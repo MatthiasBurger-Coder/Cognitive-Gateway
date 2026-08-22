@@ -1,2 +1,1 @@
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct CapabilityId(pub String);
+pub use crate::identifiers::CapabilityId;

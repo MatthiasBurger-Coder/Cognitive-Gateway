@@ -65,3 +65,9 @@ RAG output therefore remains advisory, MCP/tool output remains capability-scoped
 ## 8.10 Architecture guard
 
 The repository provides `scripts/check-architecture.sh` as an initial executable guard against obvious dependency inversions. CI runs this guard before the Rust quality gates. More exhaustive architecture tests may be added later without changing the dependency model.
+
+## 8.11 Domain primitive validation
+
+The domain crate uses distinct validated newtypes for task, agent, skill, workflow, policy, execution-context and capability identifiers. Identifiers are 1–128 characters, use only ASCII letters, digits, `-`, `_` and `.`, and must begin and end with an ASCII alphanumeric character. Identifiers are never silently trimmed or normalized; malformed values are rejected by their constructors and parsing implementations.
+
+Required textual values must contain a non-whitespace character, be no longer than 16,384 characters, and contain no control characters other than tab, line feed and carriage return. `SchemaVersion` is a major/minor value object; major version zero is reserved and malformed version strings fail parsing. These rules are deterministic, side-effect free and independent of serialization frameworks or execution providers.
