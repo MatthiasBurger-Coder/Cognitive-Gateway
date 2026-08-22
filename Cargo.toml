@@ -1,0 +1,23 @@
+[workspace]
+resolver = "2"
+members = [
+  "crates/gateway-domain",
+  "crates/gateway-application",
+  "crates/gateway-registry",
+  "crates/gateway-workflow",
+  "crates/gateway-policy",
+  "crates/gateway-context",
+  "crates/gateway-daemon",
+]
+
+[workspace.package]
+edition = "2024"
+license = "MIT"
+rust-version = "1.85"
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+
+[workspace.lints.clippy]
+all = "deny"
+pedantic = "warn"
