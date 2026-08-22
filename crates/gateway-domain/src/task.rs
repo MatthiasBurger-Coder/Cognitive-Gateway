@@ -6,6 +6,8 @@ pub struct TaskDescriptor {
 impl TaskDescriptor {
     #[must_use]
     pub fn new(intent: impl Into<String>) -> Self {
-        Self { intent: intent.into() }
+        Self {
+            intent: intent.into(),
+        }
     }
 }

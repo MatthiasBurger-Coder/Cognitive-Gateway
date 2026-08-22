@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# This script is intentionally LF-terminated for POSIX shells.
 set -euo pipefail
 
 fail() {

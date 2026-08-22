@@ -1,4 +1,6 @@
-use crate::{execution_profile::ExecutionProfile, operating_mode::OperatingMode, task::TaskDescriptor};
+use crate::{
+    execution_profile::ExecutionProfile, operating_mode::OperatingMode, task::TaskDescriptor,
+};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ExecutionContext {
