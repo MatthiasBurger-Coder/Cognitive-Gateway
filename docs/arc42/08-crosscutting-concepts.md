@@ -20,33 +20,11 @@ Unknown definitions, malformed profiles and unauthorized capabilities are reject
 
 ## 8.4 Stable versus dynamic context
 
-The compiler separates:
-
-**Stable context**
-- governance;
-- policy;
-- workflow definitions;
-- role contracts;
-- skill contracts.
-
-**Dynamic context**
-- current task;
-- issue details;
-- Git diff;
-- runtime state;
-- test results;
-- current blockers.
-
-This separation improves reproducibility and allows provider-side prompt caching where supported.
+The compiler separates stable governance/policy/workflow/role/skill contracts from dynamic task, issue, Git, runtime, test and blocker state. This improves reproducibility and enables provider-side prompt caching where supported.
 
 ## 8.5 Capability classes
 
-At minimum, capabilities are divided into:
-
-- `inspect`: read-only or observational operations;
-- `mutate`: operations that change repositories, infrastructure, remote systems or state.
-
-Mutations can require additional policy checks and explicit user authorization.
+At minimum, capabilities are divided into `inspect` and `mutate`. Mutations can require additional policy checks and explicit user authorization.
 
 ## 8.6 Knowledge retrieval
 
@@ -55,3 +33,21 @@ Retrieval is advisory and evidence-producing. It must not directly create new au
 ## 8.7 State model
 
 Operating Mode, Execution Profile, workflow, gate, slice, blockers and authorization state are explicit machine-readable data rather than implicit prompt text.
+
+## 8.8 Dependency inversion and adapter replaceability
+
+The deterministic Rust core follows Hexagonal Architecture. Domain and application contracts are stable inner abstractions; infrastructure and execution technologies are replaceable outer adapters.
+
+The dependency rule is inward-only:
+
+```text
+Adapters -> Application Ports -> Domain/Core
+```
+
+RAG implementations depend on knowledge/retrieval ports, MCP/tool implementations depend on capability ports, and execution runtimes depend on runtime ports. None of these technologies may become a dependency of `gateway-domain`.
+
+This enables isolated unit testing through port doubles, architecture verification from Cargo manifests, and replacement of infrastructure without rewriting core behavior.
+
+## 8.9 Architecture guard
+
+The repository provides `scripts/check-architecture.sh` as an initial executable guard against obvious dependency inversions. CI runs this guard before the Rust quality gates. More exhaustive architecture tests may be added later without changing the dependency model.

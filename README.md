@@ -6,6 +6,37 @@ The gateway is not another agent framework and not merely a RAG system. Its resp
 
 > **Authority defines the boundaries. State describes the situation. Cognitive routing determines what is needed. Retrieval supplies knowledge. MCP/tools supply capabilities. The execution runtime acts inside those boundaries.**
 
+## Architecture
+
+The deterministic Rust core follows **Hexagonal Architecture / Ports & Adapters**. Dependencies point inward toward domain and application abstractions. RAG, MCP/tool integrations and execution runtimes attach through ports and remain replaceable adapters.
+
+Initial workspace:
+
+```text
+crates/
+├── gateway-domain/
+├── gateway-application/
+├── gateway-registry/
+├── gateway-workflow/
+├── gateway-policy/
+├── gateway-context/
+└── gateway-daemon/
+```
+
+## Build and quality
+
+A Rust toolchain with `rustfmt` and `clippy` is required.
+
+```bash
+./scripts/check-architecture.sh
+cargo fmt --check
+cargo build --workspace
+cargo test --workspace
+cargo clippy --workspace --all-targets -- -D warnings
+```
+
+The GitHub Actions workflow `.github/workflows/rust.yml` runs the same quality baseline for pull requests and pushes to `main`.
+
 ## Documentation
 
 The technical architecture is maintained in the repository as the canonical source of truth:
