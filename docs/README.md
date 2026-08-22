@@ -26,3 +26,4 @@ See [`adr/`](adr/) for accepted architecture decisions.
 5. Execution-runtime independence: Codex, PraisonAI and other runtimes are adapters.
 6. Operating Mode and Execution Profile are independent dimensions.
 7. Versioned Execution Context IR as the core runtime integration contract.
+8. Hexagonal Architecture with inward dependencies and replaceable ports/adapters.

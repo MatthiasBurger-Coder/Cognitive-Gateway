@@ -32,9 +32,20 @@ Execution Runtime
 
 The initial system resolves workflow, role, skills, dependencies and policies without an LLM. Probabilistic services are optional enhancements.
 
-### Ports and adapters
+### Hexagonal structure and ports
 
-The core depends on abstractions rather than Codex, PraisonAI, Ollama, GitHub or a specific vector database.
+Ports & Adapters is the structural architecture strategy. Driving adapters such as CLI, API, IDE and CI enter through inbound application ports. The application and domain core owns validation, deterministic routing, policy evaluation and context compilation. It reaches external concerns only through outbound ports implemented by driven adapters.
+
+The control-plane concepts map onto the hexagon as follows:
+
+- **Authority** and **State** are validated domain inputs and constraints.
+- **Cognitive Routing** is an application/core responsibility that determines the relevant workflow, role, skills and knowledge queries.
+- The **Knowledge Plane** is accessed through knowledge/retrieval ports; Git, filesystem, vector and graph RAG implementations are driven adapters.
+- The **Capability Plane** is accessed through capability ports; MCP, repository, Git and quality-tool integrations are driven adapters subject to policy.
+- The **Context Compiler** is an application/core service that produces the validated Execution Context IR.
+- The **Execution Runtime** is reached through an execution-runtime port; Codex, PraisonAI, local models and cloud models are replaceable driven adapters.
+
+The dependency rule is inward-only: adapters depend on application ports and domain abstractions, while the core never imports adapter technologies.
 
 ### Execution Context IR
 
