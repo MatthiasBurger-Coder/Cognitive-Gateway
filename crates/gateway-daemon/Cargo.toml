@@ -1,0 +1,16 @@
+[package]
+name = "gateway-daemon"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+gateway-application = { path = "../gateway-application" }
+gateway-context = { path = "../gateway-context" }
+gateway-policy = { path = "../gateway-policy" }
+gateway-registry = { path = "../gateway-registry" }
+gateway-workflow = { path = "../gateway-workflow" }
+
+[lints]
+workspace = true
