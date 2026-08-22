@@ -48,6 +48,20 @@ RAG implementations depend on knowledge/retrieval ports, MCP/tool implementation
 
 This enables isolated unit testing through port doubles, architecture verification from Cargo manifests, and replacement of infrastructure without rewriting core behavior.
 
-## 8.9 Architecture guard
+Ports are owned by the inner application/domain model and describe stable contracts rather than vendor protocols. Driving adapters translate external requests into inbound ports; driven adapters implement outbound ports. This keeps transport, storage, model-provider, MCP and runtime concerns replaceable.
+
+## 8.9 Auditability and separation of concerns
+
+Each routing, policy and adapter interaction should be explainable through structured evidence: the selected or rejected definitions, the policy decision, the port used, adapter provenance and the resulting state. Evidence is observational; it cannot grant authority.
+
+Authority, knowledge and capability remain separate planes:
+
+- authority comes from canonical governance and policy sources;
+- knowledge adapters retrieve information and provenance;
+- capability adapters perform only operations authorized by the core.
+
+RAG output therefore remains advisory, MCP/tool output remains capability-scoped, and execution runtimes remain consumers of the compiled context rather than policy authorities.
+
+## 8.10 Architecture guard
 
 The repository provides `scripts/check-architecture.sh` as an initial executable guard against obvious dependency inversions. CI runs this guard before the Rust quality gates. More exhaustive architecture tests may be added later without changing the dependency model.

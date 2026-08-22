@@ -11,5 +11,6 @@ Current decisions:
 - ADR-005 — Execution Runtime Independence
 - ADR-006 — Operating Mode and Execution Profile Are Independent
 - ADR-007 — Execution Context IR as Integration Contract
+- [ADR-008 — Hexagonal Architecture and Ports & Adapters](../adr/ADR-008-hexagonal-architecture.md)
 
 ADRs are append-only records of architectural intent. If a decision changes, a new ADR supersedes the old one rather than silently rewriting history.

@@ -21,29 +21,29 @@ Repository, Git, quality gates, runtime inspection, GitHub and MCP/tool integrat
 ## 5.2 Rust workspace and hexagonal mapping
 
 ```text
-Driving Adapters
-CLI / API / IDE / CI
-        |
-        v
-+-------------------------+
-| gateway-application     |
-| inbound/outbound ports  |
-+------------+------------+
-             |
-             v
-+-------------------------+
-| gateway-domain          |
-| stable domain model     |
-+-------------------------+
-             ^
-             |
-+------------+---------------------------------------------+
-| gateway-registry | gateway-workflow | gateway-policy    |
-| gateway-context  | deterministic application components |
-+------------+---------------------------------------------+
-             ^
-             |
-      gateway-daemon / future adapters
+        Driving Adapters
+       CLI / API / IDE / CI
+                |
+                v
+        Inbound Application Ports
+                |
+                v
+  +------------------------------------+
+  | Application + Domain/Core          |
+  |                                    |
+  | gateway-application (use cases,   |
+  | ports)                             |
+  | gateway-domain (stable model)     |
+  | registry/workflow/policy/context   |
+  +------------------------------------+
+                |
+                v
+        Outbound Application Ports
+          /          |           \
+         v           v            v
+   Knowledge      Capability   Runtime/Evidence
+   Driven        Driven       Driven Adapters
+   Adapters      Adapters
 ```
 
 Initial crates:
@@ -59,13 +59,26 @@ crates/
 └── gateway-daemon/
 ```
 
+The intended responsibility of each current crate is:
+
+- `gateway-domain`: stable entities, value objects and domain rules;
+- `gateway-application`: inbound use-case ports, outbound ports and application orchestration;
+- `gateway-registry`: deterministic loading and validation of registered definitions;
+- `gateway-workflow`: workflow resolution and execution-state rules;
+- `gateway-policy`: authorization and fail-closed policy evaluation;
+- `gateway-context`: validated context compilation and Execution Context IR handling;
+- `gateway-daemon`: composition root and future process/transport wiring, outside the core.
+
+Concrete CLI/API/IDE/CI driving adapters and Git/RAG, MCP/tool, runtime and evidence driven adapters are intentionally future outer components. They must implement the contracts exposed by `gateway-application` rather than introduce dependencies into `gateway-domain` or the deterministic core.
+
 ### Legal dependency direction
 
-- `gateway-domain` has no workspace or infrastructure dependency.
-- `gateway-application` depends on `gateway-domain` and defines ports.
-- `gateway-registry`, `gateway-workflow`, `gateway-policy` and `gateway-context` depend only on inner abstractions required by their responsibility.
-- `gateway-daemon` is an outer composition root and may depend on inner crates.
-- future adapters may depend on application/domain contracts; the core must never depend on adapters.
+- `gateway-domain` contains stable domain concepts and has no workspace or infrastructure dependency.
+- `gateway-application` contains application use cases and defines inbound and outbound ports; it depends inward on `gateway-domain`.
+- `gateway-registry`, `gateway-workflow`, `gateway-policy` and `gateway-context` are deterministic inner components and depend only on inner abstractions required by their responsibility.
+- `gateway-daemon` is the initial outer composition root and may depend on inner crates and, later, on concrete adapters.
+- driving adapters may call inbound ports; driven adapters may implement outbound ports. Both depend on core-defined contracts.
+- the core must never depend on adapters, transport frameworks, providers, databases, Git/GitHub details or concrete MCP implementations.
 - circular crate dependencies are forbidden.
 
 ### Adapter attachment points
@@ -76,6 +89,8 @@ CapabilityPort      <- MCP / Git / quality / GitHub / runtime-tool adapters
 ExecutionRuntimePort<- Codex / PraisonAI / local/cloud LLM adapters
 EvidencePort        <- audit/evidence persistence adapters
 ```
+
+These are attachment points, not permissions. The policy engine decides whether a capability request is allowed; an adapter only performs the operation authorized through its port. Knowledge adapters return knowledge and provenance, never authority or permissions.
 
 Concrete adapter technologies are intentionally not selected by CG-01.02.
 

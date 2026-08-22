@@ -1,7 +1,19 @@
 # 12. Glossary
 
+## Adapter
+
+An outer component that translates between an external technology and a core-defined port. Adapters are replaceable and do not define domain authority.
+
+## Application Port
+
+A stable contract owned by the application/core boundary. Inbound application ports expose use cases to driving adapters; outbound application ports are implemented by driven adapters.
+
 ## Authority
 Canonical governance or policy information that defines hard constraints.
+
+## Domain/Core
+
+The stable inner part of the hexagon containing domain concepts and deterministic application behavior. It must not depend on infrastructure or adapter technologies.
 
 ## Cognitive Gateway
 The local AI Context & Agent Control Plane that mediates between clients and execution runtimes.
@@ -21,6 +33,18 @@ Verification depth: `FAST_PATH`, `NORMAL_PATH` or `FULL_PATH`.
 ## Execution Runtime
 System that performs the actual model/agent execution, such as Codex or PraisonAI.
 
+## Driving Adapter
+
+An adapter that initiates a use case, such as a CLI, API, IDE or CI integration, by calling an inbound application port.
+
+## Driven Adapter
+
+An adapter called by the core through an outbound port, such as a Git/RAG, MCP/tool, evidence or execution-runtime integration.
+
+## Hexagonal Architecture
+
+An architecture that isolates the domain/application core behind ports and connects external systems through replaceable driving and driven adapters. Dependencies point inward toward the core.
+
 ## Knowledge Plane
 Retrieval side of the architecture. Answers what the runtime needs to know.
 
@@ -32,6 +56,10 @@ Model Context Protocol. Used as one possible standardized tool/capability bounda
 
 ## Operating Mode
 Project phase: `DEVELOPMENT`, `HARDENING` or `RELEASE_QUALIFICATION`.
+
+## Port
+
+A core-owned interface defining how the application communicates with an external actor. Inbound ports accept requests; outbound ports request external knowledge, capabilities, runtime execution or evidence persistence.
 
 ## Project Profile
 Project-specific declarative agents, skills, workflows, policies, retrieval metadata and tool bindings.
