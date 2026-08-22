@@ -5,7 +5,7 @@ pub struct KnowledgeQuery(NonEmptyText);
 
 impl KnowledgeQuery {
     pub fn new(query: impl Into<String>) -> Result<Self, ValidationError> {
-        Ok(Self(NonEmptyText::new(query)?))
+        Ok(Self(NonEmptyText::new_for_field(query, "query")?))
     }
 
     /// Fallible constructor with an explicit name for use at parsing boundaries.

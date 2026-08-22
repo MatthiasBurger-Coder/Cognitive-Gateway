@@ -106,7 +106,7 @@ typed_identifier! {
 mod tests {
     use std::str::FromStr;
 
-    use super::{AgentId, ExecutionContextId, TaskId};
+    use super::{AgentId, CapabilityId, ExecutionContextId, PolicyId, SkillId, TaskId, WorkflowId};
 
     #[test]
     fn typed_ids_are_not_interchangeable() {
@@ -127,5 +127,22 @@ mod tests {
         assert!(TaskId::from_str("../context").is_err());
         assert!(TaskId::from_str("context/").is_err());
         assert!(TaskId::from_str("").is_err());
+    }
+
+    #[test]
+    fn ids_support_typed_conversions_and_owned_values() {
+        let agent = AgentId::try_from("agent").unwrap();
+        assert_eq!(agent.as_ref(), "agent");
+        assert_eq!(agent.clone().into_inner(), "agent");
+        assert_eq!(
+            SkillId::try_from("skill".to_owned()).unwrap().to_string(),
+            "skill"
+        );
+        assert_eq!(WorkflowId::new("workflow").unwrap().as_str(), "workflow");
+        assert_eq!(PolicyId::new("policy").unwrap().as_str(), "policy");
+        assert_eq!(
+            CapabilityId::new("capability").unwrap().as_str(),
+            "capability"
+        );
     }
 }

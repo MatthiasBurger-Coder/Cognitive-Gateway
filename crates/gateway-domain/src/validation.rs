@@ -32,6 +32,20 @@ pub enum ValidationError {
     InvalidSchemaVersion,
     /// A schema version string was not in the supported `MAJOR.MINOR` form.
     InvalidSchemaVersionFormat,
+    /// A descriptor requires at least one relationship in the named field.
+    EmptyRelationship { field: &'static str },
+    /// A relationship was listed more than once in the named field.
+    DuplicateRelationship { field: &'static str },
+    /// A relationship points back to the descriptor that owns it.
+    SelfReference { field: &'static str },
+    /// A capability was both allowed and denied by one policy.
+    ConflictingRelationship { field: &'static str },
+    /// A relationship graph contains a cycle where an acyclic graph is required.
+    CircularRelationship { field: &'static str },
+    /// A definition with this typed identifier was registered more than once.
+    DuplicateDefinition { kind: &'static str, id: String },
+    /// A relationship points to a definition that is not in the catalog.
+    MissingDefinition { kind: &'static str, id: String },
 }
 
 impl fmt::Display for ValidationError {
@@ -70,6 +84,33 @@ impl fmt::Display for ValidationError {
             Self::InvalidSchemaVersionFormat => {
                 write!(formatter, "schema version must use MAJOR.MINOR format")
             }
+            Self::EmptyRelationship { field } => {
+                write!(formatter, "{field} must contain at least one reference")
+            }
+            Self::DuplicateRelationship { field } => {
+                write!(formatter, "{field} must not contain duplicate references")
+            }
+            Self::SelfReference { field } => {
+                write!(
+                    formatter,
+                    "{field} must not reference its owning definition"
+                )
+            }
+            Self::ConflictingRelationship { field } => {
+                write!(formatter, "{field} contains conflicting references")
+            }
+            Self::CircularRelationship { field } => {
+                write!(formatter, "{field} must not contain circular references")
+            }
+            Self::DuplicateDefinition { kind, id } => {
+                write!(
+                    formatter,
+                    "{kind} definition {id:?} is registered more than once"
+                )
+            }
+            Self::MissingDefinition { kind, id } => {
+                write!(formatter, "{kind} definition {id:?} is not registered")
+            }
         }
     }
 }
@@ -87,14 +128,23 @@ pub struct NonEmptyText(String);
 impl NonEmptyText {
     /// Creates a validated text value without changing its contents.
     pub fn new(value: impl Into<String>) -> Result<Self, ValidationError> {
+        Self::new_for_field(value, "text")
+    }
+
+    /// Creates a validated text value and associates validation failures with
+    /// the owning domain field.
+    pub(crate) fn new_for_field(
+        value: impl Into<String>,
+        field: &'static str,
+    ) -> Result<Self, ValidationError> {
         let value = value.into();
 
         if value.trim().is_empty() {
-            return Err(ValidationError::EmptyText { field: "text" });
+            return Err(ValidationError::EmptyText { field });
         }
         if value.chars().count() > MAX_TEXT_LENGTH {
             return Err(ValidationError::TextTooLong {
-                field: "text",
+                field,
                 max_length: MAX_TEXT_LENGTH,
             });
         }
@@ -102,7 +152,7 @@ impl NonEmptyText {
             .chars()
             .any(|character| character.is_control() && !matches!(character, '\t' | '\n' | '\r'))
         {
-            return Err(ValidationError::ControlCharacter { field: "text" });
+            return Err(ValidationError::ControlCharacter { field });
         }
 
         Ok(Self(value))
@@ -228,5 +278,46 @@ mod tests {
             validate_identifier("x".repeat(MAX_IDENTIFIER_LENGTH + 1)),
             Err(ValidationError::IdentifierTooLong { .. })
         ));
+    }
+
+    #[test]
+    fn formats_every_validation_error() {
+        let errors = [
+            ValidationError::EmptyText { field: "intent" },
+            ValidationError::TextTooLong {
+                field: "description",
+                max_length: MAX_TEXT_LENGTH,
+            },
+            ValidationError::ControlCharacter { field: "query" },
+            ValidationError::EmptyIdentifier,
+            ValidationError::IdentifierTooLong {
+                max_length: MAX_IDENTIFIER_LENGTH,
+            },
+            ValidationError::InvalidIdentifierCharacter { character: '/' },
+            ValidationError::InvalidIdentifierBoundary,
+            ValidationError::InvalidSchemaVersion,
+            ValidationError::InvalidSchemaVersionFormat,
+            ValidationError::EmptyRelationship { field: "skill_ids" },
+            ValidationError::DuplicateRelationship { field: "skill_ids" },
+            ValidationError::SelfReference {
+                field: "dependencies",
+            },
+            ValidationError::ConflictingRelationship {
+                field: "capability_ids",
+            },
+            ValidationError::CircularRelationship {
+                field: "dependency_ids",
+            },
+            ValidationError::DuplicateDefinition {
+                kind: "skill",
+                id: "inspect".to_owned(),
+            },
+            ValidationError::MissingDefinition {
+                kind: "policy",
+                id: "missing".to_owned(),
+            },
+        ];
+
+        assert!(errors.iter().all(|error| !error.to_string().is_empty()));
     }
 }

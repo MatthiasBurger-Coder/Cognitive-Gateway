@@ -11,7 +11,7 @@ impl TaskDescriptor {
     pub fn new(id: TaskId, intent: impl Into<String>) -> Result<Self, ValidationError> {
         Ok(Self {
             id,
-            intent: NonEmptyText::new(intent)?,
+            intent: NonEmptyText::new_for_field(intent, "intent")?,
         })
     }
 

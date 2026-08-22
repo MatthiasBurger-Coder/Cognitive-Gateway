@@ -22,6 +22,10 @@ The current domain-primitive slice is covered by unit tests colocated with its i
 - required text validation, including whitespace-only, control-character and length cases;
 - `SchemaVersion` construction, formatting and malformed-version rejection;
 - validated `TaskDescriptor` and `KnowledgeQuery` construction.
+- validated `AgentDefinition`, `SkillDefinition`, `WorkflowDefinition` and
+  `PolicyDefinition` construction;
+- local relationship invariants and complete cross-definition validation via
+  `DefinitionCatalog`.
 
 The context component has an integration test at [`../crates/gateway-context/tests/context_compiler.rs`](../crates/gateway-context/tests/context_compiler.rs). It verifies context compilation, preservation of domain values and all nine combinations of the three operating modes with the three independent execution profiles.
 

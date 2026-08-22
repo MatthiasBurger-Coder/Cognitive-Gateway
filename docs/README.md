@@ -10,6 +10,11 @@ See [`arc42/`](arc42/) for the living architecture documentation.
 
 See [`adr/`](adr/) for accepted architecture decisions.
 
+## Domain model
+
+See [`domain-model.md`](domain-model.md) for the descriptor and relationship
+contract introduced by CG-02.02.
+
 ## Documentation Policy
 
 - Repository documentation is the technical source of truth.
