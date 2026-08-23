@@ -88,6 +88,8 @@ identifier!(ProcessInstanceId);
 identifier!(StateId);
 identifier!(EventTypeId);
 identifier!(EventOccurrenceId);
+identifier!(CorrelationId);
+identifier!(CausationId);
 identifier!(TransitionId);
 identifier!(GateId);
 identifier!(EvidenceTypeId);
@@ -189,6 +191,11 @@ impl<'de> Deserialize<'de> for ProcessDefinitionDigest {
 pub struct ProcessInstanceRevision(u64);
 
 impl ProcessInstanceRevision {
+    #[must_use]
+    pub const fn new(value: u64) -> Self {
+        Self(value)
+    }
+
     #[must_use]
     pub const fn initial() -> Self {
         Self(0)

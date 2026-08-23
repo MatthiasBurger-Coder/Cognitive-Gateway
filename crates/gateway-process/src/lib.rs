@@ -6,6 +6,7 @@ mod error;
 mod identifiers;
 mod instance;
 mod ir;
+mod mutation;
 mod registry;
 mod source;
 mod validation;
@@ -16,9 +17,9 @@ pub use compiler::{
 };
 pub use error::{ProcessError, ValidationCode};
 pub use identifiers::{
-    ActivityId, BlockerId, EventOccurrenceId, EventTypeId, EvidenceTypeId, GateId,
-    ProcessDefinitionDigest, ProcessDefinitionId, ProcessDefinitionVersion, ProcessInstanceId,
-    ProcessInstanceRevision, StateId, TransitionId,
+    ActivityId, BlockerId, CausationId, CorrelationId, EventOccurrenceId, EventTypeId,
+    EvidenceTypeId, GateId, ProcessDefinitionDigest, ProcessDefinitionId, ProcessDefinitionVersion,
+    ProcessInstanceId, ProcessInstanceRevision, StateId, TransitionId,
 };
 pub use instance::{
     BlockerRuntimeState, InstanceError, ProcessInstance, ProcessInstanceStatus,
@@ -29,6 +30,9 @@ pub use ir::{
     EventTypeDefinition, EvidenceRequirement, ExecutionGraphExtension, GateDefinition, GateStatus,
     GuardExpression, InvariantDefinition, ProcessDefinition, ProcessDefinitionBuilder,
     ProcessIrVersion, RecoveryPolicy, StateDefinition, TransitionDefinition,
+};
+pub use mutation::{
+    AtomicProcessMutation, CommitOutcome, EventOccurrence, InMemoryProcessStore, MutationError,
 };
 pub use registry::{ProcessRegistry, ProcessRegistryError, ProcessSource, RegisteredProcess};
 pub use source::{
