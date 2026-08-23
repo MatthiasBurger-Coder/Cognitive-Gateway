@@ -7,7 +7,7 @@
 
 Cognitive Gateway manages two fundamentally different categories of data:
 
-1. **declarative system definitions** that describe what the system is allowed and configured to do, such as agents, skills, workflows, policies and project profiles;
+1. **declarative system definitions** that describe what the system is allowed and configured to do, such as Agents, Skills, workflows and policies;
 2. **dynamic runtime state** that describes what the system is currently doing or has done, such as workflow instances, execution history, evidence, blockers, checkpoints and audit events.
 
 A conventional database is attractive for fast lookup, but making it the primary authority for declarative definitions would weaken Git-based review, versioning, reproducibility, provenance and rollback. At the same time, storing mutable runtime state only in Git would be operationally inappropriate.
@@ -26,7 +26,7 @@ The canonical form of the following artifacts is stored as versioned repository 
 - Skill definitions;
 - Workflow definitions;
 - Policy definitions;
-- project/profile definitions;
+- catalog metadata and schema versions;
 - registry metadata and schema versions;
 - architecture and governance configuration where applicable.
 

@@ -39,7 +39,7 @@ impl DefinitionCatalog {
         Ok(catalog)
     }
 
-    /// Alias for [`Self::new`] for profile/parsing boundaries.
+    /// Alias for [`Self::new`] for serialization/parsing boundaries.
     pub fn try_new(
         agents: Vec<AgentDefinition>,
         skills: Vec<SkillDefinition>,

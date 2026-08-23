@@ -115,17 +115,15 @@ cognitive-services/
 
 Python cognitive services remain optional and sit outside the deterministic Rust core.
 
-## 5.4 Project profiles
+## 5.4 Agent and Skill catalog
 
 ```text
-profiles/<project>/
-├── skills/
-├── workflows/
-├── policies/
-├── retrieval/
-└── tools/
+catalog/
+├── agents/
+└── skills/
 ```
 
-Profiles configure the generic gateway without embedding product-specific
-logic in the core. Agents are loaded from the generic catalog; profiles do not
-provide an Agent partition.
+The catalog is the sole built-in Agent and Skill definition boundary. It
+contains reusable, schema-validated definitions and has no project namespace
+or override layer. Consuming-project repository content, configuration and
+runtime state are supplied through explicit ports and adapters.

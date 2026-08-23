@@ -29,16 +29,13 @@ model, strict exclusions and representative normalized fixtures.
 See [`reference-scenarios.md`](reference-scenarios.md) for the CG-02.06
 executable acceptance scenarios covering the complete domain and IR contract.
 
-See [`catalog-profile-boundaries.md`](catalog-profile-boundaries.md) for the
-generic catalog and project profile layout, ownership rules, loading APIs and
-fail-closed conflict semantics.
+See [`catalog-boundaries.md`](catalog-boundaries.md) for the Agent and Skill
+catalog layout, ownership rules, loading APIs and fail-closed semantics.
 
 See the materialized reusable Agent definitions under [`../catalog/agents/`](../catalog/agents/)
-for CG-03.07 and CG-03.13, and the reusable Skill definitions under
-[`../catalog/skills/`](../catalog/skills/) for CG-03.08. Former profile Agents
-are promoted to the generic specialist catalog. Example project-specific Skill
-definitions are under
-[`../profiles/example-project/skills/`](../profiles/example-project/).
+and the reusable Skill definitions under [`../catalog/skills/`](../catalog/skills/).
+Specialist Agents are normal catalog entries, and all catalog Skill references
+use canonical IDs from the same built-in catalog.
 
 ## Documentation Policy
 

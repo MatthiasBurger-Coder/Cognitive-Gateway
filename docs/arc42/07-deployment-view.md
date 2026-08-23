@@ -8,7 +8,7 @@ v0.1 is a local developer-side deployment.
 Developer Workstation
 ├── Cognitive Gateway CLI/Core (Rust)
 ├── Project Repository
-└── Local configuration/profile
+└── Local request configuration and runtime context
 ```
 
 No external AI service is required for deterministic validation and resolution.

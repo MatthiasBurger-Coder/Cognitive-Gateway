@@ -2,7 +2,9 @@
 
 ## 10.1 Determinism
 
-Given the same validated project profile, task descriptor and state, the deterministic core must produce the same logical workflow, agent, skill, policy and compiled-context result.
+Given the same validated catalog, task descriptor and state, the deterministic
+core must produce the same logical workflow, Agent, Skill, policy and
+compiled-context result.
 
 ## 10.2 Safety
 
@@ -41,5 +43,5 @@ Every non-trivial routing or policy decision must provide a reason trace suitabl
 
 Agent, skill, workflow and policy definitions should be declarative and
 schema-validated rather than hard-coded into the daemon. Reusable Agents come
-from the generic catalog; project-specific Skills and other configuration are
-provided by the selected profile.
+from the generic catalog; consuming-project context and configuration are
+provided through explicit runtime or adapter inputs.

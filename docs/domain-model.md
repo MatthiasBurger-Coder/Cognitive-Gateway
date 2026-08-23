@@ -16,7 +16,8 @@ integration boundary.
 
 The domain model describes what may be selected and under which conditions.
 Application services resolve and compose these values; ports and adapters load
-profiles, retrieve knowledge, perform capabilities and execute runtimes. A
+catalog definitions, retrieve knowledge, perform capabilities and execute
+runtimes. A
 skill requirement or retrieval result is not permission by itself.
 
 ## Typed primitives

@@ -6,7 +6,7 @@ fn repository_catalog() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../catalog")
 }
 
-const MIGRATED_GENERIC_SKILLS: &[&str] = &[
+const CATALOG_SKILLS: &[&str] = &[
     "adr-steward",
     "analysis-storage-architect",
     "arc42-architecture-governance",
@@ -47,7 +47,7 @@ const MIGRATED_GENERIC_SKILLS: &[&str] = &[
 ];
 
 #[test]
-fn migrated_generic_catalog_loads_and_validates() {
+fn catalog_loads_and_validates() {
     let registry = Registry::load_catalog(repository_catalog()).expect("catalog should load");
 
     registry
@@ -74,11 +74,11 @@ fn migrated_generic_catalog_loads_and_validates() {
     );
 
     let skill_ids: Vec<_> = registry.skills().ids().map(ToString::to_string).collect();
-    assert_eq!(skill_ids, MIGRATED_GENERIC_SKILLS);
+    assert_eq!(skill_ids, CATALOG_SKILLS);
 }
 
 #[test]
-fn promoted_agents_are_project_independent_and_reference_catalog_skills() {
+fn catalog_agents_reference_catalog_skills() {
     let registry = Registry::load_catalog(repository_catalog()).expect("catalog should load");
 
     for agent in registry.agents().documents() {
@@ -88,16 +88,15 @@ fn promoted_agents_are_project_independent_and_reference_catalog_skills() {
             agent.description().to_ascii_lowercase()
         );
         for forbidden in [
-            "tiny-swarm-world",
-            "example-project",
-            "profiles/",
             "project-specific",
+            "external-context",
+            "consumer/path",
             "origin",
             "migration",
         ] {
             assert!(
                 !searchable.contains(forbidden),
-                "project-specific Agent content leaked into {}",
+                "external Agent content leaked into {}",
                 agent.id()
             );
         }
@@ -114,11 +113,11 @@ fn promoted_agents_are_project_independent_and_reference_catalog_skills() {
 
     registry
         .validate_integrity()
-        .expect("promoted Agents must validate without a consuming project");
+        .expect("catalog Agents must validate without external context");
 }
 
 #[test]
-fn migrated_skills_preserve_generic_boundaries_and_structured_shape() {
+fn catalog_skills_preserve_generic_boundaries_and_structured_shape() {
     let registry = Registry::load_catalog(repository_catalog()).expect("catalog should load");
 
     let forbidden_generic_terms = [
@@ -160,7 +159,7 @@ fn migrated_skills_preserve_generic_boundaries_and_structured_shape() {
         );
         assert!(
             !skill.knowledge_queries().is_empty(),
-            "migrated skill {} lacks a normalized retrieval hint",
+            "catalog skill {} lacks a normalized retrieval hint",
             skill.id()
         );
 
@@ -178,7 +177,7 @@ fn migrated_skills_preserve_generic_boundaries_and_structured_shape() {
             !forbidden_generic_terms
                 .iter()
                 .any(|term| searchable.contains(term)),
-            "project-specific term leaked into generic skill {}",
+            "external term leaked into generic skill {}",
             skill.id()
         );
     }
@@ -189,7 +188,7 @@ fn catalog_skills_are_complete_and_references_are_canonical() {
     let registry = Registry::load_catalog(repository_catalog()).expect("catalog should load");
 
     let skills = registry.skills();
-    assert_eq!(skills.documents().len(), MIGRATED_GENERIC_SKILLS.len());
+    assert_eq!(skills.documents().len(), CATALOG_SKILLS.len());
 
     for skill in skills.documents() {
         assert!(
@@ -253,13 +252,13 @@ fn catalog_skills_are_complete_and_references_are_canonical() {
 }
 
 #[test]
-fn complete_generic_skill_graph_resolves_without_a_consuming_project() {
+fn catalog_skill_graph_resolves_deterministically() {
     let registry = Registry::load_catalog(repository_catalog()).expect("catalog should load");
     let root = gateway_domain::SkillId::new("source-analysis-pipeline").unwrap();
 
     let graph = registry
         .resolve_skill(&root)
-        .expect("a generic Skill must resolve without a project profile");
+        .expect("a catalog Skill must resolve without external context");
 
     assert_eq!(graph.root(), &root);
     assert_eq!(

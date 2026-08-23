@@ -16,7 +16,8 @@ Resolver and policy decisions must produce machine-readable reasons describing:
 
 ## 8.3 Fail-closed behavior
 
-Unknown definitions, malformed profiles and unauthorized capabilities are rejected by default.
+Unknown definitions, malformed catalog documents and unauthorized capabilities
+are rejected by default.
 
 ## 8.4 Stable versus dynamic context
 
@@ -46,7 +47,7 @@ their coordinated invariants: blocked execution requires an active blocker and
 a blocked gate; completion requires a passed or skipped gate; and active
 blockers cannot coexist with running or terminal workflows. Unknown values and
 illegal transitions fail closed. `OperatingMode` and `ExecutionProfile` stay
-orthogonal, with project-specific restrictions represented by explicit
+orthogonal, with request-specific restrictions represented by explicit
 constraints rather than hard-coded coupling.
 
 Capabilities are classified as `INSPECT` or `MUTATE`. Constraints are typed

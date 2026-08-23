@@ -34,7 +34,7 @@ Knowledge retrieval is not executable capability use: a knowledge adapter return
 Task
   |
   v
-Profile Loader
+Catalog Loader
   |
   v
 Registry Validation
