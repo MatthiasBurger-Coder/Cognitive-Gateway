@@ -30,7 +30,8 @@ See [`reference-scenarios.md`](reference-scenarios.md) for the CG-02.06
 executable acceptance scenarios covering the complete domain and IR contract.
 
 See [`catalog-boundaries.md`](catalog-boundaries.md) for the Agent and Skill
-catalog layout, ownership rules, loading APIs and fail-closed semantics.
+catalog layout, ownership rules, loading APIs, deterministic capability index
+and query behavior, and fail-closed semantics.
 
 See the materialized reusable Agent definitions under [`../catalog/agents/`](../catalog/agents/)
 and the reusable Skill definitions under [`../catalog/skills/`](../catalog/skills/).
