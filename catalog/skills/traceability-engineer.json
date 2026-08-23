@@ -1,0 +1,15 @@
+{
+  "schema_version": "1.0",
+  "kind": "skill",
+  "id": "traceability-engineer",
+  "description": "Requirement-to-evidence traceability",
+  "owner_agent_id": null,
+  "dependency_ids": [],
+  "required_capability_ids": [],
+  "knowledge_queries": ["requirement-to-evidence traceability"],
+  "origin": {
+    "project": "Tiny-Swarm-World",
+    "source": ".agents/skills/traceability-engineer/SKILL.md",
+    "migration_status": "MIGRATED"
+  }
+}

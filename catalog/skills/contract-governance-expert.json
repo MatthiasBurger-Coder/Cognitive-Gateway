@@ -1,0 +1,15 @@
+{
+  "schema_version": "1.0",
+  "kind": "skill",
+  "id": "contract-governance-expert",
+  "description": "API, event and transport contracts",
+  "owner_agent_id": null,
+  "dependency_ids": [],
+  "required_capability_ids": [],
+  "knowledge_queries": ["API, event and transport contracts"],
+  "origin": {
+    "project": "Tiny-Swarm-World",
+    "source": ".agents/skills/contract-governance-expert/SKILL.md; .agents/skills/contract-first-api-steward/SKILL.md",
+    "migration_status": "MERGED"
+  }
+}

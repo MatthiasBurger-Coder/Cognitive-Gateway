@@ -1,0 +1,15 @@
+{
+  "schema_version": "1.0",
+  "kind": "skill",
+  "id": "microservice-runtime-readiness-expert",
+  "description": "Independent service readiness",
+  "owner_agent_id": null,
+  "dependency_ids": [],
+  "required_capability_ids": [],
+  "knowledge_queries": ["independent service readiness"],
+  "origin": {
+    "project": "Tiny-Swarm-World",
+    "source": ".agents/skills/microservice-runtime-readiness-expert/SKILL.md",
+    "migration_status": "MIGRATED"
+  }
+}

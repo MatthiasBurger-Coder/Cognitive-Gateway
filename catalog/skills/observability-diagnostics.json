@@ -1,0 +1,15 @@
+{
+  "schema_version": "1.0",
+  "kind": "skill",
+  "id": "observability-diagnostics",
+  "description": "Logging, metrics and trace correlation",
+  "owner_agent_id": null,
+  "dependency_ids": [],
+  "required_capability_ids": [],
+  "knowledge_queries": ["logging, metrics and trace correlation"],
+  "origin": {
+    "project": "Tiny-Swarm-World",
+    "source": ".agents/skills/observability-diagnostics/SKILL.md; .agents/skills/observability-and-diagnostics/SKILL.md",
+    "migration_status": "MERGED"
+  }
+}

@@ -41,3 +41,8 @@ proves the EPIC reference context, all operating-mode/profile pairs,
 workflow/gate/blocker states, authority constraints, negative cases and full
 IR serialization round trips. Its scenario inventory and acceptance evidence
 are documented in [`../docs/reference-scenarios.md`](../docs/reference-scenarios.md).
+
+The catalog migration fixture at
+[`../crates/gateway-registry/tests/catalog_migration.rs`](../crates/gateway-registry/tests/catalog_migration.rs)
+loads the repository catalog, validates all Agent/Skill relationships and
+asserts the CG-03.07 reusable definition set.

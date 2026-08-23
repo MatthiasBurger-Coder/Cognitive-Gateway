@@ -1,0 +1,16 @@
+{
+  "schema_version": "1.0",
+  "kind": "agent",
+  "id": "security-sandbox-engineer",
+  "description": "Safe handling of untrusted workspaces",
+  "skill_ids": [
+    "git-large-repository-specialist",
+    "security-sandbox-specialist",
+    "workspace-lifecycle-specialist"
+  ],
+  "origin": {
+    "project": "Tiny-Swarm-World",
+    "source": ".agents/roles/senior-security-sandbox-engineer.md",
+    "migration_status": "MIGRATED"
+  }
+}

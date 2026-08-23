@@ -1,0 +1,17 @@
+{
+  "schema_version": "1.0",
+  "kind": "agent",
+  "id": "performance-engineer",
+  "description": "Performance budgets and runtime scalability",
+  "skill_ids": [
+    "distributed-systems-architect",
+    "git-large-repository-specialist",
+    "performance-scalability-engineer",
+    "quality-gate-governance"
+  ],
+  "origin": {
+    "project": "Tiny-Swarm-World",
+    "source": ".agents/roles/senior-performance-engineer.md",
+    "migration_status": "MIGRATED"
+  }
+}

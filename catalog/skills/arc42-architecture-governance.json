@@ -1,0 +1,15 @@
+{
+  "schema_version": "1.0",
+  "kind": "skill",
+  "id": "arc42-architecture-governance",
+  "description": "Architecture documentation alignment",
+  "owner_agent_id": null,
+  "dependency_ids": [],
+  "required_capability_ids": [],
+  "knowledge_queries": ["architecture documentation alignment"],
+  "origin": {
+    "project": "Tiny-Swarm-World",
+    "source": ".agents/skills/arc42-architecture-governance/SKILL.md",
+    "migration_status": "MIGRATED"
+  }
+}

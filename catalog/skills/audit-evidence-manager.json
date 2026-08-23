@@ -1,0 +1,15 @@
+{
+  "schema_version": "1.0",
+  "kind": "skill",
+  "id": "audit-evidence-manager",
+  "description": "Findings and remediation evidence",
+  "owner_agent_id": null,
+  "dependency_ids": [],
+  "required_capability_ids": [],
+  "knowledge_queries": ["findings and remediation evidence"],
+  "origin": {
+    "project": "Tiny-Swarm-World",
+    "source": ".agents/skills/audit-evidence-manager/SKILL.md",
+    "migration_status": "MIGRATED"
+  }
+}

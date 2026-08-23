@@ -1,0 +1,15 @@
+{
+  "schema_version": "1.0",
+  "kind": "skill",
+  "id": "source-analysis-pipeline",
+  "description": "Source facts and unresolved references",
+  "owner_agent_id": null,
+  "dependency_ids": [],
+  "required_capability_ids": [],
+  "knowledge_queries": ["source facts and unresolved references"],
+  "origin": {
+    "project": "Tiny-Swarm-World",
+    "source": ".agents/skills/source-analysis-pipeline/SKILL.md",
+    "migration_status": "MIGRATED"
+  }
+}

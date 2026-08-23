@@ -1,0 +1,15 @@
+{
+  "schema_version": "1.0",
+  "kind": "skill",
+  "id": "live-evidence-validation-expert",
+  "description": "Live evidence validation and redaction",
+  "owner_agent_id": null,
+  "dependency_ids": [],
+  "required_capability_ids": [],
+  "knowledge_queries": ["live evidence validation and redaction"],
+  "origin": {
+    "project": "Tiny-Swarm-World",
+    "source": ".agents/skills/live-evidence-validation-expert/SKILL.md",
+    "migration_status": "MIGRATED"
+  }
+}

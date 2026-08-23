@@ -1,0 +1,15 @@
+{
+  "schema_version": "1.0",
+  "kind": "skill",
+  "id": "resilience-engineering",
+  "description": "Retry, timeout and failure semantics",
+  "owner_agent_id": null,
+  "dependency_ids": [],
+  "required_capability_ids": [],
+  "knowledge_queries": ["retry, timeout and failure semantics"],
+  "origin": {
+    "project": "Tiny-Swarm-World",
+    "source": ".agents/skills/resilience-engineering/SKILL.md",
+    "migration_status": "MIGRATED"
+  }
+}

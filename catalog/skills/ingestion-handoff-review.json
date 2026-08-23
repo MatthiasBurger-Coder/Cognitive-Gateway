@@ -1,0 +1,15 @@
+{
+  "schema_version": "1.0",
+  "kind": "skill",
+  "id": "ingestion-handoff-review",
+  "description": "Ingestion handoff contract review",
+  "owner_agent_id": null,
+  "dependency_ids": [],
+  "required_capability_ids": [],
+  "knowledge_queries": ["ingestion handoff contract review"],
+  "origin": {
+    "project": "Tiny-Swarm-World",
+    "source": ".agents/skills/ingestion-handoff-review/SKILL.md",
+    "migration_status": "MIGRATED"
+  }
+}

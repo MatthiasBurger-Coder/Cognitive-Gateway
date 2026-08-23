@@ -1,0 +1,15 @@
+{
+  "schema_version": "1.0",
+  "kind": "skill",
+  "id": "analysis-storage-architect",
+  "description": "Analysis evidence storage and projections",
+  "owner_agent_id": null,
+  "dependency_ids": [],
+  "required_capability_ids": [],
+  "knowledge_queries": ["analysis evidence storage and projections"],
+  "origin": {
+    "project": "Tiny-Swarm-World",
+    "source": ".agents/skills/analysis-storage-architect/SKILL.md",
+    "migration_status": "MIGRATED"
+  }
+}

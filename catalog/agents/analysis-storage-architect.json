@@ -1,0 +1,16 @@
+{
+  "schema_version": "1.0",
+  "kind": "agent",
+  "id": "analysis-storage-architect",
+  "description": "Analysis and evidence storage boundaries",
+  "skill_ids": [
+    "analysis-storage-architect",
+    "architecture-hexagonal",
+    "quality-testing-strategy"
+  ],
+  "origin": {
+    "project": "Tiny-Swarm-World",
+    "source": ".agents/roles/senior-analysis-storage-architect.md",
+    "migration_status": "MIGRATED"
+  }
+}

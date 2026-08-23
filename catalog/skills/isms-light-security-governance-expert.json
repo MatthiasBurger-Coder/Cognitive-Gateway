@@ -1,0 +1,15 @@
+{
+  "schema_version": "1.0",
+  "kind": "skill",
+  "id": "isms-light-security-governance-expert",
+  "description": "Security management governance",
+  "owner_agent_id": null,
+  "dependency_ids": [],
+  "required_capability_ids": [],
+  "knowledge_queries": ["security management governance"],
+  "origin": {
+    "project": "Tiny-Swarm-World",
+    "source": ".agents/skills/isms-light-security-governance-expert/SKILL.md",
+    "migration_status": "MIGRATED"
+  }
+}
