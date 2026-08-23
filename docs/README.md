@@ -41,6 +41,10 @@ See [`registry-inspection-cli.md`](registry-inspection-cli.md) for the CG-03
 read-only registry and capability inspection commands, JSON output and exit
 codes.
 
+See [`tiny-swarm-world-process-inventory.md`](tiny-swarm-world-process-inventory.md)
+and its [machine-readable inventory](tiny-swarm-world-process-inventory.json)
+for the CG-04.14 TSW process-semantic classification and migration gaps.
+
 See the materialized reusable Agent definitions under [`../catalog/agents/`](../catalog/agents/)
 and the reusable Skill definitions under [`../catalog/skills/`](../catalog/skills/).
 Specialist Agents are normal catalog entries, and all catalog Skill references
