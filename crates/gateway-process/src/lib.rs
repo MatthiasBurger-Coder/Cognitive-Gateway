@@ -3,6 +3,7 @@
 
 mod compiler;
 mod error;
+mod evaluator;
 mod identifiers;
 mod instance;
 mod ir;
@@ -16,6 +17,10 @@ pub use compiler::{
     SemanticCompiler,
 };
 pub use error::{ProcessError, ValidationCode};
+pub use evaluator::{
+    EvaluationInputs, GuardEvaluation, TransitionDecision, TransitionDecisionCode,
+    TransitionEvaluator,
+};
 pub use identifiers::{
     ActivityId, BlockerId, CausationId, CorrelationId, EventOccurrenceId, EventTypeId,
     EvidenceTypeId, GateId, ProcessDefinitionDigest, ProcessDefinitionId, ProcessDefinitionVersion,
