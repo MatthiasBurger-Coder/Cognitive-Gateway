@@ -4,6 +4,7 @@
 mod error;
 mod identifiers;
 mod ir;
+mod source;
 
 pub use error::{ProcessError, ValidationCode};
 pub use identifiers::{
@@ -16,4 +17,8 @@ pub use ir::{
     EvidenceRequirement, ExecutionGraphExtension, GateDefinition, GateStatus, GuardExpression,
     InvariantDefinition, ProcessDefinition, ProcessDefinitionBuilder, ProcessIrVersion,
     RecoveryPolicy, StateDefinition, TransitionDefinition,
+};
+pub use source::{
+    FrontendError, SourceDocument, SourceLocation, SourceRule, SourceScenario, SourceStep,
+    SourceStepKeyword, SourceTag, TableRow,
 };
