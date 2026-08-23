@@ -581,13 +581,21 @@ fn required_tag(
             location,
         ));
     }
-    values[0].value.clone().ok_or_else(|| {
+    let value = values[0].value.as_deref().ok_or_else(|| {
         FrontendError::new(
             "INVALID_TAG",
             format!("@{name} requires a value"),
             values[0].location,
         )
-    })
+    })?;
+    if value.trim().is_empty() {
+        return Err(FrontendError::new(
+            "INVALID_TAG",
+            format!("@{name} requires a non-empty value"),
+            values[0].location,
+        ));
+    }
+    Ok(value.to_owned())
 }
 
 #[cfg(test)]
