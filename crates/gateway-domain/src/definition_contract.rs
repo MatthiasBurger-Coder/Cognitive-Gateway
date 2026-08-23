@@ -9,8 +9,9 @@ use std::{fmt, str::FromStr};
 use serde::{Deserialize, Deserializer, Serialize, Serializer, de::Error as _};
 
 use crate::{
-    AgentDefinition, AgentId, CapabilityId, KnowledgeQuery, NonEmptyText, SchemaVersion,
-    SkillDefinition, SkillId, ValidationError, serialization::SerializationError,
+    AgentDefinition, AgentId, CapabilityClass, CapabilityDefinition, CapabilityId, KnowledgeQuery,
+    NonEmptyText, SchemaVersion, SkillDefinition, SkillId, ValidationError,
+    serialization::SerializationError,
 };
 
 /// The only schema version currently accepted by Agent and Skill documents.
@@ -79,6 +80,7 @@ pub struct AgentDefinitionDocument {
     id: AgentId,
     description: String,
     skill_ids: Vec<SkillId>,
+    provided_capabilities: Vec<CapabilityDefinition>,
 }
 
 impl AgentDefinitionDocument {
@@ -95,6 +97,16 @@ impl AgentDefinitionDocument {
         )?))
     }
 
+    /// Creates a v2 Agent document with direct provided capability contracts.
+    pub fn new_with_provided_capabilities(
+        id: AgentId,
+        description: impl Into<String>,
+        skill_ids: impl IntoIterator<Item = SkillId>,
+        provided_capabilities: impl IntoIterator<Item = CapabilityDefinition>,
+    ) -> Result<Self, ValidationError> {
+        Self::new(id, description, skill_ids)?.with_provided_capabilities(provided_capabilities)
+    }
+
     #[must_use]
     pub fn from_domain(definition: AgentDefinition) -> Self {
         Self {
@@ -102,6 +114,7 @@ impl AgentDefinitionDocument {
             id: definition.id().clone(),
             description: definition.description().to_owned(),
             skill_ids: definition.skill_ids().to_vec(),
+            provided_capabilities: definition.provided_capabilities().to_vec(),
         }
     }
 
@@ -130,6 +143,42 @@ impl AgentDefinitionDocument {
         &self.skill_ids
     }
 
+    /// Returns the reusable capabilities directly provided by this Agent.
+    #[must_use]
+    pub fn provided_capabilities(&self) -> &[CapabilityDefinition] {
+        &self.provided_capabilities
+    }
+
+    /// Alias for callers that use the shorter capability vocabulary.
+    #[must_use]
+    pub fn capabilities(&self) -> &[CapabilityDefinition] {
+        self.provided_capabilities()
+    }
+
+    /// Adds the reusable capabilities directly provided by this Agent.
+    pub fn with_provided_capabilities(
+        mut self,
+        capabilities: impl IntoIterator<Item = CapabilityDefinition>,
+    ) -> Result<Self, ValidationError> {
+        self.provided_capabilities = AgentDefinition::new(
+            self.id.clone(),
+            self.description.clone(),
+            self.skill_ids.clone(),
+        )?
+        .with_provided_capabilities(capabilities)?
+        .provided_capabilities()
+        .to_vec();
+        Ok(self)
+    }
+
+    /// Alias for [`Self::with_provided_capabilities`].
+    pub fn with_capabilities(
+        self,
+        capabilities: impl IntoIterator<Item = CapabilityDefinition>,
+    ) -> Result<Self, ValidationError> {
+        self.with_provided_capabilities(capabilities)
+    }
+
     #[must_use]
     pub fn to_domain(&self) -> AgentDefinition {
         AgentDefinition::new(
@@ -138,6 +187,8 @@ impl AgentDefinitionDocument {
             self.skill_ids.clone(),
         )
         .expect("validated Agent document must convert to its domain definition")
+        .with_provided_capabilities(self.provided_capabilities.clone())
+        .expect("validated Agent capabilities must convert to its domain definition")
     }
 
     pub fn to_json(&self) -> Result<String, SerializationError> {
@@ -165,6 +216,12 @@ impl AgentDefinitionDocument {
                 .into_iter()
                 .map(SkillId::new)
                 .collect::<Result<Vec<_>, _>>()?,
+        )?
+        .with_provided_capabilities(
+            wire.provided_capabilities
+                .into_iter()
+                .map(capability_from_wire)
+                .collect::<Result<Vec<_>, _>>()?,
         )
     }
 }
@@ -184,6 +241,7 @@ pub struct SkillDefinitionDocument {
     related_skill_ids: Vec<SkillId>,
     required_capability_ids: Vec<CapabilityId>,
     knowledge_queries: Vec<KnowledgeQuery>,
+    provided_capabilities: Vec<CapabilityDefinition>,
 }
 
 impl SkillDefinitionDocument {
@@ -213,6 +271,38 @@ impl SkillDefinitionDocument {
             .with_related_skill_ids(related_skills)?
             .with_knowledge_queries(knowledge_queries);
         Ok(Self::from_domain(definition))
+    }
+
+    /// Creates a v2 Skill document with direct provided capability contracts.
+    #[allow(clippy::too_many_arguments)]
+    pub fn new_with_provided_capabilities(
+        id: SkillId,
+        name: impl Into<String>,
+        description: impl Into<String>,
+        owner_agent_id: Option<AgentId>,
+        authoritative_sources: impl IntoIterator<Item = impl Into<String>>,
+        rules: impl IntoIterator<Item = impl Into<String>>,
+        verification: impl IntoIterator<Item = impl Into<String>>,
+        requires: impl IntoIterator<Item = SkillId>,
+        related_skills: impl IntoIterator<Item = SkillId>,
+        required_capability_ids: impl IntoIterator<Item = CapabilityId>,
+        knowledge_queries: impl IntoIterator<Item = KnowledgeQuery>,
+        provided_capabilities: impl IntoIterator<Item = CapabilityDefinition>,
+    ) -> Result<Self, ValidationError> {
+        Self::new(
+            id,
+            name,
+            description,
+            owner_agent_id,
+            authoritative_sources,
+            rules,
+            verification,
+            requires,
+            related_skills,
+            required_capability_ids,
+            knowledge_queries,
+        )?
+        .with_provided_capabilities(provided_capabilities)
     }
 
     /// Creates a minimal complete Skill document with empty optional lists.
@@ -251,6 +341,7 @@ impl SkillDefinitionDocument {
             related_skill_ids: definition.related_skill_ids().to_vec(),
             required_capability_ids: definition.required_capability_ids().to_vec(),
             knowledge_queries: definition.knowledge_queries().to_vec(),
+            provided_capabilities: definition.provided_capabilities().to_vec(),
         }
     }
 
@@ -330,6 +421,50 @@ impl SkillDefinitionDocument {
         &self.required_capability_ids
     }
 
+    /// Returns the reusable capabilities directly provided by this Skill.
+    #[must_use]
+    pub fn provided_capabilities(&self) -> &[CapabilityDefinition] {
+        &self.provided_capabilities
+    }
+
+    /// Alias for callers that use the shorter capability vocabulary.
+    #[must_use]
+    pub fn capabilities(&self) -> &[CapabilityDefinition] {
+        self.provided_capabilities()
+    }
+
+    /// Adds the reusable capabilities directly provided by this Skill.
+    pub fn with_provided_capabilities(
+        mut self,
+        capabilities: impl IntoIterator<Item = CapabilityDefinition>,
+    ) -> Result<Self, ValidationError> {
+        self.provided_capabilities = SkillDefinition::new(
+            self.id.clone(),
+            self.description.clone(),
+            self.dependency_ids.clone(),
+            self.required_capability_ids.clone(),
+        )?
+        .with_name(self.name.clone())?
+        .with_owner_if_present(self.owner_agent_id.clone())
+        .with_authoritative_sources(self.authoritative_sources.iter().map(NonEmptyText::as_str))?
+        .with_rules(self.rules.iter().map(NonEmptyText::as_str))?
+        .with_verification(self.verification.iter().map(NonEmptyText::as_str))?
+        .with_related_skill_ids(self.related_skill_ids.clone())?
+        .with_knowledge_queries(self.knowledge_queries.clone())
+        .with_provided_capabilities(capabilities)?
+        .provided_capabilities()
+        .to_vec();
+        Ok(self)
+    }
+
+    /// Alias for [`Self::with_provided_capabilities`].
+    pub fn with_capabilities(
+        self,
+        capabilities: impl IntoIterator<Item = CapabilityDefinition>,
+    ) -> Result<Self, ValidationError> {
+        self.with_provided_capabilities(capabilities)
+    }
+
     #[must_use]
     pub fn knowledge_queries(&self) -> &[KnowledgeQuery] {
         &self.knowledge_queries
@@ -356,6 +491,8 @@ impl SkillDefinitionDocument {
         .with_related_skill_ids(self.related_skill_ids.clone())
         .expect("validated Skill references must convert to its domain definition")
         .with_knowledge_queries(self.knowledge_queries.clone())
+        .with_provided_capabilities(self.provided_capabilities.clone())
+        .expect("validated Skill capabilities must convert to its domain definition")
     }
 
     pub fn to_json(&self) -> Result<String, SerializationError> {
@@ -400,6 +537,12 @@ impl SkillDefinitionDocument {
                 .into_iter()
                 .map(KnowledgeQuery::new)
                 .collect::<Result<Vec<_>, _>>()?,
+        )?
+        .with_provided_capabilities(
+            wire.provided_capabilities
+                .into_iter()
+                .map(capability_from_wire)
+                .collect::<Result<Vec<_>, _>>()?,
         )
     }
 }
@@ -436,6 +579,8 @@ struct WireAgentDefinition {
     id: String,
     description: String,
     skill_ids: Vec<String>,
+    #[serde(default)]
+    provided_capabilities: Vec<WireCapabilityDefinition>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -457,6 +602,72 @@ struct WireSkillDefinition {
     required_capability_ids: Vec<String>,
     #[serde(default)]
     knowledge_queries: Vec<String>,
+    #[serde(default)]
+    provided_capabilities: Vec<WireCapabilityDefinition>,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
+struct WireCapabilityDefinition {
+    id: String,
+    class: String,
+    domain: String,
+    description: String,
+    input_kinds: Vec<String>,
+    output_kinds: Vec<String>,
+    preconditions: Vec<String>,
+    constraints: Vec<String>,
+    applicability_tags: Vec<String>,
+}
+
+fn capability_from_wire(
+    wire: WireCapabilityDefinition,
+) -> Result<CapabilityDefinition, ValidationError> {
+    CapabilityDefinition::new_with_contract(
+        CapabilityId::new(wire.id)?,
+        CapabilityClass::from_str(&wire.class)?,
+        wire.domain,
+        wire.description,
+        wire.input_kinds,
+        wire.output_kinds,
+        wire.preconditions,
+        wire.constraints,
+        wire.applicability_tags,
+    )
+}
+
+fn capability_to_wire(capability: &CapabilityDefinition) -> WireCapabilityDefinition {
+    WireCapabilityDefinition {
+        id: capability.id().to_string(),
+        class: capability.class().to_string(),
+        domain: capability.domain().to_string(),
+        description: capability.description().to_owned(),
+        input_kinds: capability
+            .input_kinds()
+            .iter()
+            .map(ToString::to_string)
+            .collect(),
+        output_kinds: capability
+            .output_kinds()
+            .iter()
+            .map(ToString::to_string)
+            .collect(),
+        preconditions: capability
+            .preconditions()
+            .iter()
+            .map(ToString::to_string)
+            .collect(),
+        constraints: capability
+            .constraints()
+            .iter()
+            .map(ToString::to_string)
+            .collect(),
+        applicability_tags: capability
+            .applicability_tags()
+            .iter()
+            .map(ToString::to_string)
+            .collect(),
+    }
 }
 
 impl Serialize for AgentDefinitionDocument {
@@ -470,6 +681,11 @@ impl Serialize for AgentDefinitionDocument {
             id: self.id.to_string(),
             description: self.description.clone(),
             skill_ids: self.skill_ids.iter().map(ToString::to_string).collect(),
+            provided_capabilities: self
+                .provided_capabilities
+                .iter()
+                .map(capability_to_wire)
+                .collect(),
         }
         .serialize(serializer)
     }
@@ -532,6 +748,11 @@ impl Serialize for SkillDefinitionDocument {
                 .iter()
                 .map(|query| query.as_str().to_owned())
                 .collect(),
+            provided_capabilities: self
+                .provided_capabilities
+                .iter()
+                .map(capability_to_wire)
+                .collect(),
         }
         .serialize(serializer)
     }
@@ -561,7 +782,18 @@ mod tests {
             "kind": "agent",
             "id": "reviewer",
             "description": "Reviews architecture changes",
-            "skill_ids": ["architecture"]
+            "skill_ids": ["architecture"],
+            "provided_capabilities": [{
+                "id": "architecture.dependency-analysis",
+                "class": "INSPECT",
+                "domain": "architecture",
+                "description": "Analyze dependency direction",
+                "input_kinds": ["repository.snapshot"],
+                "output_kinds": ["architecture.dependency-graph"],
+                "preconditions": ["repository.available"],
+                "constraints": ["read-only"],
+                "applicability_tags": ["architecture"]
+            }]
         })
         .to_string()
     }
@@ -580,7 +812,18 @@ mod tests {
             "requires": ["foundation"],
             "related_skills": ["quality"],
             "required_capability_ids": ["repository.read"],
-            "knowledge_queries": ["architecture boundaries"]
+            "knowledge_queries": ["architecture boundaries"],
+            "provided_capabilities": [{
+                "id": "architecture.dependency-analysis",
+                "class": "INSPECT",
+                "domain": "architecture",
+                "description": "Analyze dependency direction",
+                "input_kinds": ["repository.snapshot"],
+                "output_kinds": ["architecture.dependency-graph"],
+                "preconditions": ["repository.available"],
+                "constraints": ["read-only"],
+                "applicability_tags": ["architecture"]
+            }]
         })
         .to_string()
     }
@@ -591,6 +834,16 @@ mod tests {
         assert_eq!(document.schema_version(), SchemaVersion::V2);
         assert_eq!(document.kind(), DefinitionKind::Agent);
         assert_eq!(document.to_domain().skill_ids().len(), 1);
+        assert_eq!(
+            document.provided_capabilities()[0].id().as_str(),
+            "architecture.dependency-analysis"
+        );
+        assert_eq!(
+            document.to_domain().provided_capabilities()[0]
+                .domain()
+                .as_str(),
+            "architecture"
+        );
         assert_eq!(
             AgentDefinitionDocument::from_json(&document.to_json().unwrap()).unwrap(),
             document
@@ -637,6 +890,14 @@ mod tests {
         );
         assert_eq!(document.requires()[0].as_str(), "foundation");
         assert_eq!(document.related_skills()[0].as_str(), "quality");
+        assert_eq!(
+            document.provided_capabilities()[0].output_kinds()[0].as_str(),
+            "architecture.dependency-graph"
+        );
+        assert_eq!(
+            document.to_domain().provided_capabilities()[0].applicability_tags()[0].as_str(),
+            "architecture"
+        );
         assert_eq!(
             document.to_domain().related_skill_ids()[0].as_str(),
             "quality"
@@ -738,6 +999,32 @@ mod tests {
     }
 
     #[test]
+    fn capability_contracts_reject_unknown_or_malformed_nested_values() {
+        let unknown = skill_json().replace(
+            "\"applicability_tags\"",
+            "\"unexpected\":true,\"applicability_tags\"",
+        );
+        assert!(SkillDefinitionDocument::from_json(&unknown).is_err());
+
+        let invalid_class = skill_json().replace("\"class\":\"INSPECT\"", "\"class\":\"READ\"");
+        assert!(matches!(
+            SkillDefinitionDocument::from_json(&invalid_class),
+            Err(SerializationError::Validation(
+                ValidationError::UnknownDomainValue {
+                    field: "capability_class",
+                    ..
+                }
+            ))
+        ));
+
+        let invalid_selector = skill_json().replace(
+            "\"input_kinds\":[\"repository.snapshot\"]",
+            "\"input_kinds\":[\"repository snapshot\"]",
+        );
+        assert!(SkillDefinitionDocument::from_json(&invalid_selector).is_err());
+    }
+
+    #[test]
     fn constructors_and_aliases_cover_minimal_documents() {
         let agent = AgentDefinitionDocument::new(
             AgentId::new("reviewer").unwrap(),
@@ -777,5 +1064,103 @@ mod tests {
         let encoded = serde_json::to_string(&DefinitionKind::Skill).unwrap();
         assert_eq!(encoded, "\"skill\"");
         assert!(serde_json::from_str::<DefinitionKind>("\"workflow\"").is_err());
+    }
+
+    #[test]
+    fn direct_constructors_and_aliases_preserve_capability_contracts() {
+        let capability = CapabilityDefinition::new_with_contract(
+            CapabilityId::new("architecture.inspect").unwrap(),
+            CapabilityClass::Inspect,
+            "architecture",
+            "Inspect architecture boundaries",
+            ["repository.snapshot"],
+            ["architecture.report"],
+            ["repository.available"],
+            ["read-only"],
+            ["architecture"],
+        )
+        .unwrap();
+
+        let agent = AgentDefinitionDocument::new_with_provided_capabilities(
+            AgentId::new("reviewer").unwrap(),
+            "Reviews architecture",
+            [SkillId::new("architecture").unwrap()],
+            [capability.clone()],
+        )
+        .unwrap();
+        assert_eq!(agent.id().as_str(), "reviewer");
+        assert_eq!(agent.description(), "Reviews architecture");
+        assert_eq!(agent.skill_ids()[0].as_str(), "architecture");
+        assert_eq!(agent.provided_capabilities(), &[capability]);
+        assert_eq!(agent.capabilities(), agent.provided_capabilities());
+
+        let agent_with_alias = AgentDefinitionDocument::new(
+            AgentId::new("reviewer-alias").unwrap(),
+            "Reviews architecture",
+            [SkillId::new("architecture").unwrap()],
+        )
+        .unwrap()
+        .with_capabilities(agent.provided_capabilities().to_vec())
+        .unwrap();
+        assert_eq!(
+            agent_with_alias.provided_capabilities(),
+            agent.provided_capabilities()
+        );
+
+        let capability = agent.provided_capabilities()[0].clone();
+        let skill = SkillDefinitionDocument::new_with_provided_capabilities(
+            SkillId::new("architecture").unwrap(),
+            "Architecture Expert",
+            "Reviews architecture boundaries",
+            Some(AgentId::new("reviewer").unwrap()),
+            ["architecture guide"],
+            ["Keep dependencies directed inward."],
+            ["Run architecture tests."],
+            [SkillId::new("foundation").unwrap()],
+            [SkillId::new("quality").unwrap()],
+            [CapabilityId::new("repository.read").unwrap()],
+            [KnowledgeQuery::new("architecture boundaries").unwrap()],
+            [capability.clone()],
+        )
+        .unwrap();
+        assert_eq!(skill.id().as_str(), "architecture");
+        assert_eq!(skill.name(), "Architecture Expert");
+        assert_eq!(skill.description(), "Reviews architecture boundaries");
+        assert_eq!(skill.owner_agent_id().unwrap().as_str(), "reviewer");
+        assert_eq!(
+            skill.authoritative_sources()[0].as_str(),
+            "architecture guide"
+        );
+        assert_eq!(
+            skill.rules()[0].as_str(),
+            "Keep dependencies directed inward."
+        );
+        assert_eq!(skill.verification()[0].as_str(), "Run architecture tests.");
+        assert_eq!(skill.dependency_ids()[0].as_str(), "foundation");
+        assert_eq!(skill.required_skill_ids(), skill.requires());
+        assert_eq!(skill.related_skill_ids()[0].as_str(), "quality");
+        assert_eq!(
+            skill.required_capability_ids()[0].as_str(),
+            "repository.read"
+        );
+        assert_eq!(
+            skill.knowledge_queries()[0].as_str(),
+            "architecture boundaries"
+        );
+        assert_eq!(skill.provided_capabilities(), &[capability]);
+        assert_eq!(skill.capabilities(), skill.provided_capabilities());
+
+        let skill_with_alias = SkillDefinitionDocument::new_minimal(
+            SkillId::new("alias").unwrap(),
+            "Alias",
+            "Alias skill",
+        )
+        .unwrap()
+        .with_capabilities(skill.provided_capabilities().to_vec())
+        .unwrap();
+        assert_eq!(
+            skill_with_alias.provided_capabilities(),
+            skill.provided_capabilities()
+        );
     }
 }

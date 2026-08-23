@@ -26,5 +26,18 @@
   "required_capability_ids": [],
   "knowledge_queries": [
     "architecture and dependency validation"
+  ],
+  "provided_capabilities": [
+    {
+      "id": "architecture.boundary-validation",
+      "class": "INSPECT",
+      "domain": "architecture",
+      "description": "Validate module dependencies and architectural boundaries",
+      "input_kinds": ["repository.snapshot", "architecture.rules"],
+      "output_kinds": ["architecture.validation-result"],
+      "preconditions": ["repository.available"],
+      "constraints": ["read-only"],
+      "applicability_tags": ["architecture", "validation"]
+    }
   ]
 }

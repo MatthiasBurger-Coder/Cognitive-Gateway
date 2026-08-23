@@ -41,10 +41,11 @@ remain outside this catalog.
 
 Skill applicability is represented through the v2 self-contained contract:
 structured content, optional agent ownership, abstract capability
-requirements, retrieval hints, mandatory `requires` dependencies and optional
-`related_skills`. A Skill does not gain a project selector or an execution
-permission; applicability and capability authorization remain separate
-registry/policy concerns.
+requirements, reusable `provided_capabilities`, retrieval hints, mandatory
+`requires` dependencies and optional `related_skills`. Agents may also declare
+capabilities they provide directly. A capability contract does not gain a
+project selector or an execution permission; applicability and capability
+authorization remain separate registry/policy concerns.
 
 `Registry::resolve_skill(skill_id)` returns an owned `ResolvedSkillGraph` for
 the requested canonical ID and its transitive `requires` closure. The result

@@ -12,4 +12,6 @@ through runtime or retrieval boundaries and are not embedded in an Agent.
 
 The catalog includes the promoted `devops`, `python-automation-developer`,
 `react-frontend` and `ux-designer` specialists. All Agent-to-Skill references
-resolve against the catalog's canonical Skill IDs.
+resolve against the catalog's canonical Skill IDs. An Agent may additionally
+declare reusable `provided_capabilities`; these are typed descriptions of
+what the Agent can provide, not execution permissions.

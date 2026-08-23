@@ -26,5 +26,18 @@
   "required_capability_ids": [],
   "knowledge_queries": [
     "deterministic regression strategy"
+  ],
+  "provided_capabilities": [
+    {
+      "id": "quality.test-strategy-analysis",
+      "class": "INSPECT",
+      "domain": "quality",
+      "description": "Design deterministic regression coverage for changed behavior",
+      "input_kinds": ["change.summary", "acceptance.criteria"],
+      "output_kinds": ["quality.test-strategy"],
+      "preconditions": ["requirements.available"],
+      "constraints": ["read-only"],
+      "applicability_tags": ["quality", "testing"]
+    }
   ]
 }

@@ -97,4 +97,19 @@ mod tests {
         assert!(SchemaVersion::from_str("01.0").is_err());
         assert_eq!(SchemaVersion::from_str("2.3").unwrap().major(), 2);
     }
+
+    #[test]
+    fn preserves_minor_values_and_rejects_numeric_overflow() {
+        let version = SchemaVersion::new(3, 7).unwrap();
+        assert_eq!(version.major(), 3);
+        assert_eq!(version.minor(), 7);
+        assert_eq!(version.to_string(), "3.7");
+        assert!(SchemaVersion::from_str("65536.0").is_err());
+        assert!(SchemaVersion::from_str("1.65536").is_err());
+        assert!(SchemaVersion::from_str("0.1").is_err());
+        assert!(SchemaVersion::from_str("1.").is_err());
+        assert!(SchemaVersion::from_str(".1").is_err());
+        assert!(SchemaVersion::from_str("1.a").is_err());
+        assert!(SchemaVersion::from_str("1.01").is_err());
+    }
 }

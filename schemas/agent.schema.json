@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://cognitive-gateway.dev/schemas/agent.schema.json",
-  "title": "Cognitive Gateway Agent Definition",
-  "description": "The strict v2 contract for an Agent and its Skill references.",
+  "title": "Cognitive Gateway Agent and Capability Definition",
+  "description": "The strict v2 contract for an Agent, its Skill references and optional provided capability contracts.",
   "type": "object",
   "additionalProperties": false,
   "required": ["schema_version", "kind", "id", "description", "skill_ids"],
@@ -16,6 +16,11 @@
       "minItems": 1,
       "uniqueItems": true,
       "items": { "$ref": "#/$defs/identifier" }
+    },
+    "provided_capabilities": {
+      "type": "array",
+      "description": "Reusable capabilities directly provided by this Agent; this is not execution authority.",
+      "items": { "$ref": "#/$defs/capability" }
     }
   },
   "$defs": {
@@ -30,6 +35,52 @@
       "minLength": 1,
       "maxLength": 16384,
       "pattern": "\\S"
+    },
+    "capability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "class",
+        "domain",
+        "description",
+        "input_kinds",
+        "output_kinds",
+        "preconditions",
+        "constraints",
+        "applicability_tags"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/identifier" },
+        "class": { "enum": ["INSPECT", "MUTATE"] },
+        "domain": { "$ref": "#/$defs/identifier" },
+        "description": { "$ref": "#/$defs/description" },
+        "input_kinds": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/identifier" }
+        },
+        "output_kinds": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/identifier" }
+        },
+        "preconditions": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/identifier" }
+        },
+        "constraints": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/identifier" }
+        },
+        "applicability_tags": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/identifier" }
+        }
+      }
     }
   }
 }

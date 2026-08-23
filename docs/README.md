@@ -23,8 +23,8 @@ See [`ir-serialization.md`](ir-serialization.md) for the JSON wire schema,
 validation behavior, public serialization API and version compatibility rules.
 
 See [`agent-skill-definition-contracts.md`](agent-skill-definition-contracts.md)
-for the CG-03.03 versioned Agent and Skill document contracts, provenance
-model, strict exclusions and representative normalized fixtures.
+for the CG-03.16 versioned Agent, Skill and machine-resolvable capability
+document contracts, strict exclusions and representative normalized fixtures.
 
 See [`reference-scenarios.md`](reference-scenarios.md) for the CG-02.06
 executable acceptance scenarios covering the complete domain and IR contract.

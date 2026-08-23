@@ -26,5 +26,18 @@
   "required_capability_ids": [],
   "knowledge_queries": [
     "required quality-gate execution"
+  ],
+  "provided_capabilities": [
+    {
+      "id": "quality.verification-planning",
+      "class": "INSPECT",
+      "domain": "quality",
+      "description": "Identify and structure the reproducible checks required by a quality gate",
+      "input_kinds": ["repository.snapshot", "quality.gate-definition"],
+      "output_kinds": ["quality.verification-plan"],
+      "preconditions": ["quality-gate.available"],
+      "constraints": ["read-only"],
+      "applicability_tags": ["quality", "verification"]
+    }
   ]
 }

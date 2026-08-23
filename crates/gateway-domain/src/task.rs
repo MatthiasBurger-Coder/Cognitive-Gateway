@@ -156,6 +156,7 @@ mod tests {
 
         assert_eq!(descriptor.task_type(), Some("runtime_bugfix"));
         assert_eq!(descriptor.confidence().unwrap().as_fraction(), 0.94);
+        assert_eq!(descriptor.confidence().unwrap().as_f64(), 0.94);
         assert_eq!(
             descriptor.classification().unwrap().task_type(),
             "runtime_bugfix"

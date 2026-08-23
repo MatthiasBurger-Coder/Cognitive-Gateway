@@ -19,8 +19,8 @@ use std::{
 };
 
 use gateway_domain::{
-    AgentDefinitionDocument, AgentId, DefinitionKind, SerializationError, SkillDefinitionDocument,
-    SkillId,
+    AgentDefinitionDocument, AgentId, CapabilityDefinition, CapabilityId, DefinitionKind,
+    SerializationError, SkillDefinitionDocument, SkillId,
 };
 
 /// The result of loading one repository-backed registry.
@@ -82,6 +82,13 @@ pub enum RegistryIntegrityError {
         related_skill_id: SkillId,
         source: String,
     },
+    /// Two providers use one canonical capability ID with incompatible
+    /// reusable metadata.
+    ConflictingCapabilityDeclaration {
+        capability_id: CapabilityId,
+        first_source: String,
+        conflicting_source: String,
+    },
     /// The dependency graph contains a cycle, including its closing edge.
     CircularSkillDependency { cycle: Vec<SkillId>, source: String },
 }
@@ -140,6 +147,15 @@ impl fmt::Display for RegistryIntegrityError {
                 "skill {:?} from {source:?} references missing related skill {:?}",
                 skill_id.as_str(),
                 related_skill_id.as_str()
+            ),
+            Self::ConflictingCapabilityDeclaration {
+                capability_id,
+                first_source,
+                conflicting_source,
+            } => write!(
+                formatter,
+                "capability {:?} has conflicting declarations from {first_source:?} and {conflicting_source:?}",
+                capability_id.as_str()
             ),
             Self::CircularSkillDependency { cycle, source } => {
                 let path = cycle
@@ -785,7 +801,49 @@ impl Registry {
             }
         }
 
+        self.validate_capability_declarations()?;
         self.skills.validate_integrity()
+    }
+
+    /// Validates that one canonical capability ID has one reusable contract.
+    ///
+    /// Multiple Agents or Skills may provide the same capability and therefore
+    /// become candidates. They must agree on the metadata so a later derived
+    /// capability index cannot depend on discovery order.
+    fn validate_capability_declarations(&self) -> Result<(), RegistryIntegrityError> {
+        let mut declarations = BTreeMap::<CapabilityId, (CapabilityDefinition, String)>::new();
+
+        for (source, capabilities) in self
+            .agents
+            .iter()
+            .map(|agent| (canonical_source(agent), agent.provided_capabilities()))
+            .chain(
+                self.skills
+                    .iter()
+                    .map(|skill| (canonical_source(skill), skill.provided_capabilities())),
+            )
+        {
+            for capability in capabilities {
+                match declarations.get(capability.id()) {
+                    Some((existing, first_source)) if existing != capability => {
+                        return Err(RegistryIntegrityError::ConflictingCapabilityDeclaration {
+                            capability_id: capability.id().clone(),
+                            first_source: first_source.clone(),
+                            conflicting_source: source.clone(),
+                        });
+                    }
+                    Some(_) => {}
+                    None => {
+                        declarations.insert(
+                            capability.id().clone(),
+                            (capability.clone(), source.clone()),
+                        );
+                    }
+                }
+            }
+        }
+
+        Ok(())
     }
 
     /// Alias for [`Self::validate_integrity`].
@@ -1106,7 +1164,10 @@ mod tests {
         time::{SystemTime, UNIX_EPOCH},
     };
 
-    use gateway_domain::{AgentDefinitionDocument, AgentId, SkillDefinitionDocument, SkillId};
+    use gateway_domain::{
+        AgentDefinitionDocument, AgentId, CapabilityClass, CapabilityDefinition, CapabilityId,
+        SkillDefinitionDocument, SkillId,
+    };
 
     use super::{AgentRegistry, Registry, RegistryError, RegistryIntegrityError, SkillRegistry};
 
@@ -1190,6 +1251,21 @@ mod tests {
             AgentId::new(id).unwrap(),
             format!("Agent {id}"),
             skills.iter().map(|value| SkillId::new(*value).unwrap()),
+        )
+        .unwrap()
+    }
+
+    fn capability(domain: &str) -> CapabilityDefinition {
+        CapabilityDefinition::new_with_contract(
+            CapabilityId::new("shared.analysis").unwrap(),
+            CapabilityClass::Inspect,
+            domain,
+            "A shared analysis capability",
+            ["repository.snapshot"],
+            ["analysis.report"],
+            ["repository.available"],
+            ["read-only"],
+            ["analysis"],
         )
         .unwrap()
     }
@@ -1567,6 +1643,41 @@ mod tests {
         assert!(matches!(
             missing_related,
             RegistryIntegrityError::MissingRelatedSkillReference { .. }
+        ));
+    }
+
+    #[test]
+    fn rejects_conflicting_capability_metadata_but_allows_multiple_providers() {
+        let agent = AgentDefinitionDocument::new_with_provided_capabilities(
+            AgentId::new("reviewer").unwrap(),
+            "Reviews changes",
+            [SkillId::new("analysis").unwrap()],
+            [capability("analysis")],
+        )
+        .unwrap();
+        let skill = complete_skill_document("analysis", &[], &[])
+            .with_provided_capabilities([capability("analysis")])
+            .unwrap();
+
+        let valid = Registry::from_documents([agent.clone()], [skill.clone()]).unwrap();
+        valid
+            .validate_integrity()
+            .expect("equivalent declarations can have multiple providers");
+
+        let conflicting_skill = skill
+            .with_provided_capabilities([capability("security")])
+            .unwrap();
+        let registry = Registry::from_documents([agent], [conflicting_skill]).unwrap();
+        let error = registry.validate_integrity().unwrap_err();
+        assert!(matches!(
+            error,
+            RegistryIntegrityError::ConflictingCapabilityDeclaration {
+                capability_id,
+                first_source,
+                conflicting_source,
+            } if capability_id.as_str() == "shared.analysis"
+                && first_source == "agent:reviewer"
+                && conflicting_source == "skill:analysis"
         ));
     }
 

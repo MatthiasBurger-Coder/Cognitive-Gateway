@@ -16,3 +16,8 @@ resolved as part of the catalog dependency graph. `related_skills` records
 optional or contextual guidance only; it never activates a Skill or grants a
 capability. All references are canonical IDs from this directory, and every
 target is validated when the catalog loads.
+
+`provided_capabilities` contains the typed, project-independent capability
+contracts directly provided by a Skill. Their input/output kinds,
+preconditions, intrinsic constraints and applicability tags are deterministic
+metadata for later indexing; policy remains the authority for execution.

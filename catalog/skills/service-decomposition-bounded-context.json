@@ -27,5 +27,18 @@
   "required_capability_ids": [],
   "knowledge_queries": [
     "service ownership and boundaries"
+  ],
+  "provided_capabilities": [
+    {
+      "id": "architecture.service-boundary-analysis",
+      "class": "INSPECT",
+      "domain": "architecture",
+      "description": "Analyze service responsibility, data ownership and communication boundaries",
+      "input_kinds": ["system-context", "service-candidates"],
+      "output_kinds": ["architecture.boundary-assessment"],
+      "preconditions": ["system-context.available"],
+      "constraints": ["read-only"],
+      "applicability_tags": ["architecture", "service-boundaries"]
+    }
   ]
 }

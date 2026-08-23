@@ -1,6 +1,9 @@
 //! Agent definitions and their typed skill relationships.
 
-use crate::{AgentId, NonEmptyText, SkillId, ValidationError, relationships::unique_relationships};
+use crate::{
+    AgentId, CapabilityDefinition, NonEmptyText, SkillId, ValidationError,
+    capability::unique_capabilities, relationships::unique_relationships,
+};
 
 /// A named responsibility contract for work performed by the gateway.
 ///
@@ -13,6 +16,7 @@ pub struct AgentDefinition {
     id: AgentId,
     description: NonEmptyText,
     skill_ids: Vec<SkillId>,
+    provided_capabilities: Vec<CapabilityDefinition>,
 }
 
 impl AgentDefinition {
@@ -31,6 +35,7 @@ impl AgentDefinition {
             id,
             description: NonEmptyText::new_for_field(description, "description")?,
             skill_ids,
+            provided_capabilities: Vec::new(),
         })
     }
 
@@ -66,12 +71,43 @@ impl AgentDefinition {
     pub fn skills(&self) -> &[SkillId] {
         self.skill_ids()
     }
+
+    /// Adds the reusable capabilities directly provided by this Agent.
+    pub fn with_provided_capabilities(
+        mut self,
+        capabilities: impl IntoIterator<Item = CapabilityDefinition>,
+    ) -> Result<Self, ValidationError> {
+        self.provided_capabilities = unique_capabilities(capabilities)?;
+        Ok(self)
+    }
+
+    /// Alias for [`Self::with_provided_capabilities`].
+    pub fn with_capabilities(
+        self,
+        capabilities: impl IntoIterator<Item = CapabilityDefinition>,
+    ) -> Result<Self, ValidationError> {
+        self.with_provided_capabilities(capabilities)
+    }
+
+    /// Returns the reusable capabilities directly provided by this Agent.
+    #[must_use]
+    pub fn provided_capabilities(&self) -> &[CapabilityDefinition] {
+        &self.provided_capabilities
+    }
+
+    /// Alias for callers that use the shorter capability vocabulary.
+    #[must_use]
+    pub fn capabilities(&self) -> &[CapabilityDefinition] {
+        self.provided_capabilities()
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::AgentDefinition;
-    use crate::{AgentId, SkillId, ValidationError};
+    use crate::{
+        AgentId, CapabilityClass, CapabilityDefinition, CapabilityId, SkillId, ValidationError,
+    };
 
     fn ids() -> [SkillId; 2] {
         [
@@ -109,5 +145,57 @@ mod tests {
     #[test]
     fn rejects_an_invalid_description() {
         assert!(AgentDefinition::try_new(AgentId::new("reviewer").unwrap(), "\0", ids(),).is_err());
+    }
+
+    #[test]
+    fn exposes_unique_provided_capabilities() {
+        let capability = CapabilityDefinition::new(
+            CapabilityId::new("repository.read").unwrap(),
+            CapabilityClass::Inspect,
+        );
+        let agent =
+            AgentDefinition::new(AgentId::new("reviewer").unwrap(), "Reviews changes", ids())
+                .unwrap()
+                .with_provided_capabilities([capability.clone()])
+                .unwrap();
+
+        assert_eq!(agent.provided_capabilities(), &[capability]);
+        assert_eq!(agent.capabilities().len(), 1);
+    }
+
+    #[test]
+    fn rejects_duplicate_provided_capabilities() {
+        let capability = CapabilityDefinition::new(
+            CapabilityId::new("repository.read").unwrap(),
+            CapabilityClass::Inspect,
+        );
+        let result =
+            AgentDefinition::new(AgentId::new("reviewer").unwrap(), "Reviews changes", ids())
+                .unwrap()
+                .with_provided_capabilities([capability.clone(), capability]);
+        assert!(matches!(
+            result,
+            Err(ValidationError::DuplicateRelationship {
+                field: "provided_capabilities"
+            })
+        ));
+    }
+
+    #[test]
+    fn supports_the_capability_alias_on_agents() {
+        let capability = CapabilityDefinition::new(
+            CapabilityId::new("repository.read").unwrap(),
+            CapabilityClass::Inspect,
+        );
+        let agent =
+            AgentDefinition::new(AgentId::new("reviewer").unwrap(), "Reviews changes", ids())
+                .unwrap()
+                .with_capabilities([capability.clone()])
+                .unwrap();
+
+        assert_eq!(agent.description(), "Reviews changes");
+        assert_eq!(agent.skill_ids(), ids());
+        assert_eq!(agent.provided_capabilities(), &[capability]);
+        assert_eq!(agent.capabilities(), agent.provided_capabilities());
     }
 }

@@ -16,6 +16,9 @@ The Agent and Skill contracts are implemented by
 with representative fixtures under [`examples/`](examples/). Their field
 mapping and validation boundary are documented in
 [`../docs/agent-skill-definition-contracts.md`](../docs/agent-skill-definition-contracts.md).
+Both contracts optionally carry `provided_capabilities`, whose nested entries
+are strict, typed and project-independent capability declarations. Capability
+metadata is descriptive provider knowledge; it is not policy authority.
 Definitions are stored under [`../catalog/`](../catalog/), the sole built-in
 Agent/Skill catalog. The catalog boundary and loading rules are documented in
 [`../docs/catalog-boundaries.md`](../docs/catalog-boundaries.md).
