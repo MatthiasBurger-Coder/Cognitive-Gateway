@@ -11,6 +11,11 @@ The bootstrap slice reserves the following schema boundaries:
 - `project-state.schema.json`
 - `execution-context.schema.json`
 
+`project-state.schema.json` is reserved for a later project-state contract. The
+current consuming-project configuration boundary is intentionally opaque and
+request-scoped in `gateway-application`; it is not a catalog or domain
+definition schema.
+
 The Agent and Skill contracts are implemented by
 [`agent.schema.json`](agent.schema.json) and [`skill.schema.json`](skill.schema.json),
 with representative fixtures under [`examples/`](examples/). Their field

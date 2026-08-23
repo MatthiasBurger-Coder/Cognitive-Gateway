@@ -92,6 +92,8 @@ The GitHub Wiki is intended for simplified end-user documentation, tutorials and
 - deterministic workflow/agent/skill resolution before probabilistic retrieval
 - Git as source of truth
 - RAG as knowledge retrieval, not authority
+- consuming-project configuration as request-scoped application input, never
+  as catalog membership or execution authority
 - MCP/tool adapters as controlled capabilities
 - execution runtimes remain replaceable
 

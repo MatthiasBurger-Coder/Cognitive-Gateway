@@ -61,3 +61,7 @@ The registry unit tests cover deterministic catalog loading, duplicate
 detection, complete Skill reference integrity and deterministic dependency
 resolution. The architecture guard also prevents external registry roots from
 being reintroduced.
+
+Application boundary tests cover explicit project context on execution and
+retrieval requests. Domain retrieval tests cover validated content and
+provenance, including fail-closed empty values.

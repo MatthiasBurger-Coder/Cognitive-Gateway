@@ -99,6 +99,12 @@ EvidencePort        <- audit/evidence persistence adapters
 
 These are attachment points, not permissions. The policy engine decides whether a capability request is allowed; an adapter only performs the operation authorized through its port. Knowledge adapters return knowledge and provenance, never authority or permissions.
 
+The application boundary represents consuming-project configuration as an
+opaque request-scoped `ProjectContext`. A `KnowledgeRequest` may carry that
+scope explicitly, while a knowledge adapter returns typed `RetrievedKnowledge`
+with `KnowledgeProvenance`. Neither value is a catalog definition or an
+authority-bearing execution field.
+
 The adapter technologies are replaceable implementation choices. Their
 provider-specific configuration and behavior do not belong in the domain
 contract.

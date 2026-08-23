@@ -35,7 +35,7 @@ At minimum, capabilities are divided into `inspect` and `mutate`. Mutations can 
 
 ## 8.6 Knowledge retrieval
 
-Retrieval is advisory and evidence-producing. It must not directly create new authorities, permissions, agents, skills or workflows.
+Retrieval is advisory and evidence-producing. It must not directly create new authorities, permissions, agents, skills or workflows. The application retrieval contract returns typed knowledge with source and optional revision provenance; project configuration is an explicit request-scoped input and remains outside the catalog and execution IR.
 
 ## 8.7 State model
 
