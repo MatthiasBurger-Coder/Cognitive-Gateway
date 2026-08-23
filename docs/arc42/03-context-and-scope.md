@@ -55,4 +55,6 @@ Potential external systems include:
 
 ## 3.5 Project profiles
 
-Product-specific knowledge does not belong in the generic gateway core. A consumer such as Tiny Swarm World contributes a project profile containing its own agents, skills, workflows, policies, retrieval metadata and tool bindings.
+Product-specific knowledge does not belong in the generic gateway core. Each
+consumer contributes a project profile containing its own agents, skills,
+workflows, policies, retrieval metadata and tool bindings.

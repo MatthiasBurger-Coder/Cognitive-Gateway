@@ -24,29 +24,19 @@ validation behavior, public serialization API and version compatibility rules.
 
 See [`agent-skill-definition-contracts.md`](agent-skill-definition-contracts.md)
 for the CG-03.03 versioned Agent and Skill document contracts, provenance
-model, strict exclusions and representative normalized TSW fixtures.
+model, strict exclusions and representative normalized fixtures.
 
 See [`reference-scenarios.md`](reference-scenarios.md) for the CG-02.06
 executable acceptance scenarios covering the complete domain and IR contract.
 
-## Migration inventory
-
-See [`tiny-swarm-world-agent-skill-inventory.md`](tiny-swarm-world-agent-skill-inventory.md)
-for the CG-03.01 source-pinned inventory of Tiny Swarm World roles, skills and
-supporting Codex runtime assets.
-
-See [`tiny-swarm-world-agent-skill-migration.md`](tiny-swarm-world-agent-skill-migration.md)
-for the CG-03.02 classification, canonical-ID mapping, ownership boundary and
-duplicate/deprecation decisions.
-
 See [`catalog-profile-boundaries.md`](catalog-profile-boundaries.md) for the
-CG-03.06 generic catalog and Tiny Swarm World profile layout, ownership rules,
-loading APIs and fail-closed conflict semantics.
+generic catalog and project profile layout, ownership rules, loading APIs and
+fail-closed conflict semantics.
 
 See the materialized reusable Agent definitions under [`../catalog/agents/`](../catalog/agents/)
 for CG-03.07 and the reusable Skill definitions under [`../catalog/skills/`](../catalog/skills/)
-for CG-03.08. TSW-specific Agent and Skill definitions for CG-03.09 are under
-[`../profiles/tiny-swarm-world/`](../profiles/tiny-swarm-world/).
+for CG-03.08. Example project-specific Agent and Skill definitions are under
+[`../profiles/example-project/`](../profiles/example-project/).
 
 ## Documentation Policy
 

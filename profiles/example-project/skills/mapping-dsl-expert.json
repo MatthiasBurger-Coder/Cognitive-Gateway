@@ -1,9 +1,9 @@
 {
   "schema_version": 2,
   "kind": "skill",
-  "id": "quality-archunit-review",
-  "name": "quality archunit review",
-  "description": "TSW Python/architecture review",
+  "id": "mapping-dsl-expert",
+  "name": "mapping dsl expert",
+  "description": "Project mapping DSL guidance",
   "owner_agent_id": null,
   "authoritative_sources": [],
   "rules": [],
@@ -12,6 +12,6 @@
   "related_skills": [],
   "required_capability_ids": [],
   "knowledge_queries": [
-    "TSW Python/architecture review"
+    "Project mapping DSL guidance"
   ]
 }

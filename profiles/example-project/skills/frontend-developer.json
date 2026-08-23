@@ -1,9 +1,9 @@
 {
   "schema_version": 2,
   "kind": "skill",
-  "id": "tdd-expert",
-  "name": "tdd expert",
-  "description": "TSW test-first automation",
+  "id": "frontend-developer",
+  "name": "frontend developer",
+  "description": "Project terminal UI implementation",
   "owner_agent_id": null,
   "authoritative_sources": [],
   "rules": [],
@@ -12,6 +12,6 @@
   "related_skills": [],
   "required_capability_ids": [],
   "knowledge_queries": [
-    "TSW test-first automation"
+    "Project terminal UI implementation"
   ]
 }

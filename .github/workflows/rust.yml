@@ -14,8 +14,6 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt, clippy
-      - name: Migration matrix
-        run: pwsh -NoProfile -File scripts/check-migration-matrix.ps1
       - name: Architecture guard
         run: ./scripts/check-architecture.sh
       - name: Format

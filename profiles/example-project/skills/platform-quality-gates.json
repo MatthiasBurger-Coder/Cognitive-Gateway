@@ -1,9 +1,9 @@
 {
   "schema_version": 2,
   "kind": "skill",
-  "id": "platform-layout-governance",
-  "name": "platform layout governance",
-  "description": "TSW repository layout",
+  "id": "platform-quality-gates",
+  "name": "platform quality gates",
+  "description": "Project verification gate selection",
   "owner_agent_id": null,
   "authoritative_sources": [],
   "rules": [],
@@ -12,6 +12,6 @@
   "related_skills": [],
   "required_capability_ids": [],
   "knowledge_queries": [
-    "TSW repository layout"
+    "Project verification gate selection"
   ]
 }

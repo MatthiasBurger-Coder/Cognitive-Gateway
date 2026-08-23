@@ -1,9 +1,9 @@
 {
   "schema_version": 2,
   "kind": "skill",
-  "id": "mapping-dsl-expert",
-  "name": "mapping dsl expert",
-  "description": "TSW mapping DSL guidance",
+  "id": "python-automation",
+  "name": "python automation",
+  "description": "Project Python automation",
   "owner_agent_id": null,
   "authoritative_sources": [],
   "rules": [],
@@ -12,6 +12,6 @@
   "related_skills": [],
   "required_capability_ids": [],
   "knowledge_queries": [
-    "TSW mapping DSL guidance"
+    "Project Python automation"
   ]
 }

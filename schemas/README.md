@@ -18,7 +18,7 @@ mapping and validation boundary are documented in
 [`../docs/agent-skill-definition-contracts.md`](../docs/agent-skill-definition-contracts.md).
 Generic definitions are stored under [`../catalog/`](../catalog/), while
 project-specific definitions use a profile such as
-[`../profiles/tiny-swarm-world/`](../profiles/tiny-swarm-world/). The boundary
+[`../profiles/example-project/`](../profiles/example-project/). The boundary
 ownership and combined-loading rules are documented in
 [`../docs/catalog-profile-boundaries.md`](../docs/catalog-profile-boundaries.md).
 The `gateway-registry` crate provides deterministic JSON profile loading for

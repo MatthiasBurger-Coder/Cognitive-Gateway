@@ -1,9 +1,9 @@
 {
   "schema_version": 2,
   "kind": "skill",
-  "id": "frontend-developer",
-  "name": "frontend developer",
-  "description": "TSW terminal UI implementation",
+  "id": "quality-archunit-review",
+  "name": "quality archunit review",
+  "description": "Project Python/architecture review",
   "owner_agent_id": null,
   "authoritative_sources": [],
   "rules": [],
@@ -12,6 +12,6 @@
   "related_skills": [],
   "required_capability_ids": [],
   "knowledge_queries": [
-    "TSW terminal UI implementation"
+    "Project Python/architecture review"
   ]
 }

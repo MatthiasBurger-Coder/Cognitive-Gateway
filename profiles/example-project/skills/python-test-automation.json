@@ -3,7 +3,7 @@
   "kind": "skill",
   "id": "python-test-automation",
   "name": "python test automation",
-  "description": "TSW Python test automation",
+  "description": "Project Python test automation",
   "owner_agent_id": null,
   "authoritative_sources": [],
   "rules": [],
@@ -12,6 +12,6 @@
   "related_skills": [],
   "required_capability_ids": [],
   "knowledge_queries": [
-    "TSW Python test automation"
+    "Project Python test automation"
   ]
 }

@@ -1202,15 +1202,15 @@ mod tests {
         let profile_root = temporary_directory("profile-conflict");
         let catalog_agent =
             agent("same").replace("\"project\":\"project\"", "\"project\":\"catalog\"");
-        let profile_agent = agent("same").replace(
-            "\"project\":\"project\"",
-            "\"project\":\"tiny-swarm-world\"",
-        );
+        let profile_agent =
+            agent("same").replace("\"project\":\"project\"", "\"project\":\"profile\"");
+
         write_file(&catalog_root.join("agents/catalog.json"), &catalog_agent);
         write_file(
             &catalog_root.join("skills/README.md"),
             "no catalog skills yet",
         );
+
         write_file(&profile_root.join("agents/profile.json"), &profile_agent);
         write_file(
             &profile_root.join("skills/README.md"),

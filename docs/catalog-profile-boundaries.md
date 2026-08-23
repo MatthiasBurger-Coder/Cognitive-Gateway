@@ -1,9 +1,8 @@
-# Generic catalog and project profile boundaries (CG-03.06)
+# Generic catalog and project profile boundaries
 
 CG-03.06 establishes the physical and semantic boundary between reusable
-Cognitive Gateway definitions and project-specific definitions. Tiny Swarm
-World is the first reference profile, but the rule is intended to apply to
-future projects as well.
+Cognitive Gateway definitions and project-specific definitions. The rule is
+intended to apply consistently to every project profile.
 
 ## Repository layout
 
@@ -13,7 +12,7 @@ catalog/
 └── skills/
 
 profiles/
-└── tiny-swarm-world/
+└── example-project/
     ├── agents/
     ├── skills/
     ├── workflows/
@@ -23,22 +22,21 @@ profiles/
 ```
 
 `catalog/agents/` and `catalog/skills/` contain reusable Agent and Skill
-documents. The corresponding TSW directories contain only TSW-specific
+documents. The corresponding project directories contain only project-specific
 documents. The remaining profile directories reserve later workflow, policy,
 retrieval and adapter boundaries; CG-03.06 does not load or migrate them.
 
 ## Ownership and leakage rules
 
-Generic definitions must be usable without TSW. They may describe
+Generic definitions must be usable without a project profile. They may describe
 provider-independent responsibilities such as architecture, storage,
 observability, resilience, security, Git, gRPC or Protobuf. They must not
-assume TSW paths, Docker Swarm, LXD/Incus, Portainer, Linux/WSL, a particular
+assume project paths, Docker Swarm, LXD/Incus, Portainer, Linux/WSL, a particular
 repository layout, a provider prompt, a model or a runtime package.
 
-TSW profile definitions may retain product, repository and platform conventions
-identified as `project-specific:tiny-swarm-world` by the CG-03.02 migration
-matrix. Profile ownership does not authorize a capability: capability IDs are
-abstract requirements and still require an independent policy decision.
+Project profile definitions may retain product, repository and platform
+conventions. Profile ownership does not authorize a capability: capability IDs
+are abstract requirements and still require an independent policy decision.
 
 Agent and Skill documents remain declarative. Workflow lifecycle, handoff,
 branch/commit/PR process, prompts, model selection, runtime behavior and
@@ -75,11 +73,11 @@ This means the valid resolution shape is:
 ```text
 catalog definition ──┐
                       ├── deterministic combined registry ── integrity validation
-TSW profile reference ┘
+project profile reference ┘
 ```
 
 The reverse dependency is prohibited: reusable catalog content must not need a
-TSW profile to load or validate.
+project profile to load or validate.
 
 ## Contract independence
 
@@ -90,5 +88,5 @@ external `SKILL.md` content references are outside the runtime contract.
 
 The CG-03.02 migration matrix remains authoritative for classification,
 canonical IDs, merge targets and deprecated exclusions. CG-03.06 creates the
-containers and resolution rules; the actual generic and TSW migrations are
-performed by CG-03.07, CG-03.08 and CG-03.09.
+containers and resolution rules; the contents of each project profile are
+managed independently from the reusable catalog.

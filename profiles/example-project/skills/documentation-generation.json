@@ -1,9 +1,9 @@
 {
   "schema_version": 2,
   "kind": "skill",
-  "id": "tiny-swarm-world-system-architecture",
-  "name": "tiny swarm world system architecture",
-  "description": "TSW Linux/WSL and Swarm architecture",
+  "id": "documentation-generation",
+  "name": "documentation generation",
+  "description": "Project documentation generation",
   "owner_agent_id": null,
   "authoritative_sources": [],
   "rules": [],
@@ -12,6 +12,6 @@
   "related_skills": [],
   "required_capability_ids": [],
   "knowledge_queries": [
-    "TSW Linux/WSL and Swarm architecture"
+    "Project documentation generation"
   ]
 }
