@@ -5,12 +5,14 @@
 //! runtime. It discovers JSON documents in lexical path order, parses every
 //! definition file, rejects duplicate canonical IDs, and exposes the accepted
 //! documents in canonical ID order. Cross-definition reference and dependency
-//! graph validation belongs to the next registry-integrity layer; loading
-//! itself never infers relationships from text or retrieval results.
+//! graph validation is also performed deterministically before a combined
+//! registry is consumed; loading and validation never infer relationships from
+//! text or retrieval results.
 
 #![forbid(unsafe_code)]
 
 use std::{
+    collections::{BTreeMap, BTreeSet},
     error::Error,
     fmt, fs, io,
     path::{Path, PathBuf},
@@ -43,6 +45,114 @@ pub enum RegistryError {
         duplicate_path: PathBuf,
     },
 }
+
+/// A deterministic Agent/Skill relationship-validation failure.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum RegistryIntegrityError {
+    /// An Agent references a Skill that is not registered.
+    MissingSkillReference {
+        agent_id: AgentId,
+        skill_id: SkillId,
+        source: String,
+    },
+    /// A Skill names an owner Agent that is not registered.
+    MissingAgentReference {
+        skill_id: SkillId,
+        agent_id: AgentId,
+        source: String,
+    },
+    /// A Skill depends on a Skill that is not registered.
+    MissingSkillDependency {
+        skill_id: SkillId,
+        dependency_id: SkillId,
+        source: String,
+    },
+    /// The dependency graph contains a cycle, including its closing edge.
+    CircularSkillDependency { cycle: Vec<SkillId>, source: String },
+}
+
+impl fmt::Display for RegistryIntegrityError {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::MissingSkillReference {
+                agent_id,
+                skill_id,
+                source,
+            } => write!(
+                formatter,
+                "agent {:?} from {source:?} references missing skill {:?}",
+                agent_id.as_str(),
+                skill_id.as_str()
+            ),
+            Self::MissingAgentReference {
+                skill_id,
+                agent_id,
+                source,
+            } => write!(
+                formatter,
+                "skill {:?} from {source:?} references missing owner agent {:?}",
+                skill_id.as_str(),
+                agent_id.as_str()
+            ),
+            Self::MissingSkillDependency {
+                skill_id,
+                dependency_id,
+                source,
+            } => write!(
+                formatter,
+                "skill {:?} from {source:?} depends on missing skill {:?}",
+                skill_id.as_str(),
+                dependency_id.as_str()
+            ),
+            Self::CircularSkillDependency { cycle, source } => {
+                let path = cycle
+                    .iter()
+                    .map(SkillId::as_str)
+                    .collect::<Vec<_>>()
+                    .join(" -> ");
+                write!(formatter, "skill dependency cycle {path} from {source:?}")
+            }
+        }
+    }
+}
+
+impl Error for RegistryIntegrityError {}
+
+/// A stable topological view of the registered Skill dependency graph.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct SkillDependencyGraph {
+    dependencies: BTreeMap<SkillId, Vec<SkillId>>,
+    topological_order: Vec<SkillId>,
+}
+
+impl SkillDependencyGraph {
+    /// Returns every Skill ID with dependencies before their dependents.
+    #[must_use]
+    pub fn topological_order(&self) -> &[SkillId] {
+        &self.topological_order
+    }
+
+    /// Returns the declared, ordered dependencies of a Skill.
+    #[must_use]
+    pub fn dependencies(&self, skill_id: &SkillId) -> Option<&[SkillId]> {
+        self.dependencies.get(skill_id).map(Vec::as_slice)
+    }
+
+    /// Returns the number of Skills represented by the graph.
+    #[must_use]
+    pub fn len(&self) -> usize {
+        self.dependencies.len()
+    }
+
+    /// Returns whether the graph contains no Skills.
+    #[must_use]
+    pub fn is_empty(&self) -> bool {
+        self.dependencies.is_empty()
+    }
+}
+
+/// Compatibility alias for callers using the shorter error name.
+pub type IntegrityError = RegistryIntegrityError;
 
 impl fmt::Display for RegistryError {
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -307,6 +417,48 @@ impl SkillRegistry {
     pub fn ids(&self) -> impl ExactSizeIterator<Item = &SkillId> {
         self.documents.iter().map(SkillDefinitionDocument::id)
     }
+
+    /// Builds and validates the Skill dependency graph.
+    ///
+    /// The returned order is deterministic and places every dependency before
+    /// the Skill that depends on it. Missing dependencies and cycles fail
+    /// closed with the originating document's provenance.
+    pub fn dependency_graph(&self) -> Result<SkillDependencyGraph, RegistryIntegrityError> {
+        let mut dependencies = BTreeMap::new();
+        for document in &self.documents {
+            let dependency_ids = document.dependency_ids().to_vec();
+            for dependency_id in &dependency_ids {
+                if self.get(dependency_id).is_none() {
+                    return Err(RegistryIntegrityError::MissingSkillDependency {
+                        skill_id: document.id().clone(),
+                        dependency_id: dependency_id.clone(),
+                        source: provenance(document),
+                    });
+                }
+            }
+            dependencies.insert(document.id().clone(), dependency_ids);
+        }
+
+        let topological_order = topological_order(&dependencies).ok_or_else(|| {
+            let cycle = find_dependency_cycle(&dependencies)
+                .expect("a non-topological graph must contain a dependency cycle");
+            let source = self
+                .get(cycle.first().expect("a cycle must not be empty"))
+                .map(provenance)
+                .unwrap_or_else(|| "unknown source".to_owned());
+            RegistryIntegrityError::CircularSkillDependency { cycle, source }
+        })?;
+
+        Ok(SkillDependencyGraph {
+            dependencies,
+            topological_order,
+        })
+    }
+
+    /// Validates this Skill registry's dependency relationships.
+    pub fn validate_integrity(&self) -> Result<(), RegistryIntegrityError> {
+        self.dependency_graph().map(|_| ())
+    }
 }
 
 /// The Agent and Skill registries loaded from one profile directory.
@@ -382,6 +534,50 @@ impl Registry {
     pub fn skill(&self, id: &SkillId) -> Option<&SkillDefinitionDocument> {
         self.skills.get(id)
     }
+
+    /// Validates Agent ownership/references and the complete Skill graph.
+    ///
+    /// Validation is deterministic: Agents, Skills and declared relationship
+    /// lists are visited in their stable registry order. No execution or
+    /// retrieval service is involved.
+    pub fn validate_integrity(&self) -> Result<(), RegistryIntegrityError> {
+        for agent in self.agents.iter() {
+            for skill_id in agent.skill_ids() {
+                if self.skills.get(skill_id).is_none() {
+                    return Err(RegistryIntegrityError::MissingSkillReference {
+                        agent_id: agent.id().clone(),
+                        skill_id: skill_id.clone(),
+                        source: provenance(agent),
+                    });
+                }
+            }
+        }
+
+        for skill in self.skills.iter() {
+            if let Some(agent_id) = skill.owner_agent_id()
+                && self.agents.get(agent_id).is_none()
+            {
+                return Err(RegistryIntegrityError::MissingAgentReference {
+                    skill_id: skill.id().clone(),
+                    agent_id: agent_id.clone(),
+                    source: provenance(skill),
+                });
+            }
+        }
+
+        self.skills.validate_integrity()
+    }
+
+    /// Alias for [`Self::validate_integrity`].
+    pub fn validate(&self) -> Result<(), RegistryIntegrityError> {
+        self.validate_integrity()
+    }
+
+    /// Returns the validated deterministic Skill dependency graph.
+    pub fn dependency_graph(&self) -> Result<SkillDependencyGraph, RegistryIntegrityError> {
+        self.validate_integrity()?;
+        self.skills.dependency_graph()
+    }
 }
 
 fn discover_json_files(root: &Path) -> RegistryResult<Vec<PathBuf>> {
@@ -445,6 +641,124 @@ fn read_document(path: &Path) -> RegistryResult<String> {
         path: path.to_path_buf(),
         source,
     })
+}
+
+trait HasProvenance {
+    fn provenance(&self) -> String;
+}
+
+impl HasProvenance for AgentDefinitionDocument {
+    fn provenance(&self) -> String {
+        format!("{}:{}", self.origin().project(), self.origin().source())
+    }
+}
+
+impl HasProvenance for SkillDefinitionDocument {
+    fn provenance(&self) -> String {
+        format!("{}:{}", self.origin().project(), self.origin().source())
+    }
+}
+
+fn provenance<T: HasProvenance>(document: &T) -> String {
+    document.provenance()
+}
+
+fn topological_order(dependencies: &BTreeMap<SkillId, Vec<SkillId>>) -> Option<Vec<SkillId>> {
+    let mut indegrees = dependencies
+        .keys()
+        .cloned()
+        .map(|id| (id, 0_usize))
+        .collect::<BTreeMap<_, _>>();
+    let mut dependents = BTreeMap::<SkillId, Vec<SkillId>>::new();
+
+    for (skill_id, dependency_ids) in dependencies {
+        indegrees.insert(skill_id.clone(), dependency_ids.len());
+        for dependency_id in dependency_ids {
+            dependents
+                .entry(dependency_id.clone())
+                .or_default()
+                .push(skill_id.clone());
+        }
+    }
+    for skill_ids in dependents.values_mut() {
+        skill_ids.sort();
+    }
+
+    let mut ready = indegrees
+        .iter()
+        .filter(|(_, degree)| **degree == 0)
+        .map(|(id, _)| id.clone())
+        .collect::<BTreeSet<_>>();
+    let mut order = Vec::with_capacity(dependencies.len());
+
+    while let Some(skill_id) = ready.pop_first() {
+        order.push(skill_id.clone());
+        if let Some(skill_ids) = dependents.get(&skill_id) {
+            for dependent_id in skill_ids {
+                let degree = indegrees
+                    .get_mut(dependent_id)
+                    .expect("every dependency graph node has an indegree");
+                *degree -= 1;
+                if *degree == 0 {
+                    ready.insert(dependent_id.clone());
+                }
+            }
+        }
+    }
+
+    (order.len() == dependencies.len()).then_some(order)
+}
+
+fn find_dependency_cycle(dependencies: &BTreeMap<SkillId, Vec<SkillId>>) -> Option<Vec<SkillId>> {
+    let mut visited = BTreeSet::new();
+    let mut visiting = BTreeSet::new();
+    let mut stack = Vec::new();
+
+    for skill_id in dependencies.keys() {
+        if let Some(cycle) = visit_dependency(
+            skill_id,
+            dependencies,
+            &mut visited,
+            &mut visiting,
+            &mut stack,
+        ) {
+            return Some(cycle);
+        }
+    }
+    None
+}
+
+fn visit_dependency(
+    skill_id: &SkillId,
+    dependencies: &BTreeMap<SkillId, Vec<SkillId>>,
+    visited: &mut BTreeSet<SkillId>,
+    visiting: &mut BTreeSet<SkillId>,
+    stack: &mut Vec<SkillId>,
+) -> Option<Vec<SkillId>> {
+    if let Some(position) = stack.iter().position(|id| id == skill_id) {
+        let mut cycle = stack[position..].to_vec();
+        cycle.push(skill_id.clone());
+        return Some(cycle);
+    }
+    if visited.contains(skill_id) {
+        return None;
+    }
+
+    visiting.insert(skill_id.clone());
+    stack.push(skill_id.clone());
+    for dependency_id in dependencies
+        .get(skill_id)
+        .expect("every dependency graph node has a definition")
+    {
+        if let Some(cycle) = visit_dependency(dependency_id, dependencies, visited, visiting, stack)
+        {
+            return Some(cycle);
+        }
+    }
+    stack.pop();
+    visiting.remove(skill_id);
+    visited.insert(skill_id.clone());
+    None
 }
 
 fn register_id(
@@ -511,10 +825,11 @@ mod tests {
     };
 
     use gateway_domain::{
-        AgentDefinitionDocument, AgentId, DefinitionOrigin, MigrationStatus, SkillId,
+        AgentDefinitionDocument, AgentId, DefinitionOrigin, MigrationStatus,
+        SkillDefinitionDocument, SkillId,
     };
 
-    use super::{AgentRegistry, Registry, RegistryError, SkillRegistry};
+    use super::{AgentRegistry, Registry, RegistryError, RegistryIntegrityError, SkillRegistry};
 
     fn temporary_directory(name: &str) -> PathBuf {
         let nonce = SystemTime::now()
@@ -541,6 +856,45 @@ mod tests {
         format!(
             r#"{{"schema_version":"1.0","kind":"skill","id":"{id}","description":"Skill {id}","owner_agent_id":null,"dependency_ids":[],"required_capability_ids":[],"knowledge_queries":[],"origin":{{"project":"project","source":"skills/{id}.json","migration_status":"NATIVE"}}}}"#
         )
+    }
+
+    fn skill_document(
+        id: &str,
+        owner_agent_id: Option<&str>,
+        dependencies: &[&str],
+    ) -> SkillDefinitionDocument {
+        SkillDefinitionDocument::new(
+            SkillId::new(id).unwrap(),
+            format!("Skill {id}"),
+            owner_agent_id.map(|value| AgentId::new(value).unwrap()),
+            dependencies
+                .iter()
+                .map(|value| SkillId::new(*value).unwrap()),
+            [],
+            [],
+            DefinitionOrigin::new(
+                "project",
+                format!("skills/{id}.json"),
+                MigrationStatus::Native,
+            )
+            .unwrap(),
+        )
+        .unwrap()
+    }
+
+    fn agent_document(id: &str, skills: &[&str]) -> AgentDefinitionDocument {
+        AgentDefinitionDocument::new(
+            AgentId::new(id).unwrap(),
+            format!("Agent {id}"),
+            skills.iter().map(|value| SkillId::new(*value).unwrap()),
+            DefinitionOrigin::new(
+                "project",
+                format!("agents/{id}.json"),
+                MigrationStatus::Native,
+            )
+            .unwrap(),
+        )
+        .unwrap()
     }
 
     fn origin() -> DefinitionOrigin {
@@ -615,6 +969,27 @@ mod tests {
     }
 
     #[test]
+    fn rejects_self_and_duplicate_dependencies_at_the_document_boundary() {
+        let root = temporary_directory("self-dependency");
+        let self_reference =
+            skill("same").replace("\"dependency_ids\":[]", "\"dependency_ids\":[\"same\"]");
+        write_file(&root.join("self.json"), &self_reference);
+        let error = SkillRegistry::load(&root).unwrap_err();
+        assert!(error.to_string().contains("must not reference"));
+        fs::remove_dir_all(&root).unwrap();
+
+        let root = temporary_directory("duplicate-dependency");
+        let duplicate = skill("same").replace(
+            "\"dependency_ids\":[]",
+            "\"dependency_ids\":[\"other\",\"other\"]",
+        );
+        write_file(&root.join("duplicate.json"), &duplicate);
+        let error = SkillRegistry::load(&root).unwrap_err();
+        assert!(error.to_string().contains("duplicate references"));
+        fs::remove_dir_all(root).unwrap();
+    }
+
+    #[test]
     fn combined_profile_loads_agent_and_skill_boundaries() {
         let root = temporary_directory("profile");
         write_file(&root.join("agents/agent.json"), &agent("agent"));
@@ -623,6 +998,7 @@ mod tests {
         let registry = Registry::load(&root).unwrap();
         assert!(registry.agent(&AgentId::new("agent").unwrap()).is_some());
         assert!(registry.skill(&SkillId::new("skill").unwrap()).is_some());
+        registry.validate_integrity().unwrap();
         assert_eq!(registry.agents().documents().len(), 1);
         assert_eq!(registry.skills().documents().len(), 1);
 
@@ -655,5 +1031,100 @@ mod tests {
             duplicate,
             RegistryError::DuplicateDefinition { .. }
         ));
+    }
+
+    #[test]
+    fn validates_references_and_returns_stable_dependency_order() {
+        let registry = Registry::from_documents(
+            [agent_document("reviewer", &["root"])],
+            [
+                skill_document("root", None, &["branch", "leaf"]),
+                skill_document("leaf", None, &[]),
+                skill_document("branch", None, &["leaf"]),
+            ],
+        )
+        .unwrap();
+
+        registry.validate_integrity().unwrap();
+        let graph = registry.dependency_graph().unwrap();
+        let order = graph
+            .topological_order()
+            .iter()
+            .map(SkillId::as_str)
+            .collect::<Vec<_>>();
+        assert_eq!(order, ["leaf", "branch", "root"]);
+        assert_eq!(
+            graph
+                .dependencies(&SkillId::new("root").unwrap())
+                .unwrap()
+                .iter()
+                .map(SkillId::as_str)
+                .collect::<Vec<_>>(),
+            ["branch", "leaf"]
+        );
+    }
+
+    #[test]
+    fn reports_missing_agent_and_skill_references_with_provenance() {
+        let missing_skill =
+            Registry::from_documents([agent_document("reviewer", &["missing"])], [])
+                .unwrap()
+                .validate_integrity()
+                .unwrap_err();
+        assert!(matches!(
+            missing_skill,
+            RegistryIntegrityError::MissingSkillReference { .. }
+        ));
+        assert!(missing_skill.to_string().contains("agents/reviewer.json"));
+
+        let missing_owner =
+            Registry::from_documents([], [skill_document("owned", Some("missing-agent"), &[])])
+                .unwrap()
+                .validate_integrity()
+                .unwrap_err();
+        assert!(matches!(
+            missing_owner,
+            RegistryIntegrityError::MissingAgentReference { .. }
+        ));
+        assert!(missing_owner.to_string().contains("skills/owned.json"));
+
+        let missing_dependency =
+            Registry::from_documents([], [skill_document("dependent", None, &["missing"])])
+                .unwrap()
+                .validate_integrity()
+                .unwrap_err();
+        assert!(matches!(
+            missing_dependency,
+            RegistryIntegrityError::MissingSkillDependency { .. }
+        ));
+        assert!(
+            missing_dependency
+                .to_string()
+                .contains("skills/dependent.json")
+        );
+    }
+
+    #[test]
+    fn reports_a_reproducible_cycle_path() {
+        let registry = Registry::from_documents(
+            [],
+            [
+                skill_document("alpha", None, &["beta"]),
+                skill_document("beta", None, &["alpha"]),
+            ],
+        )
+        .unwrap();
+
+        let error = registry.validate_integrity().unwrap_err();
+        match error {
+            RegistryIntegrityError::CircularSkillDependency { cycle, source } => {
+                assert_eq!(
+                    cycle.iter().map(SkillId::as_str).collect::<Vec<_>>(),
+                    ["alpha", "beta", "alpha"]
+                );
+                assert_eq!(source, "project:skills/alpha.json");
+            }
+            other => panic!("unexpected error: {other}"),
+        }
     }
 }
