@@ -32,8 +32,15 @@ pub enum ValidationError {
     InvalidSchemaVersion,
     /// A schema version string was not in the supported `MAJOR.MINOR` form.
     InvalidSchemaVersionFormat,
+    /// A value belongs to a schema version that this IR type does not support.
+    UnsupportedSchemaVersion {
+        expected: &'static str,
+        actual: String,
+    },
     /// A serialized value did not identify a known domain enum/state value.
     UnknownDomainValue { field: &'static str, value: String },
+    /// A confidence value was not a finite number in the inclusive 0..=1 range.
+    InvalidConfidence { field: &'static str },
     /// A state transition is not allowed by the domain lifecycle.
     InvalidStateTransition {
         state: &'static str,
@@ -94,8 +101,15 @@ impl fmt::Display for ValidationError {
             Self::InvalidSchemaVersionFormat => {
                 write!(formatter, "schema version must use MAJOR.MINOR format")
             }
+            Self::UnsupportedSchemaVersion { expected, actual } => write!(
+                formatter,
+                "schema version {actual:?} is not supported; expected {expected}"
+            ),
             Self::UnknownDomainValue { field, value } => {
                 write!(formatter, "unknown {field} value {value:?}")
+            }
+            Self::InvalidConfidence { field } => {
+                write!(formatter, "{field} must be a finite value between 0 and 1")
             }
             Self::InvalidStateTransition { state, from, to } => {
                 write!(
@@ -322,6 +336,9 @@ mod tests {
             ValidationError::UnknownDomainValue {
                 field: "operating_mode",
                 value: "UNKNOWN".to_owned(),
+            },
+            ValidationError::InvalidConfidence {
+                field: "confidence",
             },
             ValidationError::InvalidStateTransition {
                 state: "workflow",

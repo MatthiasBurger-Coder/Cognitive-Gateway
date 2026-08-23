@@ -54,7 +54,7 @@ impl FromStr for ConstraintKind {
 }
 
 /// A named, provider-independent execution constraint.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Constraint {
     id: ConstraintId,
     kind: ConstraintKind,

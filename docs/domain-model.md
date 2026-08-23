@@ -98,5 +98,6 @@ qualification; it does not make the two dimensions intrinsically dependent.
 
 These types are declarations and validation rules only. They do not execute
 capabilities, persist state, select a runtime, or embed Codex/PraisonAI/OpenAI
-behavior. Serialization and `ExecutionContextIR` composition are subsequent
-CG-02 slices.
+behavior. The versioned `ExecutionContextIR` composition is documented in
+[`execution-context-ir.md`](execution-context-ir.md); serialization and
+compatibility handling remain a subsequent CG-02 slice.
