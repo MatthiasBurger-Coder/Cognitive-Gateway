@@ -6,6 +6,7 @@ mod error;
 mod identifiers;
 mod ir;
 mod source;
+mod validation;
 
 pub use compiler::{
     CompilationDiagnostic, CompilationError, CompilationResult, CompilationTraceEntry,
@@ -27,3 +28,4 @@ pub use source::{
     FrontendError, SourceDocument, SourceLocation, SourceRule, SourceScenario, SourceStep,
     SourceStepKeyword, SourceTag, TableRow,
 };
+pub use validation::{ProcessValidator, ValidationDiagnostic, ValidationReport};
