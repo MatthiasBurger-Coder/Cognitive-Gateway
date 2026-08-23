@@ -6,9 +6,42 @@ catalog snapshot through `gateway-registry`; it does not connect to a project,
 LLM, retrieval service, runtime or policy engine. It is intentionally separate
 from the later CG-11 declarative product CLI.
 
-Run it from the repository root, or pass another catalog root explicitly:
+## Build and install
 
-```text
+From the repository root on WSL/Linux, build the workspace and install the
+canonical `cg-registry` executable into Cargo's standard user bin directory:
+
+```bash
+cargo build --workspace
+cargo install --path crates/gateway-daemon --bin cg-registry --locked --force
+```
+
+Cargo installs the executable in `$HOME/.cargo/bin`. Ensure that directory is
+on `PATH`, then verify that the command is shell-resolvable:
+
+```bash
+export PATH="$HOME/.cargo/bin:$PATH"  # only needed if Rustup did not add it
+command -v cg-registry
+cg-registry --help
+```
+
+Run installed commands from the repository root, or provide a catalog root
+explicitly with `--catalog <dir>`:
+
+```bash
+cg-registry agent list
+cg-registry agent show system-architect
+cg-registry skill list
+cg-registry skill show architecture-hexagonal
+cg-registry skill graph architecture-hexagonal
+cg-registry capability list
+cg-registry capability show architecture.dependency-analysis
+cg-registry capability resolve architecture.dependency-analysis
+```
+
+For a one-off invocation without installing, Cargo can run the same binary:
+
+```bash
 cargo run --bin cg-registry -- agent list
 cargo run --bin cg-registry -- --catalog catalog capability resolve architecture.dependency-analysis
 ```
