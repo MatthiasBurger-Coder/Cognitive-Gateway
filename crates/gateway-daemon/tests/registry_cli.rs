@@ -34,36 +34,22 @@ fn json_output(output: std::process::Output) -> Value {
     serde_json::from_slice(&output.stdout).expect("CLI output must be valid JSON")
 }
 
+fn json_command(arguments: &[&str]) -> Value {
+    json_output(cli().args(arguments).arg("--json").output().unwrap())
+}
+
 #[test]
-fn lists_agents_and_skills_in_canonical_order() {
-    let agents = json_output(
-        cli()
-            .args([
-                "--catalog",
-                catalog().to_str().unwrap(),
-                "--json",
-                "agent",
-                "list",
-            ])
-            .output()
-            .unwrap(),
-    );
+fn executes_every_public_command_against_the_canonical_catalog() {
+    let agents = json_command(&["agent", "list"]);
     assert_eq!(agents["kind"], "agent_list");
     assert_eq!(agents["agents"][0]["id"], "analysis-storage-architect");
     assert_eq!(agents["agents"].as_array().unwrap().len(), agents["count"]);
 
-    let skills = json_output(
-        cli()
-            .args([
-                "--catalog",
-                catalog().to_str().unwrap(),
-                "skill",
-                "list",
-                "--json",
-            ])
-            .output()
-            .unwrap(),
-    );
+    let agent = json_command(&["agent", "show", "system-architect"]);
+    assert_eq!(agent["kind"], "agent");
+    assert_eq!(agent["agent"]["id"], "system-architect");
+
+    let skills = json_command(&["skill", "list"]);
     assert_eq!(skills["kind"], "skill_list");
     let listed = skills["skills"].as_array().unwrap();
     assert!(
@@ -71,60 +57,29 @@ fn lists_agents_and_skills_in_canonical_order() {
             .windows(2)
             .all(|pair| { pair[0]["id"].as_str().unwrap() < pair[1]["id"].as_str().unwrap() })
     );
-}
 
-#[test]
-fn shows_complete_skill_and_dependency_graph() {
-    let skill = json_output(
-        cli()
-            .args([
-                "--catalog",
-                catalog().to_str().unwrap(),
-                "skill",
-                "show",
-                "architecture-hexagonal",
-                "--json",
-            ])
-            .output()
-            .unwrap(),
-    );
+    let skill = json_command(&["skill", "show", "architecture-hexagonal"]);
     assert_eq!(skill["skill"]["name"], "architecture hexagonal");
     assert!(skill["skill"]["rules"].as_array().unwrap().len() >= 3);
     assert!(skill["skill"].get("provided_capabilities").is_some());
 
-    let graph = json_output(
-        cli()
-            .args([
-                "--catalog",
-                catalog().to_str().unwrap(),
-                "skill",
-                "graph",
-                "architecture-hexagonal",
-                "--json",
-            ])
-            .output()
-            .unwrap(),
-    );
+    let graph = json_command(&["skill", "graph", "architecture-hexagonal"]);
     assert_eq!(graph["root"], "architecture-hexagonal");
     assert_eq!(graph["topological_order"][0], "architecture-hexagonal");
     assert!(graph["dependencies"].is_object());
-}
 
-#[test]
-fn resolves_capability_with_provider_and_match_explanation() {
-    let output = json_output(
-        cli()
-            .args([
-                "--catalog",
-                catalog().to_str().unwrap(),
-                "capability",
-                "resolve",
-                "architecture.dependency-analysis",
-                "--json",
-            ])
-            .output()
-            .unwrap(),
+    let capabilities = json_command(&["capability", "list"]);
+    assert_eq!(capabilities["kind"], "capability_list");
+    assert!(capabilities["count"].as_u64().unwrap() > 0);
+
+    let capability = json_command(&["capability", "show", "architecture.dependency-analysis"]);
+    assert_eq!(capability["kind"], "capability");
+    assert_eq!(
+        capability["capability"]["id"],
+        "architecture.dependency-analysis"
     );
+
+    let output = json_command(&["capability", "resolve", "architecture.dependency-analysis"]);
     assert_eq!(output["outcome"], "ambiguous");
     assert_eq!(output["status"], "resolvable");
     let matches = output["matches"].as_array().unwrap();
@@ -143,15 +98,23 @@ fn resolves_capability_with_provider_and_match_explanation() {
 }
 
 #[test]
-fn unknown_ids_and_invalid_catalogs_fail_closed() {
-    let unknown = cli()
-        .args(["capability", "show", "missing.capability", "--json"])
-        .output()
-        .unwrap();
-    assert_eq!(unknown.status.code(), Some(4));
-    let error: Value = serde_json::from_slice(&unknown.stdout).unwrap();
-    assert_eq!(error["code"], "unknown_id");
+fn show_and_resolve_commands_reject_unknown_ids() {
+    for arguments in [
+        ["agent", "show", "missing-agent"],
+        ["skill", "show", "missing-skill"],
+        ["skill", "graph", "missing-skill"],
+        ["capability", "show", "missing.capability"],
+        ["capability", "resolve", "missing.capability"],
+    ] {
+        let output = cli().args(arguments).arg("--json").output().unwrap();
+        assert_eq!(output.status.code(), Some(4), "command: {arguments:?}");
+        let error: Value = serde_json::from_slice(&output.stdout).unwrap();
+        assert_eq!(error["code"], "unknown_id", "command: {arguments:?}");
+    }
+}
 
+#[test]
+fn invalid_catalogs_fail_closed() {
     let unique = format!(
         "cg-registry-cli-{}-{}",
         std::process::id(),

@@ -22,6 +22,23 @@ jobs:
         run: cargo build --workspace
       - name: Test
         run: cargo test --workspace
+      - name: Install registry CLI
+        run: cargo install --path crates/gateway-daemon --bin cg-registry --locked --force --root "$RUNNER_TEMP/cg-registry"
+      - name: Add registry CLI to PATH
+        run: echo "$RUNNER_TEMP/cg-registry/bin" >> "$GITHUB_PATH"
+      - name: Registry CLI smoke
+        run: |
+          set -euo pipefail
+          command -v cg-registry
+          cg-registry --help >/dev/null
+          cg-registry agent list --json >/dev/null
+          cg-registry agent show system-architect --json >/dev/null
+          cg-registry skill list --json >/dev/null
+          cg-registry skill show architecture-hexagonal --json >/dev/null
+          cg-registry skill graph architecture-hexagonal --json >/dev/null
+          cg-registry capability list --json >/dev/null
+          cg-registry capability show architecture.dependency-analysis --json >/dev/null
+          cg-registry capability resolve architecture.dependency-analysis --json >/dev/null
       - name: Domain coverage
         uses: taiki-e/install-action@cargo-llvm-cov
       - name: Domain coverage gate
