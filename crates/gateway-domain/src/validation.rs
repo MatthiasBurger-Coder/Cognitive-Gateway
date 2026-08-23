@@ -371,4 +371,16 @@ mod tests {
 
         assert!(errors.iter().all(|error| !error.to_string().is_empty()));
     }
+
+    #[test]
+    fn supports_text_conversion_traits_without_normalization() {
+        let borrowed = NonEmptyText::try_from("borrowed").unwrap();
+        assert_eq!(<NonEmptyText as AsRef<str>>::as_ref(&borrowed), "borrowed");
+        assert_eq!(borrowed.clone().into_inner(), "borrowed");
+
+        let owned = NonEmptyText::try_from(String::from("owned")).unwrap();
+        let value: String = owned.clone().into();
+        assert_eq!(value, "owned");
+        assert_eq!(String::from(owned), "owned");
+    }
 }

@@ -180,4 +180,22 @@ mod tests {
             })
         ));
     }
+
+    #[test]
+    fn supports_the_capability_alias_on_agents() {
+        let capability = CapabilityDefinition::new(
+            CapabilityId::new("repository.read").unwrap(),
+            CapabilityClass::Inspect,
+        );
+        let agent =
+            AgentDefinition::new(AgentId::new("reviewer").unwrap(), "Reviews changes", ids())
+                .unwrap()
+                .with_capabilities([capability.clone()])
+                .unwrap();
+
+        assert_eq!(agent.description(), "Reviews changes");
+        assert_eq!(agent.skill_ids(), ids());
+        assert_eq!(agent.provided_capabilities(), &[capability]);
+        assert_eq!(agent.capabilities(), agent.provided_capabilities());
+    }
 }

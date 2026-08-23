@@ -533,6 +533,67 @@ mod tests {
     }
 
     #[test]
+    fn covers_contract_aliases_and_typed_accessors() {
+        let capability = CapabilityDefinition::new(
+            CapabilityId::new("quality.coverage").unwrap(),
+            CapabilityClass::Mutate,
+        )
+        .with_domain("quality")
+        .unwrap()
+        .with_description("Publish a coverage report")
+        .unwrap()
+        .with_input_kinds(["repository.snapshot"])
+        .unwrap()
+        .with_output_kinds(["quality.coverage-report"])
+        .unwrap()
+        .with_preconditions(["repository.available"])
+        .unwrap()
+        .with_constraints(["requires-approval"])
+        .unwrap()
+        .with_applicability_selectors(["quality", "coverage"])
+        .unwrap();
+
+        assert_eq!(capability.purpose(), "Publish a coverage report");
+        assert_eq!(capability.input_kinds(), capability.inputs());
+        assert_eq!(capability.input_kinds(), capability.input_context_kinds());
+        assert_eq!(capability.output_kinds(), capability.outputs());
+        assert_eq!(capability.output_kinds(), capability.result_kinds());
+        assert_eq!(capability.constraints(), capability.intrinsic_constraints());
+        assert_eq!(
+            capability.applicability_tags(),
+            capability.applicability_selectors()
+        );
+        assert!(capability.requires_mutation_policy());
+
+        let via_try = CapabilityDefinition::try_new_with_contract(
+            CapabilityId::new("architecture.inspect").unwrap(),
+            CapabilityClass::Inspect,
+            "architecture",
+            "Inspect architecture",
+            std::iter::empty::<String>(),
+            std::iter::empty::<String>(),
+            std::iter::empty::<String>(),
+            std::iter::empty::<String>(),
+            std::iter::empty::<String>(),
+        )
+        .unwrap();
+        let via_metadata = CapabilityDefinition::new_with_metadata(
+            CapabilityId::new("security.inspect").unwrap(),
+            CapabilityClass::Inspect,
+            "security",
+            "Inspect security posture",
+            std::iter::empty::<String>(),
+            std::iter::empty::<String>(),
+            std::iter::empty::<String>(),
+            std::iter::empty::<String>(),
+            std::iter::empty::<String>(),
+        )
+        .unwrap();
+        assert_eq!(via_try.domain().as_str(), "architecture");
+        assert_eq!(via_metadata.domain().as_str(), "security");
+    }
+
+    #[test]
     fn rejects_invalid_or_duplicate_contract_selectors() {
         let capability = CapabilityDefinition::new(
             CapabilityId::new("inspect").unwrap(),

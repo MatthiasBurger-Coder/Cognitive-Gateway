@@ -286,6 +286,36 @@ mod tests {
     }
 
     #[test]
+    fn supports_try_new_and_empty_typed_lookups() {
+        let catalog = DefinitionCatalog::try_new(vec![], vec![], vec![], vec![]).unwrap();
+
+        assert!(catalog.agents().is_empty());
+        assert!(catalog.skills().is_empty());
+        assert!(catalog.workflows().is_empty());
+        assert!(catalog.policies().is_empty());
+        assert!(
+            catalog
+                .agent(&AgentId::new("missing-agent").unwrap())
+                .is_none()
+        );
+        assert!(
+            catalog
+                .skill(&SkillId::new("missing-skill").unwrap())
+                .is_none()
+        );
+        assert!(
+            catalog
+                .workflow(&WorkflowId::new("missing-workflow").unwrap())
+                .is_none()
+        );
+        assert!(
+            catalog
+                .policy(&PolicyId::new("missing-policy").unwrap())
+                .is_none()
+        );
+    }
+
+    #[test]
     fn rejects_missing_relationship_targets() {
         let agent = AgentDefinition::new(
             AgentId::new("reviewer").unwrap(),

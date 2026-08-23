@@ -487,4 +487,49 @@ mod tests {
         );
         assert_eq!(skill.provided_capabilities(), &[capability]);
     }
+
+    #[test]
+    fn supports_the_capability_alias_and_all_content_accessors() {
+        let capability = CapabilityDefinition::new(
+            CapabilityId::new("repository.read").unwrap(),
+            crate::CapabilityClass::Inspect,
+        );
+        let dependency = SkillId::new("foundation").unwrap();
+        let related = SkillId::new("quality").unwrap();
+        let skill = SkillDefinition::new(
+            SkillId::new("architecture").unwrap(),
+            "Architecture boundaries",
+            [dependency.clone()],
+            [CapabilityId::new("repository.read").unwrap()],
+        )
+        .unwrap()
+        .with_name("Architecture Expert")
+        .unwrap()
+        .with_owner(crate::AgentId::new("reviewer").unwrap())
+        .with_authoritative_sources(["architecture guide"])
+        .unwrap()
+        .with_rules(["Keep dependencies directed inward."])
+        .unwrap()
+        .with_verification(["Run architecture tests."])
+        .unwrap()
+        .with_related_skill_ids([related.clone()])
+        .unwrap()
+        .with_knowledge_queries([KnowledgeQuery::new("architecture boundaries").unwrap()])
+        .with_capabilities([capability.clone()])
+        .unwrap();
+
+        assert_eq!(skill.name(), "Architecture Expert");
+        assert_eq!(skill.description(), "Architecture boundaries");
+        assert_eq!(skill.owner_agent_id().unwrap().as_str(), "reviewer");
+        assert_eq!(skill.dependency_ids(), &[dependency]);
+        assert_eq!(skill.requires(), skill.required_skill_ids());
+        assert_eq!(skill.related_skill_ids(), &[related]);
+        assert_eq!(skill.required_capability_ids().len(), 1);
+        assert_eq!(skill.provided_capabilities(), &[capability]);
+        assert_eq!(skill.capabilities(), skill.provided_capabilities());
+        assert_eq!(skill.knowledge_queries().len(), 1);
+        assert_eq!(skill.authoritative_sources().len(), 1);
+        assert_eq!(skill.rules().len(), 1);
+        assert_eq!(skill.verification().len(), 1);
+    }
 }

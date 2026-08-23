@@ -1065,4 +1065,102 @@ mod tests {
         assert_eq!(encoded, "\"skill\"");
         assert!(serde_json::from_str::<DefinitionKind>("\"workflow\"").is_err());
     }
+
+    #[test]
+    fn direct_constructors_and_aliases_preserve_capability_contracts() {
+        let capability = CapabilityDefinition::new_with_contract(
+            CapabilityId::new("architecture.inspect").unwrap(),
+            CapabilityClass::Inspect,
+            "architecture",
+            "Inspect architecture boundaries",
+            ["repository.snapshot"],
+            ["architecture.report"],
+            ["repository.available"],
+            ["read-only"],
+            ["architecture"],
+        )
+        .unwrap();
+
+        let agent = AgentDefinitionDocument::new_with_provided_capabilities(
+            AgentId::new("reviewer").unwrap(),
+            "Reviews architecture",
+            [SkillId::new("architecture").unwrap()],
+            [capability.clone()],
+        )
+        .unwrap();
+        assert_eq!(agent.id().as_str(), "reviewer");
+        assert_eq!(agent.description(), "Reviews architecture");
+        assert_eq!(agent.skill_ids()[0].as_str(), "architecture");
+        assert_eq!(agent.provided_capabilities(), &[capability]);
+        assert_eq!(agent.capabilities(), agent.provided_capabilities());
+
+        let agent_with_alias = AgentDefinitionDocument::new(
+            AgentId::new("reviewer-alias").unwrap(),
+            "Reviews architecture",
+            [SkillId::new("architecture").unwrap()],
+        )
+        .unwrap()
+        .with_capabilities(agent.provided_capabilities().to_vec())
+        .unwrap();
+        assert_eq!(
+            agent_with_alias.provided_capabilities(),
+            agent.provided_capabilities()
+        );
+
+        let capability = agent.provided_capabilities()[0].clone();
+        let skill = SkillDefinitionDocument::new_with_provided_capabilities(
+            SkillId::new("architecture").unwrap(),
+            "Architecture Expert",
+            "Reviews architecture boundaries",
+            Some(AgentId::new("reviewer").unwrap()),
+            ["architecture guide"],
+            ["Keep dependencies directed inward."],
+            ["Run architecture tests."],
+            [SkillId::new("foundation").unwrap()],
+            [SkillId::new("quality").unwrap()],
+            [CapabilityId::new("repository.read").unwrap()],
+            [KnowledgeQuery::new("architecture boundaries").unwrap()],
+            [capability.clone()],
+        )
+        .unwrap();
+        assert_eq!(skill.id().as_str(), "architecture");
+        assert_eq!(skill.name(), "Architecture Expert");
+        assert_eq!(skill.description(), "Reviews architecture boundaries");
+        assert_eq!(skill.owner_agent_id().unwrap().as_str(), "reviewer");
+        assert_eq!(
+            skill.authoritative_sources()[0].as_str(),
+            "architecture guide"
+        );
+        assert_eq!(
+            skill.rules()[0].as_str(),
+            "Keep dependencies directed inward."
+        );
+        assert_eq!(skill.verification()[0].as_str(), "Run architecture tests.");
+        assert_eq!(skill.dependency_ids()[0].as_str(), "foundation");
+        assert_eq!(skill.required_skill_ids(), skill.requires());
+        assert_eq!(skill.related_skill_ids()[0].as_str(), "quality");
+        assert_eq!(
+            skill.required_capability_ids()[0].as_str(),
+            "repository.read"
+        );
+        assert_eq!(
+            skill.knowledge_queries()[0].as_str(),
+            "architecture boundaries"
+        );
+        assert_eq!(skill.provided_capabilities(), &[capability]);
+        assert_eq!(skill.capabilities(), skill.provided_capabilities());
+
+        let skill_with_alias = SkillDefinitionDocument::new_minimal(
+            SkillId::new("alias").unwrap(),
+            "Alias",
+            "Alias skill",
+        )
+        .unwrap()
+        .with_capabilities(skill.provided_capabilities().to_vec())
+        .unwrap();
+        assert_eq!(
+            skill_with_alias.provided_capabilities(),
+            skill.provided_capabilities()
+        );
+    }
 }
