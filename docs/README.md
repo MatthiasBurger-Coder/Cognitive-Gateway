@@ -25,6 +25,12 @@ validation behavior, public serialization API and version compatibility rules.
 See [`reference-scenarios.md`](reference-scenarios.md) for the CG-02.06
 executable acceptance scenarios covering the complete domain and IR contract.
 
+## Migration inventory
+
+See [`tiny-swarm-world-agent-skill-inventory.md`](tiny-swarm-world-agent-skill-inventory.md)
+for the CG-03.01 source-pinned inventory of Tiny Swarm World roles, skills and
+supporting Codex runtime assets.
+
 ## Documentation Policy
 
 - Repository documentation is the technical source of truth.
