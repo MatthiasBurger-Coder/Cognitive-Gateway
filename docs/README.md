@@ -39,6 +39,10 @@ See [`tiny-swarm-world-agent-skill-migration.md`](tiny-swarm-world-agent-skill-m
 for the CG-03.02 classification, canonical-ID mapping, ownership boundary and
 duplicate/deprecation decisions.
 
+See [`catalog-profile-boundaries.md`](catalog-profile-boundaries.md) for the
+CG-03.06 generic catalog and Tiny Swarm World profile layout, ownership rules,
+loading APIs and fail-closed conflict semantics.
+
 ## Documentation Policy
 
 - Repository documentation is the technical source of truth.

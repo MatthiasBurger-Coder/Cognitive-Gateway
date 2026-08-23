@@ -16,6 +16,11 @@ The CG-03.03 Agent and Skill contracts are implemented by
 with representative fixtures under [`examples/`](examples/). Their field
 mapping and validation boundary are documented in
 [`../docs/agent-skill-definition-contracts.md`](../docs/agent-skill-definition-contracts.md).
+Generic definitions are stored under [`../catalog/`](../catalog/), while
+project-specific definitions use a profile such as
+[`../profiles/tiny-swarm-world/`](../profiles/tiny-swarm-world/). The boundary
+ownership and combined-loading rules are documented in
+[`../docs/catalog-profile-boundaries.md`](../docs/catalog-profile-boundaries.md).
 The `gateway-registry` crate provides deterministic JSON profile loading for
 these contracts. It recursively discovers `*.json` files in lexical relative
 path order, rejects malformed or unsupported documents and duplicate canonical
