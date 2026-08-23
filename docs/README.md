@@ -34,9 +34,11 @@ generic catalog and project profile layout, ownership rules, loading APIs and
 fail-closed conflict semantics.
 
 See the materialized reusable Agent definitions under [`../catalog/agents/`](../catalog/agents/)
-for CG-03.07 and the reusable Skill definitions under [`../catalog/skills/`](../catalog/skills/)
-for CG-03.08. Example project-specific Agent and Skill definitions are under
-[`../profiles/example-project/`](../profiles/example-project/).
+for CG-03.07 and CG-03.13, and the reusable Skill definitions under
+[`../catalog/skills/`](../catalog/skills/) for CG-03.08. Former profile Agents
+are promoted to the generic specialist catalog. Example project-specific Skill
+definitions are under
+[`../profiles/example-project/skills/`](../profiles/example-project/).
 
 ## Documentation Policy
 

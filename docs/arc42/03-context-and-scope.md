@@ -55,6 +55,9 @@ Potential external systems include:
 
 ## 3.5 Project profiles
 
-Product-specific knowledge does not belong in the generic gateway core. Each
-consumer contributes a project profile containing its own agents, skills,
-workflows, policies, retrieval metadata and tool bindings.
+Product-specific knowledge does not belong in the generic Agent catalog. Each
+consumer contributes a project profile containing project-specific Skills,
+workflows, policies, retrieval metadata and tool bindings. Reusable Agents,
+including technology-specific specialists, are resolved from the shared
+catalog; project knowledge and activation evidence arrive through explicit
+runtime or retrieval inputs.

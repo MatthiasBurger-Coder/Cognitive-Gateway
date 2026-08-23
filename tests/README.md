@@ -45,9 +45,10 @@ are documented in [`../docs/reference-scenarios.md`](../docs/reference-scenarios
 The catalog migration fixture at
 [`../crates/gateway-registry/tests/catalog_migration.rs`](../crates/gateway-registry/tests/catalog_migration.rs)
 loads the repository catalog, validates all Agent/Skill relationships and
-asserts the complete CG-03.07 Agent set and CG-03.08 Skill set, including
-provenance, merge status and generic-boundary checks.
+asserts the complete generic Agent set, including the promoted specialist
+Agents, and the CG-03.08 Skill set with generic-boundary checks.
 
 The registry unit tests and the example-project profile fixture cover
-deterministic catalog/profile loading, combined boundary validation, duplicate
-detection and complete Skill reference integrity.
+deterministic catalog/profile loading, profile Agent exclusion, combined
+boundary validation, duplicate detection and complete Skill reference
+integrity.

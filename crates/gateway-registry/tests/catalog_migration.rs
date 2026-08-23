@@ -59,18 +59,62 @@ fn migrated_generic_catalog_loads_and_validates() {
         agent_ids,
         vec![
             "analysis-storage-architect",
+            "devops",
             "git-workspace-specialist",
             "grpc-proto-specialist",
             "performance-engineer",
             "plugin-integration-developer",
+            "python-automation-developer",
+            "react-frontend",
             "security-sandbox-engineer",
             "system-architect",
             "tester",
+            "ux-designer",
         ]
     );
 
     let skill_ids: Vec<_> = registry.skills().ids().map(ToString::to_string).collect();
     assert_eq!(skill_ids, MIGRATED_GENERIC_SKILLS);
+}
+
+#[test]
+fn promoted_agents_are_project_independent_and_reference_catalog_skills() {
+    let registry = Registry::load_catalog(repository_catalog()).expect("catalog should load");
+
+    for agent in registry.agents().documents() {
+        let searchable = format!(
+            "{} {}",
+            agent.id().as_str().to_ascii_lowercase(),
+            agent.description().to_ascii_lowercase()
+        );
+        for forbidden in [
+            "tiny-swarm-world",
+            "example-project",
+            "profiles/",
+            "project-specific",
+            "origin",
+            "migration",
+        ] {
+            assert!(
+                !searchable.contains(forbidden),
+                "project-specific Agent content leaked into {}",
+                agent.id()
+            );
+        }
+        assert!(!agent.skill_ids().is_empty());
+        for skill_id in agent.skill_ids() {
+            assert!(
+                registry.skill(skill_id).is_some(),
+                "catalog Agent {} references a non-catalog Skill {}",
+                agent.id(),
+                skill_id
+            );
+        }
+    }
+
+    registry
+        .validate_integrity()
+        .expect("promoted Agents must validate without a consuming project");
 }
 
 #[test]

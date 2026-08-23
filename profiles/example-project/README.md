@@ -6,7 +6,6 @@ The profile is organized into the following independent concerns:
 
 ```text
 profiles/example-project/
-├── agents/
 ├── skills/
 ├── workflows/
 ├── policies/
@@ -14,7 +13,7 @@ profiles/example-project/
 └── tools/
 ```
 
-The agent and skill directories are ready for strict versioned JSON
-definitions loaded by `gateway-registry`. Workflow, policy, retrieval and tool
-directories currently contain boundary documentation only; their loaders are
+Reusable Agents are loaded exclusively from the generic catalog. This profile
+contains only project-specific Skills and reserved workflow, policy, retrieval
+and tool boundaries. Workflow, policy, retrieval and tool loaders are
 introduced by later vertical slices.

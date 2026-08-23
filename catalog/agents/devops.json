@@ -2,11 +2,9 @@
   "schema_version": 2,
   "kind": "agent",
   "id": "devops",
-  "description": "Project platform automation and runtime operations",
+  "description": "Platform automation and runtime operations",
   "skill_ids": [
     "devops-ci-cd",
-    "devops-docker",
-    "devops-kubernetes",
     "observability-diagnostics",
     "quality-gate"
   ]

@@ -688,7 +688,7 @@ impl SkillRegistry {
     }
 }
 
-/// The Agent and Skill registries loaded from one profile directory.
+/// The Agent and Skill registries loaded from one catalog or profile boundary.
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct Registry {
     agents: AgentRegistry,
@@ -702,12 +702,16 @@ impl Registry {
         Self { agents, skills }
     }
 
-    /// Loads `agents/` and `skills/` below a profile directory.
-    pub fn load(profile_directory: impl AsRef<Path>) -> RegistryResult<Self> {
-        let profile_directory = profile_directory.as_ref();
+    /// Loads `agents/` and `skills/` below a registry directory.
+    ///
+    /// This is the generic directory loader used by [`Self::load_catalog`].
+    /// Project profiles must use [`Self::load_profile`], which deliberately
+    /// does not discover an Agent directory.
+    pub fn load(registry_directory: impl AsRef<Path>) -> RegistryResult<Self> {
+        let registry_directory = registry_directory.as_ref();
         Self::load_from_directories(
-            profile_directory.join("agents"),
-            profile_directory.join("skills"),
+            registry_directory.join("agents"),
+            registry_directory.join("skills"),
         )
     }
 
@@ -721,18 +725,29 @@ impl Registry {
         Self::load(catalog_directory)
     }
 
-    /// Alias emphasizing that the input is a project profile.
+    /// Loads project-specific Skills without discovering project Agents.
+    ///
+    /// Agents are reusable catalog definitions and therefore cannot be added,
+    /// replaced or shadowed by a consuming project profile. Project-specific
+    /// context enters through Skills, workflows, policies and retrieval/input
+    /// boundaries instead.
     pub fn load_profile(profile_directory: impl AsRef<Path>) -> RegistryResult<Self> {
-        Self::load(profile_directory)
+        let profile_directory = profile_directory.as_ref();
+        Ok(Self::new(
+            AgentRegistry::default(),
+            SkillRegistry::load(profile_directory.join("skills"))?,
+        ))
     }
 
     /// Loads the generic catalog and one project profile into one registry.
     ///
-    /// The catalog is loaded first and the profile second. Both inputs are
-    /// independently deterministic, and the combined registries are sorted by
-    /// canonical ID. A profile may reference catalog definitions, but it may
-    /// not redefine them: cross-boundary ID collisions fail closed with both
-    /// canonical identity values. There is no precedence or override behavior.
+    /// The catalog is loaded first and the profile's Skills second. Both
+    /// inputs are independently deterministic, and the combined registries
+    /// are sorted by canonical ID. A profile may reference catalog
+    /// definitions, but it may not redefine them: cross-boundary Skill ID
+    /// collisions fail closed with both canonical identity values. There is no
+    /// precedence or override behavior, and profile Agent directories are not
+    /// discovered.
     pub fn load_catalog_with_profile(
         catalog_directory: impl AsRef<Path>,
         profile_directory: impl AsRef<Path>,
@@ -751,22 +766,6 @@ impl Registry {
     }
 
     fn merge_catalog_and_profile(catalog: Self, profile: Self) -> RegistryResult<Self> {
-        let mut agents = catalog.agents.documents;
-        for document in profile.agents.documents {
-            if let Some(catalog_document) = agents
-                .iter()
-                .find(|candidate| candidate.id() == document.id())
-            {
-                return Err(RegistryError::CrossBoundaryDuplicateDefinition {
-                    kind: DefinitionKind::Agent,
-                    id: document.id().as_str().to_owned(),
-                    catalog_source: canonical_source(catalog_document),
-                    profile_source: canonical_source(&document),
-                });
-            }
-            agents.push(document);
-        }
-
         let mut skills = catalog.skills.documents;
         for document in profile.skills.documents {
             if let Some(catalog_document) = skills
@@ -783,7 +782,7 @@ impl Registry {
             skills.push(document);
         }
 
-        Self::from_documents(agents, skills)
+        Self::from_documents(catalog.agents.documents, skills)
     }
 
     /// Loads the two registry boundaries from explicit directories.
@@ -1442,10 +1441,6 @@ mod tests {
             &skill("skill"),
         );
         write_file(
-            &profile_root.join("agents/profile-agent.json"),
-            &agent("profile-agent"),
-        );
-        write_file(
             &profile_root.join("skills/README.md"),
             "no profile skills yet",
         );
@@ -1458,7 +1453,7 @@ mod tests {
                 .ids()
                 .map(AgentId::as_str)
                 .collect::<Vec<_>>(),
-            ["catalog-agent", "profile-agent"]
+            ["catalog-agent"]
         );
         assert_eq!(
             registry
@@ -1474,25 +1469,13 @@ mod tests {
     }
 
     #[test]
-    fn profile_cannot_override_a_catalog_definition() {
+    fn profile_cannot_override_a_catalog_skill() {
         let catalog_root = temporary_directory("catalog-conflict");
         let profile_root = temporary_directory("profile-conflict");
-        let catalog_agent =
-            agent("same").replace("\"project\":\"project\"", "\"project\":\"catalog\"");
-        let profile_agent =
-            agent("same").replace("\"project\":\"project\"", "\"project\":\"profile\"");
 
-        write_file(&catalog_root.join("agents/catalog.json"), &catalog_agent);
-        write_file(
-            &catalog_root.join("skills/README.md"),
-            "no catalog skills yet",
-        );
-
-        write_file(&profile_root.join("agents/profile.json"), &profile_agent);
-        write_file(
-            &profile_root.join("skills/README.md"),
-            "no profile skills yet",
-        );
+        write_file(&catalog_root.join("agents/catalog.json"), &agent("catalog"));
+        write_file(&catalog_root.join("skills/same.json"), &skill("same"));
+        write_file(&profile_root.join("skills/profile.json"), &skill("same"));
 
         let error = Registry::load_catalog_with_profile(&catalog_root, &profile_root).unwrap_err();
         match error {
@@ -1502,15 +1485,34 @@ mod tests {
                 catalog_source,
                 profile_source,
             } => {
-                assert_eq!(kind, gateway_domain::DefinitionKind::Agent);
+                assert_eq!(kind, gateway_domain::DefinitionKind::Skill);
                 assert_eq!(id, "same");
-                assert_eq!(catalog_source, "agent:same");
-                assert_eq!(profile_source, "agent:same");
+                assert_eq!(catalog_source, "skill:same");
+                assert_eq!(profile_source, "skill:same");
             }
             other => panic!("unexpected error: {other}"),
         }
 
         fs::remove_dir_all(catalog_root).unwrap();
+        fs::remove_dir_all(profile_root).unwrap();
+    }
+
+    #[test]
+    fn profile_agent_directory_is_not_discovered() {
+        let profile_root = temporary_directory("profile-agent-free");
+        write_file(
+            &profile_root.join("agents/not-a-definition.json"),
+            "this must not be parsed",
+        );
+        write_file(
+            &profile_root.join("skills/README.md"),
+            "profile Skills are loaded from this boundary",
+        );
+
+        let registry = Registry::load_profile(&profile_root).unwrap();
+        assert!(registry.agents().is_empty());
+        assert!(registry.skills().is_empty());
+
         fs::remove_dir_all(profile_root).unwrap();
     }
 

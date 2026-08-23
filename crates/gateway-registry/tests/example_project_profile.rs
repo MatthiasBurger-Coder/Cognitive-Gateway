@@ -18,6 +18,23 @@ fn example_project_profile_loads_with_the_catalog() {
         .validate_integrity()
         .expect("catalog and profile references should be valid");
 
+    assert!(registry.agents().ids().all(|id| {
+        [
+            "analysis-storage-architect",
+            "devops",
+            "git-workspace-specialist",
+            "grpc-proto-specialist",
+            "performance-engineer",
+            "plugin-integration-developer",
+            "python-automation-developer",
+            "react-frontend",
+            "security-sandbox-engineer",
+            "system-architect",
+            "tester",
+            "ux-designer",
+        ]
+        .contains(&id.as_str())
+    }));
     assert_eq!(registry.agents().len(), 12);
     assert_eq!(registry.skills().len(), 89);
 }

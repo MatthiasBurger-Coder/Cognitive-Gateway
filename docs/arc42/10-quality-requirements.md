@@ -39,4 +39,7 @@ Every non-trivial routing or policy decision must provide a reason trace suitabl
 
 ## 10.7 Maintainability
 
-Agent, skill, workflow and policy definitions should be declarative, schema-validated and project-profile driven rather than hard-coded into the daemon.
+Agent, skill, workflow and policy definitions should be declarative and
+schema-validated rather than hard-coded into the daemon. Reusable Agents come
+from the generic catalog; project-specific Skills and other configuration are
+provided by the selected profile.
