@@ -1,6 +1,7 @@
 #![forbid(unsafe_code)]
 #![doc = "Canonical, deterministic process contracts for Cognitive Gateway."]
 
+mod application;
 mod authorization;
 mod compiler;
 mod constraints;
@@ -15,6 +16,11 @@ mod registry;
 mod source;
 mod validation;
 
+pub use application::{
+    ApplicationError, ApplyEventResult, CompilationExplanation, CompilationTrace,
+    ProcessApplication, ProcessDefinitionSummary, ProcessInspection, RuntimeExplanation,
+    SimulationResult,
+};
 pub use authorization::{
     AuthorizationStatus, AuthorizedActivity, PolicyDecisionStatus, PolicyInput,
 };

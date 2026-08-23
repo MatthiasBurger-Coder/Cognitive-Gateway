@@ -3,6 +3,7 @@
 use std::collections::{BTreeMap, BTreeSet};
 
 use gateway_domain::CapabilityId;
+use serde::Serialize;
 
 use crate::{
     AuthorizationStatus, ConstraintEvaluation, EventOccurrence, EvidenceStatus, GateId, GateStatus,
@@ -153,7 +154,7 @@ impl TransitionDecisionCode {
 }
 
 /// One guard evaluation retained in the deterministic decision trace.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct GuardEvaluation {
     expression: String,
     matched: bool,
