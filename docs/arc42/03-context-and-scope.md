@@ -23,7 +23,7 @@ Typical inputs include:
 
 - natural-language user tasks;
 - issue or work-item metadata;
-- project profile and governance state;
+- request-scoped governance and configuration state;
 - repository state;
 - workflow/gate/blocker state;
 - runtime and test evidence.
@@ -53,11 +53,11 @@ Potential external systems include:
 - Codex/OpenAI runtimes;
 - vector or graph stores in later releases.
 
-## 3.5 Project profiles
+## 3.5 External project context
 
-Product-specific knowledge does not belong in the generic Agent catalog. Each
-consumer contributes a project profile containing project-specific Skills,
-workflows, policies, retrieval metadata and tool bindings. Reusable Agents,
-including technology-specific specialists, are resolved from the shared
-catalog; project knowledge and activation evidence arrive through explicit
-runtime or retrieval inputs.
+Product-specific knowledge does not belong in the built-in Agent or Skill
+catalog. A consuming project supplies repository content, configuration, state
+and evidence through explicit runtime, input, retrieval or adapter boundaries.
+Reusable Agents and Skills, including technology-specific specialists, are
+resolved from the shared catalog; external context cannot alter catalog
+membership.

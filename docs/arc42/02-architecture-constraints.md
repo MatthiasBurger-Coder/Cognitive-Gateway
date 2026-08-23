@@ -15,7 +15,7 @@ The core must not depend on an adapter or on its technology. In particular, the 
 
 ## 2.2 Deterministic core
 
-The gateway core must remain usable without an LLM, RAG backend or external network dependency for deterministic operations such as profile validation, registry lookup, workflow resolution, policy evaluation and context compilation.
+The gateway core must remain usable without an LLM, RAG backend or external network dependency for deterministic operations such as catalog validation, registry lookup, workflow resolution, policy evaluation and context compilation.
 
 ## 2.3 Source of truth
 

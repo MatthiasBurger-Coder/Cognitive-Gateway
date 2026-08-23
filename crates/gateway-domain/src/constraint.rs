@@ -105,7 +105,7 @@ impl Constraint {
     }
 }
 
-/// Alias used when constraints are declared as profile definitions.
+/// Alias used when constraints are declared as definitions.
 pub type ConstraintDefinition = Constraint;
 
 #[cfg(test)]

@@ -11,7 +11,7 @@ cargo test --workspace
 cargo clippy --workspace --all-targets -- -D warnings
 ```
 
-The [`architecture/`](architecture/) area records cross-crate architecture-test contracts. Schema and Execution Context IR compatibility tests are added with the corresponding domain and profile-loading slices; CG-01 intentionally introduces no provider, RAG or MCP behavior to test.
+The [`architecture/`](architecture/) area records cross-crate architecture-test contracts. Schema and Execution Context IR compatibility tests are added with the corresponding domain and catalog-loading slices; CG-01 intentionally introduces no provider, RAG or MCP behavior to test.
 
 ## Current test coverage
 
@@ -42,13 +42,13 @@ workflow/gate/blocker states, authority constraints, negative cases and full
 IR serialization round trips. Its scenario inventory and acceptance evidence
 are documented in [`../docs/reference-scenarios.md`](../docs/reference-scenarios.md).
 
-The catalog migration fixture at
-[`../crates/gateway-registry/tests/catalog_migration.rs`](../crates/gateway-registry/tests/catalog_migration.rs)
+The catalog contract fixture at
+[`../crates/gateway-registry/tests/catalog_contract.rs`](../crates/gateway-registry/tests/catalog_contract.rs)
 loads the repository catalog, validates all Agent/Skill relationships and
 asserts the complete generic Agent set, including the promoted specialist
-Agents, and the CG-03.08 Skill set with generic-boundary checks.
+Agents, and the catalog Skill set with generic-boundary checks.
 
-The registry unit tests and the example-project profile fixture cover
-deterministic catalog/profile loading, profile Agent exclusion, combined
-boundary validation, duplicate detection and complete Skill reference
-integrity.
+The registry unit tests cover deterministic catalog loading, duplicate
+detection, complete Skill reference integrity and deterministic dependency
+resolution. The architecture guard also prevents external registry roots from
+being reintroduced.

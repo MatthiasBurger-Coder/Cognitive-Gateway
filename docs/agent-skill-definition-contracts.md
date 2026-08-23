@@ -66,9 +66,9 @@ registry rejects missing targets in either list, but only `requires` contributes
 to the deterministic dependency-first topological order and mandatory cycle
 detection.
 
-Agent-to-Skill and Skill owner-Agent references are validated by the combined
+Agent-to-Skill and Skill owner-Agent references are validated by the catalog
 registry. A diagnostic identifies the canonical definition (`agent:<id>` or
-`skill:<id>`); it does not depend on migration provenance.
+`skill:<id>`).
 
 ## Serialization and failure behavior
 
@@ -80,8 +80,6 @@ serialization uses the same strict wire contract.
 The parser fails closed when JSON is malformed, `schema_version` is not the
 numeric value `2`, `kind` is wrong, a required field is absent, an obsolete
 field such as `origin` or `content_ref` is present, or any typed value fails
-validation. Schema files under `schemas/` mirror these rules.
-
-Historical migration information may remain in reports and Git history, but
-`origin`, source-project identity and migration status are not runtime Agent or
-Skill fields.
+validation. Schema files under `schemas/` mirror these rules. Runtime Agent and
+Skill documents contain no consuming-project identity, repository path or
+provenance metadata.

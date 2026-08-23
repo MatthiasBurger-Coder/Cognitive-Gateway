@@ -33,9 +33,9 @@ Cognitive Gateway is not intended to:
 
 - developers using IDE or CLI integrations;
 - platform and DevOps engineers;
-- maintainers of project-specific agent/skill/workflow profiles;
+- maintainers of reusable Agent, Skill and workflow catalogs;
 - security and governance reviewers;
-- downstream consumers such as example projects and Forensic Analytics.
+- independent projects consuming the gateway through explicit runtime boundaries.
 
 ## 1.5 Primary quality goals
 
