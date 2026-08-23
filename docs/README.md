@@ -50,6 +50,9 @@ and its [machine-readable gap matrix](execution-graph-migration-gaps.json) for
 the CG-04.16 lifecycle-versus-scheduling boundary and explicit S3D
 dispositions.
 
+See [`process-platform-integration-proof.md`](process-platform-integration-proof.md)
+for the CG-04.17 vertical Rust-only integration proof and test matrix.
+
 See the materialized reusable Agent definitions under [`../catalog/agents/`](../catalog/agents/)
 and the reusable Skill definitions under [`../catalog/skills/`](../catalog/skills/).
 Specialist Agents are normal catalog entries, and all catalog Skill references
