@@ -2,6 +2,7 @@
 #![doc = "Canonical, deterministic process contracts for Cognitive Gateway."]
 
 mod compiler;
+mod constraints;
 mod error;
 mod evaluator;
 mod identifiers;
@@ -16,6 +17,7 @@ pub use compiler::{
     CompilationDiagnostic, CompilationError, CompilationResult, CompilationTraceEntry,
     SemanticCompiler,
 };
+pub use constraints::{ConstraintEvaluation, EvidenceReference, EvidenceStatus};
 pub use error::{ProcessError, ValidationCode};
 pub use evaluator::{
     EvaluationInputs, GuardEvaluation, TransitionDecision, TransitionDecisionCode,

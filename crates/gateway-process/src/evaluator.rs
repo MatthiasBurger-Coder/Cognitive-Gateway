@@ -5,14 +5,16 @@ use std::collections::{BTreeMap, BTreeSet};
 use gateway_domain::CapabilityId;
 
 use crate::{
-    EventOccurrence, GateId, GateStatus, GuardExpression, ProcessDefinition, ProcessInstance,
-    ProcessInstanceStatus, ProcessValidator, StateId, TransitionId, TransitionProjection,
+    ConstraintEvaluation, EventOccurrence, EvidenceStatus, GateId, GateStatus, GuardExpression,
+    ProcessDefinition, ProcessInstance, ProcessInstanceStatus, ProcessValidator, StateId,
+    TransitionId, TransitionProjection,
 };
 
 /// Explicit inputs available to typed guard evaluation.
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct EvaluationInputs {
     evidence: BTreeSet<crate::EvidenceTypeId>,
+    evidence_status: BTreeMap<crate::EvidenceTypeId, EvidenceStatus>,
     gates: BTreeMap<GateId, GateStatus>,
     capabilities: BTreeSet<CapabilityId>,
     blockers: BTreeSet<crate::BlockerId>,
@@ -24,7 +26,23 @@ impl EvaluationInputs {
         mut self,
         values: impl IntoIterator<Item = crate::EvidenceTypeId>,
     ) -> Self {
-        self.evidence.extend(values);
+        for value in values {
+            self.evidence_status
+                .insert(value.clone(), EvidenceStatus::Present);
+            self.evidence.insert(value);
+        }
+        self
+    }
+    #[must_use]
+    pub fn with_evidence_status(
+        mut self,
+        value: crate::EvidenceTypeId,
+        status: EvidenceStatus,
+    ) -> Self {
+        if status == EvidenceStatus::Present {
+            self.evidence.insert(value.clone());
+        }
+        self.evidence_status.insert(value, status);
         self
     }
     #[must_use]
@@ -45,6 +63,10 @@ impl EvaluationInputs {
     #[must_use]
     pub fn evidence(&self) -> &BTreeSet<crate::EvidenceTypeId> {
         &self.evidence
+    }
+    #[must_use]
+    pub fn evidence_status(&self) -> &BTreeMap<crate::EvidenceTypeId, EvidenceStatus> {
+        &self.evidence_status
     }
     #[must_use]
     pub fn gates(&self) -> &BTreeMap<GateId, GateStatus> {
@@ -73,6 +95,12 @@ pub enum TransitionDecisionCode {
     GuardRejected,
     AmbiguousTransition,
     TerminalState,
+    WaitingForEvidence,
+    WaitingForAuthorization,
+    GateFailed,
+    EvidenceInvalid,
+    ActiveBlocker,
+    InvariantViolation,
 }
 
 impl TransitionDecisionCode {
@@ -89,6 +117,12 @@ impl TransitionDecisionCode {
             Self::GuardRejected => "GUARD_REJECTED",
             Self::AmbiguousTransition => "AMBIGUOUS_TRANSITION",
             Self::TerminalState => "TERMINAL_STATE",
+            Self::WaitingForEvidence => "WAITING_FOR_EVIDENCE",
+            Self::WaitingForAuthorization => "WAITING_FOR_AUTHORIZATION",
+            Self::GateFailed => "GATE_FAILED",
+            Self::EvidenceInvalid => "EVIDENCE_INVALID",
+            Self::ActiveBlocker => "ACTIVE_BLOCKER",
+            Self::InvariantViolation => "INVARIANT_VIOLATION",
         }
     }
 }
@@ -124,6 +158,7 @@ pub struct TransitionDecision {
     guard_evaluations: Vec<GuardEvaluation>,
     projection: Option<TransitionProjection>,
     authorized_activity: Option<crate::ActivityId>,
+    constraint_evaluations: Vec<ConstraintEvaluation>,
 }
 
 impl TransitionDecision {
@@ -167,6 +202,10 @@ impl TransitionDecision {
     pub fn authorized_activity(&self) -> Option<&crate::ActivityId> {
         self.authorized_activity.as_ref()
     }
+    #[must_use]
+    pub fn constraint_evaluations(&self) -> &[ConstraintEvaluation] {
+        &self.constraint_evaluations
+    }
 }
 
 /// Stateless pure evaluator.
@@ -195,6 +234,7 @@ impl TransitionEvaluator {
             guard_evaluations: Vec::new(),
             projection: None,
             authorized_activity: None,
+            constraint_evaluations: Vec::new(),
         };
         if !ProcessValidator::validate(definition).is_valid() {
             return rejected(
@@ -257,7 +297,19 @@ impl TransitionEvaluator {
         }
         let mut matched = Vec::new();
         let mut evaluations = Vec::new();
+        let mut constraint_evaluations = Vec::new();
         for transition in candidates {
+            if let Some((code, reason)) = evaluate_constraints(
+                definition,
+                instance,
+                transition,
+                inputs,
+                &mut constraint_evaluations,
+            ) {
+                let mut decision = rejected(code, &reason);
+                decision.constraint_evaluations = constraint_evaluations;
+                return decision;
+            }
             let result = evaluate_guard(
                 transition.guard(),
                 event,
@@ -275,6 +327,7 @@ impl TransitionEvaluator {
                 "all candidate transition guards rejected the event",
             );
             decision.guard_evaluations = evaluations;
+            decision.constraint_evaluations = constraint_evaluations;
             return decision;
         }
         if matched.len() != 1 {
@@ -283,6 +336,7 @@ impl TransitionEvaluator {
                 "more than one transition guard matched",
             );
             decision.guard_evaluations = evaluations;
+            decision.constraint_evaluations = constraint_evaluations;
             return decision;
         }
         let transition = matched[0];
@@ -320,6 +374,7 @@ impl TransitionEvaluator {
             guard_evaluations: evaluations,
             projection: Some(projection),
             authorized_activity: transition.authorized_activity().cloned(),
+            constraint_evaluations,
         }
     }
 }
@@ -346,7 +401,18 @@ fn evaluate_guard(
             .get(name)
             .is_some_and(|actual| actual == value),
         GuardExpression::EvidencePresent(value) => {
-            inputs.evidence().contains(value) || instance.evidence().contains(value)
+            inputs
+                .evidence_status()
+                .get(value)
+                .copied()
+                .unwrap_or_else(|| {
+                    if inputs.evidence().contains(value) || instance.evidence().contains(value) {
+                        EvidenceStatus::Present
+                    } else {
+                        EvidenceStatus::Missing
+                    }
+                })
+                == EvidenceStatus::Present
         }
         GuardExpression::CapabilityAvailable(value) => inputs.capabilities().contains(value),
         GuardExpression::BlockerActive(value) => {
@@ -370,6 +436,161 @@ fn evaluate_guard(
         matched,
     });
     matched
+}
+
+fn evidence_status(
+    value: &crate::EvidenceTypeId,
+    instance: &ProcessInstance,
+    inputs: &EvaluationInputs,
+) -> EvidenceStatus {
+    inputs
+        .evidence_status()
+        .get(value)
+        .copied()
+        .unwrap_or_else(|| {
+            if inputs.evidence().contains(value) || instance.evidence().contains(value) {
+                EvidenceStatus::Present
+            } else {
+                EvidenceStatus::Missing
+            }
+        })
+}
+
+fn evaluate_constraints(
+    definition: &ProcessDefinition,
+    instance: &ProcessInstance,
+    transition: &crate::TransitionDefinition,
+    inputs: &EvaluationInputs,
+    trace: &mut Vec<ConstraintEvaluation>,
+) -> Option<(TransitionDecisionCode, String)> {
+    for gate_id in transition.required_gates() {
+        let status = inputs
+            .gates()
+            .get(gate_id)
+            .copied()
+            .or_else(|| instance.active_gates().get(gate_id).copied())
+            .unwrap_or(GateStatus::Open);
+        trace.push(ConstraintEvaluation::new(
+            "GATE",
+            gate_id.as_str(),
+            &format!("{status:?}"),
+            "required transition gate",
+        ));
+        match status {
+            GateStatus::Passed => {}
+            GateStatus::WaitingForEvidence => {
+                return Some((
+                    TransitionDecisionCode::WaitingForEvidence,
+                    "gate is waiting for evidence".to_owned(),
+                ));
+            }
+            GateStatus::WaitingForAuthorization => {
+                return Some((
+                    TransitionDecisionCode::WaitingForAuthorization,
+                    "gate is waiting for authorization".to_owned(),
+                ));
+            }
+            GateStatus::Open => {
+                return Some((
+                    TransitionDecisionCode::WaitingForEvidence,
+                    "required gate is not passed".to_owned(),
+                ));
+            }
+            GateStatus::Failed | GateStatus::Blocked => {
+                return Some((
+                    TransitionDecisionCode::GateFailed,
+                    "required gate failed or is blocked".to_owned(),
+                ));
+            }
+        }
+    }
+    for evidence in transition.required_evidence() {
+        let status = evidence_status(evidence, instance, inputs);
+        trace.push(ConstraintEvaluation::new(
+            "EVIDENCE",
+            evidence.as_str(),
+            status.as_str(),
+            "required transition evidence",
+        ));
+        match status {
+            EvidenceStatus::Present => {}
+            EvidenceStatus::Missing => {
+                return Some((
+                    TransitionDecisionCode::WaitingForEvidence,
+                    "required evidence is missing".to_owned(),
+                ));
+            }
+            EvidenceStatus::Invalid | EvidenceStatus::Failed => {
+                return Some((
+                    TransitionDecisionCode::EvidenceInvalid,
+                    "required evidence is invalid or failed".to_owned(),
+                ));
+            }
+        }
+    }
+    for gate in definition.gates() {
+        for evidence in gate.required_evidence() {
+            let status = evidence_status(evidence.evidence_type(), instance, inputs);
+            trace.push(ConstraintEvaluation::new(
+                "GATE_EVIDENCE",
+                gate.id().as_str(),
+                status.as_str(),
+                "gate evidence prerequisite",
+            ));
+            if status != EvidenceStatus::Present {
+                return Some((
+                    TransitionDecisionCode::WaitingForEvidence,
+                    "gate evidence prerequisite is not present".to_owned(),
+                ));
+            }
+        }
+    }
+    if let Some(blocker) = instance.blockers().values().find(|value| value.active()) {
+        trace.push(ConstraintEvaluation::new(
+            "BLOCKER",
+            blocker.id().as_str(),
+            "ACTIVE",
+            blocker.reason(),
+        ));
+        return Some((
+            TransitionDecisionCode::ActiveBlocker,
+            "an active blocker prevents progression".to_owned(),
+        ));
+    }
+    for invariant in definition.invariants() {
+        let check_event = EventOccurrence::new(
+            crate::EventOccurrenceId::new("invariant-check").expect("static identifier is valid"),
+            transition.event().clone(),
+            instance.id().clone(),
+            instance.revision(),
+        );
+        let mut guard_trace = Vec::new();
+        if !evaluate_guard(
+            invariant.condition(),
+            &check_event,
+            instance,
+            inputs,
+            &mut guard_trace,
+        ) {
+            trace.push(ConstraintEvaluation::new(
+                "INVARIANT",
+                invariant.id().as_str(),
+                "VIOLATED",
+                invariant.reason(),
+            ));
+            return Some((
+                TransitionDecisionCode::InvariantViolation,
+                invariant.reason().to_owned(),
+            ));
+        }
+        trace.push(ConstraintEvaluation::new(
+            "INVARIANT",
+            invariant.id().as_str(),
+            "PASSED",
+            invariant.reason(),
+        ));
+    }
+    None
 }
 
 #[cfg(test)]
@@ -533,5 +754,94 @@ mod tests {
         assert!(accepted.guard_evaluations().len() >= 2);
         let (definition, instance) = setup(GuardExpression::Always);
         let _ = (definition, instance);
+    }
+
+    #[test]
+    fn evaluates_gates_evidence_and_blockers_as_first_class_constraints() {
+        let definition = ProcessDefinitionBuilder::new(
+            ProcessDefinitionId::new("constraints-example").unwrap(),
+            ProcessDefinitionVersion::new(1).unwrap(),
+        )
+        .with_states([
+            StateDefinition::new(StateId::new("start").unwrap(), true, false).unwrap(),
+            StateDefinition::new(StateId::new("done").unwrap(), false, true).unwrap(),
+        ])
+        .with_events([EventTypeDefinition::new(
+            EventTypeId::new("finish").unwrap(),
+        )])
+        .with_gates([crate::GateDefinition::new(
+            GateId::new("review").unwrap(),
+            Vec::new(),
+        )])
+        .with_evidence([crate::EvidenceRequirement::new(
+            crate::EvidenceTypeId::new("report").unwrap(),
+            true,
+        )])
+        .with_transitions([crate::TransitionDefinition::new(
+            TransitionId::new("finish").unwrap(),
+            StateId::new("start").unwrap(),
+            EventTypeId::new("finish").unwrap(),
+            StateId::new("done").unwrap(),
+            GuardExpression::Always,
+        )
+        .with_required_gates(vec![GateId::new("review").unwrap()])
+        .with_required_evidence(vec![crate::EvidenceTypeId::new("report").unwrap()])])
+        .build()
+        .unwrap();
+        let instance =
+            ProcessInstance::start(&definition, ProcessInstanceId::new("run-1").unwrap()).unwrap();
+        let occurrence = event(&instance, "finish");
+        assert_eq!(
+            TransitionEvaluator::evaluate(
+                &definition,
+                &instance,
+                &occurrence,
+                &EvaluationInputs::default()
+            )
+            .code(),
+            TransitionDecisionCode::WaitingForEvidence
+        );
+        let failed = EvaluationInputs::default()
+            .with_gate(GateId::new("review").unwrap(), GateStatus::Failed);
+        assert_eq!(
+            TransitionEvaluator::evaluate(&definition, &instance, &occurrence, &failed).code(),
+            TransitionDecisionCode::GateFailed
+        );
+        let invalid = EvaluationInputs::default()
+            .with_gate(GateId::new("review").unwrap(), GateStatus::Passed)
+            .with_evidence_status(
+                crate::EvidenceTypeId::new("report").unwrap(),
+                EvidenceStatus::Invalid,
+            );
+        assert_eq!(
+            TransitionEvaluator::evaluate(&definition, &instance, &occurrence, &invalid).code(),
+            TransitionDecisionCode::EvidenceInvalid
+        );
+        let complete = EvaluationInputs::default()
+            .with_gate(GateId::new("review").unwrap(), GateStatus::Passed)
+            .with_evidence([crate::EvidenceTypeId::new("report").unwrap()]);
+        assert!(
+            TransitionEvaluator::evaluate(&definition, &instance, &occurrence, &complete)
+                .accepted()
+        );
+        let mut blocked = instance;
+        blocked.record_blocker(
+            crate::BlockerRuntimeState::new(
+                crate::BlockerId::new("incident").unwrap(),
+                "incident",
+                true,
+            )
+            .unwrap(),
+        );
+        assert_eq!(
+            TransitionEvaluator::evaluate(
+                &definition,
+                &blocked,
+                &event(&blocked, "finish"),
+                &complete
+            )
+            .code(),
+            TransitionDecisionCode::ActiveBlocker
+        );
     }
 }
