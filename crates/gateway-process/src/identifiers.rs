@@ -90,6 +90,8 @@ identifier!(EventTypeId);
 identifier!(EventOccurrenceId);
 identifier!(CorrelationId);
 identifier!(CausationId);
+identifier!(AuthorizationId);
+identifier!(PolicyDecisionId);
 identifier!(TransitionId);
 identifier!(GateId);
 identifier!(EvidenceTypeId);

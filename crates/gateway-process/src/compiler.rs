@@ -704,6 +704,12 @@ impl<'a> CompilerContext<'a> {
                 ["capability", value, "is", "available"] => {
                     self.parse_capability_guard(value, step, &mut guards)
                 }
+                ["authorization", value, "is", status] => {
+                    self.parse_authorization_guard(value, status, step, &mut guards)
+                }
+                ["policy", "decision", value, "is", status] => {
+                    self.parse_policy_guard(value, status, step, &mut guards)
+                }
                 ["event", value, "occurs"]
                     if matches!(
                         step.keyword(),
@@ -900,6 +906,76 @@ impl<'a> CompilerContext<'a> {
                 step.location(),
             ),
         }
+    }
+
+    fn parse_authorization_guard(
+        &mut self,
+        raw: &str,
+        status: &str,
+        step: &SourceStep,
+        guards: &mut Vec<GuardExpression>,
+    ) {
+        let Ok(authorization) = crate::AuthorizationId::new(raw) else {
+            self.error(
+                "INVALID_IDENTIFIER",
+                format!("invalid authorization identifier {raw:?}"),
+                step.location(),
+            );
+            return;
+        };
+        let Some(status) = (match status {
+            "allowed" => Some(crate::AuthorizationStatus::Allowed),
+            "denied" => Some(crate::AuthorizationStatus::Denied),
+            "waiting" => Some(crate::AuthorizationStatus::Waiting),
+            _ => None,
+        }) else {
+            self.error(
+                "INVALID_AUTHORIZATION_STATUS",
+                format!("unknown authorization status {status:?}"),
+                step.location(),
+            );
+            return;
+        };
+        guards.push(GuardExpression::AuthorizationIs {
+            authorization: authorization.clone(),
+            status,
+        });
+        self.trace(step, "authorization guard", authorization.to_string());
+    }
+
+    fn parse_policy_guard(
+        &mut self,
+        raw: &str,
+        status: &str,
+        step: &SourceStep,
+        guards: &mut Vec<GuardExpression>,
+    ) {
+        let Ok(policy) = crate::PolicyDecisionId::new(raw) else {
+            self.error(
+                "INVALID_IDENTIFIER",
+                format!("invalid policy decision identifier {raw:?}"),
+                step.location(),
+            );
+            return;
+        };
+        let Some(status) = (match status {
+            "allow" => Some(crate::PolicyDecisionStatus::Allow),
+            "deny" => Some(crate::PolicyDecisionStatus::Deny),
+            "waiting" => Some(crate::PolicyDecisionStatus::Waiting),
+            _ => None,
+        }) else {
+            self.error(
+                "INVALID_POLICY_STATUS",
+                format!("unknown policy status {status:?}"),
+                step.location(),
+            );
+            return;
+        };
+        guards.push(GuardExpression::PolicyDecisionIs {
+            policy: policy.clone(),
+            status,
+        });
+        self.trace(step, "policy decision guard", policy.to_string());
     }
     fn parse_event(&mut self, raw: &str, step: &SourceStep, event: &mut Option<EventTypeId>) {
         match EventTypeId::new(raw) {
@@ -1137,6 +1213,32 @@ mod tests {
         assert_eq!(transition.required_evidence().len(), 1);
         assert_eq!(transition.authorized_activity().unwrap().as_str(), "ship");
         assert!(transition.completes());
+    }
+
+    #[test]
+    fn compiles_typed_authorization_and_policy_guards() {
+        let source = "@process(example)\n@process-version(1)\n@cg-language(1)\nFeature: Example\nRule: Process\nGiven state START is initial\nGiven state DONE is terminal\nGiven event finish\nScenario: finish\nGiven process state START\nGiven authorization human-review is allowed\nAnd policy decision release-check is allow\nWhen event finish occurs\nThen transition to state DONE\nThen complete process\n";
+        let result = SemanticCompiler::compile(source).unwrap();
+        assert!(matches!(
+            result.definition().transitions()[0].guard(),
+            GuardExpression::All(guards) if guards.len() == 2
+        ));
+        assert!(
+            result
+                .trace()
+                .iter()
+                .any(|entry| entry.construct() == "authorization guard")
+        );
+    }
+
+    #[test]
+    fn rejects_unknown_authorization_and_policy_statuses() {
+        let source = "@process(example)\n@process-version(1)\n@cg-language(1)\nFeature: Example\nRule: Process\nGiven state START is initial\nGiven state DONE is terminal\nGiven event finish\nScenario: finish\nGiven process state START\nGiven authorization human-review is maybe\nWhen event finish occurs\nThen transition to state DONE\nThen complete process\n";
+        let error = SemanticCompiler::compile(source).unwrap_err();
+        assert_eq!(
+            error.diagnostics()[0].code(),
+            "INVALID_AUTHORIZATION_STATUS"
+        );
     }
 
     #[test]

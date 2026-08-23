@@ -404,6 +404,8 @@ impl ValidationContext<'_> {
                 }
             }
             GuardExpression::CapabilityAvailable(_)
+            | GuardExpression::AuthorizationIs { .. }
+            | GuardExpression::PolicyDecisionIs { .. }
             | GuardExpression::Always
             | GuardExpression::Never
             | GuardExpression::EventAttributeEquals { .. } => {}

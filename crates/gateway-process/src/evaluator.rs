@@ -5,9 +5,9 @@ use std::collections::{BTreeMap, BTreeSet};
 use gateway_domain::CapabilityId;
 
 use crate::{
-    ConstraintEvaluation, EventOccurrence, EvidenceStatus, GateId, GateStatus, GuardExpression,
-    ProcessDefinition, ProcessInstance, ProcessInstanceStatus, ProcessValidator, StateId,
-    TransitionId, TransitionProjection,
+    AuthorizationStatus, ConstraintEvaluation, EventOccurrence, EvidenceStatus, GateId, GateStatus,
+    GuardExpression, PolicyDecisionStatus, PolicyInput, ProcessDefinition, ProcessInstance,
+    ProcessInstanceStatus, ProcessValidator, StateId, TransitionId, TransitionProjection,
 };
 
 /// Explicit inputs available to typed guard evaluation.
@@ -18,6 +18,7 @@ pub struct EvaluationInputs {
     gates: BTreeMap<GateId, GateStatus>,
     capabilities: BTreeSet<CapabilityId>,
     blockers: BTreeSet<crate::BlockerId>,
+    policy: PolicyInput,
 }
 
 impl EvaluationInputs {
@@ -61,6 +62,24 @@ impl EvaluationInputs {
         self
     }
     #[must_use]
+    pub fn with_authorization(
+        mut self,
+        id: crate::AuthorizationId,
+        status: AuthorizationStatus,
+    ) -> Self {
+        self.policy = self.policy.with_authorization(id, status);
+        self
+    }
+    #[must_use]
+    pub fn with_policy_decision(
+        mut self,
+        id: crate::PolicyDecisionId,
+        status: PolicyDecisionStatus,
+    ) -> Self {
+        self.policy = self.policy.with_policy_decision(id, status);
+        self
+    }
+    #[must_use]
     pub fn evidence(&self) -> &BTreeSet<crate::EvidenceTypeId> {
         &self.evidence
     }
@@ -79,6 +98,10 @@ impl EvaluationInputs {
     #[must_use]
     pub fn blockers(&self) -> &BTreeSet<crate::BlockerId> {
         &self.blockers
+    }
+    #[must_use]
+    pub fn policy(&self) -> &PolicyInput {
+        &self.policy
     }
 }
 
@@ -101,6 +124,7 @@ pub enum TransitionDecisionCode {
     EvidenceInvalid,
     ActiveBlocker,
     InvariantViolation,
+    AuthorizationDenied,
 }
 
 impl TransitionDecisionCode {
@@ -123,6 +147,7 @@ impl TransitionDecisionCode {
             Self::EvidenceInvalid => "EVIDENCE_INVALID",
             Self::ActiveBlocker => "ACTIVE_BLOCKER",
             Self::InvariantViolation => "INVARIANT_VIOLATION",
+            Self::AuthorizationDenied => "AUTHORIZATION_DENIED",
         }
     }
 }
@@ -159,6 +184,7 @@ pub struct TransitionDecision {
     projection: Option<TransitionProjection>,
     authorized_activity: Option<crate::ActivityId>,
     constraint_evaluations: Vec<ConstraintEvaluation>,
+    authorized_activity_definition: Option<crate::AuthorizedActivity>,
 }
 
 impl TransitionDecision {
@@ -206,6 +232,10 @@ impl TransitionDecision {
     pub fn constraint_evaluations(&self) -> &[ConstraintEvaluation] {
         &self.constraint_evaluations
     }
+    #[must_use]
+    pub fn authorized_activity_definition(&self) -> Option<&crate::AuthorizedActivity> {
+        self.authorized_activity_definition.as_ref()
+    }
 }
 
 /// Stateless pure evaluator.
@@ -235,6 +265,7 @@ impl TransitionEvaluator {
             projection: None,
             authorized_activity: None,
             constraint_evaluations: Vec::new(),
+            authorized_activity_definition: None,
         };
         if !ProcessValidator::validate(definition).is_valid() {
             return rejected(
@@ -375,6 +406,13 @@ impl TransitionEvaluator {
             projection: Some(projection),
             authorized_activity: transition.authorized_activity().cloned(),
             constraint_evaluations,
+            authorized_activity_definition: transition.authorized_activity().and_then(|activity| {
+                definition
+                    .activities()
+                    .iter()
+                    .find(|item| item.id() == activity)
+                    .map(crate::AuthorizedActivity::from_definition)
+            }),
         }
     }
 }
@@ -429,6 +467,13 @@ fn evaluate_guard(
                 .copied()
                 .or_else(|| instance.active_gates().get(gate).copied())
                 == Some(*status)
+        }
+        GuardExpression::AuthorizationIs {
+            authorization,
+            status,
+        } => inputs.policy().authorizations().get(authorization).copied() == Some(*status),
+        GuardExpression::PolicyDecisionIs { policy, status } => {
+            inputs.policy().decisions().get(policy).copied() == Some(*status)
         }
     };
     evaluations.push(GuardEvaluation {
@@ -590,7 +635,72 @@ fn evaluate_constraints(
             invariant.reason(),
         ));
     }
+    if let Some(result) = authorization_constraint(transition.guard(), inputs) {
+        trace.push(ConstraintEvaluation::new(
+            "AUTHORIZATION",
+            result.1.as_str(),
+            result.0,
+            "typed authorization or policy input",
+        ));
+        return Some((
+            match result.0 {
+                "DENIED" => TransitionDecisionCode::AuthorizationDenied,
+                _ => TransitionDecisionCode::WaitingForAuthorization,
+            },
+            match result.0 {
+                "DENIED" => "authorization was denied".to_owned(),
+                _ => "authorization input is missing or waiting".to_owned(),
+            },
+        ));
+    }
     None
+}
+
+fn authorization_constraint(
+    guard: &GuardExpression,
+    inputs: &EvaluationInputs,
+) -> Option<(&'static str, String)> {
+    match guard {
+        GuardExpression::AuthorizationIs {
+            authorization,
+            status: AuthorizationStatus::Allowed,
+        } => match inputs.policy().authorizations().get(authorization) {
+            Some(AuthorizationStatus::Allowed) => None,
+            Some(AuthorizationStatus::Denied) => Some(("DENIED", authorization.to_string())),
+            Some(AuthorizationStatus::Waiting) | None => {
+                Some(("WAITING", authorization.to_string()))
+            }
+        },
+        GuardExpression::PolicyDecisionIs {
+            policy,
+            status: PolicyDecisionStatus::Allow,
+        } => match inputs.policy().decisions().get(policy) {
+            Some(PolicyDecisionStatus::Allow) => None,
+            Some(PolicyDecisionStatus::Deny) => Some(("DENIED", policy.to_string())),
+            Some(PolicyDecisionStatus::Waiting) | None => Some(("WAITING", policy.to_string())),
+        },
+        GuardExpression::All(children) => children
+            .iter()
+            .filter_map(|child| authorization_constraint(child, inputs))
+            .min_by_key(|(status, _)| *status == "WAITING"),
+        GuardExpression::Any(children) => {
+            let dependencies = children
+                .iter()
+                .filter_map(|child| authorization_constraint(child, inputs))
+                .collect::<Vec<_>>();
+            if dependencies.is_empty() {
+                None
+            } else if dependencies.iter().any(|(status, _)| *status == "WAITING") {
+                dependencies
+                    .into_iter()
+                    .find(|(status, _)| *status == "WAITING")
+            } else {
+                dependencies.into_iter().next()
+            }
+        }
+        GuardExpression::Not(child) => authorization_constraint(child, inputs),
+        _ => None,
+    }
 }
 
 #[cfg(test)]
@@ -843,5 +953,97 @@ mod tests {
             .code(),
             TransitionDecisionCode::ActiveBlocker
         );
+    }
+
+    #[test]
+    fn authorization_is_fail_closed_and_projects_capability_first_activity() {
+        let authorization = crate::AuthorizationId::new("human-review").unwrap();
+        let policy = crate::PolicyDecisionId::new("release-check").unwrap();
+        let activity_id = crate::ActivityId::new("ship").unwrap();
+        let capability = CapabilityId::new("repository.write").unwrap();
+        let evidence = crate::EvidenceTypeId::new("release-report").unwrap();
+        let constraint = crate::ActivityConstraint::new("branch", "protected").unwrap();
+        let definition = ProcessDefinitionBuilder::new(
+            ProcessDefinitionId::new("authorization-example").unwrap(),
+            ProcessDefinitionVersion::new(1).unwrap(),
+        )
+        .with_states([
+            StateDefinition::new(StateId::new("start").unwrap(), true, false).unwrap(),
+            StateDefinition::new(StateId::new("done").unwrap(), false, true).unwrap(),
+        ])
+        .with_events([EventTypeDefinition::new(
+            EventTypeId::new("finish").unwrap(),
+        )])
+        .with_evidence([crate::EvidenceRequirement::new(evidence.clone(), true)])
+        .with_activities([crate::ActivityDefinition::new(
+            activity_id.clone(),
+            vec![capability.clone()],
+            vec![evidence.clone()],
+            vec![constraint.clone()],
+        )])
+        .with_transitions([crate::TransitionDefinition::new(
+            TransitionId::new("finish").unwrap(),
+            StateId::new("start").unwrap(),
+            EventTypeId::new("finish").unwrap(),
+            StateId::new("done").unwrap(),
+            GuardExpression::All(vec![
+                GuardExpression::AuthorizationIs {
+                    authorization: authorization.clone(),
+                    status: AuthorizationStatus::Allowed,
+                },
+                GuardExpression::PolicyDecisionIs {
+                    policy: policy.clone(),
+                    status: PolicyDecisionStatus::Allow,
+                },
+            ]),
+        )
+        .with_authorized_activity(activity_id)])
+        .build()
+        .unwrap();
+        let instance =
+            ProcessInstance::start(&definition, ProcessInstanceId::new("run-1").unwrap()).unwrap();
+        let occurrence = event(&instance, "finish");
+
+        let missing = TransitionEvaluator::evaluate(
+            &definition,
+            &instance,
+            &occurrence,
+            &EvaluationInputs::default(),
+        );
+        assert_eq!(
+            missing.code(),
+            TransitionDecisionCode::WaitingForAuthorization
+        );
+        assert!(
+            missing
+                .constraint_evaluations()
+                .iter()
+                .any(|item| item.kind() == "AUTHORIZATION" && item.status() == "WAITING")
+        );
+
+        let denied = TransitionEvaluator::evaluate(
+            &definition,
+            &instance,
+            &occurrence,
+            &EvaluationInputs::default()
+                .with_authorization(authorization.clone(), AuthorizationStatus::Denied)
+                .with_policy_decision(policy.clone(), PolicyDecisionStatus::Allow),
+        );
+        assert_eq!(denied.code(), TransitionDecisionCode::AuthorizationDenied);
+
+        let accepted = TransitionEvaluator::evaluate(
+            &definition,
+            &instance,
+            &occurrence,
+            &EvaluationInputs::default()
+                .with_authorization(authorization, AuthorizationStatus::Allowed)
+                .with_policy_decision(policy, PolicyDecisionStatus::Allow),
+        );
+        assert_eq!(accepted.code(), TransitionDecisionCode::Accepted);
+        let projected = accepted.authorized_activity_definition().unwrap();
+        assert_eq!(projected.id().as_str(), "ship");
+        assert_eq!(projected.capabilities(), &[capability]);
+        assert_eq!(projected.output_evidence(), &[evidence]);
+        assert_eq!(projected.constraints(), &[constraint]);
     }
 }

@@ -48,11 +48,25 @@ pub enum GuardExpression {
     All(Vec<Self>),
     Any(Vec<Self>),
     Not(Box<Self>),
-    EventAttributeEquals { name: String, value: String },
+    EventAttributeEquals {
+        name: String,
+        value: String,
+    },
     EvidencePresent(EvidenceTypeId),
     CapabilityAvailable(gateway_domain::CapabilityId),
     BlockerActive(BlockerId),
-    GateIs { gate: GateId, status: GateStatus },
+    AuthorizationIs {
+        authorization: crate::AuthorizationId,
+        status: crate::AuthorizationStatus,
+    },
+    PolicyDecisionIs {
+        policy: crate::PolicyDecisionId,
+        status: crate::PolicyDecisionStatus,
+    },
+    GateIs {
+        gate: GateId,
+        status: GateStatus,
+    },
 }
 
 /// The finite gate statuses available in Process IR v1.

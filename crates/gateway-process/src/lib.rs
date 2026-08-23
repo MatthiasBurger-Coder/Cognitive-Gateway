@@ -1,6 +1,7 @@
 #![forbid(unsafe_code)]
 #![doc = "Canonical, deterministic process contracts for Cognitive Gateway."]
 
+mod authorization;
 mod compiler;
 mod constraints;
 mod error;
@@ -14,6 +15,9 @@ mod registry;
 mod source;
 mod validation;
 
+pub use authorization::{
+    AuthorizationStatus, AuthorizedActivity, PolicyDecisionStatus, PolicyInput,
+};
 pub use compiler::{
     CompilationDiagnostic, CompilationError, CompilationResult, CompilationTraceEntry,
     SemanticCompiler,
@@ -25,9 +29,10 @@ pub use evaluator::{
     TransitionEvaluator,
 };
 pub use identifiers::{
-    ActivityId, BlockerId, CausationId, CorrelationId, EventOccurrenceId, EventTypeId,
-    EvidenceTypeId, GateId, ProcessDefinitionDigest, ProcessDefinitionId, ProcessDefinitionVersion,
-    ProcessInstanceId, ProcessInstanceRevision, StateId, TransitionId,
+    ActivityId, AuthorizationId, BlockerId, CausationId, CorrelationId, EventOccurrenceId,
+    EventTypeId, EvidenceTypeId, GateId, PolicyDecisionId, ProcessDefinitionDigest,
+    ProcessDefinitionId, ProcessDefinitionVersion, ProcessInstanceId, ProcessInstanceRevision,
+    StateId, TransitionId,
 };
 pub use instance::{
     BlockerRuntimeState, InstanceError, ProcessInstance, ProcessInstanceStatus,
