@@ -26,5 +26,18 @@
   "required_capability_ids": [],
   "knowledge_queries": [
     "requirement-to-evidence traceability"
+  ],
+  "provided_capabilities": [
+    {
+      "id": "documentation.traceability-analysis",
+      "class": "INSPECT",
+      "domain": "documentation",
+      "description": "Analyze links from requirements to implementation, tests and evidence",
+      "input_kinds": ["requirements.set", "evidence.records"],
+      "output_kinds": ["documentation.traceability-report"],
+      "preconditions": ["requirements.available"],
+      "constraints": ["read-only"],
+      "applicability_tags": ["documentation", "traceability"]
+    }
   ]
 }

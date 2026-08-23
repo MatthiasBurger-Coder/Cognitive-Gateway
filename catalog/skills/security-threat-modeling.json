@@ -26,5 +26,18 @@
   "required_capability_ids": [],
   "knowledge_queries": [
     "threat modeling across boundaries"
+  ],
+  "provided_capabilities": [
+    {
+      "id": "security.threat-analysis",
+      "class": "INSPECT",
+      "domain": "security",
+      "description": "Analyze threats, trust boundaries, controls and residual risk",
+      "input_kinds": ["system-context", "data-flow"],
+      "output_kinds": ["security.threat-model"],
+      "preconditions": ["system-context.available"],
+      "constraints": ["read-only"],
+      "applicability_tags": ["security", "threat-modeling"]
+    }
   ]
 }

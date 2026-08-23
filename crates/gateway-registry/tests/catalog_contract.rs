@@ -268,3 +268,63 @@ fn catalog_skill_graph_resolves_deterministically() {
     assert_eq!(graph.len(), 2);
     assert_eq!(graph.skills()[1].id(), &root);
 }
+
+#[test]
+fn catalog_capability_contracts_are_typed_and_project_independent() {
+    let registry = Registry::load_catalog(repository_catalog()).expect("catalog should load");
+    registry
+        .validate_integrity()
+        .expect("capability declarations should be consistent");
+
+    let agent_capabilities: Vec<_> = registry
+        .agents()
+        .documents()
+        .iter()
+        .flat_map(|agent| agent.provided_capabilities())
+        .collect();
+    let skill_capabilities: Vec<_> = registry
+        .skills()
+        .documents()
+        .iter()
+        .flat_map(|skill| skill.provided_capabilities())
+        .collect();
+
+    assert!(!agent_capabilities.is_empty());
+    assert!(!skill_capabilities.is_empty());
+    assert!(
+        skill_capabilities
+            .iter()
+            .any(|capability| capability.id().as_str() == "architecture.dependency-analysis")
+    );
+
+    for capability in agent_capabilities.into_iter().chain(skill_capabilities) {
+        assert!(!capability.domain().as_str().is_empty());
+        assert!(!capability.description().trim().is_empty());
+        assert!(
+            capability
+                .input_kinds()
+                .iter()
+                .all(|kind| !kind.as_str().contains('/'))
+        );
+        assert!(
+            capability
+                .output_kinds()
+                .iter()
+                .all(|kind| !kind.as_str().contains('/'))
+        );
+        let searchable = format!(
+            "{} {} {}",
+            capability.id(),
+            capability.domain(),
+            capability.description()
+        )
+        .to_ascii_lowercase();
+        for forbidden in ["project", "repository path", "workflow state"] {
+            assert!(
+                !searchable.contains(forbidden),
+                "project-specific capability content leaked into {}",
+                capability.id()
+            );
+        }
+    }
+}

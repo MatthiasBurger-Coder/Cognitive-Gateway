@@ -103,6 +103,36 @@ typed_identifier! {
 }
 
 typed_identifier! {
+    /// Identifies the reusable domain in which a capability operates.
+    CapabilityDomain
+}
+
+typed_identifier! {
+    /// Identifies an input or context kind accepted by a capability.
+    CapabilityInputKind
+}
+
+typed_identifier! {
+    /// Identifies a result or output kind produced by a capability.
+    CapabilityOutputKind
+}
+
+typed_identifier! {
+    /// Identifies an intrinsic precondition of a capability.
+    CapabilityPrecondition
+}
+
+typed_identifier! {
+    /// Identifies an intrinsic limitation or constraint of a capability.
+    CapabilityConstraint
+}
+
+typed_identifier! {
+    /// Identifies a deterministic applicability selector for a capability.
+    CapabilityTag
+}
+
+typed_identifier! {
     /// Identifies a named execution constraint.
     ConstraintId
 }
@@ -121,8 +151,9 @@ mod tests {
     use std::str::FromStr;
 
     use super::{
-        AgentId, CapabilityId, ConstraintId, ExecutionContextId, ExecutionRuntimeId, PolicyId,
-        SkillId, TaskId, WorkflowId,
+        AgentId, CapabilityConstraint, CapabilityDomain, CapabilityId, CapabilityInputKind,
+        CapabilityOutputKind, CapabilityPrecondition, CapabilityTag, ConstraintId,
+        ExecutionContextId, ExecutionRuntimeId, PolicyId, SkillId, TaskId, WorkflowId,
     };
 
     #[test]
@@ -160,6 +191,36 @@ mod tests {
         assert_eq!(
             CapabilityId::new("capability").unwrap().as_str(),
             "capability"
+        );
+        assert_eq!(
+            CapabilityDomain::new("architecture").unwrap().as_str(),
+            "architecture"
+        );
+        assert_eq!(
+            CapabilityInputKind::new("repository.snapshot")
+                .unwrap()
+                .as_str(),
+            "repository.snapshot"
+        );
+        assert_eq!(
+            CapabilityOutputKind::new("architecture.graph")
+                .unwrap()
+                .as_str(),
+            "architecture.graph"
+        );
+        assert_eq!(
+            CapabilityPrecondition::new("repository.available")
+                .unwrap()
+                .as_str(),
+            "repository.available"
+        );
+        assert_eq!(
+            CapabilityConstraint::new("read-only").unwrap().as_str(),
+            "read-only"
+        );
+        assert_eq!(
+            CapabilityTag::new("architecture").unwrap().as_str(),
+            "architecture"
         );
         assert_eq!(
             ConstraintId::new("constraint").unwrap().as_str(),

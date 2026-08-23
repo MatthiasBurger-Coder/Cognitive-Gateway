@@ -10,5 +10,18 @@
     "microservice-runtime-readiness-expert",
     "protobuf-contracts",
     "service-decomposition-bounded-context"
+  ],
+  "provided_capabilities": [
+    {
+      "id": "architecture.dependency-analysis",
+      "class": "INSPECT",
+      "domain": "architecture",
+      "description": "Analyze dependency direction and boundary relationships",
+      "input_kinds": ["repository.snapshot"],
+      "output_kinds": ["architecture.dependency-graph"],
+      "preconditions": ["repository.available"],
+      "constraints": ["read-only"],
+      "applicability_tags": ["architecture", "dependency-analysis"]
+    }
   ]
 }

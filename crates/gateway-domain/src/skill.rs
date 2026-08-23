@@ -1,7 +1,9 @@
 //! Reusable skill definitions and typed capability/knowledge relationships.
 
 use crate::{
-    AgentId, CapabilityId, KnowledgeQuery, NonEmptyText, SkillId, ValidationError,
+    AgentId, CapabilityDefinition, CapabilityId, KnowledgeQuery, NonEmptyText, SkillId,
+    ValidationError,
+    capability::unique_capabilities,
     relationships::{reject_self_dependency, unique_relationships},
 };
 
@@ -18,6 +20,7 @@ pub struct SkillDefinition {
     owner_agent_id: Option<AgentId>,
     dependency_ids: Vec<SkillId>,
     required_capability_ids: Vec<CapabilityId>,
+    provided_capabilities: Vec<CapabilityDefinition>,
     knowledge_queries: Vec<KnowledgeQuery>,
     authoritative_sources: Vec<NonEmptyText>,
     rules: Vec<NonEmptyText>,
@@ -48,6 +51,7 @@ impl SkillDefinition {
                 required_capability_ids,
                 "required_capability_ids",
             )?,
+            provided_capabilities: Vec::new(),
             knowledge_queries: Vec::new(),
             authoritative_sources: Vec::new(),
             rules: Vec::new(),
@@ -87,6 +91,23 @@ impl SkillDefinition {
     ) -> Self {
         self.knowledge_queries = queries.into_iter().collect();
         self
+    }
+
+    /// Adds the reusable capabilities directly provided by this Skill.
+    pub fn with_provided_capabilities(
+        mut self,
+        capabilities: impl IntoIterator<Item = CapabilityDefinition>,
+    ) -> Result<Self, ValidationError> {
+        self.provided_capabilities = unique_capabilities(capabilities)?;
+        Ok(self)
+    }
+
+    /// Alias for [`Self::with_provided_capabilities`].
+    pub fn with_capabilities(
+        self,
+        capabilities: impl IntoIterator<Item = CapabilityDefinition>,
+    ) -> Result<Self, ValidationError> {
+        self.with_provided_capabilities(capabilities)
     }
 
     /// Sets the human-readable skill name.
@@ -197,6 +218,18 @@ impl SkillDefinition {
         &self.required_capability_ids
     }
 
+    /// Returns the reusable capabilities directly provided by this Skill.
+    #[must_use]
+    pub fn provided_capabilities(&self) -> &[CapabilityDefinition] {
+        &self.provided_capabilities
+    }
+
+    /// Alias for callers that use the shorter capability vocabulary.
+    #[must_use]
+    pub fn capabilities(&self) -> &[CapabilityDefinition] {
+        self.provided_capabilities()
+    }
+
     /// Returns the knowledge queries declared by this skill.
     #[must_use]
     pub fn knowledge_queries(&self) -> &[KnowledgeQuery] {
@@ -243,7 +276,7 @@ impl SkillDefinition {
 #[cfg(test)]
 mod tests {
     use super::SkillDefinition;
-    use crate::{CapabilityId, KnowledgeQuery, SkillId, ValidationError};
+    use crate::{CapabilityDefinition, CapabilityId, KnowledgeQuery, SkillId, ValidationError};
 
     #[test]
     fn creates_a_skill_with_typed_relationships() {
@@ -430,5 +463,28 @@ mod tests {
                 field: "related_skill_ids"
             })
         ));
+    }
+
+    #[test]
+    fn exposes_provided_capabilities_separately_from_requirements() {
+        let capability = CapabilityDefinition::new(
+            CapabilityId::new("repository.read").unwrap(),
+            crate::CapabilityClass::Inspect,
+        );
+        let skill = SkillDefinition::new(
+            SkillId::new("architecture").unwrap(),
+            "Architecture",
+            [],
+            [CapabilityId::new("repository.read").unwrap()],
+        )
+        .unwrap()
+        .with_provided_capabilities([capability.clone()])
+        .unwrap();
+
+        assert_eq!(
+            skill.required_capability_ids()[0].as_str(),
+            "repository.read"
+        );
+        assert_eq!(skill.provided_capabilities(), &[capability]);
     }
 }

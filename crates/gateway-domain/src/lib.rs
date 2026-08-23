@@ -21,7 +21,7 @@ pub mod version;
 pub mod workflow;
 
 pub use agent::AgentDefinition;
-pub use capability::{Capability, CapabilityClass, CapabilityDefinition};
+pub use capability::{Capability, CapabilityClass, CapabilityContract, CapabilityDefinition};
 pub use constraint::{Constraint, ConstraintDefinition, ConstraintKind};
 pub use definition_contract::{
     AgentDefinitionDocument, DEFINITION_SCHEMA_VERSION, DefinitionKind, SkillDefinitionDocument,
@@ -37,8 +37,9 @@ pub use workflow::WorkflowDefinition;
 pub use execution_context::{ExecutionContext, ExecutionContextIR, ExecutionContextIr};
 pub use execution_profile::ExecutionProfile;
 pub use identifiers::{
-    AgentId, CapabilityId, ConstraintId, ExecutionContextId, ExecutionRuntimeId, PolicyId,
-    RuntimeId, SkillId, TaskId, WorkflowId,
+    AgentId, CapabilityConstraint, CapabilityDomain, CapabilityId, CapabilityInputKind,
+    CapabilityOutputKind, CapabilityPrecondition, CapabilityTag, ConstraintId, ExecutionContextId,
+    ExecutionRuntimeId, PolicyId, RuntimeId, SkillId, TaskId, WorkflowId,
 };
 pub use operating_mode::OperatingMode;
 pub use state::{

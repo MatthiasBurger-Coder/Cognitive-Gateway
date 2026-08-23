@@ -72,11 +72,11 @@ graph.
 | Object | Responsibility | Relationships and limits |
 | --- | --- | --- |
 | `TaskDescriptor` | Identifies the requested work and carries its intent. | Optional `TaskClassification` containing `task_type` and finite confidence `0..=1`; the two classification values are present together. |
-| `AgentDefinition` | Declares a named responsibility contract. | Requires a non-empty, unique ordered list of `SkillId` values. It contains no prompt, model, runtime or behavior. |
-| `SkillDefinition` | Declares complete reusable Skill content and requirements. | Name, description, authoritative sources, rules and verification guidance; unique mandatory and related `SkillId` references; optional owning `AgentId`, capability requirements and `KnowledgeQuery` values. A skill cannot reference itself or overlap required/related references. |
+| `AgentDefinition` | Declares a named responsibility contract. | Requires a non-empty, unique ordered list of `SkillId` values and may expose typed reusable capability contracts. It contains no prompt, model, runtime or behavior. |
+| `SkillDefinition` | Declares complete reusable Skill content, requirements and optional providers. | Name, description, authoritative sources, rules and verification guidance; unique mandatory and related `SkillId` references; optional owning `AgentId`, required capability IDs, provided capability contracts and `KnowledgeQuery` values. A skill cannot reference itself or overlap required/related references. |
 | `WorkflowDefinition` | Selects a deterministic unit of work. | Exactly one primary `AgentId`, one or more unique ordered `SkillId` values, and exactly one `PolicyId`. It references definitions rather than embedding them. |
 | `PolicyDefinition` | Defines the authoritative capability decision input for a workflow. | Unique allowed and denied `CapabilityId` lists. The allow-list may be empty for deny-by-default; a capability cannot occur in both lists. |
-| `CapabilityDefinition` | Classifies an abstract capability by safety impact. | A typed `CapabilityId` and `CapabilityClass`: `INSPECT` or `MUTATE`. It has no provider handle or tool implementation. |
+| `CapabilityDefinition` | Describes a reusable, machine-resolvable capability contract. | Typed `CapabilityId`, `CapabilityClass` (`INSPECT` or `MUTATE`), `CapabilityDomain`, purpose, typed input/output kinds, intrinsic preconditions/constraints and applicability tags. It has no provider handle or tool implementation. |
 | `Constraint` | Declares an execution-planning rule. | A typed `ConstraintId` and `ConstraintKind`; it is checked against the operating-mode/profile pair. |
 
 `TaskClassification` is semantic metadata, not authority. `TaskConfidence`
@@ -96,10 +96,12 @@ exposes immutable slices and typed lookups. `DefinitionCatalog::new` and
 
 Local constructors additionally reject duplicate relationships, skill
 self-references, conflicting policy allow/deny entries, empty required
-relationships and invalid text. A catalog does not register
-`CapabilityDefinition` values: capabilities are typed references classified by
-the capability boundary, while policy and context carry the authority
-decisions for those references.
+relationships and invalid text. A catalog does not treat `CapabilityDefinition`
+values as executable authority: Agent and Skill documents own the provider
+declarations, while policy and context carry the authority decisions for those
+references. The registry validates equivalent metadata for a capability ID
+across providers; a later derived index may then rebuild candidate
+relationships deterministically.
 
 ## Operating mode and execution profile
 

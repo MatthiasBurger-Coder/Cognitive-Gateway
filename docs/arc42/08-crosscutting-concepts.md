@@ -28,7 +28,7 @@ domain contract.
 
 ## 8.5 Capability classes
 
-At minimum, capabilities are divided into `inspect` and `mutate`. Mutations can require additional policy checks and explicit user authorization.
+At minimum, capabilities are divided into `inspect` and `mutate`. Mutations can require additional policy checks and explicit user authorization. Agent and Skill contracts may expose a reusable capability declaration with a canonical identity, domain, purpose, typed input/output kinds, intrinsic preconditions and constraints, and deterministic applicability tags. This metadata describes what a provider can do; policy remains authoritative for whether it may be used.
 
 ## 8.6 Knowledge retrieval
 

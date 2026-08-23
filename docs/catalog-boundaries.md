@@ -30,8 +30,9 @@ path order and exposes them in canonical ID order:
 
 Malformed documents, unsupported schema versions and duplicate canonical IDs
 fail closed. `Registry::validate_integrity()` then validates Agent-to-Skill,
-Skill-owner, related-Skill and mandatory dependency references. There is no
-secondary built-in registry, merge operation or override rule.
+Skill-owner, related-Skill and mandatory dependency references, as well as
+equivalence of shared capability declarations. There is no secondary built-in
+registry, merge operation or override rule.
 
 ## Resolution and runtime context
 
@@ -48,7 +49,8 @@ create or change Agent/Skill catalog membership.
 ## Definition boundary
 
 Agent and Skill documents contain reusable declarative semantics, typed
-canonical IDs and abstract capability requirements. They do not contain
-consuming-project identities, repository paths, provenance fields, external
-content references or runtime authorization. Technology-specific expertise is
-valid when it remains reusable across consumers.
+canonical IDs, abstract capability requirements and optional typed
+`provided_capabilities` contracts. They do not contain consuming-project
+identities, repository paths, provenance fields, external content references or
+runtime authorization. Technology-specific expertise is valid when it remains
+reusable across consumers.

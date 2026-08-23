@@ -126,4 +126,9 @@ catalog/
 The catalog is the sole built-in Agent and Skill definition boundary. It
 contains reusable, schema-validated definitions and has no project namespace
 or override layer. Consuming-project repository content, configuration and
-runtime state are supplied through explicit ports and adapters.
+runtime state are supplied through explicit ports and adapters. Agent and
+Skill documents may carry typed `provided_capabilities` contracts containing
+canonical identity, domain, inspect/mutate class, input/output kinds,
+intrinsic preconditions and deterministic applicability tags. These contracts
+describe reusable provider capability only; policy still decides whether an
+execution may use it.

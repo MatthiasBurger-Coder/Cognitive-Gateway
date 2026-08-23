@@ -29,7 +29,9 @@ The current domain-primitive slice is covered by unit tests colocated with its i
 - strict parsing and canonical representations for operating modes, execution
   profiles, workflow/gate/blocker states and constraint kinds;
 - explicit lifecycle transitions and coordinated execution-state invariants;
-- inspect/mutate capability classification and mode/profile constraint checks.
+- inspect/mutate capability classification and machine-resolvable capability
+  contract metadata;
+- mode/profile constraint checks and strict Agent/Skill document round trips.
 - strict `ExecutionContextIR` JSON round trips, malformed payload handling,
   unknown enum rejection and unsupported-version rejection.
 
