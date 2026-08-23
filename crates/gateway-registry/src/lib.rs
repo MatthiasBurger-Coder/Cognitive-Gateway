@@ -1361,6 +1361,7 @@ mod tests {
         write_file(&root.join("malformed.json"), "not json");
         let error = AgentRegistry::load(&root).unwrap_err();
         assert!(matches!(error, RegistryError::InvalidDocument { .. }));
+        assert!(std::error::Error::source(&error).is_some());
         assert!(error.to_string().contains("malformed.json"));
         fs::remove_dir_all(&root).unwrap();
 
@@ -1720,6 +1721,152 @@ mod tests {
                 assert_eq!(source, "skill:alpha");
             }
             other => panic!("unexpected error: {other}"),
+        }
+    }
+
+    #[test]
+    fn exposes_empty_registries_and_all_public_boundary_aliases() {
+        let empty_agents = AgentRegistry::from_documents([]).unwrap();
+        assert!(empty_agents.is_empty());
+        assert_eq!(empty_agents.len(), 0);
+        assert!(empty_agents.documents().is_empty());
+        assert!(empty_agents.agents().is_empty());
+        assert!(empty_agents.iter().next().is_none());
+        assert!(empty_agents.ids().next().is_none());
+
+        let empty_skills = SkillRegistry::from_documents([]).unwrap();
+        assert!(empty_skills.is_empty());
+        assert_eq!(empty_skills.len(), 0);
+        assert!(empty_skills.documents().is_empty());
+        assert!(empty_skills.skills().is_empty());
+        assert!(empty_skills.iter().next().is_none());
+        assert!(empty_skills.ids().next().is_none());
+        assert!(empty_skills.validate_integrity().is_ok());
+        let empty_graph = empty_skills.dependency_graph().unwrap();
+        assert!(empty_graph.is_empty());
+        assert_eq!(empty_graph.len(), 0);
+        assert!(empty_graph.topological_order().is_empty());
+
+        let complete_skill = complete_skill_document("skill", &[], &[]);
+        let agent_document = agent_document("agent", &["skill"]);
+        let agents = AgentRegistry::from_documents([agent_document.clone()]).unwrap();
+        let skills = SkillRegistry::from_documents([complete_skill.clone()]).unwrap();
+        let agent_id = AgentId::new("agent").unwrap();
+        let skill_id = SkillId::new("skill").unwrap();
+        assert_eq!(agents.documents(), agents.agents());
+        assert_eq!(agents.len(), 1);
+        assert!(!agents.is_empty());
+        assert_eq!(agents.iter().count(), 1);
+        assert_eq!(agents.get(&agent_id), agents.agent(&agent_id));
+        assert!(agents.contains(&agent_id));
+        assert!(!agents.contains(&AgentId::new("missing").unwrap()));
+        assert_eq!(agents.ids().next(), Some(&agent_id));
+        assert_eq!(skills.documents(), skills.skills());
+        assert_eq!(skills.len(), 1);
+        assert!(!skills.is_empty());
+        assert_eq!(skills.iter().count(), 1);
+        assert_eq!(skills.get(&skill_id), skills.skill(&skill_id));
+        assert!(skills.contains(&skill_id));
+        assert!(!skills.contains(&SkillId::new("missing").unwrap()));
+        assert_eq!(skills.ids().next(), Some(&skill_id));
+
+        let registry = Registry::new(agents, skills);
+        assert_eq!(registry.agents().len(), 1);
+        assert_eq!(registry.skills().len(), 1);
+        assert_eq!(
+            registry.agent(&agent_id),
+            registry.agents().agent(&agent_id)
+        );
+        assert_eq!(
+            registry.skill(&skill_id),
+            registry.skills().skill(&skill_id)
+        );
+        assert!(registry.validate().is_ok());
+        assert!(registry.validate_integrity().is_ok());
+
+        let root = temporary_directory("boundary-aliases");
+        write_file(&root.join("agents/agent.json"), &agent("agent"));
+        write_file(&root.join("skills/skill.json"), &skill("skill"));
+        assert_eq!(
+            AgentRegistry::load_directory(root.join("agents"))
+                .unwrap()
+                .len(),
+            1
+        );
+        assert_eq!(
+            SkillRegistry::load_directory(root.join("skills"))
+                .unwrap()
+                .len(),
+            1
+        );
+        assert_eq!(Registry::load(&root).unwrap().agents().len(), 1);
+        fs::remove_dir_all(root).unwrap();
+    }
+
+    #[test]
+    fn formats_loading_and_integrity_errors_with_sources() {
+        let missing = temporary_directory("missing-root");
+        let io_error = AgentRegistry::load(&missing).unwrap_err();
+        assert!(
+            io_error
+                .to_string()
+                .contains("could not inspect registry path")
+        );
+        assert!(std::error::Error::source(&io_error).is_some());
+
+        let file = temporary_directory("not-a-directory");
+        write_file(&file, "not a directory");
+        let not_directory = AgentRegistry::load(&file).unwrap_err();
+        assert!(not_directory.to_string().contains("not a directory"));
+        assert!(std::error::Error::source(&not_directory).is_some());
+        fs::remove_file(file).unwrap();
+
+        let first = agent_document("same", &["skill"]);
+        let duplicate = AgentRegistry::from_documents([first.clone(), first]).unwrap_err();
+        assert!(duplicate.to_string().contains("duplicate agent definition"));
+        assert!(std::error::Error::source(&duplicate).is_none());
+
+        let errors = [
+            RegistryIntegrityError::SkillNotFound {
+                skill_id: SkillId::new("missing").unwrap(),
+            },
+            RegistryIntegrityError::IncompleteSkillDefinition {
+                skill_id: SkillId::new("incomplete").unwrap(),
+                field: "rules",
+                source: "skill:incomplete".to_owned(),
+            },
+            RegistryIntegrityError::MissingSkillReference {
+                agent_id: AgentId::new("agent").unwrap(),
+                skill_id: SkillId::new("missing").unwrap(),
+                source: "agent:agent".to_owned(),
+            },
+            RegistryIntegrityError::MissingAgentReference {
+                skill_id: SkillId::new("skill").unwrap(),
+                agent_id: AgentId::new("missing").unwrap(),
+                source: "skill:skill".to_owned(),
+            },
+            RegistryIntegrityError::MissingSkillDependency {
+                skill_id: SkillId::new("skill").unwrap(),
+                dependency_id: SkillId::new("missing").unwrap(),
+                source: "skill:skill".to_owned(),
+            },
+            RegistryIntegrityError::MissingRelatedSkillReference {
+                skill_id: SkillId::new("skill").unwrap(),
+                related_skill_id: SkillId::new("missing").unwrap(),
+                source: "skill:skill".to_owned(),
+            },
+            RegistryIntegrityError::ConflictingCapabilityDeclaration {
+                capability_id: CapabilityId::new("shared.analysis").unwrap(),
+                first_source: "agent:first".to_owned(),
+                conflicting_source: "skill:second".to_owned(),
+            },
+            RegistryIntegrityError::CircularSkillDependency {
+                cycle: vec![SkillId::new("a").unwrap(), SkillId::new("a").unwrap()],
+                source: "skill:a".to_owned(),
+            },
+        ];
+        for error in errors {
+            assert!(!error.to_string().is_empty());
         }
     }
 }

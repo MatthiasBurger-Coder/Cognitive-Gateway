@@ -43,5 +43,9 @@ jobs:
         uses: taiki-e/install-action@cargo-llvm-cov
       - name: Domain coverage gate
         run: cargo llvm-cov -p gateway-domain --all-targets --fail-under-lines 95
+      - name: CG-03 registry coverage gate
+        run: cargo llvm-cov -p gateway-registry --all-targets --fail-under-lines 95
+      - name: CG-03 registry CLI coverage gate
+        run: cargo llvm-cov -p gateway-daemon --all-targets --fail-under-lines 95
       - name: Clippy
         run: cargo clippy --workspace --all-targets -- -D warnings

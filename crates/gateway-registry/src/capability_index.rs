@@ -1283,4 +1283,56 @@ mod tests {
         let no_match = CapabilityIndex::default().query(&CapabilityQuery::all());
         assert_eq!(no_match.outcome(), CapabilityQueryOutcome::NoMatch);
     }
+
+    #[test]
+    fn resolves_unique_candidates_and_exposes_rejection_diagnostics() {
+        let capability = capability("unique.analysis", "analysis", &["analysis"]);
+        let registry =
+            Registry::from_documents([], [skill("only", &[], [capability.clone()])]).unwrap();
+        let index = registry.capability_index().unwrap();
+        let capability_id = CapabilityId::new("unique.analysis").unwrap();
+        let query = CapabilityQuery::new(capability_id.clone());
+
+        let result = index.query(&query);
+        assert_eq!(result.outcome(), CapabilityQueryOutcome::Unique);
+        assert!(result.is_unique());
+        let candidate = result.unique_candidate().unwrap();
+        assert_eq!(candidate.capability_id(), &capability_id);
+        let resolved = index.resolve_unique(&query).unwrap();
+        assert_eq!(resolved.capability(), candidate.capability());
+        assert_eq!(resolved.provider(), candidate.provider());
+        assert_eq!(
+            index.resolve(&query).unwrap().provider(),
+            candidate.provider()
+        );
+
+        let filtered = index.query(&CapabilityQuery::all().with_selector(
+            super::CapabilitySelector::CapabilityId(CapabilityId::new("other.analysis").unwrap()),
+        ));
+        assert_eq!(filtered.outcome(), CapabilityQueryOutcome::NoMatch);
+        assert!(filtered.is_empty());
+        assert_eq!(filtered.len(), 0);
+        assert_eq!(filtered.rejected(), filtered.rejections());
+        assert_eq!(filtered.rejections().len(), 1);
+        let rejection = &filtered.rejections()[0];
+        assert_eq!(rejection.capability(), &capability);
+        assert_eq!(rejection.provider().to_string(), "skill:only");
+        let failed = rejection.failed_selectors().collect::<Vec<_>>();
+        assert_eq!(
+            failed,
+            rejection
+                .reasons()
+                .iter()
+                .map(|reason| reason.selector())
+                .collect::<Vec<_>>()
+        );
+        assert_eq!(failed.len(), 1);
+        assert!(matches!(
+            failed[0],
+            super::CapabilitySelector::CapabilityId(id) if id.as_str() == "other.analysis"
+        ));
+
+        let no_match_error = filtered.unique_candidate().unwrap_err();
+        assert!(no_match_error.to_string().contains("no match"));
+    }
 }
