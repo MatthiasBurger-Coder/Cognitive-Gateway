@@ -1,18 +1,17 @@
 {
-  "schema_version": "1.0",
+  "schema_version": 2,
   "kind": "skill",
   "id": "image-versioning-tagging",
+  "name": "image versioning tagging",
   "description": "Container image version governance",
   "owner_agent_id": null,
-  "dependency_ids": [],
+  "authoritative_sources": [],
+  "rules": [],
+  "verification": [],
+  "requires": [],
+  "related_skills": [],
   "required_capability_ids": [],
   "knowledge_queries": [
     "Container image version governance"
-  ],
-  "origin": {
-    "project": "Tiny-Swarm-World",
-    "source": ".agents/skills/image-versioning-tagging/SKILL.md",
-    "migration_status": "MIGRATED"
-  }
+  ]
 }
-

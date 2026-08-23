@@ -1,18 +1,17 @@
 {
-  "schema_version": "1.0",
+  "schema_version": 2,
   "kind": "skill",
   "id": "nexus-bootstrap",
+  "name": "nexus bootstrap",
   "description": "Nexus bootstrap guidance",
   "owner_agent_id": null,
-  "dependency_ids": [],
+  "authoritative_sources": [],
+  "rules": [],
+  "verification": [],
+  "requires": [],
+  "related_skills": [],
   "required_capability_ids": [],
   "knowledge_queries": [
     "Nexus bootstrap guidance"
-  ],
-  "origin": {
-    "project": "Tiny-Swarm-World",
-    "source": ".agents/skills/nexus-bootstrap/SKILL.md",
-    "migration_status": "MIGRATED"
-  }
+  ]
 }
-

@@ -1,18 +1,17 @@
 {
-  "schema_version": "1.0",
+  "schema_version": 2,
   "kind": "skill",
   "id": "llm-analysis-expert",
+  "name": "llm analysis expert",
   "description": "LLM-assisted analysis with explicit evidence",
   "owner_agent_id": null,
-  "dependency_ids": [],
+  "authoritative_sources": [],
+  "rules": [],
+  "verification": [],
+  "requires": [],
+  "related_skills": [],
   "required_capability_ids": [],
   "knowledge_queries": [
     "LLM-assisted analysis with explicit evidence"
-  ],
-  "origin": {
-    "project": "Tiny-Swarm-World",
-    "source": ".agents/skills/llm-analysis-expert/SKILL.md",
-    "migration_status": "MIGRATED"
-  }
+  ]
 }
-

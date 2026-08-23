@@ -1,18 +1,17 @@
 {
-  "schema_version": "1.0",
+  "schema_version": 2,
   "kind": "skill",
   "id": "tiny-swarm-world-system-architecture",
+  "name": "tiny swarm world system architecture",
   "description": "TSW Linux/WSL and Swarm architecture",
   "owner_agent_id": null,
-  "dependency_ids": [],
+  "authoritative_sources": [],
+  "rules": [],
+  "verification": [],
+  "requires": [],
+  "related_skills": [],
   "required_capability_ids": [],
   "knowledge_queries": [
     "TSW Linux/WSL and Swarm architecture"
-  ],
-  "origin": {
-    "project": "Tiny-Swarm-World",
-    "source": ".agents/skills/tiny-swarm-world-system-architecture/SKILL.md",
-    "migration_status": "MIGRATED"
-  }
+  ]
 }
-

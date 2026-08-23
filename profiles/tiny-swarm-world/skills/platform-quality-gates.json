@@ -1,18 +1,17 @@
 {
-  "schema_version": "1.0",
+  "schema_version": 2,
   "kind": "skill",
   "id": "platform-quality-gates",
+  "name": "platform quality gates",
   "description": "TSW verification gate selection",
   "owner_agent_id": null,
-  "dependency_ids": [],
+  "authoritative_sources": [],
+  "rules": [],
+  "verification": [],
+  "requires": [],
+  "related_skills": [],
   "required_capability_ids": [],
   "knowledge_queries": [
     "TSW verification gate selection"
-  ],
-  "origin": {
-    "project": "Tiny-Swarm-World",
-    "source": ".agents/skills/platform-quality-gates/SKILL.md",
-    "migration_status": "MIGRATED"
-  }
+  ]
 }
-

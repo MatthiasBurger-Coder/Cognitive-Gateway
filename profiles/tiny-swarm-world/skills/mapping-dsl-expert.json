@@ -1,18 +1,17 @@
 {
-  "schema_version": "1.0",
+  "schema_version": 2,
   "kind": "skill",
   "id": "mapping-dsl-expert",
+  "name": "mapping dsl expert",
   "description": "TSW mapping DSL guidance",
   "owner_agent_id": null,
-  "dependency_ids": [],
+  "authoritative_sources": [],
+  "rules": [],
+  "verification": [],
+  "requires": [],
+  "related_skills": [],
   "required_capability_ids": [],
   "knowledge_queries": [
     "TSW mapping DSL guidance"
-  ],
-  "origin": {
-    "project": "Tiny-Swarm-World",
-    "source": ".agents/skills/mapping-dsl-expert/SKILL.md",
-    "migration_status": "MIGRATED"
-  }
+  ]
 }
-

@@ -1,15 +1,17 @@
 {
-  "schema_version": "1.0",
+  "schema_version": 2,
   "kind": "skill",
   "id": "frontend-ux-guidelines",
+  "name": "frontend ux guidelines",
   "description": "Accessible evidence-review UX",
   "owner_agent_id": null,
-  "dependency_ids": [],
+  "authoritative_sources": [],
+  "rules": [],
+  "verification": [],
+  "requires": [],
+  "related_skills": [],
   "required_capability_ids": [],
-  "knowledge_queries": ["accessible evidence-review UX"],
-  "origin": {
-    "project": "Tiny-Swarm-World",
-    "source": ".agents/skills/frontend-ux-guidelines/SKILL.md",
-    "migration_status": "MIGRATED"
-  }
+  "knowledge_queries": [
+    "accessible evidence-review UX"
+  ]
 }

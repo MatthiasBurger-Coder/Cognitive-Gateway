@@ -1,6 +1,5 @@
 use std::path::PathBuf;
 
-use gateway_domain::MigrationStatus;
 use gateway_registry::Registry;
 
 fn repository_profile() -> PathBuf {
@@ -88,30 +87,27 @@ fn migrated_tsw_profile_loads() {
 }
 
 #[test]
-fn profile_definitions_preserve_scope_and_provenance() {
+fn profile_definitions_preserve_scope_and_structured_content() {
     let registry = Registry::load_profile(repository_profile()).expect("profile should load");
 
     for agent in registry.agents().documents() {
-        assert_eq!(agent.origin().project(), "Tiny-Swarm-World");
-        assert!(agent.origin().source().starts_with(".agents/roles/"));
-        assert_eq!(agent.origin().migration_status(), MigrationStatus::Migrated);
+        assert_eq!(agent.schema_version().major(), 2);
     }
 
     for skill in registry.skills().documents() {
-        assert_eq!(skill.origin().project(), "Tiny-Swarm-World");
-        assert!(skill.origin().source().starts_with(".agents/skills/"));
+        assert_eq!(skill.schema_version().major(), 2);
+        assert!(!skill.name().is_empty());
         assert!(skill.owner_agent_id().is_none());
         assert!(skill.dependency_ids().is_empty());
         assert!(skill.required_capability_ids().is_empty());
         assert_eq!(skill.knowledge_queries().len(), 1);
 
-        if skill.id().as_str() == "python-automation" {
-            assert_eq!(skill.origin().migration_status(), MigrationStatus::Merged);
-            assert!(skill.origin().source().contains("; "));
-        } else {
-            assert_eq!(skill.origin().migration_status(), MigrationStatus::Migrated);
-            assert!(!skill.origin().source().contains("; "));
-        }
+        assert!(
+            skill
+                .authoritative_sources()
+                .iter()
+                .all(|value| !value.as_str().is_empty())
+        );
     }
 
     for scope_gated_id in SCOPE_GATED_SKILLS {

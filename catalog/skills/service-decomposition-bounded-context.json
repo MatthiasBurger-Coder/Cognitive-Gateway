@@ -1,15 +1,17 @@
 {
-  "schema_version": "1.0",
+  "schema_version": 2,
   "kind": "skill",
   "id": "service-decomposition-bounded-context",
+  "name": "service decomposition bounded context",
   "description": "Service ownership and boundaries",
   "owner_agent_id": null,
-  "dependency_ids": [],
+  "authoritative_sources": [],
+  "rules": [],
+  "verification": [],
+  "requires": [],
+  "related_skills": [],
   "required_capability_ids": [],
-  "knowledge_queries": ["service ownership and boundaries"],
-  "origin": {
-    "project": "Tiny-Swarm-World",
-    "source": ".agents/skills/service-decomposition-bounded-context/SKILL.md",
-    "migration_status": "MIGRATED"
-  }
+  "knowledge_queries": [
+    "service ownership and boundaries"
+  ]
 }

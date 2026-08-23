@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.0",
+  "schema_version": 2,
   "kind": "agent",
   "id": "devops",
   "description": "TSW platform automation and runtime operations",
@@ -9,11 +9,5 @@
     "devops-kubernetes",
     "observability-diagnostics",
     "quality-gate"
-  ],
-  "origin": {
-    "project": "Tiny-Swarm-World",
-    "source": ".agents/roles/senior-devops.md",
-    "migration_status": "MIGRATED"
-  }
+  ]
 }
-

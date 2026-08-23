@@ -286,14 +286,15 @@ The reusable Skill candidates selected by this matrix are materialized under
 37 canonical Skill IDs classified as catalog-owned: generic core, development,
 quality, architecture, documentation and declarative governance skills.
 
-Each document uses the CG-03.03 v1 Skill contract. Its normalized
-responsibility is stored in `description`, retrieval hints in
-`knowledge_queries`, and both `dependency_ids` and
-`required_capability_ids` are present as explicit ordered arrays. Empty arrays
-mean that this migration does not assert a dependency or abstract capability
-requirement; they are not an implicit execution grant.
+The migration record predates the v2 runtime contract. Current documents use
+the self-contained Skill shape: normalized responsibility in `name` and
+`description`, structured guidance in `authoritative_sources`, `rules` and
+`verification`, and explicit `requires`/`related_skills` references. Empty
+arrays mean that the definition does not assert that relationship; they are
+not an implicit execution grant.
 
-The three merged canonical skills preserve every source path in `origin.source`:
+The three merged canonical skills were historically associated with multiple
+source paths:
 `architecture-hexagonal`, `contract-governance-expert` and
 `observability-diagnostics`. Project-specific, process-only, scope-gated and
 deprecated candidates remain outside the generic catalog for CG-03.09 or the
@@ -305,14 +306,15 @@ The TSW-specific candidates selected by this matrix are materialized under
 the TSW profile: four canonical Agent definitions and 52 canonical Skill
 definitions. Profile Agents may reference generic catalog Skills, and the
 combined registry validates both boundaries together.
-The merged python-automation Skill preserves both source paths in
-origin.source and uses migration status MERGED.
+The merged python-automation Skill was historically associated with both
+source paths. Those migration details remain documentation-only and are not
+serialized into runtime definitions.
 
 The four scope-gated Skills
 (code-property-graph-joern-specialist, joern-semantic-analysis,
 replay-graph-llm-review and sca-migration-expert) remain unmaterialized until
 explicit scope approval. Conditional applicability remains part of the
-normalized responsibility because the v1 definition contract has no profile
+normalized responsibility because profile selection remains outside the
 selector or execution constraint field. bdd-expert and
 strangler-command-adapter-pattern are profile entries, while their
 workflow/process use remains deferred to CG-05.

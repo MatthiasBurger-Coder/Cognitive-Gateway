@@ -15,6 +15,9 @@ impl SchemaVersion {
     /// The first schema version used by the gateway contracts.
     pub const V1: Self = Self { major: 1, minor: 0 };
 
+    /// The self-contained Agent and Skill definition contract.
+    pub const V2: Self = Self { major: 2, minor: 0 };
+
     /// Creates a schema version. Major version zero is reserved for drafts.
     pub const fn new(major: u16, minor: u16) -> Result<Self, ValidationError> {
         if major == 0 {
@@ -81,6 +84,8 @@ mod tests {
         assert_eq!(SchemaVersion::V1.major(), 1);
         assert_eq!(SchemaVersion::V1.minor(), 0);
         assert_eq!(SchemaVersion::V1.to_string(), "1.0");
+        assert_eq!(SchemaVersion::V2.major(), 2);
+        assert_eq!(SchemaVersion::V2.to_string(), "2.0");
     }
 
     #[test]

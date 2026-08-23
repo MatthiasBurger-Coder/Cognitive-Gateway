@@ -1,15 +1,17 @@
 {
-  "schema_version": "1.0",
+  "schema_version": 2,
   "kind": "skill",
   "id": "replay-runtime-correlation-specialist",
+  "name": "replay runtime correlation specialist",
   "description": "Replay and trace correlation semantics",
   "owner_agent_id": null,
-  "dependency_ids": [],
+  "authoritative_sources": [],
+  "rules": [],
+  "verification": [],
+  "requires": [],
+  "related_skills": [],
   "required_capability_ids": [],
-  "knowledge_queries": ["replay and trace correlation semantics"],
-  "origin": {
-    "project": "Tiny-Swarm-World",
-    "source": ".agents/skills/replay-runtime-correlation-specialist/SKILL.md",
-    "migration_status": "MIGRATED"
-  }
+  "knowledge_queries": [
+    "replay and trace correlation semantics"
+  ]
 }

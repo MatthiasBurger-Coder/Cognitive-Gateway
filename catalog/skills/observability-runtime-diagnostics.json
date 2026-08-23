@@ -1,15 +1,17 @@
 {
-  "schema_version": "1.0",
+  "schema_version": 2,
   "kind": "skill",
   "id": "observability-runtime-diagnostics",
+  "name": "observability runtime diagnostics",
   "description": "Runtime-wide diagnostic governance",
   "owner_agent_id": null,
-  "dependency_ids": [],
+  "authoritative_sources": [],
+  "rules": [],
+  "verification": [],
+  "requires": [],
+  "related_skills": [],
   "required_capability_ids": [],
-  "knowledge_queries": ["runtime-wide diagnostic governance"],
-  "origin": {
-    "project": "Tiny-Swarm-World",
-    "source": ".agents/skills/observability-runtime-diagnostics/SKILL.md",
-    "migration_status": "MIGRATED"
-  }
+  "knowledge_queries": [
+    "runtime-wide diagnostic governance"
+  ]
 }

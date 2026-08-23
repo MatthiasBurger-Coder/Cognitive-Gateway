@@ -1,15 +1,17 @@
 {
-  "schema_version": "1.0",
+  "schema_version": 2,
   "kind": "skill",
   "id": "devops-ci-cd",
+  "name": "devops ci cd",
   "description": "CI/CD automation boundaries",
   "owner_agent_id": null,
-  "dependency_ids": [],
+  "authoritative_sources": [],
+  "rules": [],
+  "verification": [],
+  "requires": [],
+  "related_skills": [],
   "required_capability_ids": [],
-  "knowledge_queries": ["CI/CD automation boundaries"],
-  "origin": {
-    "project": "Tiny-Swarm-World",
-    "source": ".agents/skills/devops-ci-cd/SKILL.md",
-    "migration_status": "MIGRATED"
-  }
+  "knowledge_queries": [
+    "CI/CD automation boundaries"
+  ]
 }

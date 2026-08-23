@@ -24,8 +24,8 @@ pub use agent::AgentDefinition;
 pub use capability::{Capability, CapabilityClass, CapabilityDefinition};
 pub use constraint::{Constraint, ConstraintDefinition, ConstraintKind};
 pub use definition_contract::{
-    AgentDefinitionDocument, DEFINITION_SCHEMA_VERSION, DefinitionKind, DefinitionOrigin,
-    MigrationStatus, SkillDefinitionDocument, VersionedAgentDefinition, VersionedSkillDefinition,
+    AgentDefinitionDocument, DEFINITION_SCHEMA_VERSION, DefinitionKind, SkillDefinitionDocument,
+    VersionedAgentDefinition, VersionedSkillDefinition,
 };
 pub use definitions::DefinitionCatalog;
 pub use policy::PolicyDefinition;
