@@ -1,0 +1,34 @@
+{
+  "fixture_version": "cg-04.16-v1",
+  "fixture_kind": "execution_graph",
+  "graph_id": "neutral-lock-conflict",
+  "nodes": [
+    {
+      "id": "slice-a",
+      "depends_on": [],
+      "execution_group": "parallel-group",
+      "required_locks": ["resource-shared"]
+    },
+    {
+      "id": "slice-b",
+      "depends_on": [],
+      "execution_group": "parallel-group",
+      "required_locks": ["resource-shared"]
+    }
+  ],
+  "execution_groups": [
+    {
+      "id": "parallel-group",
+      "mode": "parallel",
+      "members": ["slice-a", "slice-b"]
+    }
+  ],
+  "locks": [
+    {"id": "resource-shared", "kind": "resource", "mode": "exclusive"}
+  ],
+  "expected": {
+    "acyclic": true,
+    "disposition": "reject-parallel-plan",
+    "reason": "exclusive-lock-conflict"
+  }
+}

@@ -1,0 +1,162 @@
+{
+  "schema_version": "cg-04.16-v1",
+  "authority": "docs/tiny-swarm-world-process-inventory.json",
+  "boundary": {
+    "lifecycle_process_ir_v1": [
+      "states",
+      "events",
+      "transitions",
+      "gates",
+      "evidence",
+      "blockers",
+      "invariants",
+      "retry-recovery"
+    ],
+    "execution_graph_extension": [
+      "dependency-dag",
+      "topological-ordering",
+      "execution-groups",
+      "locks",
+      "joins-barriers",
+      "parallelization",
+      "stream-distribution"
+    ]
+  },
+  "semantic_classes": [
+    {
+      "id": "slice-task-dependency-graph",
+      "disposition": "EXTENSION_READY",
+      "status": "DEFERRED_RUNTIME_FEATURE",
+      "source_units": ["TSW-PROC-007", "TSW-PROC-008"],
+      "fixture": "crates/gateway-process/fixtures/execution-graph/neutral-graph.json",
+      "current_contract": "ExecutionGraphExtension(kind=execution-graph, supported=false)"
+    },
+    {
+      "id": "topological-ordering",
+      "disposition": "DEFERRED_RUNTIME_FEATURE",
+      "status": "NOT_SUPPORTED_BY_PROCESS_IR_V1",
+      "source_units": ["TSW-PROC-007", "TSW-PROC-008"],
+      "fixture": "crates/gateway-process/fixtures/execution-graph/neutral-graph.json"
+    },
+    {
+      "id": "unknown-dependency-and-cycle-rejection",
+      "disposition": "DEFERRED_RUNTIME_FEATURE",
+      "status": "NOT_SUPPORTED_BY_PROCESS_IR_V1",
+      "source_units": ["TSW-PROC-008"],
+      "fixture": "crates/gateway-process/fixtures/execution-graph/cycle.json"
+    },
+    {
+      "id": "execution-groups",
+      "disposition": "EXTENSION_READY",
+      "status": "DEFERRED_RUNTIME_FEATURE",
+      "source_units": ["TSW-PROC-007", "TSW-PROC-009"],
+      "fixture": "crates/gateway-process/fixtures/execution-graph/neutral-graph.json"
+    },
+    {
+      "id": "sequential-vs-parallel-input",
+      "disposition": "DEFERRED_RUNTIME_FEATURE",
+      "status": "NOT_SUPPORTED_BY_PROCESS_IR_V1",
+      "source_units": ["TSW-PROC-007", "TSW-PROC-018"],
+      "fixture": "crates/gateway-process/fixtures/execution-graph/neutral-graph.json"
+    },
+    {
+      "id": "resource-locks",
+      "disposition": "UNSUPPORTED_FUTURE_EXTENSION",
+      "status": "NO_V1_REPRESENTATION",
+      "source_units": ["TSW-PROC-007", "TSW-PROC-018"],
+      "fixture": "crates/gateway-process/fixtures/execution-graph/lock-conflict.json"
+    },
+    {
+      "id": "lock-conflict-handling",
+      "disposition": "UNSUPPORTED_FUTURE_EXTENSION",
+      "status": "NO_V1_REPRESENTATION",
+      "source_units": ["TSW-PROC-018"],
+      "fixture": "crates/gateway-process/fixtures/execution-graph/lock-conflict.json"
+    },
+    {
+      "id": "join-barriers",
+      "disposition": "EXTENSION_READY",
+      "status": "DEFERRED_RUNTIME_FEATURE",
+      "source_units": ["TSW-PROC-019"],
+      "fixture": "crates/gateway-process/fixtures/execution-graph/neutral-graph.json"
+    },
+    {
+      "id": "typed-failure-error-routing",
+      "disposition": "SUPPORTED_V1",
+      "status": "SUPPORTED",
+      "source_units": ["TSW-PROC-010", "TSW-PROC-012", "TSW-PROC-017"],
+      "current_contract": "typed events, blockers, evidence and recovery policies"
+    },
+    {
+      "id": "gate-evidence-interactions",
+      "disposition": "SUPPORTED_V1",
+      "status": "SUPPORTED",
+      "source_units": ["TSW-PROC-002", "TSW-PROC-004", "TSW-PROC-013", "TSW-PROC-014"],
+      "current_contract": "typed gates and evidence constraints"
+    },
+    {
+      "id": "stop-conditions",
+      "disposition": "SUPPORTED_V1",
+      "status": "SUPPORTED",
+      "source_units": ["TSW-PROC-004", "TSW-PROC-013", "TSW-PROC-017"],
+      "current_contract": "blocked, failed, waiting and rejected decisions"
+    },
+    {
+      "id": "stream-distribution-metadata",
+      "disposition": "UNSUPPORTED_FUTURE_EXTENSION",
+      "status": "NO_V1_REPRESENTATION",
+      "source_units": ["TSW-PROC-018"],
+      "fixture": "crates/gateway-process/fixtures/execution-graph/neutral-graph.json"
+    },
+    {
+      "id": "runtime-orchestration-boundary",
+      "disposition": "EXCLUDED_BOUNDARY",
+      "status": "OUTSIDE_CG04_LIFECYCLE_AUTHORITY",
+      "source_units": ["TSW-PROC-009", "TSW-PROC-020"],
+      "current_contract": "agent and runtime selection remain external adapters"
+    }
+  ],
+  "migration_gaps": [
+    {
+      "id": "CG04-GAP-EXECUTION-DAG",
+      "classification": "DEFERRED_ENGINE_FEATURE",
+      "source_units": ["TSW-PROC-007", "TSW-PROC-008"],
+      "semantic_classes": [
+        "slice-task-dependency-graph",
+        "topological-ordering",
+        "unknown-dependency-and-cycle-rejection"
+      ],
+      "disposition": "future typed execution-graph extension owns dependency validation and scheduling",
+      "status": "explicitly_deferred"
+    },
+    {
+      "id": "CG04-GAP-LOCKS-PARALLELISM",
+      "classification": "UNSUPPORTED_GAP",
+      "source_units": ["TSW-PROC-018"],
+      "semantic_classes": [
+        "sequential-vs-parallel-input",
+        "resource-locks",
+        "lock-conflict-handling",
+        "stream-distribution-metadata"
+      ],
+      "disposition": "unsupported until typed lock, parallel scheduling and stream contracts exist",
+      "status": "explicitly_unsupported"
+    },
+    {
+      "id": "CG04-GAP-JOIN-BARRIER",
+      "classification": "DEFERRED_ENGINE_FEATURE",
+      "source_units": ["TSW-PROC-019"],
+      "semantic_classes": ["join-barriers"],
+      "disposition": "future typed execution-graph extension owns join and barrier evaluation",
+      "status": "explicitly_deferred"
+    },
+    {
+      "id": "CG04-GAP-RUNTIME-ORCHESTRATION",
+      "classification": "EXCLUDED",
+      "source_units": ["TSW-PROC-009", "TSW-PROC-020"],
+      "semantic_classes": ["runtime-orchestration-boundary"],
+      "disposition": "outside CG-04 lifecycle authority and remains an adapter concern",
+      "status": "explicitly_excluded"
+    }
+  ]
+}

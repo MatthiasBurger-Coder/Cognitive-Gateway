@@ -11,3 +11,7 @@ ID/version, an invalid definition, an unsupported version or a conflicting
 digest fails closed. Resolving without a version selects the highest
 registered version; explicit version lookup is exact. The registry does not
 execute processes, agents or tools.
+
+The lifecycle/scheduling boundary and the explicit CG-04.16 execution-graph
+dispositions are documented in
+[`execution-graph-extension-boundary.md`](execution-graph-extension-boundary.md).
