@@ -34,6 +34,20 @@ Retrieval is advisory and evidence-producing. It must not directly create new au
 
 Operating Mode, Execution Profile, workflow, gate, slice, blockers and authorization state are explicit machine-readable data rather than implicit prompt text.
 
+The domain currently models `WorkflowState`, `GateState` and `BlockerState` as
+strict, independently parseable state machines. `ExecutionState` validates
+their coordinated invariants: blocked execution requires an active blocker and
+a blocked gate; completion requires a passed or skipped gate; and active
+blockers cannot coexist with running or terminal workflows. Unknown values and
+illegal transitions fail closed. `OperatingMode` and `ExecutionProfile` stay
+orthogonal, with project-specific restrictions represented by explicit
+constraints rather than hard-coded coupling.
+
+Capabilities are classified as `INSPECT` or `MUTATE`. Constraints are typed
+domain declarations, including feature freeze, consent for live mutation and
+an optional full-path requirement for release qualification. Neither type
+contains provider handles or executes an adapter operation.
+
 ## 8.8 Dependency inversion and adapter replaceability
 
 The deterministic Rust core follows Hexagonal Architecture. Domain and application contracts are stable inner abstractions; infrastructure and execution technologies are replaceable outer adapters.

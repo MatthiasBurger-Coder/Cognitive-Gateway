@@ -1,5 +1,8 @@
 # 12. Glossary
 
+This glossary includes the explicit execution-state, capability and constraint
+domain concepts introduced by CG-02.03.
+
 ## Adapter
 
 An outer component that translates between an external technology and a core-defined port. Adapters are replaceable and do not define domain authority.
@@ -75,3 +78,27 @@ Declarative capability/knowledge contract with dependencies, ownership, constrai
 
 ## SLM
 Small Language Model used locally for semantic perception tasks such as classification or relevance scoring.
+
+## Execution State
+
+The validated combination of workflow, gate and blocker states for one run.
+
+## Gate State
+
+Lifecycle of the current quality or governance gate: `PENDING`, `IN_PROGRESS`,
+`PASSED`, `FAILED`, `BLOCKED` or `SKIPPED`.
+
+## Blocker State
+
+Whether execution is `CLEAR`, `ACTIVE` or `RESOLVED` with respect to blockers.
+
+## Capability Class
+
+The safety classification of a capability: `INSPECT` is read-only, while
+`MUTATE` may change state and requires policy evaluation.
+
+## Constraint
+
+A typed execution-planning rule, such as feature freeze or a requirement for
+explicit consent before mutation. Constraints can restrict a mode/profile pair
+without making those dimensions the same concept.

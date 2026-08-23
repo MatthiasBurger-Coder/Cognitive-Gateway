@@ -102,11 +102,19 @@ typed_identifier! {
     CapabilityId
 }
 
+typed_identifier! {
+    /// Identifies a named execution constraint.
+    ConstraintId
+}
+
 #[cfg(test)]
 mod tests {
     use std::str::FromStr;
 
-    use super::{AgentId, CapabilityId, ExecutionContextId, PolicyId, SkillId, TaskId, WorkflowId};
+    use super::{
+        AgentId, CapabilityId, ConstraintId, ExecutionContextId, PolicyId, SkillId, TaskId,
+        WorkflowId,
+    };
 
     #[test]
     fn typed_ids_are_not_interchangeable() {
@@ -143,6 +151,10 @@ mod tests {
         assert_eq!(
             CapabilityId::new("capability").unwrap().as_str(),
             "capability"
+        );
+        assert_eq!(
+            ConstraintId::new("constraint").unwrap().as_str(),
+            "constraint"
         );
     }
 }

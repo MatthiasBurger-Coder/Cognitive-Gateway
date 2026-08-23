@@ -32,6 +32,16 @@ pub enum ValidationError {
     InvalidSchemaVersion,
     /// A schema version string was not in the supported `MAJOR.MINOR` form.
     InvalidSchemaVersionFormat,
+    /// A serialized value did not identify a known domain enum/state value.
+    UnknownDomainValue { field: &'static str, value: String },
+    /// A state transition is not allowed by the domain lifecycle.
+    InvalidStateTransition {
+        state: &'static str,
+        from: String,
+        to: String,
+    },
+    /// A set of state values violates a cross-field domain invariant.
+    InvalidStateCombination { reason: &'static str },
     /// A descriptor requires at least one relationship in the named field.
     EmptyRelationship { field: &'static str },
     /// A relationship was listed more than once in the named field.
@@ -83,6 +93,18 @@ impl fmt::Display for ValidationError {
             }
             Self::InvalidSchemaVersionFormat => {
                 write!(formatter, "schema version must use MAJOR.MINOR format")
+            }
+            Self::UnknownDomainValue { field, value } => {
+                write!(formatter, "unknown {field} value {value:?}")
+            }
+            Self::InvalidStateTransition { state, from, to } => {
+                write!(
+                    formatter,
+                    "invalid {state} transition from {from:?} to {to:?}"
+                )
+            }
+            Self::InvalidStateCombination { reason } => {
+                write!(formatter, "invalid state combination: {reason}")
             }
             Self::EmptyRelationship { field } => {
                 write!(formatter, "{field} must contain at least one reference")
@@ -297,6 +319,18 @@ mod tests {
             ValidationError::InvalidIdentifierBoundary,
             ValidationError::InvalidSchemaVersion,
             ValidationError::InvalidSchemaVersionFormat,
+            ValidationError::UnknownDomainValue {
+                field: "operating_mode",
+                value: "UNKNOWN".to_owned(),
+            },
+            ValidationError::InvalidStateTransition {
+                state: "workflow",
+                from: "COMPLETED".to_owned(),
+                to: "RUNNING".to_owned(),
+            },
+            ValidationError::InvalidStateCombination {
+                reason: "a completed workflow requires a passed gate",
+            },
             ValidationError::EmptyRelationship { field: "skill_ids" },
             ValidationError::DuplicateRelationship { field: "skill_ids" },
             ValidationError::SelfReference {

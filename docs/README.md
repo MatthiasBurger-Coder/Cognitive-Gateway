@@ -13,7 +13,8 @@ See [`adr/`](adr/) for accepted architecture decisions.
 ## Domain model
 
 See [`domain-model.md`](domain-model.md) for the descriptor and relationship
-contract introduced by CG-02.02.
+contract introduced by CG-02.02, including the CG-02.03 execution state,
+capability and constraint model.
 
 ## Documentation Policy
 
