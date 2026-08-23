@@ -68,7 +68,9 @@ A core-owned interface defining how the application communicates with an externa
 Retrieval-Augmented Generation. In Cognitive Gateway, RAG is a knowledge accelerator and never the sole governance authority.
 
 ## Resolver
-Deterministic component that selects valid workflows, agents and skills from registry data and project state.
+Deterministic component that selects valid workflows, agents and skills from
+validated registry data. Request or project state may constrain a later
+selection, but it cannot change catalog membership.
 
 ## Skill
 Declarative knowledge and capability requirement with optional ownership,

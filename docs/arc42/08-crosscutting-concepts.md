@@ -2,7 +2,10 @@
 
 ## 8.1 Authority and provenance
 
-Every context fragment should retain provenance. Governance and policy content must be traceable to canonical repository sources.
+Every context fragment should retain provenance. Gateway-owned governance and
+policy content must be traceable to canonical repository sources. Consuming
+project content is contextual input and must remain distinguishable from the
+definitions that establish catalog membership.
 
 ## 8.2 Explainability
 

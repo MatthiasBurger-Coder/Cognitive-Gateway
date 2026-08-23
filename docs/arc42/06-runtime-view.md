@@ -53,6 +53,10 @@ CLI / Runtime Adapter
 ```
 
 This path must work without an LLM or external network access in v0.1.
+The Catalog Loader receives only the Gateway-owned catalog boundary. Consuming
+project context enters through explicit request, input, retrieval or adapter
+ports; it may influence a request-scoped plan, but it cannot add, replace or
+override an Agent or Skill definition.
 
 ## 6.3 Semantic classification flow
 

@@ -34,6 +34,14 @@ Skill-owner, related-Skill and mandatory dependency references, as well as
 equivalence of shared capability declarations. There is no secondary built-in
 registry, merge operation or override rule.
 
+The project-agnostic integration proof is
+[`crates/gateway-registry/tests/project_agnostic.rs`](../crates/gateway-registry/tests/project_agnostic.rs).
+It loads the repository catalog without a project directory, validates the
+`analysis-storage-architect` Agent and Skill together, resolves the complete
+`resilience-engineering -> analysis-storage-architect` dependency closure, and
+verifies that conventional and explicitly supplied catalog boundaries produce
+the same registry snapshot.
+
 ## Resolution and runtime context
 
 `Registry::resolve_skill(skill_id)` resolves only the requested canonical Skill
