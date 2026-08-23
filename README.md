@@ -89,6 +89,7 @@ The technical architecture is maintained in the repository as the canonical sour
 - [`docs/arc42/`](docs/arc42/) — arc42 architecture documentation
 - [`docs/adr/`](docs/adr/) — Architecture Decision Records
 - [`docs/registry-inspection-cli.md`](docs/registry-inspection-cli.md) — `cg-registry` installation and inspection commands
+- [`docs/process-application-api.md`](docs/process-application-api.md) — Rust process application ports, simulation and explainability
 
 The GitHub Wiki is intended for simplified end-user documentation, tutorials and usage guidance. If Wiki content and repository architecture documentation ever conflict, the repository documentation is authoritative.
 

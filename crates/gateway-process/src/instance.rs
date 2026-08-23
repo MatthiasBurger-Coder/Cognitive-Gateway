@@ -416,6 +416,13 @@ impl ProcessInstance {
         self.blockers.insert(blocker.id().clone(), blocker);
     }
 
+    pub fn resolve_blocker(&mut self, blocker: &BlockerId) -> Result<(), InstanceError> {
+        self.blockers
+            .get_mut(blocker)
+            .ok_or_else(|| InstanceError::new("UNKNOWN_BLOCKER", "blocker is not attached"))?
+            .resolve()
+    }
+
     pub fn add_context_reference(
         &mut self,
         reference: impl Into<String>,

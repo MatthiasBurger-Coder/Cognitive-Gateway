@@ -1,6 +1,7 @@
 //! Typed gate, evidence, invariant and blocker evaluation values.
 
 use crate::EvidenceTypeId;
+use serde::Serialize;
 
 /// Explicit evidence evaluation status. Missing evidence never passes.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Ord, PartialOrd)]
@@ -65,7 +66,7 @@ impl EvidenceReference {
 }
 
 /// One machine-readable constraint result in a transition trace.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct ConstraintEvaluation {
     kind: String,
     reference: String,
