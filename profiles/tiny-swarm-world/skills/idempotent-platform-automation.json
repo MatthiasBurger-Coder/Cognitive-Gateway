@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0",
+  "kind": "skill",
+  "id": "idempotent-platform-automation",
+  "description": "Safe repeatable platform automation",
+  "owner_agent_id": null,
+  "dependency_ids": [],
+  "required_capability_ids": [],
+  "knowledge_queries": [
+    "Safe repeatable platform automation"
+  ],
+  "origin": {
+    "project": "Tiny-Swarm-World",
+    "source": ".agents/skills/idempotent-platform-automation/SKILL.md",
+    "migration_status": "MIGRATED"
+  }
+}
+

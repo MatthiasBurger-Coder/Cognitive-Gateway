@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0",
+  "kind": "agent",
+  "id": "python-automation-developer",
+  "description": "TSW Python automation boundaries",
+  "skill_ids": [
+    "architecture-hexagonal",
+    "python-automation",
+    "quality-architecture-validation",
+    "quality-gate",
+    "quality-testing-strategy",
+    "resilience-engineering"
+  ],
+  "origin": {
+    "project": "Tiny-Swarm-World",
+    "source": ".agents/roles/senior-python-automation-developer.md",
+    "migration_status": "MIGRATED"
+  }
+}
+

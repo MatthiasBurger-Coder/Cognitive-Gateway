@@ -1,0 +1,17 @@
+{
+  "schema_version": "1.0",
+  "kind": "skill",
+  "id": "python-automation",
+  "description": "TSW Python automation",
+  "owner_agent_id": null,
+  "dependency_ids": [],
+  "required_capability_ids": [],
+  "knowledge_queries": [
+    "TSW Python automation"
+  ],
+  "origin": {
+    "project": "Tiny-Swarm-World",
+    "source": ".agents/skills/python-automation/SKILL.md; .agents/skills/python-senior-developer/SKILL.md",
+    "migration_status": "MERGED"
+  }
+}

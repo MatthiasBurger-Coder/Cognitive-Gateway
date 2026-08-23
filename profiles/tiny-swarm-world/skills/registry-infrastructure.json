@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0",
+  "kind": "skill",
+  "id": "registry-infrastructure",
+  "description": "Artifact/registry infrastructure",
+  "owner_agent_id": null,
+  "dependency_ids": [],
+  "required_capability_ids": [],
+  "knowledge_queries": [
+    "Artifact/registry infrastructure"
+  ],
+  "origin": {
+    "project": "Tiny-Swarm-World",
+    "source": ".agents/skills/registry-infrastructure/SKILL.md",
+    "migration_status": "MIGRATED"
+  }
+}
+

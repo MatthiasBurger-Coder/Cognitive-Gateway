@@ -45,7 +45,7 @@ loading APIs and fail-closed conflict semantics.
 
 See the materialized reusable Agent definitions under [`../catalog/agents/`](../catalog/agents/)
 for CG-03.07 and the reusable Skill definitions under [`../catalog/skills/`](../catalog/skills/)
-for CG-03.08. TSW-specific material remains reserved for CG-03.09 under
+for CG-03.08. TSW-specific Agent and Skill definitions for CG-03.09 are under
 [`../profiles/tiny-swarm-world/`](../profiles/tiny-swarm-world/).
 
 ## Documentation Policy

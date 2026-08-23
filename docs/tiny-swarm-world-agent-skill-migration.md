@@ -298,3 +298,21 @@ The three merged canonical skills preserve every source path in `origin.source`:
 `observability-diagnostics`. Project-specific, process-only, scope-gated and
 deprecated candidates remain outside the generic catalog for CG-03.09 or the
 later workflow/governance slices.
+
+## CG-03.09 materialization record
+
+The TSW-specific candidates selected by this matrix are materialized under
+the TSW profile: four canonical Agent definitions and 52 canonical Skill
+definitions. Profile Agents may reference generic catalog Skills, and the
+combined registry validates both boundaries together.
+The merged python-automation Skill preserves both source paths in
+origin.source and uses migration status MERGED.
+
+The four scope-gated Skills
+(code-property-graph-joern-specialist, joern-semantic-analysis,
+replay-graph-llm-review and sca-migration-expert) remain unmaterialized until
+explicit scope approval. Conditional applicability remains part of the
+normalized responsibility because the v1 definition contract has no profile
+selector or execution constraint field. bdd-expert and
+strangler-command-adapter-pattern are profile entries, while their
+workflow/process use remains deferred to CG-05.

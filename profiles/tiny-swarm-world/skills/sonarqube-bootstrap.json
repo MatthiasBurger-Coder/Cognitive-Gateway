@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0",
+  "kind": "skill",
+  "id": "sonarqube-bootstrap",
+  "description": "SonarQube bootstrap guidance",
+  "owner_agent_id": null,
+  "dependency_ids": [],
+  "required_capability_ids": [],
+  "knowledge_queries": [
+    "SonarQube bootstrap guidance"
+  ],
+  "origin": {
+    "project": "Tiny-Swarm-World",
+    "source": ".agents/skills/sonarqube-bootstrap/SKILL.md",
+    "migration_status": "MIGRATED"
+  }
+}
+

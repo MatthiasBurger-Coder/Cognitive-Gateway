@@ -1,0 +1,19 @@
+{
+  "schema_version": "1.0",
+  "kind": "agent",
+  "id": "devops",
+  "description": "TSW platform automation and runtime operations",
+  "skill_ids": [
+    "devops-ci-cd",
+    "devops-docker",
+    "devops-kubernetes",
+    "observability-diagnostics",
+    "quality-gate"
+  ],
+  "origin": {
+    "project": "Tiny-Swarm-World",
+    "source": ".agents/roles/senior-devops.md",
+    "migration_status": "MIGRATED"
+  }
+}
+

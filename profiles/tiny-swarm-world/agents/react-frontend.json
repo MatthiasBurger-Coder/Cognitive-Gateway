@@ -1,0 +1,19 @@
+{
+  "schema_version": "1.0",
+  "kind": "agent",
+  "id": "react-frontend",
+  "description": "Frontend boundary work when a module is verified",
+  "skill_ids": [
+    "architecture-hexagonal",
+    "frontend-hexagonal",
+    "frontend-react",
+    "frontend-ux-guidelines",
+    "quality-testing-strategy"
+  ],
+  "origin": {
+    "project": "Tiny-Swarm-World",
+    "source": ".agents/roles/senior-react-frontend.md",
+    "migration_status": "MIGRATED"
+  }
+}
+

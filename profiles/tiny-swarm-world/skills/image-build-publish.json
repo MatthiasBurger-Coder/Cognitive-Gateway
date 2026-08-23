@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0",
+  "kind": "skill",
+  "id": "image-build-publish",
+  "description": "Container image build guidance",
+  "owner_agent_id": null,
+  "dependency_ids": [],
+  "required_capability_ids": [],
+  "knowledge_queries": [
+    "Container image build guidance"
+  ],
+  "origin": {
+    "project": "Tiny-Swarm-World",
+    "source": ".agents/skills/image-build-publish/SKILL.md",
+    "migration_status": "MIGRATED"
+  }
+}
+

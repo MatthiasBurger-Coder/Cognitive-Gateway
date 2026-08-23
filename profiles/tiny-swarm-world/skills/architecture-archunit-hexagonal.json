@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0",
+  "kind": "skill",
+  "id": "architecture-archunit-hexagonal",
+  "description": "Java/ArchUnit boundary checks",
+  "owner_agent_id": null,
+  "dependency_ids": [],
+  "required_capability_ids": [],
+  "knowledge_queries": [
+    "Java/ArchUnit boundary checks"
+  ],
+  "origin": {
+    "project": "Tiny-Swarm-World",
+    "source": ".agents/skills/architecture-archunit-hexagonal/SKILL.md",
+    "migration_status": "MIGRATED"
+  }
+}
+

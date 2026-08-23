@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0",
+  "kind": "skill",
+  "id": "linux-host-preparation",
+  "description": "Linux/WSL host preparation",
+  "owner_agent_id": null,
+  "dependency_ids": [],
+  "required_capability_ids": [],
+  "knowledge_queries": [
+    "Linux/WSL host preparation"
+  ],
+  "origin": {
+    "project": "Tiny-Swarm-World",
+    "source": ".agents/skills/linux-host-preparation/SKILL.md",
+    "migration_status": "MIGRATED"
+  }
+}
+

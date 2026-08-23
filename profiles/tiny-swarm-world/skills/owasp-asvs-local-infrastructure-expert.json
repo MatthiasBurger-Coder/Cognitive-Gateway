@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0",
+  "kind": "skill",
+  "id": "owasp-asvs-local-infrastructure-expert",
+  "description": "Local-infrastructure security controls",
+  "owner_agent_id": null,
+  "dependency_ids": [],
+  "required_capability_ids": [],
+  "knowledge_queries": [
+    "Local-infrastructure security controls"
+  ],
+  "origin": {
+    "project": "Tiny-Swarm-World",
+    "source": ".agents/skills/owasp-asvs-local-infrastructure-expert/SKILL.md",
+    "migration_status": "MIGRATED"
+  }
+}
+
