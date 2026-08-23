@@ -5,6 +5,7 @@ mod compiler;
 mod error;
 mod identifiers;
 mod ir;
+mod registry;
 mod source;
 mod validation;
 
@@ -24,6 +25,7 @@ pub use ir::{
     GuardExpression, InvariantDefinition, ProcessDefinition, ProcessDefinitionBuilder,
     ProcessIrVersion, RecoveryPolicy, StateDefinition, TransitionDefinition,
 };
+pub use registry::{ProcessRegistry, ProcessRegistryError, ProcessSource, RegisteredProcess};
 pub use source::{
     FrontendError, SourceDocument, SourceLocation, SourceRule, SourceScenario, SourceStep,
     SourceStepKeyword, SourceTag, TableRow,
