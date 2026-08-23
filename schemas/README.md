@@ -16,7 +16,12 @@ The CG-03.03 Agent and Skill contracts are implemented by
 with representative fixtures under [`examples/`](examples/). Their field
 mapping and validation boundary are documented in
 [`../docs/agent-skill-definition-contracts.md`](../docs/agent-skill-definition-contracts.md).
-Profile loading and deterministic registry validation are later CG-03 slices.
+The `gateway-registry` crate provides deterministic JSON profile loading for
+these contracts. It recursively discovers `*.json` files in lexical relative
+path order, rejects malformed or unsupported documents and duplicate canonical
+IDs, and exposes the resulting documents in canonical ID order. Non-JSON files
+are outside the current JSON adapter. Cross-definition reference and skill
+dependency-graph integrity validation is a separate CG-03 slice.
 The CG-02 JSON wire contract for `ExecutionContextIR` is documented and
 implemented by the domain crate in [`../docs/ir-serialization.md`](../docs/ir-serialization.md);
 its JSON Schema artifact remains a later schema-loading deliverable.

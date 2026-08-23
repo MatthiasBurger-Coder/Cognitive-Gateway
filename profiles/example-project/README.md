@@ -14,4 +14,7 @@ profiles/example-project/
 └── tools/
 ```
 
-The directories currently contain boundary documentation only. A coherent machine-readable example profile is introduced by the profile-loader and vertical-slice work in CG-03/CG-09.
+The agent and skill directories are ready for strict versioned JSON
+definitions loaded by `gateway-registry`. Workflow, policy, retrieval and tool
+directories currently contain boundary documentation only; their loaders are
+introduced by later vertical slices.

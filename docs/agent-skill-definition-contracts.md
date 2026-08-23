@@ -1,7 +1,7 @@
 # Versioned Agent and Skill Definition Contracts (CG-03.03)
 
 This document defines the repository-native v1 documents consumed by the
-future Agent and Skill Registry. The canonical machine-readable contracts are
+Agent and Skill Registry. The canonical machine-readable contracts are
 [`schemas/agent.schema.json`](../schemas/agent.schema.json) and
 [`schemas/skill.schema.json`](../schemas/skill.schema.json). JSON is the
 interchange form; equivalent YAML may be used by a later repository adapter
@@ -111,8 +111,12 @@ Validation is fail-closed and deterministic:
 3. The document version and exact kind are checked.
 4. IDs, descriptions, provenance, relationships and knowledge queries are
    converted through CG-02 constructors.
-5. Catalog loading later checks cross-document references and dependency
-   cycles; document parsing does not infer references from text or retrieval.
+5. The deterministic registry loader discovers JSON files, parses every
+   definition file in lexical relative-path order, rejects duplicate canonical
+   IDs and exposes accepted documents in canonical ID order. Cross-document
+   references and dependency cycles are validated by the separate registry
+   integrity layer; document parsing does not infer references from text or
+   retrieval.
 
 The Rust API is exposed from `gateway_domain` as
 `AgentDefinitionDocument` and `SkillDefinitionDocument` (also available as
@@ -139,3 +143,20 @@ The representative normalized TSW fixtures are:
 
 They preserve TSW source provenance while using canonical IDs and provider-
 neutral descriptions.
+
+## Deterministic registry loading
+
+`gateway-registry` exposes `AgentRegistry` and `SkillRegistry` loaders. Each
+loader accepts a directory, recursively discovers files whose extension is
+`json`, and treats every discovered file as a definition document. Discovery
+is sorted by normalized relative path before parsing, so the first diagnostic
+and duplicate-ID path are reproducible. Valid documents are then sorted by
+their canonical typed ID for stable iteration and binary-search lookup.
+
+`Registry::load(profile_directory)` loads the conventional `agents/` and
+`skills/` directories together. Missing roots, unreadable files, malformed
+JSON, wrong kinds, unsupported schema versions and domain-invalid values all
+fail the load; invalid JSON files are never silently skipped. Files with other
+extensions are ignored because JSON is the only repository adapter currently
+implemented. Loading performs no agent or skill execution and has no RAG,
+LLM or provider dependency.
