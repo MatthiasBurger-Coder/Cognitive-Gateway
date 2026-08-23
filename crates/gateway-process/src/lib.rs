@@ -4,6 +4,7 @@
 mod compiler;
 mod error;
 mod identifiers;
+mod instance;
 mod ir;
 mod registry;
 mod source;
@@ -18,6 +19,10 @@ pub use identifiers::{
     ActivityId, BlockerId, EventOccurrenceId, EventTypeId, EvidenceTypeId, GateId,
     ProcessDefinitionDigest, ProcessDefinitionId, ProcessDefinitionVersion, ProcessInstanceId,
     ProcessInstanceRevision, StateId, TransitionId,
+};
+pub use instance::{
+    BlockerRuntimeState, InstanceError, ProcessInstance, ProcessInstanceStatus,
+    TransitionHistoryEntry, TransitionProjection,
 };
 pub use ir::{
     ActivityConstraint, ActivityDefinition, BlockerDefinition, DefinitionIdentity,
