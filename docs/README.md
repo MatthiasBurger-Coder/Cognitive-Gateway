@@ -42,3 +42,4 @@ executable acceptance scenarios covering the complete domain and IR contract.
 6. Operating Mode and Execution Profile are independent dimensions.
 7. Versioned Execution Context IR as the core runtime integration contract.
 8. Hexagonal Architecture with inward dependencies and replaceable ports/adapters.
+9. Git is authoritative for declarative Agent/Skill/Workflow/Policy definitions; runtime databases own mutable execution state, while SQL/graph/vector stores used for definition lookup are derived and rebuildable read models.
