@@ -1,15 +1,17 @@
 {
-  "schema_version": "1.0",
+  "schema_version": 2,
   "kind": "skill",
   "id": "security-threat-modeling",
+  "name": "security threat modeling",
   "description": "Threat modeling across boundaries",
   "owner_agent_id": null,
-  "dependency_ids": [],
+  "authoritative_sources": [],
+  "rules": [],
+  "verification": [],
+  "requires": [],
+  "related_skills": [],
   "required_capability_ids": [],
-  "knowledge_queries": ["threat modeling across boundaries"],
-  "origin": {
-    "project": "Tiny-Swarm-World",
-    "source": ".agents/skills/security-threat-modeling/SKILL.md",
-    "migration_status": "MIGRATED"
-  }
+  "knowledge_queries": [
+    "threat modeling across boundaries"
+  ]
 }

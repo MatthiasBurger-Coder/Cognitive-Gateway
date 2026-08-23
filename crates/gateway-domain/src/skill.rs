@@ -13,11 +13,16 @@ use crate::{
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SkillDefinition {
     id: SkillId,
+    name: NonEmptyText,
     description: NonEmptyText,
     owner_agent_id: Option<AgentId>,
     dependency_ids: Vec<SkillId>,
     required_capability_ids: Vec<CapabilityId>,
     knowledge_queries: Vec<KnowledgeQuery>,
+    authoritative_sources: Vec<NonEmptyText>,
+    rules: Vec<NonEmptyText>,
+    verification: Vec<NonEmptyText>,
+    related_skill_ids: Vec<SkillId>,
 }
 
 impl SkillDefinition {
@@ -31,8 +36,11 @@ impl SkillDefinition {
         let dependency_ids = unique_relationships(dependency_ids, "dependency_ids")?;
         reject_self_dependency(&id, &dependency_ids)?;
 
+        let name = NonEmptyText::new_for_field(id.as_str(), "name")?;
+
         Ok(Self {
             id,
+            name,
             description: NonEmptyText::new_for_field(description, "description")?,
             owner_agent_id: None,
             dependency_ids,
@@ -41,6 +49,10 @@ impl SkillDefinition {
                 "required_capability_ids",
             )?,
             knowledge_queries: Vec::new(),
+            authoritative_sources: Vec::new(),
+            rules: Vec::new(),
+            verification: Vec::new(),
+            related_skill_ids: Vec::new(),
         })
     }
 
@@ -77,6 +89,71 @@ impl SkillDefinition {
         self
     }
 
+    /// Sets the human-readable skill name.
+    pub fn with_name(mut self, name: impl Into<String>) -> Result<Self, ValidationError> {
+        self.name = NonEmptyText::new_for_field(name, "name")?;
+        Ok(self)
+    }
+
+    /// Sets the authoritative source selectors retained by the skill.
+    pub fn with_authoritative_sources(
+        mut self,
+        sources: impl IntoIterator<Item = impl Into<String>>,
+    ) -> Result<Self, ValidationError> {
+        self.authoritative_sources = sources
+            .into_iter()
+            .map(|source| NonEmptyText::new_for_field(source, "authoritative_sources"))
+            .collect::<Result<Vec<_>, _>>()?;
+        Ok(self)
+    }
+
+    /// Sets the declarative rules retained by the skill.
+    pub fn with_rules(
+        mut self,
+        rules: impl IntoIterator<Item = impl Into<String>>,
+    ) -> Result<Self, ValidationError> {
+        self.rules = rules
+            .into_iter()
+            .map(|rule| NonEmptyText::new_for_field(rule, "rules"))
+            .collect::<Result<Vec<_>, _>>()?;
+        Ok(self)
+    }
+
+    /// Sets the verification guidance retained by the skill.
+    pub fn with_verification(
+        mut self,
+        verification: impl IntoIterator<Item = impl Into<String>>,
+    ) -> Result<Self, ValidationError> {
+        self.verification = verification
+            .into_iter()
+            .map(|item| NonEmptyText::new_for_field(item, "verification"))
+            .collect::<Result<Vec<_>, _>>()?;
+        Ok(self)
+    }
+
+    /// Sets optional or related Skill references.
+    pub fn with_related_skill_ids(
+        mut self,
+        related_skill_ids: impl IntoIterator<Item = SkillId>,
+    ) -> Result<Self, ValidationError> {
+        let related_skill_ids = unique_relationships(related_skill_ids, "related_skill_ids")?;
+        if related_skill_ids.iter().any(|related| related == &self.id) {
+            return Err(ValidationError::SelfReference {
+                field: "related_skill_ids",
+            });
+        }
+        if related_skill_ids
+            .iter()
+            .any(|related| self.dependency_ids.contains(related))
+        {
+            return Err(ValidationError::ConflictingRelationship {
+                field: "skill_references",
+            });
+        }
+        self.related_skill_ids = related_skill_ids;
+        Ok(self)
+    }
+
     /// Associates the skill with an agent while preserving value semantics.
     #[must_use]
     pub fn with_owner(mut self, owner_agent_id: AgentId) -> Self {
@@ -94,6 +171,12 @@ impl SkillDefinition {
     #[must_use]
     pub fn description(&self) -> &str {
         self.description.as_str()
+    }
+
+    /// Returns the human-readable skill name.
+    #[must_use]
+    pub fn name(&self) -> &str {
+        self.name.as_str()
     }
 
     /// Returns the optional owning agent relationship.
@@ -118,6 +201,42 @@ impl SkillDefinition {
     #[must_use]
     pub fn knowledge_queries(&self) -> &[KnowledgeQuery] {
         &self.knowledge_queries
+    }
+
+    /// Returns authoritative source selectors or patterns.
+    #[must_use]
+    pub fn authoritative_sources(&self) -> &[NonEmptyText] {
+        &self.authoritative_sources
+    }
+
+    /// Returns declarative rules.
+    #[must_use]
+    pub fn rules(&self) -> &[NonEmptyText] {
+        &self.rules
+    }
+
+    /// Returns verification guidance.
+    #[must_use]
+    pub fn verification(&self) -> &[NonEmptyText] {
+        &self.verification
+    }
+
+    /// Returns optional or related Skill references.
+    #[must_use]
+    pub fn related_skill_ids(&self) -> &[SkillId] {
+        &self.related_skill_ids
+    }
+
+    /// Alias for the required Skill references.
+    #[must_use]
+    pub fn requires(&self) -> &[SkillId] {
+        self.dependency_ids()
+    }
+
+    /// Alias using the contract's canonical `requires` terminology.
+    #[must_use]
+    pub fn required_skill_ids(&self) -> &[SkillId] {
+        self.dependency_ids()
     }
 }
 
@@ -209,5 +328,107 @@ mod tests {
         )
         .unwrap();
         assert_eq!(skill.owner_agent_id().unwrap().as_str(), "reviewer");
+    }
+
+    #[test]
+    fn preserves_complete_content_and_separates_related_references() {
+        let required = SkillId::new("foundation").unwrap();
+        let related = SkillId::new("quality").unwrap();
+        let skill = SkillDefinition::new(
+            SkillId::new("architecture").unwrap(),
+            "Architecture boundaries",
+            [required.clone()],
+            [],
+        )
+        .unwrap()
+        .with_name("Architecture Expert")
+        .unwrap()
+        .with_authoritative_sources(["architecture guide"])
+        .unwrap()
+        .with_rules(["Keep dependencies directed inward."])
+        .unwrap()
+        .with_verification(["Run architecture tests."])
+        .unwrap()
+        .with_related_skill_ids([related.clone()])
+        .unwrap();
+
+        assert_eq!(skill.name(), "Architecture Expert");
+        assert_eq!(
+            skill.authoritative_sources()[0].as_str(),
+            "architecture guide"
+        );
+        assert_eq!(
+            skill.rules()[0].as_str(),
+            "Keep dependencies directed inward."
+        );
+        assert_eq!(skill.verification()[0].as_str(), "Run architecture tests.");
+        assert_eq!(skill.requires(), std::slice::from_ref(&required));
+        assert_eq!(skill.required_skill_ids(), std::slice::from_ref(&required));
+        assert_eq!(skill.related_skill_ids(), &[related]);
+    }
+
+    #[test]
+    fn rejects_related_self_references_and_overlap_with_required_references() {
+        let id = SkillId::new("architecture").unwrap();
+        let result = SkillDefinition::new(id.clone(), "Architecture", [], [])
+            .unwrap()
+            .with_related_skill_ids([id]);
+        assert!(matches!(result, Err(ValidationError::SelfReference { .. })));
+
+        let required = SkillId::new("foundation").unwrap();
+        let result = SkillDefinition::new(
+            SkillId::new("architecture").unwrap(),
+            "Architecture",
+            [required.clone()],
+            [],
+        )
+        .unwrap()
+        .with_related_skill_ids([required]);
+        assert!(matches!(
+            result,
+            Err(ValidationError::ConflictingRelationship {
+                field: "skill_references"
+            })
+        ));
+    }
+
+    #[test]
+    fn validates_each_structured_content_collection() {
+        let skill = SkillDefinition::new(
+            SkillId::new("architecture").unwrap(),
+            "Architecture",
+            [],
+            [],
+        )
+        .unwrap();
+        assert!(matches!(
+            skill.clone().with_name("\0"),
+            Err(ValidationError::ControlCharacter { field: "name" })
+        ));
+        assert!(matches!(
+            skill.clone().with_authoritative_sources(["\0"]),
+            Err(ValidationError::ControlCharacter {
+                field: "authoritative_sources"
+            })
+        ));
+        assert!(matches!(
+            skill.clone().with_rules(["\0"]),
+            Err(ValidationError::ControlCharacter { field: "rules" })
+        ));
+        assert!(matches!(
+            skill.clone().with_verification(["\0"]),
+            Err(ValidationError::ControlCharacter {
+                field: "verification"
+            })
+        ));
+        assert!(matches!(
+            skill.with_related_skill_ids([
+                SkillId::new("quality").unwrap(),
+                SkillId::new("quality").unwrap(),
+            ]),
+            Err(ValidationError::DuplicateRelationship {
+                field: "related_skill_ids"
+            })
+        ));
     }
 }

@@ -74,14 +74,9 @@ fn migrated_generic_catalog_loads_and_validates() {
 }
 
 #[test]
-fn migrated_skills_preserve_provenance_and_generic_boundaries() {
+fn migrated_skills_preserve_generic_boundaries_and_structured_shape() {
     let registry = Registry::load_catalog(repository_catalog()).expect("catalog should load");
 
-    let merged_ids = [
-        "architecture-hexagonal",
-        "contract-governance-expert",
-        "observability-diagnostics",
-    ];
     let forbidden_generic_terms = [
         "tiny-swarm-world",
         "docker",
@@ -105,8 +100,21 @@ fn migrated_skills_preserve_provenance_and_generic_boundaries() {
     ];
 
     for skill in registry.skills().documents() {
-        assert_eq!(skill.origin().project(), "Tiny-Swarm-World");
-        assert!(skill.origin().source().contains(".agents/skills/"));
+        assert_eq!(skill.schema_version().major(), 2);
+        assert!(!skill.name().is_empty());
+        assert!(
+            skill
+                .authoritative_sources()
+                .iter()
+                .all(|value| !value.as_str().is_empty())
+        );
+        assert!(skill.rules().iter().all(|value| !value.as_str().is_empty()));
+        assert!(
+            skill
+                .verification()
+                .iter()
+                .all(|value| !value.as_str().is_empty())
+        );
         assert!(
             !skill.knowledge_queries().is_empty(),
             "migrated skill {} lacks a normalized retrieval hint",
@@ -130,19 +138,5 @@ fn migrated_skills_preserve_provenance_and_generic_boundaries() {
             "TSW-specific term leaked into generic skill {}",
             skill.id()
         );
-
-        if merged_ids.contains(&skill.id().as_str()) {
-            assert_eq!(
-                skill.origin().migration_status(),
-                gateway_domain::MigrationStatus::Merged
-            );
-            assert!(skill.origin().source().contains("; "));
-        } else {
-            assert_eq!(
-                skill.origin().migration_status(),
-                gateway_domain::MigrationStatus::Migrated
-            );
-            assert!(!skill.origin().source().contains("; "));
-        }
     }
 }

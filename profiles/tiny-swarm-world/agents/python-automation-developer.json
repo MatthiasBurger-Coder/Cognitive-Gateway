@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.0",
+  "schema_version": 2,
   "kind": "agent",
   "id": "python-automation-developer",
   "description": "TSW Python automation boundaries",
@@ -10,11 +10,5 @@
     "quality-gate",
     "quality-testing-strategy",
     "resilience-engineering"
-  ],
-  "origin": {
-    "project": "Tiny-Swarm-World",
-    "source": ".agents/roles/senior-python-automation-developer.md",
-    "migration_status": "MIGRATED"
-  }
+  ]
 }
-

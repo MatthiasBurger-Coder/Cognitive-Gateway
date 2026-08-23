@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.0",
+  "schema_version": 2,
   "kind": "agent",
   "id": "grpc-proto-specialist",
   "description": "Contract and transport-boundary design",
@@ -9,10 +9,5 @@
     "grpc-streaming-specialist",
     "ingestion-handoff-review",
     "protobuf-contracts"
-  ],
-  "origin": {
-    "project": "Tiny-Swarm-World",
-    "source": ".agents/roles/senior-grpc-proto-specialist.md",
-    "migration_status": "MIGRATED"
-  }
+  ]
 }

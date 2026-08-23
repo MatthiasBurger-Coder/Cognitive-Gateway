@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.0",
+  "schema_version": 2,
   "kind": "agent",
   "id": "system-architect",
   "description": "Cross-module boundaries and architecture decisions",
@@ -10,10 +10,5 @@
     "microservice-runtime-readiness-expert",
     "protobuf-contracts",
     "service-decomposition-bounded-context"
-  ],
-  "origin": {
-    "project": "Tiny-Swarm-World",
-    "source": ".agents/roles/senior-system-architect.md",
-    "migration_status": "MIGRATED"
-  }
+  ]
 }

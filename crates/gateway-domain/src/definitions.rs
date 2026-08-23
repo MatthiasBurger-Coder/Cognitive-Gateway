@@ -74,6 +74,9 @@ impl DefinitionCatalog {
             for dependency_id in skill.dependency_ids() {
                 require_definition(&skill_ids, "skill", dependency_id)?;
             }
+            for related_skill_id in skill.related_skill_ids() {
+                require_definition(&skill_ids, "skill", related_skill_id)?;
+            }
         }
         detect_skill_cycles(&self.skills)?;
         for workflow in &self.workflows {
@@ -291,6 +294,16 @@ mod tests {
         )
         .unwrap();
         let result = DefinitionCatalog::new(vec![agent], vec![], vec![], vec![]);
+        assert!(matches!(
+            result,
+            Err(ValidationError::MissingDefinition { kind: "skill", .. })
+        ));
+
+        let skill = SkillDefinition::new(SkillId::new("review").unwrap(), "Review", [], [])
+            .unwrap()
+            .with_related_skill_ids([SkillId::new("missing").unwrap()])
+            .unwrap();
+        let result = DefinitionCatalog::new(vec![], vec![skill], vec![], vec![]);
         assert!(matches!(
             result,
             Err(ValidationError::MissingDefinition { kind: "skill", .. })

@@ -27,12 +27,12 @@ when supported by the migration matrix.
 - Profile definitions may reference generic catalog Agent/Skill IDs when the
   combined loader is used.
 - Profile definitions may not redefine a catalog ID. The combined loader
-  rejects such collisions with both provenance values; no override or
+  rejects such collisions by canonical ID; no override or
   last-writer-wins behavior exists.
 - Profile loading is deterministic: JSON files are discovered in normalized
   relative-path order and exposed in canonical ID order.
-- Every migrated definition retains `origin.project`, `origin.source` and
-  `origin.migration_status`.
+- Definitions use the v2 self-contained Agent and Skill contracts. Historical
+  migration details remain outside runtime documents.
 - Profile ownership does not grant capability authority. Capability
   requirements still require an independent policy decision.
 

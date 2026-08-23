@@ -1,16 +1,10 @@
 {
-  "schema_version": "1.0",
+  "schema_version": 2,
   "kind": "agent",
   "id": "ux-designer",
   "description": "Operational UI and evidence-review usability",
   "skill_ids": [
     "frontend-react",
     "frontend-ux-guidelines"
-  ],
-  "origin": {
-    "project": "Tiny-Swarm-World",
-    "source": ".agents/roles/senior-ux-designer.md",
-    "migration_status": "MIGRATED"
-  }
+  ]
 }
-

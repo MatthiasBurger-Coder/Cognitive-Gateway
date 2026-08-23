@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.0",
+  "schema_version": 2,
   "kind": "agent",
   "id": "tester",
   "description": "Regression and quality-gate verification",
@@ -8,10 +8,5 @@
     "quality-gate",
     "quality-gate-governance",
     "quality-testing-strategy"
-  ],
-  "origin": {
-    "project": "Tiny-Swarm-World",
-    "source": ".agents/roles/senior-tester.md",
-    "migration_status": "MIGRATED"
-  }
+  ]
 }

@@ -1,15 +1,17 @@
 {
-  "schema_version": "1.0",
+  "schema_version": 2,
   "kind": "skill",
   "id": "documentation-sync",
+  "name": "documentation sync",
   "description": "Documentation and example consistency",
   "owner_agent_id": null,
-  "dependency_ids": [],
+  "authoritative_sources": [],
+  "rules": [],
+  "verification": [],
+  "requires": [],
+  "related_skills": [],
   "required_capability_ids": [],
-  "knowledge_queries": ["documentation and example consistency"],
-  "origin": {
-    "project": "Tiny-Swarm-World",
-    "source": ".agents/skills/documentation-sync/SKILL.md",
-    "migration_status": "MIGRATED"
-  }
+  "knowledge_queries": [
+    "documentation and example consistency"
+  ]
 }

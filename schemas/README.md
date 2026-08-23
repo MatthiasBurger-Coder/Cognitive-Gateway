@@ -11,7 +11,7 @@ The bootstrap slice reserves the following schema boundaries:
 - `project-state.schema.json`
 - `execution-context.schema.json`
 
-The CG-03.03 Agent and Skill contracts are implemented by
+The CG-03.10 Agent and Skill contracts are implemented by
 [`agent.schema.json`](agent.schema.json) and [`skill.schema.json`](skill.schema.json),
 with representative fixtures under [`examples/`](examples/). Their field
 mapping and validation boundary are documented in
@@ -32,4 +32,9 @@ The CG-02 JSON wire contract for `ExecutionContextIR` is documented and
 implemented by the domain crate in [`../docs/ir-serialization.md`](../docs/ir-serialization.md);
 its JSON Schema artifact remains a later schema-loading deliverable.
 
-Schema documents must be versioned, fail closed on invalid input and remain independent of concrete RAG, MCP and execution-runtime technologies.
+The v2 Agent and Skill documents are self-contained: structured Skill content
+and canonical required/related Skill references live in the definition itself.
+Provenance, external content references and project-owned `SKILL.md` paths are
+not runtime fields. Schema documents must be versioned, fail closed on invalid
+input and remain independent of concrete RAG, MCP and execution-runtime
+technologies.

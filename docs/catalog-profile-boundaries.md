@@ -63,10 +63,10 @@ adapter.
 
 Profiles may reference generic definitions by their canonical typed IDs. The
 combined registry validates those references and the complete Skill dependency
-graph after loading. A profile may not replace or shadow a generic definition:
+graph and related Skill references after loading. A profile may not replace or shadow a generic definition:
 an Agent or Skill ID present in both boundaries produces the deterministic,
 fail-closed `CrossBoundaryDuplicateDefinition` error containing catalog and
-profile provenance. There is no precedence, merge-by-path or last-writer-wins
+the canonical definition. There is no precedence, merge-by-path or last-writer-wins
 rule. Duplicate IDs within either boundary continue to use the existing
 duplicate-definition error.
 
@@ -81,13 +81,12 @@ TSW profile reference ┘
 The reverse dependency is prohibited: reusable catalog content must not need a
 TSW profile to load or validate.
 
-## Provenance
+## Contract independence
 
-Both boundaries use the same strict versioned Agent and Skill contracts. Every
-migrated document retains `origin.project`, `origin.source` and
-`origin.migration_status`. Provenance is also included in cross-boundary
-conflict and integrity diagnostics, so a normalized definition can be traced
-back to its source without consulting retrieval or runtime state.
+Both boundaries use the same strict v2 Agent and Skill contracts. Skill
+semantics are self-contained in structured fields and all cross-Skill edges use
+canonical Skill IDs. Project paths, migration status, provenance metadata and
+external `SKILL.md` content references are outside the runtime contract.
 
 The CG-03.02 migration matrix remains authoritative for classification,
 canonical IDs, merge targets and deprecated exclusions. CG-03.06 creates the

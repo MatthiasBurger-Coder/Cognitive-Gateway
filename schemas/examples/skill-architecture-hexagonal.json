@@ -1,15 +1,23 @@
 {
-  "schema_version": "1.0",
+  "schema_version": 2,
   "kind": "skill",
   "id": "architecture-hexagonal",
+  "name": "Hexagonal Architecture Expert",
   "description": "Hexagonal boundaries and dependency direction",
   "owner_agent_id": "system-architect",
-  "dependency_ids": [],
+  "authoritative_sources": [
+    "architecture documentation",
+    "architecture tests"
+  ],
+  "rules": [
+    "Keep dependencies directed toward stable domain boundaries.",
+    "Do not weaken architecture rules to make a change pass."
+  ],
+  "verification": [
+    "Run the affected architecture tests and quality gate."
+  ],
+  "requires": [],
+  "related_skills": ["quality-architecture-validation"],
   "required_capability_ids": ["repository.read"],
-  "knowledge_queries": ["hexagonal architecture boundaries"],
-  "origin": {
-    "project": "Tiny-Swarm-World",
-    "source": ".agents/skills/architecture-hexagonal/SKILL.md",
-    "migration_status": "MERGED"
-  }
+  "knowledge_queries": ["hexagonal architecture boundaries"]
 }

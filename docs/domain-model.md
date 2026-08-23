@@ -57,11 +57,11 @@ values fail with `ValidationError`.
 
 Repository-native versioned Agent and Skill documents are defined in
 [`agent-skill-definition-contracts.md`](agent-skill-definition-contracts.md).
-They are strict document envelopes around the `AgentDefinition` and
-`SkillDefinition` values below: schema version and provenance are document
-metadata, while supported semantic fields map through the existing typed
-constructors. They do not add prompts, runtime/provider fields or workflow
-lifecycle semantics to the core model.
+They are strict v2 document contracts around the `AgentDefinition` and
+`SkillDefinition` values below. Skill documents retain structured declarative
+content and typed required/related Skill references in the domain model. They
+do not add provenance, prompts, runtime/provider fields or workflow lifecycle
+semantics to the core model.
 
 These definitions are immutable value objects. Relationship order is retained
 so deterministic resolution can preserve the declared order. Constructors
@@ -72,7 +72,7 @@ graph.
 | --- | --- | --- |
 | `TaskDescriptor` | Identifies the requested work and carries its intent. | Optional `TaskClassification` containing `task_type` and finite confidence `0..=1`; the two classification values are present together. |
 | `AgentDefinition` | Declares a named responsibility contract. | Requires a non-empty, unique ordered list of `SkillId` values. It contains no prompt, model, runtime or behavior. |
-| `SkillDefinition` | Declares a reusable knowledge and capability requirement. | Optional owning `AgentId`; unique `SkillId` dependencies; unique required `CapabilityId` values; ordered `KnowledgeQuery` values. A skill cannot depend on itself, and these requirements do not authorize execution. |
+| `SkillDefinition` | Declares complete reusable Skill content and requirements. | Name, description, authoritative sources, rules and verification guidance; unique mandatory and related `SkillId` references; optional owning `AgentId`, capability requirements and `KnowledgeQuery` values. A skill cannot reference itself or overlap required/related references. |
 | `WorkflowDefinition` | Selects a deterministic unit of work. | Exactly one primary `AgentId`, one or more unique ordered `SkillId` values, and exactly one `PolicyId`. It references definitions rather than embedding them. |
 | `PolicyDefinition` | Defines the authoritative capability decision input for a workflow. | Unique allowed and denied `CapabilityId` lists. The allow-list may be empty for deny-by-default; a capability cannot occur in both lists. |
 | `CapabilityDefinition` | Classifies an abstract capability by safety impact. | A typed `CapabilityId` and `CapabilityClass`: `INSPECT` or `MUTATE`. It has no provider handle or tool implementation. |

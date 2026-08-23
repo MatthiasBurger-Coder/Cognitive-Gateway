@@ -47,7 +47,7 @@ pub enum RegistryError {
     /// A project profile attempted to redefine a catalog definition.
     ///
     /// Catalog definitions are not overridden by profiles. Keeping both
-    /// provenance values in the diagnostic makes the boundary conflict
+    /// canonical identity values in the diagnostic make the boundary conflict
     /// auditable without relying on filesystem traversal order.
     CrossBoundaryDuplicateDefinition {
         kind: DefinitionKind,
@@ -76,6 +76,12 @@ pub enum RegistryIntegrityError {
     MissingSkillDependency {
         skill_id: SkillId,
         dependency_id: SkillId,
+        source: String,
+    },
+    /// A Skill points to an optional/related Skill that is not registered.
+    MissingRelatedSkillReference {
+        skill_id: SkillId,
+        related_skill_id: SkillId,
         source: String,
     },
     /// The dependency graph contains a cycle, including its closing edge.
@@ -114,6 +120,16 @@ impl fmt::Display for RegistryIntegrityError {
                 "skill {:?} from {source:?} depends on missing skill {:?}",
                 skill_id.as_str(),
                 dependency_id.as_str()
+            ),
+            Self::MissingRelatedSkillReference {
+                skill_id,
+                related_skill_id,
+                source,
+            } => write!(
+                formatter,
+                "skill {:?} from {source:?} references missing related skill {:?}",
+                skill_id.as_str(),
+                related_skill_id.as_str()
             ),
             Self::CircularSkillDependency { cycle, source } => {
                 let path = cycle
@@ -443,7 +459,7 @@ impl SkillRegistry {
     ///
     /// The returned order is deterministic and places every dependency before
     /// the Skill that depends on it. Missing dependencies and cycles fail
-    /// closed with the originating document's provenance.
+    /// closed with the originating document's canonical identity.
     pub fn dependency_graph(&self) -> Result<SkillDependencyGraph, RegistryIntegrityError> {
         let mut dependencies = BTreeMap::new();
         for document in &self.documents {
@@ -453,7 +469,7 @@ impl SkillRegistry {
                     return Err(RegistryIntegrityError::MissingSkillDependency {
                         skill_id: document.id().clone(),
                         dependency_id: dependency_id.clone(),
-                        source: provenance(document),
+                        source: canonical_source(document),
                     });
                 }
             }
@@ -465,7 +481,7 @@ impl SkillRegistry {
                 .expect("a non-topological graph must contain a dependency cycle");
             let source = self
                 .get(cycle.first().expect("a cycle must not be empty"))
-                .map(provenance)
+                .map(canonical_source)
                 .unwrap_or_else(|| "unknown source".to_owned());
             RegistryIntegrityError::CircularSkillDependency { cycle, source }
         })?;
@@ -526,7 +542,7 @@ impl Registry {
     /// independently deterministic, and the combined registries are sorted by
     /// canonical ID. A profile may reference catalog definitions, but it may
     /// not redefine them: cross-boundary ID collisions fail closed with both
-    /// provenance values. There is no precedence or override behavior.
+    /// canonical identity values. There is no precedence or override behavior.
     pub fn load_catalog_with_profile(
         catalog_directory: impl AsRef<Path>,
         profile_directory: impl AsRef<Path>,
@@ -554,8 +570,8 @@ impl Registry {
                 return Err(RegistryError::CrossBoundaryDuplicateDefinition {
                     kind: DefinitionKind::Agent,
                     id: document.id().as_str().to_owned(),
-                    catalog_source: provenance(catalog_document),
-                    profile_source: provenance(&document),
+                    catalog_source: canonical_source(catalog_document),
+                    profile_source: canonical_source(&document),
                 });
             }
             agents.push(document);
@@ -570,8 +586,8 @@ impl Registry {
                 return Err(RegistryError::CrossBoundaryDuplicateDefinition {
                     kind: DefinitionKind::Skill,
                     id: document.id().as_str().to_owned(),
-                    catalog_source: provenance(catalog_document),
-                    profile_source: provenance(&document),
+                    catalog_source: canonical_source(catalog_document),
+                    profile_source: canonical_source(&document),
                 });
             }
             skills.push(document);
@@ -638,7 +654,7 @@ impl Registry {
                     return Err(RegistryIntegrityError::MissingSkillReference {
                         agent_id: agent.id().clone(),
                         skill_id: skill_id.clone(),
-                        source: provenance(agent),
+                        source: canonical_source(agent),
                     });
                 }
             }
@@ -651,8 +667,18 @@ impl Registry {
                 return Err(RegistryIntegrityError::MissingAgentReference {
                     skill_id: skill.id().clone(),
                     agent_id: agent_id.clone(),
-                    source: provenance(skill),
+                    source: canonical_source(skill),
                 });
+            }
+
+            for related_skill_id in skill.related_skill_ids() {
+                if self.skills.get(related_skill_id).is_none() {
+                    return Err(RegistryIntegrityError::MissingRelatedSkillReference {
+                        skill_id: skill.id().clone(),
+                        related_skill_id: related_skill_id.clone(),
+                        source: canonical_source(skill),
+                    });
+                }
             }
         }
 
@@ -734,24 +760,24 @@ fn read_document(path: &Path) -> RegistryResult<String> {
     })
 }
 
-trait HasProvenance {
-    fn provenance(&self) -> String;
+trait HasCanonicalSource {
+    fn canonical_source(&self) -> String;
 }
 
-impl HasProvenance for AgentDefinitionDocument {
-    fn provenance(&self) -> String {
-        format!("{}:{}", self.origin().project(), self.origin().source())
+impl HasCanonicalSource for AgentDefinitionDocument {
+    fn canonical_source(&self) -> String {
+        format!("agent:{}", self.id())
     }
 }
 
-impl HasProvenance for SkillDefinitionDocument {
-    fn provenance(&self) -> String {
-        format!("{}:{}", self.origin().project(), self.origin().source())
+impl HasCanonicalSource for SkillDefinitionDocument {
+    fn canonical_source(&self) -> String {
+        format!("skill:{}", self.id())
     }
 }
 
-fn provenance<T: HasProvenance>(document: &T) -> String {
-    document.provenance()
+fn canonical_source<T: HasCanonicalSource>(document: &T) -> String {
+    document.canonical_source()
 }
 
 fn topological_order(dependencies: &BTreeMap<SkillId, Vec<SkillId>>) -> Option<Vec<SkillId>> {
@@ -915,10 +941,7 @@ mod tests {
         time::{SystemTime, UNIX_EPOCH},
     };
 
-    use gateway_domain::{
-        AgentDefinitionDocument, AgentId, DefinitionOrigin, MigrationStatus,
-        SkillDefinitionDocument, SkillId,
-    };
+    use gateway_domain::{AgentDefinitionDocument, AgentId, SkillDefinitionDocument, SkillId};
 
     use super::{AgentRegistry, Registry, RegistryError, RegistryIntegrityError, SkillRegistry};
 
@@ -939,13 +962,13 @@ mod tests {
 
     fn agent(id: &str) -> String {
         format!(
-            r#"{{"schema_version":"1.0","kind":"agent","id":"{id}","description":"Agent {id}","skill_ids":["skill"],"origin":{{"project":"project","source":"agents/{id}.json","migration_status":"MIGRATED"}}}}"#
+            r#"{{"schema_version":2,"kind":"agent","id":"{id}","description":"Agent {id}","skill_ids":["skill"]}}"#
         )
     }
 
     fn skill(id: &str) -> String {
         format!(
-            r#"{{"schema_version":"1.0","kind":"skill","id":"{id}","description":"Skill {id}","owner_agent_id":null,"dependency_ids":[],"required_capability_ids":[],"knowledge_queries":[],"origin":{{"project":"project","source":"skills/{id}.json","migration_status":"NATIVE"}}}}"#
+            r#"{{"schema_version":2,"kind":"skill","id":"{id}","name":"Skill {id}","description":"Skill {id}","owner_agent_id":null,"authoritative_sources":[],"rules":[],"verification":[],"requires":[],"related_skills":[],"required_capability_ids":[],"knowledge_queries":[]}}"#
         )
     }
 
@@ -957,18 +980,17 @@ mod tests {
         SkillDefinitionDocument::new(
             SkillId::new(id).unwrap(),
             format!("Skill {id}"),
+            format!("Skill {id}"),
             owner_agent_id.map(|value| AgentId::new(value).unwrap()),
+            std::iter::empty::<String>(),
+            std::iter::empty::<String>(),
+            std::iter::empty::<String>(),
             dependencies
                 .iter()
                 .map(|value| SkillId::new(*value).unwrap()),
-            [],
-            [],
-            DefinitionOrigin::new(
-                "project",
-                format!("skills/{id}.json"),
-                MigrationStatus::Native,
-            )
-            .unwrap(),
+            std::iter::empty::<SkillId>(),
+            std::iter::empty::<gateway_domain::CapabilityId>(),
+            std::iter::empty::<gateway_domain::KnowledgeQuery>(),
         )
         .unwrap()
     }
@@ -978,18 +1000,27 @@ mod tests {
             AgentId::new(id).unwrap(),
             format!("Agent {id}"),
             skills.iter().map(|value| SkillId::new(*value).unwrap()),
-            DefinitionOrigin::new(
-                "project",
-                format!("agents/{id}.json"),
-                MigrationStatus::Native,
-            )
-            .unwrap(),
         )
         .unwrap()
     }
 
-    fn origin() -> DefinitionOrigin {
-        DefinitionOrigin::new("project", "memory.json", MigrationStatus::Native).unwrap()
+    fn skill_document_with_related(id: &str, related_skills: &[&str]) -> SkillDefinitionDocument {
+        SkillDefinitionDocument::new(
+            SkillId::new(id).unwrap(),
+            format!("Skill {id}"),
+            format!("Skill {id}"),
+            None,
+            std::iter::empty::<String>(),
+            std::iter::empty::<String>(),
+            std::iter::empty::<String>(),
+            std::iter::empty::<SkillId>(),
+            related_skills
+                .iter()
+                .map(|value| SkillId::new(*value).unwrap()),
+            std::iter::empty::<gateway_domain::CapabilityId>(),
+            std::iter::empty::<gateway_domain::KnowledgeQuery>(),
+        )
+        .unwrap()
     }
 
     #[test]
@@ -1008,9 +1039,9 @@ mod tests {
             registry
                 .get(&AgentId::new("alpha").unwrap())
                 .unwrap()
-                .origin()
-                .source(),
-            "agents/alpha.json"
+                .id()
+                .as_str(),
+            "alpha"
         );
 
         fs::remove_dir_all(root).unwrap();
@@ -1052,7 +1083,7 @@ mod tests {
         let root = temporary_directory("version");
         write_file(
             &root.join("agent.json"),
-            &agent("agent").replace("\"1.0\"", "\"1.1\""),
+            &agent("agent").replace("\"schema_version\":2", "\"schema_version\":3"),
         );
         let error = AgentRegistry::load(&root).unwrap_err();
         assert!(error.to_string().contains("not supported"));
@@ -1062,18 +1093,15 @@ mod tests {
     #[test]
     fn rejects_self_and_duplicate_dependencies_at_the_document_boundary() {
         let root = temporary_directory("self-dependency");
-        let self_reference =
-            skill("same").replace("\"dependency_ids\":[]", "\"dependency_ids\":[\"same\"]");
+        let self_reference = skill("same").replace("\"requires\":[]", "\"requires\":[\"same\"]");
         write_file(&root.join("self.json"), &self_reference);
         let error = SkillRegistry::load(&root).unwrap_err();
         assert!(error.to_string().contains("must not reference"));
         fs::remove_dir_all(&root).unwrap();
 
         let root = temporary_directory("duplicate-dependency");
-        let duplicate = skill("same").replace(
-            "\"dependency_ids\":[]",
-            "\"dependency_ids\":[\"other\",\"other\"]",
-        );
+        let duplicate =
+            skill("same").replace("\"requires\":[]", "\"requires\":[\"other\",\"other\"]");
         write_file(&root.join("duplicate.json"), &duplicate);
         let error = SkillRegistry::load(&root).unwrap_err();
         assert!(error.to_string().contains("duplicate references"));
@@ -1199,8 +1227,8 @@ mod tests {
             } => {
                 assert_eq!(kind, gateway_domain::DefinitionKind::Agent);
                 assert_eq!(id, "same");
-                assert_eq!(catalog_source, "catalog:agents/same.json");
-                assert_eq!(profile_source, "tiny-swarm-world:agents/same.json");
+                assert_eq!(catalog_source, "agent:same");
+                assert_eq!(profile_source, "agent:same");
             }
             other => panic!("unexpected error: {other}"),
         }
@@ -1211,19 +1239,16 @@ mod tests {
 
     #[test]
     fn in_memory_registration_is_sorted_and_rejects_duplicates() {
-        let origin = origin();
         let first = AgentDefinitionDocument::new(
             AgentId::new("zeta").unwrap(),
             "Zeta",
             [SkillId::new("skill").unwrap()],
-            origin.clone(),
         )
         .unwrap();
         let second = AgentDefinitionDocument::new(
             AgentId::new("alpha").unwrap(),
             "Alpha",
             [SkillId::new("skill").unwrap()],
-            origin,
         )
         .unwrap();
         let registry = AgentRegistry::from_documents([first.clone(), second.clone()]).unwrap();
@@ -1269,7 +1294,7 @@ mod tests {
     }
 
     #[test]
-    fn reports_missing_agent_and_skill_references_with_provenance() {
+    fn reports_missing_agent_and_skill_references_with_canonical_source() {
         let missing_skill =
             Registry::from_documents([agent_document("reviewer", &["missing"])], [])
                 .unwrap()
@@ -1279,7 +1304,7 @@ mod tests {
             missing_skill,
             RegistryIntegrityError::MissingSkillReference { .. }
         ));
-        assert!(missing_skill.to_string().contains("agents/reviewer.json"));
+        assert!(missing_skill.to_string().contains("agent:reviewer"));
 
         let missing_owner =
             Registry::from_documents([], [skill_document("owned", Some("missing-agent"), &[])])
@@ -1290,7 +1315,7 @@ mod tests {
             missing_owner,
             RegistryIntegrityError::MissingAgentReference { .. }
         ));
-        assert!(missing_owner.to_string().contains("skills/owned.json"));
+        assert!(missing_owner.to_string().contains("skill:owned"));
 
         let missing_dependency =
             Registry::from_documents([], [skill_document("dependent", None, &["missing"])])
@@ -1301,11 +1326,19 @@ mod tests {
             missing_dependency,
             RegistryIntegrityError::MissingSkillDependency { .. }
         ));
-        assert!(
-            missing_dependency
-                .to_string()
-                .contains("skills/dependent.json")
-        );
+        assert!(missing_dependency.to_string().contains("skill:dependent"));
+
+        let missing_related = Registry::from_documents(
+            [],
+            [skill_document_with_related("related", &["missing-related"])],
+        )
+        .unwrap()
+        .validate_integrity()
+        .unwrap_err();
+        assert!(matches!(
+            missing_related,
+            RegistryIntegrityError::MissingRelatedSkillReference { .. }
+        ));
     }
 
     #[test]
@@ -1326,7 +1359,7 @@ mod tests {
                     cycle.iter().map(SkillId::as_str).collect::<Vec<_>>(),
                     ["alpha", "beta", "alpha"]
                 );
-                assert_eq!(source, "project:skills/alpha.json");
+                assert_eq!(source, "skill:alpha");
             }
             other => panic!("unexpected error: {other}"),
         }

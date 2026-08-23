@@ -1,18 +1,17 @@
 {
-  "schema_version": "1.0",
+  "schema_version": 2,
   "kind": "skill",
   "id": "reverse-proxy-routing",
+  "name": "reverse proxy routing",
   "description": "NGINX/reverse-proxy routing",
   "owner_agent_id": null,
-  "dependency_ids": [],
+  "authoritative_sources": [],
+  "rules": [],
+  "verification": [],
+  "requires": [],
+  "related_skills": [],
   "required_capability_ids": [],
   "knowledge_queries": [
     "NGINX/reverse-proxy routing"
-  ],
-  "origin": {
-    "project": "Tiny-Swarm-World",
-    "source": ".agents/skills/reverse-proxy-routing/SKILL.md",
-    "migration_status": "MIGRATED"
-  }
+  ]
 }
-

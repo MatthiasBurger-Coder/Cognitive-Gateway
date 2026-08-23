@@ -1,21 +1,20 @@
-//! Versioned repository-document contracts for agents and skills.
+//! Versioned, self-contained repository contracts for Agents and Skills.
 //!
-//! The document types are deliberately a small envelope around the CG-02
-//! domain definitions. `origin` is document provenance and is not part of the
-//! executable domain definition. All semantic fields are converted through
-//! the existing domain constructors before a document is accepted.
+//! Version 2 keeps the semantic content needed by a Skill in the document
+//! itself. Provenance and external `SKILL.md` references are deliberately
+//! outside this runtime contract.
 
 use std::{fmt, str::FromStr};
 
 use serde::{Deserialize, Deserializer, Serialize, Serializer, de::Error as _};
 
 use crate::{
-    AgentDefinition, AgentId, CapabilityId, KnowledgeQuery, SchemaVersion, SkillDefinition,
-    SkillId, ValidationError, serialization::SerializationError,
+    AgentDefinition, AgentId, CapabilityId, KnowledgeQuery, NonEmptyText, SchemaVersion,
+    SkillDefinition, SkillId, ValidationError, serialization::SerializationError,
 };
 
-/// The only schema version currently accepted by agent and skill documents.
-pub const DEFINITION_SCHEMA_VERSION: SchemaVersion = SchemaVersion::V1;
+/// The only schema version currently accepted by Agent and Skill documents.
+pub const DEFINITION_SCHEMA_VERSION: SchemaVersion = SchemaVersion::V2;
 
 /// Identifies the kind of a versioned repository definition document.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -25,7 +24,6 @@ pub enum DefinitionKind {
 }
 
 impl DefinitionKind {
-    /// Returns the canonical document value.
     #[must_use]
     pub const fn as_str(self) -> &'static str {
         match self {
@@ -70,220 +68,68 @@ impl<'de> Deserialize<'de> for DefinitionKind {
     where
         D: Deserializer<'de>,
     {
-        let value = String::deserialize(deserializer)?;
-        Self::from_str(&value).map_err(D::Error::custom)
+        Self::from_str(&String::deserialize(deserializer)?).map_err(D::Error::custom)
     }
 }
 
-/// Records where a repository definition came from and how it was migrated.
-///
-/// The source is intentionally free-form text rather than a typed gateway ID:
-/// it may be a repository path, URL, commit-qualified reference or another
-/// source identifier. It is still required and validated as non-empty domain
-/// text so migrated definitions cannot lose their provenance.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct DefinitionOrigin {
-    project: String,
-    source: String,
-    migration_status: MigrationStatus,
-}
-
-impl DefinitionOrigin {
-    /// Creates complete provenance for a repository definition.
-    pub fn new(
-        project: impl Into<String>,
-        source: impl Into<String>,
-        migration_status: MigrationStatus,
-    ) -> Result<Self, ValidationError> {
-        let project = crate::NonEmptyText::new_for_field(project, "origin.project")?.into_inner();
-        let source = crate::NonEmptyText::new_for_field(source, "origin.source")?.into_inner();
-        Ok(Self {
-            project,
-            source,
-            migration_status,
-        })
-    }
-
-    /// Returns the source project name.
-    #[must_use]
-    pub fn project(&self) -> &str {
-        &self.project
-    }
-
-    /// Returns the source path or source identifier.
-    #[must_use]
-    pub fn source(&self) -> &str {
-        &self.source
-    }
-
-    /// Returns the migration state recorded for this document.
-    #[must_use]
-    pub const fn migration_status(&self) -> MigrationStatus {
-        self.migration_status
-    }
-}
-
-#[derive(Debug, Deserialize, Serialize)]
-#[serde(deny_unknown_fields)]
-struct WireDefinitionOrigin {
-    project: String,
-    source: String,
-    migration_status: String,
-}
-
-impl WireDefinitionOrigin {
-    fn into_domain(self) -> Result<DefinitionOrigin, ValidationError> {
-        DefinitionOrigin::new(
-            self.project,
-            self.source,
-            MigrationStatus::from_str(&self.migration_status)?,
-        )
-    }
-
-    fn from_domain(value: &DefinitionOrigin) -> Self {
-        Self {
-            project: value.project.clone(),
-            source: value.source.clone(),
-            migration_status: value.migration_status.to_string(),
-        }
-    }
-}
-
-/// The migration state of a repository definition.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum MigrationStatus {
-    /// The definition was authored in the Cognitive Gateway format.
-    Native,
-    /// The definition was imported from a source repository.
-    Migrated,
-    /// Multiple source definitions were normalized into this definition.
-    Merged,
-}
-
-impl MigrationStatus {
-    /// Returns the canonical document value.
-    #[must_use]
-    pub const fn as_str(self) -> &'static str {
-        match self {
-            Self::Native => "NATIVE",
-            Self::Migrated => "MIGRATED",
-            Self::Merged => "MERGED",
-        }
-    }
-}
-
-impl fmt::Display for MigrationStatus {
-    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
-        formatter.write_str(self.as_str())
-    }
-}
-
-impl FromStr for MigrationStatus {
-    type Err = ValidationError;
-
-    fn from_str(value: &str) -> Result<Self, Self::Err> {
-        match value {
-            "NATIVE" => Ok(Self::Native),
-            "MIGRATED" => Ok(Self::Migrated),
-            "MERGED" => Ok(Self::Merged),
-            value => Err(ValidationError::UnknownDomainValue {
-                field: "migration_status",
-                value: value.to_owned(),
-            }),
-        }
-    }
-}
-
-impl Serialize for MigrationStatus {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        serializer.serialize_str(self.as_str())
-    }
-}
-
-impl<'de> Deserialize<'de> for MigrationStatus {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        let value = String::deserialize(deserializer)?;
-        Self::from_str(&value).map_err(D::Error::custom)
-    }
-}
-
-/// A versioned agent repository document.
+/// A versioned Agent repository document.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AgentDefinitionDocument {
     schema_version: SchemaVersion,
     id: AgentId,
     description: String,
     skill_ids: Vec<SkillId>,
-    origin: DefinitionOrigin,
 }
 
 impl AgentDefinitionDocument {
-    /// Creates a v1 agent document from typed domain values and provenance.
+    /// Creates a v2 Agent document.
     pub fn new(
         id: AgentId,
         description: impl Into<String>,
         skill_ids: impl IntoIterator<Item = SkillId>,
-        origin: DefinitionOrigin,
     ) -> Result<Self, ValidationError> {
-        let definition = AgentDefinition::new(id, description, skill_ids)?;
-        Ok(Self::from_domain(definition, origin))
+        Ok(Self::from_domain(AgentDefinition::new(
+            id,
+            description,
+            skill_ids,
+        )?))
     }
 
-    /// Creates a document from an already validated domain definition.
     #[must_use]
-    pub fn from_domain(definition: AgentDefinition, origin: DefinitionOrigin) -> Self {
+    pub fn from_domain(definition: AgentDefinition) -> Self {
         Self {
             schema_version: DEFINITION_SCHEMA_VERSION,
             id: definition.id().clone(),
             description: definition.description().to_owned(),
             skill_ids: definition.skill_ids().to_vec(),
-            origin,
         }
     }
 
-    /// Returns the document schema version.
     #[must_use]
     pub const fn schema_version(&self) -> SchemaVersion {
         self.schema_version
     }
 
-    /// Returns the fixed document kind.
     #[must_use]
     pub const fn kind(&self) -> DefinitionKind {
         DefinitionKind::Agent
     }
 
-    /// Returns the typed agent identity.
     #[must_use]
     pub fn id(&self) -> &AgentId {
         &self.id
     }
 
-    /// Returns the validated responsibility description.
     #[must_use]
     pub fn description(&self) -> &str {
         &self.description
     }
 
-    /// Returns the ordered, unique skill references.
     #[must_use]
     pub fn skill_ids(&self) -> &[SkillId] {
         &self.skill_ids
     }
 
-    /// Returns document provenance.
-    #[must_use]
-    pub const fn origin(&self) -> &DefinitionOrigin {
-        &self.origin
-    }
-
-    /// Converts this document to the corresponding CG-02 domain definition.
     #[must_use]
     pub fn to_domain(&self) -> AgentDefinition {
         AgentDefinition::new(
@@ -291,15 +137,13 @@ impl AgentDefinitionDocument {
             self.description.clone(),
             self.skill_ids.clone(),
         )
-        .expect("validated agent document must convert to its domain definition")
+        .expect("validated Agent document must convert to its domain definition")
     }
 
-    /// Serializes this document as compact deterministic JSON.
     pub fn to_json(&self) -> Result<String, SerializationError> {
         serde_json::to_string(self).map_err(SerializationError::Json)
     }
 
-    /// Parses and validates one JSON agent document.
     pub fn from_json(value: &str) -> Result<Self, SerializationError> {
         let wire =
             serde_json::from_str::<WireAgentDefinition>(value).map_err(SerializationError::Json)?;
@@ -307,126 +151,190 @@ impl AgentDefinitionDocument {
     }
 
     fn from_wire(wire: WireAgentDefinition) -> Result<Self, ValidationError> {
-        validate_version(SchemaVersion::from_str(&wire.schema_version)?)?;
+        validate_version(wire.schema_version)?;
         if DefinitionKind::from_str(&wire.kind)? != DefinitionKind::Agent {
             return Err(ValidationError::UnknownDomainValue {
                 field: "kind",
                 value: wire.kind,
             });
         }
-        let id = AgentId::new(wire.id)?;
-        let skill_ids = wire
-            .skill_ids
-            .into_iter()
-            .map(SkillId::new)
-            .collect::<Result<Vec<_>, _>>()?;
-        let origin = wire.origin.into_domain()?;
-        let definition = AgentDefinition::new(id, wire.description, skill_ids)?;
-        Ok(Self::from_domain(definition, origin))
+        Self::new(
+            AgentId::new(wire.id)?,
+            wire.description,
+            wire.skill_ids
+                .into_iter()
+                .map(SkillId::new)
+                .collect::<Result<Vec<_>, _>>()?,
+        )
     }
 }
 
-/// A versioned skill repository document.
+/// A versioned, self-contained Skill repository document.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SkillDefinitionDocument {
     schema_version: SchemaVersion,
     id: SkillId,
+    name: String,
     description: String,
     owner_agent_id: Option<AgentId>,
+    authoritative_sources: Vec<NonEmptyText>,
+    rules: Vec<NonEmptyText>,
+    verification: Vec<NonEmptyText>,
     dependency_ids: Vec<SkillId>,
+    related_skill_ids: Vec<SkillId>,
     required_capability_ids: Vec<CapabilityId>,
     knowledge_queries: Vec<KnowledgeQuery>,
-    origin: DefinitionOrigin,
 }
 
 impl SkillDefinitionDocument {
-    /// Creates a v1 skill document from typed domain values and provenance.
+    /// Creates a complete v2 Skill document. The optional owner and legacy
+    /// capability/retrieval fields remain typed semantic fields; no external
+    /// source or provenance is retained.
+    #[allow(clippy::too_many_arguments)]
     pub fn new(
         id: SkillId,
+        name: impl Into<String>,
         description: impl Into<String>,
         owner_agent_id: Option<AgentId>,
-        dependency_ids: impl IntoIterator<Item = SkillId>,
+        authoritative_sources: impl IntoIterator<Item = impl Into<String>>,
+        rules: impl IntoIterator<Item = impl Into<String>>,
+        verification: impl IntoIterator<Item = impl Into<String>>,
+        requires: impl IntoIterator<Item = SkillId>,
+        related_skills: impl IntoIterator<Item = SkillId>,
         required_capability_ids: impl IntoIterator<Item = CapabilityId>,
         knowledge_queries: impl IntoIterator<Item = KnowledgeQuery>,
-        origin: DefinitionOrigin,
     ) -> Result<Self, ValidationError> {
-        let definition =
-            SkillDefinition::new(id, description, dependency_ids, required_capability_ids)?
-                .with_owner_if_present(owner_agent_id)
-                .with_knowledge_queries(knowledge_queries);
-        Ok(Self::from_domain(definition, origin))
+        let definition = SkillDefinition::new(id, description, requires, required_capability_ids)?
+            .with_name(name)?
+            .with_owner_if_present(owner_agent_id)
+            .with_authoritative_sources(authoritative_sources)?
+            .with_rules(rules)?
+            .with_verification(verification)?
+            .with_related_skill_ids(related_skills)?
+            .with_knowledge_queries(knowledge_queries);
+        Ok(Self::from_domain(definition))
     }
 
-    /// Creates a document from an already validated domain definition.
+    /// Creates a minimal complete Skill document with empty optional lists.
+    pub fn new_minimal(
+        id: SkillId,
+        name: impl Into<String>,
+        description: impl Into<String>,
+    ) -> Result<Self, ValidationError> {
+        Self::new(
+            id,
+            name,
+            description,
+            None,
+            std::iter::empty::<String>(),
+            std::iter::empty::<String>(),
+            std::iter::empty::<String>(),
+            std::iter::empty::<SkillId>(),
+            std::iter::empty::<SkillId>(),
+            std::iter::empty::<CapabilityId>(),
+            std::iter::empty::<KnowledgeQuery>(),
+        )
+    }
+
     #[must_use]
-    pub fn from_domain(definition: SkillDefinition, origin: DefinitionOrigin) -> Self {
+    pub fn from_domain(definition: SkillDefinition) -> Self {
         Self {
             schema_version: DEFINITION_SCHEMA_VERSION,
             id: definition.id().clone(),
+            name: definition.name().to_owned(),
             description: definition.description().to_owned(),
             owner_agent_id: definition.owner_agent_id().cloned(),
+            authoritative_sources: definition.authoritative_sources().to_vec(),
+            rules: definition.rules().to_vec(),
+            verification: definition.verification().to_vec(),
             dependency_ids: definition.dependency_ids().to_vec(),
+            related_skill_ids: definition.related_skill_ids().to_vec(),
             required_capability_ids: definition.required_capability_ids().to_vec(),
             knowledge_queries: definition.knowledge_queries().to_vec(),
-            origin,
         }
     }
 
-    /// Returns the document schema version.
     #[must_use]
     pub const fn schema_version(&self) -> SchemaVersion {
         self.schema_version
     }
 
-    /// Returns the fixed document kind.
     #[must_use]
     pub const fn kind(&self) -> DefinitionKind {
         DefinitionKind::Skill
     }
 
-    /// Returns the typed skill identity.
     #[must_use]
     pub fn id(&self) -> &SkillId {
         &self.id
     }
 
-    /// Returns the validated skill description.
+    #[must_use]
+    pub fn name(&self) -> &str {
+        &self.name
+    }
+
     #[must_use]
     pub fn description(&self) -> &str {
         &self.description
     }
 
-    /// Returns the optional owning agent relationship.
     #[must_use]
     pub fn owner_agent_id(&self) -> Option<&AgentId> {
         self.owner_agent_id.as_ref()
     }
 
-    /// Returns ordered, unique skill dependencies.
+    #[must_use]
+    pub fn authoritative_sources(&self) -> &[NonEmptyText] {
+        &self.authoritative_sources
+    }
+
+    #[must_use]
+    pub fn rules(&self) -> &[NonEmptyText] {
+        &self.rules
+    }
+
+    #[must_use]
+    pub fn verification(&self) -> &[NonEmptyText] {
+        &self.verification
+    }
+
     #[must_use]
     pub fn dependency_ids(&self) -> &[SkillId] {
         &self.dependency_ids
     }
 
-    /// Returns ordered, unique abstract capability requirements.
+    #[must_use]
+    pub fn requires(&self) -> &[SkillId] {
+        self.dependency_ids()
+    }
+
+    /// Alias using the explicit mandatory-reference terminology.
+    #[must_use]
+    pub fn required_skill_ids(&self) -> &[SkillId] {
+        self.dependency_ids()
+    }
+
+    #[must_use]
+    pub fn related_skill_ids(&self) -> &[SkillId] {
+        &self.related_skill_ids
+    }
+
+    #[must_use]
+    pub fn related_skills(&self) -> &[SkillId] {
+        self.related_skill_ids()
+    }
+
     #[must_use]
     pub fn required_capability_ids(&self) -> &[CapabilityId] {
         &self.required_capability_ids
     }
 
-    /// Returns ordered knowledge queries.
     #[must_use]
     pub fn knowledge_queries(&self) -> &[KnowledgeQuery] {
         &self.knowledge_queries
     }
 
-    /// Returns document provenance.
-    #[must_use]
-    pub const fn origin(&self) -> &DefinitionOrigin {
-        &self.origin
-    }
-
-    /// Converts this document to the corresponding CG-02 domain definition.
     #[must_use]
     pub fn to_domain(&self) -> SkillDefinition {
         SkillDefinition::new(
@@ -435,17 +343,25 @@ impl SkillDefinitionDocument {
             self.dependency_ids.clone(),
             self.required_capability_ids.clone(),
         )
-        .expect("validated skill document must convert to its domain definition")
+        .expect("validated Skill document must convert to its domain definition")
+        .with_name(self.name.clone())
+        .expect("validated Skill name must convert to its domain definition")
         .with_owner_if_present(self.owner_agent_id.clone())
+        .with_authoritative_sources(self.authoritative_sources.iter().map(NonEmptyText::as_str))
+        .expect("validated Skill sources must convert to its domain definition")
+        .with_rules(self.rules.iter().map(NonEmptyText::as_str))
+        .expect("validated Skill rules must convert to its domain definition")
+        .with_verification(self.verification.iter().map(NonEmptyText::as_str))
+        .expect("validated Skill verification must convert to its domain definition")
+        .with_related_skill_ids(self.related_skill_ids.clone())
+        .expect("validated Skill references must convert to its domain definition")
         .with_knowledge_queries(self.knowledge_queries.clone())
     }
 
-    /// Serializes this document as compact deterministic JSON.
     pub fn to_json(&self) -> Result<String, SerializationError> {
         serde_json::to_string(self).map_err(SerializationError::Json)
     }
 
-    /// Parses and validates one JSON skill document.
     pub fn from_json(value: &str) -> Result<Self, SerializationError> {
         let wire =
             serde_json::from_str::<WireSkillDefinition>(value).map_err(SerializationError::Json)?;
@@ -453,49 +369,47 @@ impl SkillDefinitionDocument {
     }
 
     fn from_wire(wire: WireSkillDefinition) -> Result<Self, ValidationError> {
-        validate_version(SchemaVersion::from_str(&wire.schema_version)?)?;
+        validate_version(wire.schema_version)?;
         if DefinitionKind::from_str(&wire.kind)? != DefinitionKind::Skill {
             return Err(ValidationError::UnknownDomainValue {
                 field: "kind",
                 value: wire.kind,
             });
         }
-        let id = SkillId::new(wire.id)?;
-        let owner_agent_id = wire.owner_agent_id.map(AgentId::new).transpose()?;
-        let dependency_ids = wire
-            .dependency_ids
-            .into_iter()
-            .map(SkillId::new)
-            .collect::<Result<Vec<_>, _>>()?;
-        let required_capability_ids = wire
-            .required_capability_ids
-            .into_iter()
-            .map(CapabilityId::new)
-            .collect::<Result<Vec<_>, _>>()?;
-        let knowledge_queries = wire
-            .knowledge_queries
-            .into_iter()
-            .map(KnowledgeQuery::new)
-            .collect::<Result<Vec<_>, _>>()?;
-        let origin = wire.origin.into_domain()?;
-        let definition = SkillDefinition::new(
-            id,
+        Self::new(
+            SkillId::new(wire.id)?,
+            wire.name,
             wire.description,
-            dependency_ids,
-            required_capability_ids,
-        )?
-        .with_owner_if_present(owner_agent_id)
-        .with_knowledge_queries(knowledge_queries);
-        Ok(Self::from_domain(definition, origin))
+            wire.owner_agent_id.map(AgentId::new).transpose()?,
+            wire.authoritative_sources,
+            wire.rules,
+            wire.verification,
+            wire.requires
+                .into_iter()
+                .map(SkillId::new)
+                .collect::<Result<Vec<_>, _>>()?,
+            wire.related_skills
+                .into_iter()
+                .map(SkillId::new)
+                .collect::<Result<Vec<_>, _>>()?,
+            wire.required_capability_ids
+                .into_iter()
+                .map(CapabilityId::new)
+                .collect::<Result<Vec<_>, _>>()?,
+            wire.knowledge_queries
+                .into_iter()
+                .map(KnowledgeQuery::new)
+                .collect::<Result<Vec<_>, _>>()?,
+        )
     }
 }
 
-fn validate_version(version: SchemaVersion) -> Result<(), ValidationError> {
-    if version == DEFINITION_SCHEMA_VERSION {
+fn validate_version(version: u16) -> Result<(), ValidationError> {
+    if version == DEFINITION_SCHEMA_VERSION.major() {
         Ok(())
     } else {
         Err(ValidationError::UnsupportedSchemaVersion {
-            expected: "1.0",
+            expected: "2",
             actual: version.to_string(),
         })
     }
@@ -517,26 +431,32 @@ impl SkillDefinitionOwnerExt for SkillDefinition {
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 struct WireAgentDefinition {
-    schema_version: String,
+    schema_version: u16,
     kind: String,
     id: String,
     description: String,
     skill_ids: Vec<String>,
-    origin: WireDefinitionOrigin,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 struct WireSkillDefinition {
-    schema_version: String,
+    schema_version: u16,
     kind: String,
     id: String,
+    name: String,
     description: String,
+    #[serde(default)]
     owner_agent_id: Option<String>,
-    dependency_ids: Vec<String>,
+    authoritative_sources: Vec<String>,
+    rules: Vec<String>,
+    verification: Vec<String>,
+    requires: Vec<String>,
+    related_skills: Vec<String>,
+    #[serde(default)]
     required_capability_ids: Vec<String>,
+    #[serde(default)]
     knowledge_queries: Vec<String>,
-    origin: WireDefinitionOrigin,
 }
 
 impl Serialize for AgentDefinitionDocument {
@@ -545,12 +465,11 @@ impl Serialize for AgentDefinitionDocument {
         S: Serializer,
     {
         WireAgentDefinition {
-            schema_version: self.schema_version.to_string(),
+            schema_version: self.schema_version.major(),
             kind: self.kind().to_string(),
             id: self.id.to_string(),
             description: self.description.clone(),
             skill_ids: self.skill_ids.iter().map(ToString::to_string).collect(),
-            origin: WireDefinitionOrigin::from_domain(&self.origin),
         }
         .serialize(serializer)
     }
@@ -561,8 +480,8 @@ impl<'de> Deserialize<'de> for AgentDefinitionDocument {
     where
         D: Deserializer<'de>,
     {
-        let wire = WireAgentDefinition::deserialize(deserializer)?;
-        AgentDefinitionDocument::from_wire(wire).map_err(D::Error::custom)
+        AgentDefinitionDocument::from_wire(WireAgentDefinition::deserialize(deserializer)?)
+            .map_err(D::Error::custom)
     }
 }
 
@@ -572,13 +491,34 @@ impl Serialize for SkillDefinitionDocument {
         S: Serializer,
     {
         WireSkillDefinition {
-            schema_version: self.schema_version.to_string(),
+            schema_version: self.schema_version.major(),
             kind: self.kind().to_string(),
             id: self.id.to_string(),
+            name: self.name.clone(),
             description: self.description.clone(),
             owner_agent_id: self.owner_agent_id.as_ref().map(ToString::to_string),
-            dependency_ids: self
+            authoritative_sources: self
+                .authoritative_sources
+                .iter()
+                .map(|value| value.as_str().to_owned())
+                .collect(),
+            rules: self
+                .rules
+                .iter()
+                .map(|value| value.as_str().to_owned())
+                .collect(),
+            verification: self
+                .verification
+                .iter()
+                .map(|value| value.as_str().to_owned())
+                .collect(),
+            requires: self
                 .dependency_ids
+                .iter()
+                .map(ToString::to_string)
+                .collect(),
+            related_skills: self
+                .related_skill_ids
                 .iter()
                 .map(ToString::to_string)
                 .collect(),
@@ -592,7 +532,6 @@ impl Serialize for SkillDefinitionDocument {
                 .iter()
                 .map(|query| query.as_str().to_owned())
                 .collect(),
-            origin: WireDefinitionOrigin::from_domain(&self.origin),
         }
         .serialize(serializer)
     }
@@ -603,202 +542,240 @@ impl<'de> Deserialize<'de> for SkillDefinitionDocument {
     where
         D: Deserializer<'de>,
     {
-        let wire = WireSkillDefinition::deserialize(deserializer)?;
-        SkillDefinitionDocument::from_wire(wire).map_err(D::Error::custom)
+        SkillDefinitionDocument::from_wire(WireSkillDefinition::deserialize(deserializer)?)
+            .map_err(D::Error::custom)
     }
 }
 
-/// Compatibility name emphasizing that these are versioned contracts.
+/// Compatibility names emphasizing that these are versioned contracts.
 pub type VersionedAgentDefinition = AgentDefinitionDocument;
-
-/// Compatibility name emphasizing that these are versioned contracts.
 pub type VersionedSkillDefinition = SkillDefinitionDocument;
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{AgentId, CapabilityId, SkillId};
 
-    fn origin(status: MigrationStatus) -> DefinitionOrigin {
-        DefinitionOrigin::new(
-            "Tiny-Swarm-World",
-            ".agents/roles/senior-system-architect.md",
-            status,
-        )
-        .unwrap()
+    fn agent_json() -> String {
+        serde_json::json!({
+            "schema_version": 2,
+            "kind": "agent",
+            "id": "reviewer",
+            "description": "Reviews architecture changes",
+            "skill_ids": ["architecture"]
+        })
+        .to_string()
+    }
+
+    fn skill_json() -> String {
+        serde_json::json!({
+            "schema_version": 2,
+            "kind": "skill",
+            "id": "architecture",
+            "name": "Architecture Expert",
+            "description": "Reviews architecture boundaries",
+            "owner_agent_id": "reviewer",
+            "authoritative_sources": ["architecture guide"],
+            "rules": ["Keep dependencies directed inward."],
+            "verification": ["Run architecture tests."],
+            "requires": ["foundation"],
+            "related_skills": ["quality"],
+            "required_capability_ids": ["repository.read"],
+            "knowledge_queries": ["architecture boundaries"]
+        })
+        .to_string()
     }
 
     #[test]
-    fn agent_document_round_trips_and_maps_to_cg02() {
-        let document = AgentDefinitionDocument::new(
-            AgentId::new("system-architect").unwrap(),
-            "Cross-module boundaries and architecture decisions",
-            [SkillId::new("architecture-hexagonal").unwrap()],
-            origin(MigrationStatus::Migrated),
-        )
-        .unwrap();
-
-        let json = document.to_json().unwrap();
-        let restored = AgentDefinitionDocument::from_json(&json).unwrap();
-        assert_eq!(restored, document);
-        assert_eq!(restored.schema_version(), SchemaVersion::V1);
-        assert_eq!(restored.kind(), DefinitionKind::Agent);
-        assert_eq!(restored.description(), document.description());
-        assert_eq!(restored.to_domain().skill_ids(), document.skill_ids());
+    fn agent_documents_round_trip_and_convert_to_domain() {
+        let document = AgentDefinitionDocument::from_json(&agent_json()).unwrap();
+        assert_eq!(document.schema_version(), SchemaVersion::V2);
+        assert_eq!(document.kind(), DefinitionKind::Agent);
+        assert_eq!(document.to_domain().skill_ids().len(), 1);
         assert_eq!(
-            restored.origin().migration_status(),
-            MigrationStatus::Migrated
-        );
-    }
-
-    #[test]
-    fn skill_document_round_trips_all_cg02_fields() {
-        let document = SkillDefinitionDocument::new(
-            SkillId::new("architecture-hexagonal").unwrap(),
-            "Hexagonal boundaries and dependency direction",
-            Some(AgentId::new("system-architect").unwrap()),
-            [],
-            [CapabilityId::new("repository.read").unwrap()],
-            [KnowledgeQuery::new("hexagonal architecture boundaries").unwrap()],
-            origin(MigrationStatus::Merged),
-        )
-        .unwrap();
-
-        let restored = SkillDefinitionDocument::from_json(&document.to_json().unwrap()).unwrap();
-        assert_eq!(restored, document);
-        assert_eq!(restored.schema_version(), SchemaVersion::V1);
-        assert_eq!(restored.kind(), DefinitionKind::Skill);
-        assert_eq!(restored.description(), document.description());
-        assert_eq!(restored.dependency_ids(), document.dependency_ids());
-        assert_eq!(
-            restored.required_capability_ids(),
-            document.required_capability_ids()
+            AgentDefinitionDocument::from_json(&document.to_json().unwrap()).unwrap(),
+            document
         );
         assert_eq!(
-            restored.to_domain().owner_agent_id(),
-            document.owner_agent_id()
-        );
-        assert_eq!(
-            restored.to_domain().knowledge_queries(),
-            document.knowledge_queries()
+            serde_json::from_str::<AgentDefinitionDocument>(&document.to_json().unwrap()).unwrap(),
+            document
         );
     }
 
     #[test]
-    fn rejects_unsupported_versions_invalid_kind_and_unknown_fields() {
-        let agent = r#"{
-            "schema_version":"1.1","kind":"agent","id":"agent",
-            "description":"Agent","skill_ids":["skill"],
-            "origin":{"project":"source","source":"roles/agent.md","migration_status":"MIGRATED"}
-        }"#;
+    fn agent_documents_reject_wrong_version_kind_and_unknown_fields() {
+        let old_version = agent_json().replace("\"schema_version\":2", "\"schema_version\":1");
         assert!(matches!(
-            AgentDefinitionDocument::from_json(agent),
+            AgentDefinitionDocument::from_json(&old_version),
             Err(SerializationError::Validation(
                 ValidationError::UnsupportedSchemaVersion { .. }
             ))
         ));
 
-        let wrong_kind = agent.replace("1.1", "1.0").replace("agent", "skill");
+        let wrong_kind = agent_json().replace("\"kind\":\"agent\"", "\"kind\":\"skill\"");
         assert!(AgentDefinitionDocument::from_json(&wrong_kind).is_err());
 
-        let skill = r#"{
-            "schema_version":"1.0","kind":"agent","id":"skill",
-            "description":"Skill","owner_agent_id":null,"dependency_ids":[],
-            "required_capability_ids":[],"knowledge_queries":[],
-            "origin":{"project":"source","source":"skills/skill.json","migration_status":"NATIVE"}
-        }"#;
-        assert!(SkillDefinitionDocument::from_json(skill).is_err());
-
-        let unknown = agent.replace("\"origin\"", "\"prompt\":\"runtime text\",\"origin\"");
+        let unknown = agent_json().replace("\"skill_ids\"", "\"extra\":true,\"skill_ids\"");
         assert!(AgentDefinitionDocument::from_json(&unknown).is_err());
     }
 
     #[test]
-    fn rejects_incomplete_provenance_and_bad_relationships() {
-        let missing_source = r#"{
-            "schema_version":"1.0","kind":"skill","id":"skill",
-            "description":"Skill","owner_agent_id":null,"dependency_ids":[],
-            "required_capability_ids":[],"knowledge_queries":[],
-            "origin":{"project":"source","source":" ","migration_status":"MIGRATED"}
-        }"#;
-        assert!(SkillDefinitionDocument::from_json(missing_source).is_err());
-
-        let duplicate = missing_source.replace(
-            "\"dependency_ids\":[]",
-            "\"dependency_ids\":[\"dependency\",\"dependency\"]",
+    fn skill_documents_round_trip_all_structured_content() {
+        let document = SkillDefinitionDocument::from_json(&skill_json()).unwrap();
+        assert_eq!(document.schema_version(), SchemaVersion::V2);
+        assert_eq!(document.name(), "Architecture Expert");
+        assert_eq!(
+            document.authoritative_sources()[0].as_str(),
+            "architecture guide"
         );
-        assert!(SkillDefinitionDocument::from_json(&duplicate).is_err());
-
-        let invalid_status = missing_source.replace("MIGRATED", "IMPORTED");
-        assert!(SkillDefinitionDocument::from_json(&invalid_status).is_err());
-
-        let unowned = missing_source
-            .replace("\" \"", "\"skills/skill.md\"")
-            .replace("\"MIGRATED\"", "\"NATIVE\"");
-        let unowned = SkillDefinitionDocument::from_json(&unowned).unwrap();
-        assert!(unowned.owner_agent_id().is_none());
-        assert!(unowned.to_domain().owner_agent_id().is_none());
+        assert_eq!(
+            document.rules()[0].as_str(),
+            "Keep dependencies directed inward."
+        );
+        assert_eq!(
+            document.verification()[0].as_str(),
+            "Run architecture tests."
+        );
+        assert_eq!(document.requires()[0].as_str(), "foundation");
+        assert_eq!(document.related_skills()[0].as_str(), "quality");
+        assert_eq!(
+            document.to_domain().related_skill_ids()[0].as_str(),
+            "quality"
+        );
+        assert_eq!(
+            SkillDefinitionDocument::from_json(&document.to_json().unwrap()).unwrap(),
+            document
+        );
+        assert_eq!(
+            serde_json::from_str::<SkillDefinitionDocument>(&document.to_json().unwrap()).unwrap(),
+            document
+        );
     }
 
     #[test]
-    fn provenance_and_enums_use_canonical_values() {
-        assert_eq!(DefinitionKind::Agent.to_string(), "agent");
-        assert_eq!(MigrationStatus::Native.to_string(), "NATIVE");
-        assert_eq!(
-            MigrationStatus::from_str("MERGED").unwrap(),
-            MigrationStatus::Merged
-        );
-        assert!(DefinitionKind::from_str("workflow").is_err());
-        assert_eq!(
-            serde_json::to_string(&DefinitionKind::Agent).unwrap(),
-            "\"agent\""
-        );
-        assert_eq!(
-            serde_json::from_str::<DefinitionKind>("\"skill\"").unwrap(),
-            DefinitionKind::Skill
-        );
-        assert!(serde_json::from_str::<DefinitionKind>("\"workflow\"").is_err());
-        for status in [
-            MigrationStatus::Native,
-            MigrationStatus::Migrated,
-            MigrationStatus::Merged,
-        ] {
-            let json = serde_json::to_string(&status).unwrap();
-            assert_eq!(
-                serde_json::from_str::<MigrationStatus>(&json).unwrap(),
-                status
+    fn skill_documents_reject_invalid_content_and_references() {
+        let invalid_name = skill_json().replace("Architecture Expert", " ");
+        assert!(matches!(
+            SkillDefinitionDocument::from_json(&invalid_name),
+            Err(SerializationError::Validation(ValidationError::EmptyText {
+                field: "name"
+            }))
+        ));
+
+        for field in ["authoritative_sources", "rules", "verification"] {
+            let invalid = skill_json().replace(
+                &format!(
+                    "\"{field}\":[\"{}\"]",
+                    match field {
+                        "authoritative_sources" => "architecture guide",
+                        "rules" => "Keep dependencies directed inward.",
+                        _ => "Run architecture tests.",
+                    }
+                ),
+                &format!("\"{field}\": [\"bad\\u0000text\"]"),
             );
+            assert!(matches!(
+                SkillDefinitionDocument::from_json(&invalid),
+                Err(SerializationError::Validation(
+                    ValidationError::ControlCharacter { .. }
+                ))
+            ));
         }
-        assert!(DefinitionOrigin::new(" ", "source", MigrationStatus::Native).is_err());
+
+        let duplicate = skill_json().replace(
+            "\"related_skills\":[\"quality\"]",
+            "\"related_skills\":[\"quality\",\"quality\"]",
+        );
+        assert!(matches!(
+            SkillDefinitionDocument::from_json(&duplicate),
+            Err(SerializationError::Validation(
+                ValidationError::DuplicateRelationship {
+                    field: "related_skill_ids"
+                }
+            ))
+        ));
+
+        let related_self = skill_json().replace(
+            "\"related_skills\":[\"quality\"]",
+            "\"related_skills\":[\"architecture\"]",
+        );
+        assert!(matches!(
+            SkillDefinitionDocument::from_json(&related_self),
+            Err(SerializationError::Validation(
+                ValidationError::SelfReference {
+                    field: "related_skill_ids"
+                }
+            ))
+        ));
+
+        let overlap = skill_json().replace(
+            "\"related_skills\":[\"quality\"]",
+            "\"related_skills\":[\"foundation\"]",
+        );
+        assert!(matches!(
+            SkillDefinitionDocument::from_json(&overlap),
+            Err(SerializationError::Validation(
+                ValidationError::ConflictingRelationship { .. }
+            ))
+        ));
     }
 
     #[test]
-    fn serde_deserialization_uses_the_same_validating_boundary() {
+    fn skill_documents_reject_obsolete_shape_and_malformed_typed_fields() {
+        let old_version = skill_json().replace("\"schema_version\":2", "\"schema_version\":1");
+        assert!(SkillDefinitionDocument::from_json(&old_version).is_err());
+        let wrong_kind = skill_json().replace("\"kind\":\"skill\"", "\"kind\":\"agent\"");
+        assert!(SkillDefinitionDocument::from_json(&wrong_kind).is_err());
+        let unknown = skill_json().replace(
+            "\"knowledge_queries\"",
+            "\"origin\":{},\"knowledge_queries\"",
+        );
+        assert!(SkillDefinitionDocument::from_json(&unknown).is_err());
+        let invalid_owner = skill_json().replace("\"reviewer\"", "\"bad owner\"");
+        assert!(SkillDefinitionDocument::from_json(&invalid_owner).is_err());
+        let invalid_id = skill_json().replace("\"architecture\"", "\"../architecture\"");
+        assert!(SkillDefinitionDocument::from_json(&invalid_id).is_err());
+        assert!(SkillDefinitionDocument::from_json("{}").is_err());
+    }
+
+    #[test]
+    fn constructors_and_aliases_cover_minimal_documents() {
         let agent = AgentDefinitionDocument::new(
-            AgentId::new("agent").unwrap(),
-            "Agent",
+            AgentId::new("reviewer").unwrap(),
+            "Reviews changes",
             [SkillId::new("skill").unwrap()],
-            origin(MigrationStatus::Native),
         )
         .unwrap();
-        let skill = SkillDefinitionDocument::new(
+        assert_eq!(agent.skill_ids()[0].as_str(), "skill");
+
+        let skill = SkillDefinitionDocument::new_minimal(
             SkillId::new("skill").unwrap(),
             "Skill",
-            None,
-            [],
-            [],
-            [],
-            origin(MigrationStatus::Native),
+            "Skill description",
         )
         .unwrap();
+        assert_eq!(skill.required_skill_ids(), skill.requires());
+        assert!(skill.related_skills().is_empty());
+        assert!(skill.owner_agent_id().is_none());
+        assert!(skill.required_capability_ids().is_empty());
+        assert!(skill.knowledge_queries().is_empty());
 
+        assert!(AgentDefinitionDocument::new(AgentId::new("bad").unwrap(), "\0", []).is_err());
+        assert!(AgentDefinitionDocument::from_json("not json").is_err());
+    }
+
+    #[test]
+    fn kind_values_are_strictly_typed() {
         assert_eq!(
-            serde_json::from_str::<AgentDefinitionDocument>(&agent.to_json().unwrap()).unwrap(),
-            agent
+            DefinitionKind::from_str("agent").unwrap(),
+            DefinitionKind::Agent
         );
         assert_eq!(
-            serde_json::from_str::<SkillDefinitionDocument>(&skill.to_json().unwrap()).unwrap(),
-            skill
+            DefinitionKind::from_str("skill").unwrap(),
+            DefinitionKind::Skill
         );
+        assert!(DefinitionKind::from_str("workflow").is_err());
+        let encoded = serde_json::to_string(&DefinitionKind::Skill).unwrap();
+        assert_eq!(encoded, "\"skill\"");
+        assert!(serde_json::from_str::<DefinitionKind>("\"workflow\"").is_err());
     }
 }

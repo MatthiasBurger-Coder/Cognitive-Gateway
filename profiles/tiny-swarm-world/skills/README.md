@@ -17,3 +17,6 @@ The scope-gated candidates `code-property-graph-joern-specialist`,
 `sca-migration-expert` are intentionally not materialized until explicit
 scope approval. Deprecated, duplicate and generic candidates remain governed
 by the migration matrix and are not copied here.
+
+Entries use the v2 structured Skill shape. Migration provenance and external
+`SKILL.md` references are not runtime fields.

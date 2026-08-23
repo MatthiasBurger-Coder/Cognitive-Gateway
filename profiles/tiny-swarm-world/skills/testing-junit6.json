@@ -1,18 +1,17 @@
 {
-  "schema_version": "1.0",
+  "schema_version": 2,
   "kind": "skill",
   "id": "testing-junit6",
+  "name": "testing junit6",
   "description": "Java/JUnit testing if verified",
   "owner_agent_id": null,
-  "dependency_ids": [],
+  "authoritative_sources": [],
+  "rules": [],
+  "verification": [],
+  "requires": [],
+  "related_skills": [],
   "required_capability_ids": [],
   "knowledge_queries": [
     "Java/JUnit testing if verified"
-  ],
-  "origin": {
-    "project": "Tiny-Swarm-World",
-    "source": ".agents/skills/testing-junit6/SKILL.md",
-    "migration_status": "MIGRATED"
-  }
+  ]
 }
-
