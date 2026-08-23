@@ -22,6 +22,10 @@ See [`execution-context-ir.md`](execution-context-ir.md) for the field-level
 See [`ir-serialization.md`](ir-serialization.md) for the JSON wire schema,
 validation behavior, public serialization API and version compatibility rules.
 
+See [`agent-skill-definition-contracts.md`](agent-skill-definition-contracts.md)
+for the CG-03.03 versioned Agent and Skill document contracts, provenance
+model, strict exclusions and representative normalized TSW fixtures.
+
 See [`reference-scenarios.md`](reference-scenarios.md) for the CG-02.06
 executable acceptance scenarios covering the complete domain and IR contract.
 

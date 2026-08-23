@@ -1,0 +1,12 @@
+{
+  "schema_version": "1.0",
+  "kind": "agent",
+  "id": "system-architect",
+  "description": "Cross-module boundaries and architecture decisions",
+  "skill_ids": ["architecture-hexagonal", "contract-governance-expert"],
+  "origin": {
+    "project": "Tiny-Swarm-World",
+    "source": ".agents/roles/senior-system-architect.md",
+    "migration_status": "MIGRATED"
+  }
+}

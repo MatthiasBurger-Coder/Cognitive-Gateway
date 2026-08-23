@@ -3,6 +3,7 @@
 pub mod agent;
 pub mod capability;
 pub mod constraint;
+pub mod definition_contract;
 pub mod definitions;
 pub mod execution_context;
 pub mod execution_profile;
@@ -22,6 +23,10 @@ pub mod workflow;
 pub use agent::AgentDefinition;
 pub use capability::{Capability, CapabilityClass, CapabilityDefinition};
 pub use constraint::{Constraint, ConstraintDefinition, ConstraintKind};
+pub use definition_contract::{
+    AgentDefinitionDocument, DEFINITION_SCHEMA_VERSION, DefinitionKind, DefinitionOrigin,
+    MigrationStatus, SkillDefinitionDocument, VersionedAgentDefinition, VersionedSkillDefinition,
+};
 pub use definitions::DefinitionCatalog;
 pub use policy::PolicyDefinition;
 pub use retrieval::KnowledgeQuery;
