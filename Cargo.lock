@@ -22,9 +22,11 @@ version = "0.1.0"
 dependencies = [
  "gateway-application",
  "gateway-context",
+ "gateway-domain",
  "gateway-policy",
  "gateway-registry",
  "gateway-workflow",
+ "serde_json",
 ]
 
 [[package]]

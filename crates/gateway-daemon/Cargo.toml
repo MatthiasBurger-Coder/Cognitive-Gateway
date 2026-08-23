@@ -8,9 +8,15 @@ rust-version.workspace = true
 [dependencies]
 gateway-application = { path = "../gateway-application" }
 gateway-context = { path = "../gateway-context" }
+gateway-domain = { path = "../gateway-domain" }
 gateway-policy = { path = "../gateway-policy" }
 gateway-registry = { path = "../gateway-registry" }
 gateway-workflow = { path = "../gateway-workflow" }
+serde_json.workspace = true
+
+[[bin]]
+name = "cg-registry"
+path = "src/bin/cg-registry.rs"
 
 [lints]
 workspace = true
