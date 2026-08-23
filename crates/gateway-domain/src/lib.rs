@@ -29,7 +29,7 @@ pub use definition_contract::{
 };
 pub use definitions::DefinitionCatalog;
 pub use policy::PolicyDefinition;
-pub use retrieval::KnowledgeQuery;
+pub use retrieval::{KnowledgeProvenance, KnowledgeQuery, RetrievedKnowledge};
 pub use serialization::SerializationError;
 pub use skill::SkillDefinition;
 pub use workflow::WorkflowDefinition;

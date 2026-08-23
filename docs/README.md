@@ -33,6 +33,10 @@ See [`catalog-boundaries.md`](catalog-boundaries.md) for the Agent and Skill
 catalog layout, ownership rules, loading APIs, deterministic capability index
 and query behavior, and fail-closed semantics.
 
+See [`project-context-boundary.md`](project-context-boundary.md) for the
+request-scoped consuming-project configuration and retrieval provenance
+contract.
+
 See [`registry-inspection-cli.md`](registry-inspection-cli.md) for the CG-03
 read-only registry and capability inspection commands, JSON output and exit
 codes.

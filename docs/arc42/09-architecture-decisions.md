@@ -13,5 +13,6 @@ Current decisions:
 - ADR-007 — Execution Context IR as Integration Contract
 - [ADR-008 — Hexagonal Architecture and Ports & Adapters](../adr/ADR-008-hexagonal-architecture.md)
 - [ADR-009 — Git Definition Authority and Runtime State Persistence](../adr/ADR-009-git-definition-authority-runtime-state-persistence.md)
+- [ADR-010 — Request-Scoped Project Context and Retrieval Provenance](../adr/ADR-010-request-scoped-project-context-and-retrieval-provenance.md)
 
 ADRs are append-only records of architectural intent. If a decision changes, a new ADR supersedes the old one rather than silently rewriting history.

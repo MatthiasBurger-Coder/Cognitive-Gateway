@@ -56,7 +56,9 @@ This path must work without an LLM or external network access in v0.1.
 The Catalog Loader receives only the Gateway-owned catalog boundary. Consuming
 project context enters through explicit request, input, retrieval or adapter
 ports; it may influence a request-scoped plan, but it cannot add, replace or
-override an Agent or Skill definition.
+override an Agent or Skill definition. In the application contract this input
+is an opaque `ProjectContext` carried by `ExecutionRequest`; it is not part of
+the registry or `ExecutionContextIR`.
 
 ## 6.3 Semantic classification flow
 
@@ -91,7 +93,7 @@ Retrieval Planner
         +--> evidence history
         |
         v
-Retrieved knowledge with provenance
+Retrieved knowledge with typed provenance
         |
         v
 Context Compiler
