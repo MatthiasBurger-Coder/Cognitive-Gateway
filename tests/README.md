@@ -25,7 +25,11 @@ The current domain-primitive slice is covered by unit tests colocated with its i
 - validated `AgentDefinition`, `SkillDefinition`, `WorkflowDefinition` and
   `PolicyDefinition` construction;
 - local relationship invariants and complete cross-definition validation via
-  `DefinitionCatalog`.
+  `DefinitionCatalog`;
+- strict parsing and canonical representations for operating modes, execution
+  profiles, workflow/gate/blocker states and constraint kinds;
+- explicit lifecycle transitions and coordinated execution-state invariants;
+- inspect/mutate capability classification and mode/profile constraint checks.
 
 The context component has an integration test at [`../crates/gateway-context/tests/context_compiler.rs`](../crates/gateway-context/tests/context_compiler.rs). It verifies context compilation, preservation of domain values and all nine combinations of the three operating modes with the three independent execution profiles.
 
