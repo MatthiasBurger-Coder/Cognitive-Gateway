@@ -1,0 +1,79 @@
+{
+  "inventory_version": "cg-04.14-v1",
+  "source": {
+    "repository": "MatthiasBurger-Coder/Tiny-Swarm-World",
+    "commit": "27ce3960da98a9ba124fd3f9ff5e003b13e89c60",
+    "commit_message": "docs(issue-252): record incomplete RC1 audit",
+    "observed_at": "2026-08-23",
+    "role": "migration_input_only"
+  },
+  "classification_values": [
+    "REUSABLE_GENERIC",
+    "MERGE_OR_DEDUPLICATE",
+    "PROJECT_BOUND_INPUT",
+    "DEPRECATED",
+    "EXCLUDED",
+    "DEFERRED_ENGINE_FEATURE",
+    "UNSUPPORTED_GAP"
+  ],
+  "candidate_process_definitions": [
+    {
+      "id": "implementation-lifecycle",
+      "source_units": ["TSW-PROC-001", "TSW-PROC-005", "TSW-PROC-013", "TSW-PROC-015"],
+      "required_cg_features": ["states", "events", "transitions", "gates", "evidence", "blockers", "recovery"]
+    },
+    {
+      "id": "requirement-readiness",
+      "source_units": ["TSW-PROC-002", "TSW-PROC-003", "TSW-PROC-016"],
+      "required_cg_features": ["gates", "evidence", "authorization", "policy-input"]
+    },
+    {
+      "id": "verification-quality-gate",
+      "source_units": ["TSW-PROC-004", "TSW-PROC-010", "TSW-PROC-011", "TSW-PROC-012"],
+      "required_cg_features": ["gates", "evidence", "blockers", "retry"]
+    },
+    {
+      "id": "repair-recovery",
+      "source_units": ["TSW-PROC-011", "TSW-PROC-012", "TSW-PROC-017"],
+      "required_cg_features": ["recovery", "blockers", "failure-routing"]
+    },
+    {
+      "id": "release-qualification",
+      "source_units": ["TSW-PROC-013", "TSW-PROC-014"],
+      "required_cg_features": ["gates", "evidence", "authorization", "invariants"]
+    }
+  ],
+  "units": [
+    {"id":"TSW-PROC-001","classification":"REUSABLE_GENERIC","source":[".agents/prompts/workflow-create.md",".agents/prompts/workflow-execute.md"],"candidate":"implementation-lifecycle","required_cg_features":["states","events","transitions","evidence"],"rationale":"Generic bounded workflow lifecycle; TSW wording and commands remain external."},
+    {"id":"TSW-PROC-002","classification":"REUSABLE_GENERIC","source":[".agents/skills/three-amigos-requirement-gatekeeper/SKILL.md"],"candidate":"requirement-readiness","required_cg_features":["gates","evidence","authorization"],"rationale":"Reusable readiness decision represented by typed gate inputs."},
+    {"id":"TSW-PROC-003","classification":"REUSABLE_GENERIC","source":["documentation/workflow/requirement-matrix.md"],"candidate":"requirement-readiness","required_cg_features":["evidence","invariants"],"rationale":"Traceability is generic; issue/file identifiers are external."},
+    {"id":"TSW-PROC-004","classification":"REUSABLE_GENERIC","source":[".agents/skills/quality-gate-orchestrator/workflow.md",".agents/skills/quality-gate-orchestrator/quality-gates.md"],"candidate":"verification-quality-gate","required_cg_features":["gates","evidence","blockers"],"rationale":"Ordered quality outcomes fail closed."},
+    {"id":"TSW-PROC-005","classification":"MERGE_OR_DEDUPLICATE","source":[".agents/skills/workflow-executor/SKILL.md","documentation/process/workflow-execute.md"],"candidate":"implementation-lifecycle","required_cg_features":["transitions","evidence","invariants"],"rationale":"Execution/evidence view duplicates the base lifecycle."},
+    {"id":"TSW-PROC-006","classification":"PROJECT_BOUND_INPUT","source":["src/tiny_swarm_world/application/services/platform/workflow/semantics.py","src/tiny_swarm_world/application/services/platform/workflow/types.py"],"candidate":null,"required_cg_features":["external-input"],"rationale":"Concrete platform operation taxonomy is not canonical process authority."},
+    {"id":"TSW-PROC-007","classification":"DEFERRED_ENGINE_FEATURE","source":[".agents/skills/s3d-execution-orchestrator/SKILL.md",".codex/evidence/s3d-execution-plan.md"],"candidate":null,"required_cg_features":["execution-graph","DAG","locks"],"rationale":"Scheduling semantics require a future execution-graph extension."},
+    {"id":"TSW-PROC-008","classification":"DEFERRED_ENGINE_FEATURE","source":[".agents/skills/s3d-execution-orchestrator/SKILL.md"],"candidate":null,"required_cg_features":["graph-validation","cycle-rejection"],"rationale":"Graph validation is extension-ready, not v1 lifecycle state."},
+    {"id":"TSW-PROC-009","classification":"EXCLUDED","source":[".agents/skills/s3d-execution-orchestrator/SKILL.md",".agents/orchestrator/routing-rules.md"],"candidate":null,"required_cg_features":["external-orchestration"],"rationale":"Worktrees, handoffs and stream ownership belong to orchestration adapters."},
+    {"id":"TSW-PROC-010","classification":"REUSABLE_GENERIC","source":["src/tiny_swarm_world/application/services/platform/workflow/runtime.py","src/tiny_swarm_world/application/services/platform/workflow/verify.py"],"candidate":"verification-quality-gate","required_cg_features":["evidence","blockers","failure-routing"],"rationale":"Verification outcome distinctions are reusable."},
+    {"id":"TSW-PROC-011","classification":"REUSABLE_GENERIC","source":["src/tiny_swarm_world/application/services/platform/workflow/runtime.py","src/tiny_swarm_world/application/services/platform/workflow/verify.py"],"candidate":"repair-recovery","required_cg_features":["retry","recovery"],"rationale":"Bounded retry is a generic recovery rule."},
+    {"id":"TSW-PROC-012","classification":"REUSABLE_GENERIC","source":[".agents/skills/quality-gate-orchestrator/failure-handling.md","src/tiny_swarm_world/application/services/platform/workflow/results.py"],"candidate":"repair-recovery","required_cg_features":["blockers","failure-routing","evidence"],"rationale":"Typed non-success outcomes must remain explicit."},
+    {"id":"TSW-PROC-013","classification":"REUSABLE_GENERIC","source":[".agents/skills/quality-gate-orchestrator/SKILL.md",".agents/skills/release-baseline-governance-expert/"],"candidate":"implementation-lifecycle","required_cg_features":["gates","invariants","evidence"],"rationale":"Hardening and stop-line discipline are generic governance semantics."},
+    {"id":"TSW-PROC-014","classification":"REUSABLE_GENERIC","source":["documentation/workflow/workflow.md","documentation/release/"],"candidate":"release-qualification","required_cg_features":["gates","evidence","authorization"],"rationale":"Release qualification can be project-agnostic with external facts."},
+    {"id":"TSW-PROC-015","classification":"PROJECT_BOUND_INPUT","source":[".agents/skills/branch-ci-governance-expert/",".agents/skills/release-branch-governance/"],"candidate":"implementation-lifecycle","required_cg_features":["external-input"],"rationale":"Branch, PR and commit values are runtime/project state."},
+    {"id":"TSW-PROC-016","classification":"REUSABLE_GENERIC","source":[".agents/skills/three-amigos-requirement-gatekeeper/",".agents/skills/workflow-conflict-resolution/"],"candidate":"requirement-readiness","required_cg_features":["authorization","policy-input","gates"],"rationale":"Human/policy waiting and allow/deny are typed CG boundary inputs."},
+    {"id":"TSW-PROC-017","classification":"REUSABLE_GENERIC","source":[".agents/skills/workflow-conflict-resolution/",".agents/skills/quality-gate-orchestrator/failure-handling.md"],"candidate":"repair-recovery","required_cg_features":["blockers","recovery","failure-routing"],"rationale":"Escalation and STOP are explicit blocked/failure outcomes."},
+    {"id":"TSW-PROC-018","classification":"UNSUPPORTED_GAP","source":["src/tiny_swarm_world/application/services/platform/workflow/"],"candidate":null,"required_cg_features":["parallelism","stream-distribution","resource-locks"],"rationale":"No safe v1 representation; never emulate with free text."},
+    {"id":"TSW-PROC-019","classification":"DEFERRED_ENGINE_FEATURE","source":[".codex/evidence/s3d-execution-plan.md"],"candidate":null,"required_cg_features":["join","barrier","execution-graph"],"rationale":"Join/barrier semantics require explicit future scheduling support."},
+    {"id":"TSW-PROC-020","classification":"EXCLUDED","source":[".codex/agents/",".agents/roles/"],"candidate":null,"required_cg_features":["external-runtime"],"rationale":"Concrete agents and Python/runtime modules belong to CG-08 or adapters."}
+  ],
+  "merge_map": [
+    {"from":"TSW-PROC-005","into":"TSW-PROC-001","reason":"one lifecycle, two evidence views"},
+    {"from":"TSW-PROC-010","into":"TSW-PROC-004","reason":"verification result semantics belong to the quality gate"},
+    {"from":"TSW-PROC-011","into":"TSW-PROC-017","reason":"retry and escalation are one recovery boundary"}
+  ],
+  "explicit_gaps": [
+    {"id":"CG04-GAP-EXECUTION-DAG","class":"DEFERRED_ENGINE_FEATURE","source_units":["TSW-PROC-007","TSW-PROC-008"],"disposition":"future execution-graph extension"},
+    {"id":"CG04-GAP-LOCKS-PARALLELISM","class":"UNSUPPORTED_GAP","source_units":["TSW-PROC-018"],"disposition":"unsupported until typed lock and parallel scheduling contracts exist"},
+    {"id":"CG04-GAP-JOIN-BARRIER","class":"DEFERRED_ENGINE_FEATURE","source_units":["TSW-PROC-019"],"disposition":"future execution-graph extension"},
+    {"id":"CG04-GAP-RUNTIME-ORCHESTRATION","class":"EXCLUDED","source_units":["TSW-PROC-009","TSW-PROC-020"],"disposition":"outside CG-04 lifecycle authority"}
+  ]
+}
