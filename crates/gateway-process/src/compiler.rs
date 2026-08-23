@@ -1094,7 +1094,7 @@ mod tests {
             result.definition().identity().id().as_str(),
             "canonical-issue-lifecycle"
         );
-        assert_eq!(result.definition().transitions().len(), 1);
+        assert_eq!(result.definition().transitions().len(), 2);
         assert!(!result.trace().is_empty());
     }
 

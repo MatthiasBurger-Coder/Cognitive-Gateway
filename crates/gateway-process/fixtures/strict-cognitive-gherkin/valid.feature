@@ -18,3 +18,9 @@ Feature: Canonical issue lifecycle
       When event implementation.accepted occurs
       Then transition to state IMPLEMENT
       Then authorize activity implement-change
+
+    Scenario: complete implementation
+      Given process state IMPLEMENT
+      When event implementation.completed occurs
+      Then transition to state COMPLETE
+      Then complete process
