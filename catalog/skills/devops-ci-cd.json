@@ -1,0 +1,15 @@
+{
+  "schema_version": "1.0",
+  "kind": "skill",
+  "id": "devops-ci-cd",
+  "description": "CI/CD automation boundaries",
+  "owner_agent_id": null,
+  "dependency_ids": [],
+  "required_capability_ids": [],
+  "knowledge_queries": ["CI/CD automation boundaries"],
+  "origin": {
+    "project": "Tiny-Swarm-World",
+    "source": ".agents/skills/devops-ci-cd/SKILL.md",
+    "migration_status": "MIGRATED"
+  }
+}

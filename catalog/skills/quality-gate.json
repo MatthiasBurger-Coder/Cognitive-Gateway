@@ -1,0 +1,15 @@
+{
+  "schema_version": "1.0",
+  "kind": "skill",
+  "id": "quality-gate",
+  "description": "Required quality-gate execution",
+  "owner_agent_id": null,
+  "dependency_ids": [],
+  "required_capability_ids": [],
+  "knowledge_queries": ["required quality-gate execution"],
+  "origin": {
+    "project": "Tiny-Swarm-World",
+    "source": ".agents/skills/quality-gate/SKILL.md",
+    "migration_status": "MIGRATED"
+  }
+}

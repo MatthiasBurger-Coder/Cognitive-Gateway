@@ -1,0 +1,15 @@
+{
+  "schema_version": "1.0",
+  "kind": "skill",
+  "id": "quality-architecture-validation",
+  "description": "Architecture and dependency validation",
+  "owner_agent_id": null,
+  "dependency_ids": [],
+  "required_capability_ids": [],
+  "knowledge_queries": ["architecture and dependency validation"],
+  "origin": {
+    "project": "Tiny-Swarm-World",
+    "source": ".agents/skills/quality-architecture-validation/SKILL.md",
+    "migration_status": "MIGRATED"
+  }
+}

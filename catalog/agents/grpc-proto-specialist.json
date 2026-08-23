@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0",
+  "kind": "agent",
+  "id": "grpc-proto-specialist",
+  "description": "Contract and transport-boundary design",
+  "skill_ids": [
+    "architecture-hexagonal",
+    "grpc-ingestion",
+    "grpc-streaming-specialist",
+    "ingestion-handoff-review",
+    "protobuf-contracts"
+  ],
+  "origin": {
+    "project": "Tiny-Swarm-World",
+    "source": ".agents/roles/senior-grpc-proto-specialist.md",
+    "migration_status": "MIGRATED"
+  }
+}

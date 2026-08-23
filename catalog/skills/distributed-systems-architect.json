@@ -1,0 +1,15 @@
+{
+  "schema_version": "1.0",
+  "kind": "skill",
+  "id": "distributed-systems-architect",
+  "description": "Long-running distributed execution",
+  "owner_agent_id": null,
+  "dependency_ids": [],
+  "required_capability_ids": [],
+  "knowledge_queries": ["long-running distributed execution"],
+  "origin": {
+    "project": "Tiny-Swarm-World",
+    "source": ".agents/skills/distributed-systems-architect/SKILL.md",
+    "migration_status": "MIGRATED"
+  }
+}

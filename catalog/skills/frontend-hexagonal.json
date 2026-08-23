@@ -1,0 +1,15 @@
+{
+  "schema_version": "1.0",
+  "kind": "skill",
+  "id": "frontend-hexagonal",
+  "description": "Frontend/API boundary separation",
+  "owner_agent_id": null,
+  "dependency_ids": [],
+  "required_capability_ids": [],
+  "knowledge_queries": ["frontend and API boundary separation"],
+  "origin": {
+    "project": "Tiny-Swarm-World",
+    "source": ".agents/skills/frontend-hexagonal/SKILL.md",
+    "migration_status": "MIGRATED"
+  }
+}

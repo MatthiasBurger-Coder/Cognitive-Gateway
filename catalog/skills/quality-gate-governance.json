@@ -1,0 +1,15 @@
+{
+  "schema_version": "1.0",
+  "kind": "skill",
+  "id": "quality-gate-governance",
+  "description": "Quality policy and evidence selection",
+  "owner_agent_id": null,
+  "dependency_ids": [],
+  "required_capability_ids": [],
+  "knowledge_queries": ["quality policy and evidence selection"],
+  "origin": {
+    "project": "Tiny-Swarm-World",
+    "source": ".agents/skills/quality-gate-governance/SKILL.md",
+    "migration_status": "MIGRATED"
+  }
+}

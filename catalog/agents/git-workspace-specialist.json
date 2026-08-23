@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0",
+  "kind": "agent",
+  "id": "git-workspace-specialist",
+  "description": "Safe repository and workspace lifecycle",
+  "skill_ids": [
+    "architecture-hexagonal",
+    "git-large-repository-specialist",
+    "performance-scalability-engineer",
+    "security-sandbox-specialist",
+    "workspace-lifecycle-specialist"
+  ],
+  "origin": {
+    "project": "Tiny-Swarm-World",
+    "source": ".agents/roles/senior-git-workspace-specialist.md",
+    "migration_status": "MIGRATED"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "schema_version": "1.0",
+  "kind": "skill",
+  "id": "performance-scalability-engineer",
+  "description": "Performance and resource scaling",
+  "owner_agent_id": null,
+  "dependency_ids": [],
+  "required_capability_ids": [],
+  "knowledge_queries": ["performance and resource scaling"],
+  "origin": {
+    "project": "Tiny-Swarm-World",
+    "source": ".agents/skills/performance-scalability-engineer/SKILL.md",
+    "migration_status": "MIGRATED"
+  }
+}

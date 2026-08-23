@@ -43,6 +43,9 @@ See [`catalog-profile-boundaries.md`](catalog-profile-boundaries.md) for the
 CG-03.06 generic catalog and Tiny Swarm World profile layout, ownership rules,
 loading APIs and fail-closed conflict semantics.
 
+See the materialized reusable definitions under [`../catalog/`](../catalog/)
+for the CG-03.07 generic Agent and Skill migration.
+
 ## Documentation Policy
 
 - Repository documentation is the technical source of truth.

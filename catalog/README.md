@@ -35,3 +35,10 @@ catalog loading or validation.
 The combined loader reads the catalog before the selected profile, sorts the
 result by canonical ID, and rejects any cross-boundary Agent or Skill ID
 collision. There is no implicit precedence or override behavior.
+
+## Current migration
+
+CG-03.07 materializes the reusable Tiny Swarm World candidates selected by the
+CG-03.02 migration matrix: eight catalog Agents and 37 canonical catalog
+Skills. Merged skills retain all source paths in `origin.source`; deferred,
+project-specific and deprecated candidates remain outside this catalog.
