@@ -30,7 +30,9 @@ Execution Runtime
 
 ### Deterministic first
 
-The initial system resolves workflow, role, skills, dependencies and policies without an LLM. Probabilistic services are optional enhancements.
+The initial system resolves workflows, agents, skills, dependencies and
+policies without an LLM. Probabilistic services are optional enhancements and
+cannot create authority or bypass validation.
 
 ### Hexagonal structure and ports
 
@@ -39,7 +41,7 @@ Ports & Adapters is the structural architecture strategy. Driving adapters such 
 The control-plane concepts map onto the hexagon as follows:
 
 - **Authority** and **State** are validated domain inputs and constraints.
-- **Cognitive Routing** is an application/core responsibility that determines the relevant workflow, role, skills and knowledge queries.
+- **Cognitive Routing** is an application/core responsibility that determines the relevant workflow, primary agent, skills and knowledge queries.
 - The **Knowledge Plane** is accessed through knowledge/retrieval ports; Git, filesystem, vector and graph RAG implementations are driven adapters.
 - The **Capability Plane** is accessed through capability ports; MCP, repository, Git and quality-tool integrations are driven adapters subject to policy.
 - The **Context Compiler** is an application/core service that produces the validated Execution Context IR.
@@ -49,7 +51,12 @@ The dependency rule is inward-only: adapters depend on application ports and dom
 
 ### Execution Context IR
 
-Natural-language requests are transformed into a validated intermediate representation before execution. This provides a stable integration boundary between routing and runtime execution.
+Natural-language requests are transformed into the validated, provider-
+independent `ExecutionContextIR v1` before execution. It carries typed task,
+workflow, agent, skill, state, policy, knowledge, capability, constraint and
+runtime identity values. Its field contract, invariants and JSON compatibility
+rules are defined in [`../execution-context-ir.md`](../execution-context-ir.md)
+and [`../ir-serialization.md`](../ir-serialization.md).
 
 ### Local cognitive services
 
@@ -61,4 +68,7 @@ v0.1 starts with filesystem, Git and registry retrieval. Vector and graph retrie
 
 ### Minimal context
 
-The compiler emits only required authority, workflow, skill and retrieved knowledge. Stable and dynamic content are separated to improve caching and reproducibility.
+The context compiler emits only required authority, workflow, skill and
+retrieved-knowledge inputs. The IR remains structured and provider-independent;
+rendering it into runtime-specific prompts or requests belongs outside the
+domain contract.

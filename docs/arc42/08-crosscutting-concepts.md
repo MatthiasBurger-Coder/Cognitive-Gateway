@@ -20,7 +20,10 @@ Unknown definitions, malformed profiles and unauthorized capabilities are reject
 
 ## 8.4 Stable versus dynamic context
 
-The compiler separates stable governance/policy/workflow/role/skill contracts from dynamic task, issue, Git, runtime, test and blocker state. This improves reproducibility and enables provider-side prompt caching where supported.
+The compiler separates stable governance/policy/workflow/agent/skill contracts
+from dynamic task and execution state. The provider-independent IR carries
+these values; runtime-specific prompt or request rendering is outside the
+domain contract.
 
 ## 8.5 Capability classes
 
@@ -32,7 +35,10 @@ Retrieval is advisory and evidence-producing. It must not directly create new au
 
 ## 8.7 State model
 
-Operating Mode, Execution Profile, workflow, gate, slice, blockers and authorization state are explicit machine-readable data rather than implicit prompt text.
+Operating Mode, Execution Profile, workflow, gate and blocker state are
+explicit machine-readable data rather than implicit prompt text. The current
+domain contract does not model a separate slice or authorization-state object;
+capability approval and policy decisions are represented explicitly in the IR.
 
 The domain currently models `WorkflowState`, `GateState` and `BlockerState` as
 strict, independently parseable state machines. `ExecutionState` validates

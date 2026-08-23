@@ -17,7 +17,7 @@ follows:
 | runtime bug fix | `TaskDescriptor` classification | `runtime_bugfix`, confidence `0.94` |
 | repair request | `TaskDescriptor` intent | `repair` |
 | release workflow | `workflow_id` | `classic-rc1` |
-| primary role | `primary_agent_id` | `senior-devops` |
+| primary agent | `primary_agent_id` | `senior-devops` |
 | selected skills | ordered `skill_ids` | engine, swarm, evidence |
 | current execution | `ExecutionState` | `RUNNING / IN_PROGRESS / CLEAR` |
 | hardening depth | mode/profile pair | `HARDENING / FULL_PATH` |
