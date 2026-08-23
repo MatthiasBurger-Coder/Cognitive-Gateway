@@ -196,6 +196,7 @@ pub struct ProcessInstance {
     retry_attempts: BTreeMap<ActivityId, u32>,
     context_references: BTreeSet<String>,
     history: Vec<TransitionHistoryEntry>,
+    waiting_condition: Option<crate::WaitingCondition>,
 }
 
 /// Stable instance-domain failure.
@@ -206,7 +207,7 @@ pub struct InstanceError {
 }
 
 impl InstanceError {
-    fn new(code: &'static str, message: impl Into<String>) -> Self {
+    pub(crate) fn new(code: &'static str, message: impl Into<String>) -> Self {
         Self {
             code,
             message: message.into(),
@@ -261,6 +262,7 @@ impl ProcessInstance {
             retry_attempts: BTreeMap::new(),
             context_references: BTreeSet::new(),
             history: Vec::new(),
+            waiting_condition: None,
         })
     }
 
@@ -319,6 +321,10 @@ impl ProcessInstance {
     #[must_use]
     pub fn history(&self) -> &[TransitionHistoryEntry] {
         &self.history
+    }
+    #[must_use]
+    pub fn waiting_condition(&self) -> Option<&crate::WaitingCondition> {
+        self.waiting_condition.as_ref()
     }
 
     /// Rejects stale callers before an authoritative mutation is attempted.
@@ -431,6 +437,57 @@ impl ProcessInstance {
             .checked_add(1)
             .ok_or_else(|| InstanceError::new("RETRY_OVERFLOW", "retry counter overflow"))?;
         Ok(*attempts)
+    }
+
+    pub(crate) fn pause(
+        &mut self,
+        condition: crate::WaitingCondition,
+    ) -> Result<(), InstanceError> {
+        if matches!(
+            self.status,
+            ProcessInstanceStatus::Completed | ProcessInstanceStatus::Failed
+        ) {
+            return Err(InstanceError::new(
+                "INVALID_PAUSE",
+                "completed or failed instances cannot pause",
+            ));
+        }
+        self.waiting_condition = Some(condition);
+        self.status = ProcessInstanceStatus::Paused;
+        Ok(())
+    }
+
+    pub(crate) fn resume(&mut self, condition_revalidated: bool) -> Result<(), InstanceError> {
+        if self.status != ProcessInstanceStatus::Paused {
+            return Err(InstanceError::new("NOT_PAUSED", "instance is not paused"));
+        }
+        if !condition_revalidated {
+            return Err(InstanceError::new(
+                "WAITING_CONDITION_NOT_CLEARED",
+                "the original waiting condition must be revalidated",
+            ));
+        }
+        self.waiting_condition = None;
+        self.status = ProcessInstanceStatus::Running;
+        Ok(())
+    }
+
+    pub(crate) fn mark_failed(&mut self, reason: impl Into<String>) -> Result<(), InstanceError> {
+        let reason = reason.into();
+        if reason.trim().is_empty() {
+            return Err(InstanceError::new(
+                "INVALID_FAILURE",
+                "failure reason cannot be empty",
+            ));
+        }
+        if self.status == ProcessInstanceStatus::Completed {
+            return Err(InstanceError::new(
+                "INVALID_FAILURE",
+                "completed instance cannot fail",
+            ));
+        }
+        self.status = ProcessInstanceStatus::Failed;
+        Ok(())
     }
 
     pub fn to_json(&self) -> Result<String, InstanceError> {

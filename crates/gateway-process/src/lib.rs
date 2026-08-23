@@ -8,6 +8,7 @@ mod evaluator;
 mod identifiers;
 mod instance;
 mod ir;
+mod lifecycle;
 mod mutation;
 mod registry;
 mod source;
@@ -38,6 +39,7 @@ pub use ir::{
     GuardExpression, InvariantDefinition, ProcessDefinition, ProcessDefinitionBuilder,
     ProcessIrVersion, RecoveryPolicy, StateDefinition, TransitionDefinition,
 };
+pub use lifecycle::{LifecycleController, PauseReason, RetryOutcome, WaitingCondition};
 pub use mutation::{
     AtomicProcessMutation, CommitOutcome, EventOccurrence, InMemoryProcessStore, MutationError,
 };
