@@ -23,6 +23,9 @@ See [`ir-serialization.md`](ir-serialization.md) for the CG-02.05 JSON wire
 schema, validation behavior, public serialization API and version compatibility
 rules.
 
+See [`reference-scenarios.md`](reference-scenarios.md) for the CG-02.06
+executable acceptance scenarios covering the complete domain and IR contract.
+
 ## Documentation Policy
 
 - Repository documentation is the technical source of truth.

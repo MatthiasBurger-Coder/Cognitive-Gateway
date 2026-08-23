@@ -35,4 +35,9 @@ The current domain-primitive slice is covered by unit tests colocated with its i
 
 The context component has an integration test at [`../crates/gateway-context/tests/context_compiler.rs`](../crates/gateway-context/tests/context_compiler.rs). It verifies context compilation, preservation of domain values and all nine combinations of the three operating modes with the three independent execution profiles.
 
-Workflow, registry, policy and full `ExecutionContextIR` contract tests remain pending until those components have executable behavior. They must be added beside the corresponding vertical slices rather than represented by placeholder tests.
+The domain acceptance fixture at
+[`../crates/gateway-domain/tests/reference_scenarios.rs`](../crates/gateway-domain/tests/reference_scenarios.rs)
+proves the EPIC reference context, all operating-mode/profile pairs,
+workflow/gate/blocker states, authority constraints, negative cases and full
+IR serialization round trips. Its scenario inventory and acceptance evidence
+are documented in [`../docs/reference-scenarios.md`](../docs/reference-scenarios.md).
