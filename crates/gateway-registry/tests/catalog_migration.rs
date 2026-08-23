@@ -207,3 +207,21 @@ fn catalog_skills_are_complete_and_references_are_canonical() {
         ]
     );
 }
+
+#[test]
+fn complete_generic_skill_graph_resolves_without_a_consuming_project() {
+    let registry = Registry::load_catalog(repository_catalog()).expect("catalog should load");
+    let root = gateway_domain::SkillId::new("source-analysis-pipeline").unwrap();
+
+    let graph = registry
+        .resolve_skill(&root)
+        .expect("a generic Skill must resolve without a project profile");
+
+    assert_eq!(graph.root(), &root);
+    assert_eq!(
+        graph.ids().map(ToString::to_string).collect::<Vec<_>>(),
+        vec!["resilience-engineering", "source-analysis-pipeline"]
+    );
+    assert_eq!(graph.len(), 2);
+    assert_eq!(graph.skills()[1].id(), &root);
+}

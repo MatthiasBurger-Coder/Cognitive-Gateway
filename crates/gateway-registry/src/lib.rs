@@ -60,6 +60,15 @@ pub enum RegistryError {
 /// A deterministic Agent/Skill relationship-validation failure.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum RegistryIntegrityError {
+    /// A requested canonical Skill ID is not registered.
+    SkillNotFound { skill_id: SkillId },
+    /// A Skill cannot be resolved because its self-contained semantic content
+    /// is incomplete for context compilation.
+    IncompleteSkillDefinition {
+        skill_id: SkillId,
+        field: &'static str,
+        source: String,
+    },
     /// An Agent references a Skill that is not registered.
     MissingSkillReference {
         agent_id: AgentId,
@@ -91,6 +100,18 @@ pub enum RegistryIntegrityError {
 impl fmt::Display for RegistryIntegrityError {
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
+            Self::SkillNotFound { skill_id } => {
+                write!(formatter, "skill {:?} is not registered", skill_id.as_str())
+            }
+            Self::IncompleteSkillDefinition {
+                skill_id,
+                field,
+                source,
+            } => write!(
+                formatter,
+                "skill {:?} from {source:?} has incomplete required field {field:?}",
+                skill_id.as_str()
+            ),
             Self::MissingSkillReference {
                 agent_id,
                 skill_id,
@@ -150,6 +171,97 @@ impl Error for RegistryIntegrityError {}
 pub struct SkillDependencyGraph {
     dependencies: BTreeMap<SkillId, Vec<SkillId>>,
     topological_order: Vec<SkillId>,
+}
+
+/// A complete, deterministic dependency closure rooted at one Skill.
+///
+/// Skills are owned by the result so the resolved graph is independent of the
+/// registry's filesystem paths and of any consuming project. `skills` are in
+/// mandatory dependency-first order. Related Skills remain visible on each
+/// document, but are deliberately not added to this closure.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ResolvedSkillGraph {
+    root: SkillId,
+    skills: Vec<SkillDefinitionDocument>,
+    topological_order: Vec<SkillId>,
+    dependencies: BTreeMap<SkillId, Vec<SkillId>>,
+}
+
+impl ResolvedSkillGraph {
+    /// Returns the canonical Skill ID from which this closure was resolved.
+    #[must_use]
+    pub fn root(&self) -> &SkillId {
+        &self.root
+    }
+
+    /// Alias emphasizing that the root is a Skill ID.
+    #[must_use]
+    pub fn root_skill_id(&self) -> &SkillId {
+        self.root()
+    }
+
+    /// Returns complete Skill documents in deterministic dependency-first order.
+    #[must_use]
+    pub fn skills(&self) -> &[SkillDefinitionDocument] {
+        &self.skills
+    }
+
+    /// Alias using the repository contract vocabulary.
+    #[must_use]
+    pub fn documents(&self) -> &[SkillDefinitionDocument] {
+        self.skills()
+    }
+
+    /// Returns the resolved root Skill document.
+    #[must_use]
+    pub fn root_skill(&self) -> &SkillDefinitionDocument {
+        self.get(&self.root)
+            .expect("a resolved graph always contains its root")
+    }
+
+    /// Returns the resolved Skill with the supplied canonical ID, if it is in
+    /// this closure.
+    #[must_use]
+    pub fn get(&self, skill_id: &SkillId) -> Option<&SkillDefinitionDocument> {
+        self.skills.iter().find(|skill| skill.id() == skill_id)
+    }
+
+    /// Alias for [`Self::get`].
+    #[must_use]
+    pub fn skill(&self, skill_id: &SkillId) -> Option<&SkillDefinitionDocument> {
+        self.get(skill_id)
+    }
+
+    /// Returns the stable IDs in dependency-first order.
+    #[must_use]
+    pub fn ids(&self) -> impl ExactSizeIterator<Item = &SkillId> {
+        self.skills.iter().map(SkillDefinitionDocument::id)
+    }
+
+    /// Returns the deterministic topological order of this closure.
+    #[must_use]
+    pub fn topological_order(&self) -> &[SkillId] {
+        &self.topological_order
+    }
+
+    /// Returns the declared mandatory dependencies of a resolved Skill.
+    #[must_use]
+    pub fn dependencies(&self, skill_id: &SkillId) -> Option<&[SkillId]> {
+        self.dependencies.get(skill_id).map(Vec::as_slice)
+    }
+
+    /// Returns the number of Skills in this closure.
+    #[must_use]
+    pub fn len(&self) -> usize {
+        self.skills.len()
+    }
+
+    /// Returns whether this closure is empty. A successful resolution is
+    /// always non-empty because it has a root.
+    #[must_use]
+    pub fn is_empty(&self) -> bool {
+        self.skills.is_empty()
+    }
 }
 
 impl SkillDependencyGraph {
@@ -473,6 +585,15 @@ impl SkillRegistry {
                     });
                 }
             }
+            for related_skill_id in document.related_skill_ids() {
+                if self.get(related_skill_id).is_none() {
+                    return Err(RegistryIntegrityError::MissingRelatedSkillReference {
+                        skill_id: document.id().clone(),
+                        related_skill_id: related_skill_id.clone(),
+                        source: canonical_source(document),
+                    });
+                }
+            }
             dependencies.insert(document.id().clone(), dependency_ids);
         }
 
@@ -495,6 +616,75 @@ impl SkillRegistry {
     /// Validates this Skill registry's dependency relationships.
     pub fn validate_integrity(&self) -> Result<(), RegistryIntegrityError> {
         self.dependency_graph().map(|_| ())
+    }
+
+    /// Resolves one canonical Skill ID and its complete mandatory dependency
+    /// closure without consulting a project profile or any external content.
+    ///
+    /// The result owns every resolved document. This makes equality and reuse
+    /// independent of discovery order, filesystem paths and the lifetime of
+    /// this registry. Related Skills are validated and remain exposed through
+    /// each document, but never become part of the mandatory closure.
+    pub fn resolve_skill(
+        &self,
+        skill_id: &SkillId,
+    ) -> Result<ResolvedSkillGraph, RegistryIntegrityError> {
+        self.validate_integrity()?;
+        if self.get(skill_id).is_none() {
+            return Err(RegistryIntegrityError::SkillNotFound {
+                skill_id: skill_id.clone(),
+            });
+        }
+
+        let mut closure = BTreeSet::new();
+        collect_skill_dependencies(skill_id, self, &mut closure);
+        let dependencies = closure
+            .iter()
+            .map(|id| {
+                (
+                    id.clone(),
+                    self.get(id)
+                        .expect("validated Skill closure contains registered IDs")
+                        .dependency_ids()
+                        .to_vec(),
+                )
+            })
+            .collect::<BTreeMap<_, _>>();
+        let order = topological_order(&dependencies)
+            .expect("validated Skill registry must have an acyclic mandatory dependency graph");
+        let skills = order
+            .iter()
+            .map(|id| {
+                let document = self
+                    .get(id)
+                    .expect("validated Skill closure contains registered IDs");
+                validate_complete_skill(document)?;
+                Ok(document.clone())
+            })
+            .collect::<Result<Vec<_>, RegistryIntegrityError>>()?;
+
+        Ok(ResolvedSkillGraph {
+            root: skill_id.clone(),
+            skills,
+            topological_order: order,
+            dependencies,
+        })
+    }
+
+    /// Alias for [`Self::resolve_skill`].
+    pub fn resolve_skill_graph(
+        &self,
+        skill_id: &SkillId,
+    ) -> Result<ResolvedSkillGraph, RegistryIntegrityError> {
+        self.resolve_skill(skill_id)
+    }
+
+    /// Short alias for [`Self::resolve_skill`].
+    pub fn resolve(
+        &self,
+        skill_id: &SkillId,
+    ) -> Result<ResolvedSkillGraph, RegistryIntegrityError> {
+        self.resolve_skill(skill_id)
     }
 }
 
@@ -695,6 +885,33 @@ impl Registry {
         self.validate_integrity()?;
         self.skills.dependency_graph()
     }
+
+    /// Resolves one canonical Skill ID and its complete mandatory dependency
+    /// closure from this registry alone. No project profile, project identity,
+    /// project path, provenance or external Skill file is consulted.
+    pub fn resolve_skill(
+        &self,
+        skill_id: &SkillId,
+    ) -> Result<ResolvedSkillGraph, RegistryIntegrityError> {
+        self.validate_integrity()?;
+        self.skills.resolve_skill(skill_id)
+    }
+
+    /// Alias for [`Self::resolve_skill`].
+    pub fn resolve_skill_graph(
+        &self,
+        skill_id: &SkillId,
+    ) -> Result<ResolvedSkillGraph, RegistryIntegrityError> {
+        self.resolve_skill(skill_id)
+    }
+
+    /// Short alias for [`Self::resolve_skill`].
+    pub fn resolve(
+        &self,
+        skill_id: &SkillId,
+    ) -> Result<ResolvedSkillGraph, RegistryIntegrityError> {
+        self.resolve_skill(skill_id)
+    }
 }
 
 fn discover_json_files(root: &Path) -> RegistryResult<Vec<PathBuf>> {
@@ -778,6 +995,41 @@ impl HasCanonicalSource for SkillDefinitionDocument {
 
 fn canonical_source<T: HasCanonicalSource>(document: &T) -> String {
     document.canonical_source()
+}
+
+fn collect_skill_dependencies(
+    skill_id: &SkillId,
+    registry: &SkillRegistry,
+    closure: &mut BTreeSet<SkillId>,
+) {
+    if !closure.insert(skill_id.clone()) {
+        return;
+    }
+    let skill = registry
+        .get(skill_id)
+        .expect("Skill dependency references are validated before resolution");
+    for dependency_id in skill.dependency_ids() {
+        collect_skill_dependencies(dependency_id, registry, closure);
+    }
+}
+
+fn validate_complete_skill(
+    document: &SkillDefinitionDocument,
+) -> Result<(), RegistryIntegrityError> {
+    for (field, values) in [
+        ("authoritative_sources", document.authoritative_sources()),
+        ("rules", document.rules()),
+        ("verification", document.verification()),
+    ] {
+        if values.is_empty() {
+            return Err(RegistryIntegrityError::IncompleteSkillDefinition {
+                skill_id: document.id().clone(),
+                field,
+                source: canonical_source(document),
+            });
+        }
+    }
+    Ok(())
 }
 
 fn topological_order(dependencies: &BTreeMap<SkillId, Vec<SkillId>>) -> Option<Vec<SkillId>> {
@@ -989,6 +1241,31 @@ mod tests {
                 .iter()
                 .map(|value| SkillId::new(*value).unwrap()),
             std::iter::empty::<SkillId>(),
+            std::iter::empty::<gateway_domain::CapabilityId>(),
+            std::iter::empty::<gateway_domain::KnowledgeQuery>(),
+        )
+        .unwrap()
+    }
+
+    fn complete_skill_document(
+        id: &str,
+        dependencies: &[&str],
+        related_skills: &[&str],
+    ) -> SkillDefinitionDocument {
+        SkillDefinitionDocument::new(
+            SkillId::new(id).unwrap(),
+            format!("Skill {id}"),
+            format!("Complete responsibility for {id}"),
+            None,
+            [format!("authoritative source for {id}")],
+            [format!("rule for {id}")],
+            [format!("verification for {id}")],
+            dependencies
+                .iter()
+                .map(|value| SkillId::new(*value).unwrap()),
+            related_skills
+                .iter()
+                .map(|value| SkillId::new(*value).unwrap()),
             std::iter::empty::<gateway_domain::CapabilityId>(),
             std::iter::empty::<gateway_domain::KnowledgeQuery>(),
         )
@@ -1291,6 +1568,146 @@ mod tests {
                 .collect::<Vec<_>>(),
             ["branch", "leaf"]
         );
+    }
+
+    #[test]
+    fn resolves_a_complete_dependency_closure_without_activating_related_skills() {
+        let registry = Registry::from_documents(
+            [],
+            [
+                complete_skill_document("root", &["branch", "leaf"], &["optional"]),
+                complete_skill_document("branch", &["leaf"], &[]),
+                complete_skill_document("leaf", &[], &[]),
+                skill_document("optional", None, &[]),
+            ],
+        )
+        .unwrap();
+
+        let graph = registry
+            .resolve_skill(&SkillId::new("root").unwrap())
+            .unwrap();
+        assert_eq!(graph.root().as_str(), "root");
+        assert_eq!(graph.root_skill_id(), graph.root());
+        assert_eq!(graph.root_skill().id(), graph.root());
+        assert_eq!(
+            graph.ids().map(SkillId::as_str).collect::<Vec<_>>(),
+            ["leaf", "branch", "root"]
+        );
+        assert_eq!(
+            graph
+                .topological_order()
+                .iter()
+                .map(SkillId::as_str)
+                .collect::<Vec<_>>(),
+            ["leaf", "branch", "root"]
+        );
+        assert_eq!(graph.documents(), graph.skills());
+        assert!(graph.get(&SkillId::new("root").unwrap()).is_some());
+        assert!(graph.skill(&SkillId::new("root").unwrap()).is_some());
+        assert!(graph.get(&SkillId::new("optional").unwrap()).is_none());
+        assert!(!graph.is_empty());
+        assert_eq!(
+            graph
+                .dependencies(&SkillId::new("root").unwrap())
+                .unwrap()
+                .iter()
+                .map(SkillId::as_str)
+                .collect::<Vec<_>>(),
+            ["branch", "leaf"]
+        );
+        assert_eq!(
+            graph
+                .get(&SkillId::new("root").unwrap())
+                .unwrap()
+                .related_skills()[0]
+                .as_str(),
+            "optional"
+        );
+    }
+
+    #[test]
+    fn resolution_is_equivalent_for_the_same_catalog_snapshot() {
+        let first = Registry::from_documents(
+            [],
+            [
+                complete_skill_document("root", &["branch"], &[]),
+                complete_skill_document("leaf", &[], &[]),
+                complete_skill_document("branch", &["leaf"], &[]),
+            ],
+        )
+        .unwrap();
+        let second = Registry::from_documents(
+            [],
+            [
+                complete_skill_document("branch", &["leaf"], &[]),
+                complete_skill_document("root", &["branch"], &[]),
+                complete_skill_document("leaf", &[], &[]),
+            ],
+        )
+        .unwrap();
+
+        assert_eq!(
+            first.resolve_skill(&SkillId::new("root").unwrap()),
+            second.resolve_skill(&SkillId::new("root").unwrap())
+        );
+        assert_eq!(
+            first.resolve_skill_graph(&SkillId::new("root").unwrap()),
+            first.resolve(&SkillId::new("root").unwrap())
+        );
+        assert_eq!(
+            first.skills().resolve_skill(&SkillId::new("root").unwrap()),
+            first
+                .skills()
+                .resolve_skill_graph(&SkillId::new("root").unwrap())
+        );
+        assert_eq!(
+            first.skills().resolve(&SkillId::new("root").unwrap()),
+            first.skills().resolve_skill(&SkillId::new("root").unwrap())
+        );
+    }
+
+    #[test]
+    fn resolution_rejects_unknown_and_incomplete_skills() {
+        let unknown = Registry::from_documents([], [])
+            .unwrap()
+            .resolve_skill(&SkillId::new("missing").unwrap());
+        assert!(matches!(
+            unknown,
+            Err(RegistryIntegrityError::SkillNotFound { .. })
+        ));
+        let unknown = Registry::from_documents([], [])
+            .unwrap()
+            .resolve_skill(&SkillId::new("missing").unwrap())
+            .unwrap_err();
+        assert!(unknown.to_string().contains("missing"));
+
+        let incomplete = Registry::from_documents([], [skill_document("incomplete", None, &[])])
+            .unwrap()
+            .resolve_skill(&SkillId::new("incomplete").unwrap());
+        assert!(matches!(
+            incomplete,
+            Err(RegistryIntegrityError::IncompleteSkillDefinition {
+                field: "authoritative_sources",
+                ..
+            })
+        ));
+        let incomplete = Registry::from_documents([], [skill_document("incomplete", None, &[])])
+            .unwrap()
+            .resolve_skill(&SkillId::new("incomplete").unwrap())
+            .unwrap_err();
+        assert!(incomplete.to_string().contains("authoritative_sources"));
+
+        let missing_related = SkillRegistry::from_documents([skill_document_with_related(
+            "related",
+            &["missing-related"],
+        )])
+        .unwrap()
+        .validate_integrity()
+        .unwrap_err();
+        assert!(matches!(
+            missing_related,
+            RegistryIntegrityError::MissingRelatedSkillReference { .. }
+        ));
     }
 
     #[test]
