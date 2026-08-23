@@ -48,3 +48,11 @@ requirements, retrieval hints, mandatory `requires` dependencies and optional
 `related_skills`. A generic Skill does not gain a project/profile selector or
 an execution permission; profile applicability and capability authorization
 remain later registry/policy concerns.
+
+`Registry::resolve_skill(skill_id)` returns an owned `ResolvedSkillGraph` for
+the requested canonical ID and its transitive `requires` closure. The result
+is dependency-first and deterministic, and contains the complete structured
+Skill documents needed by a later Context Compiler. Related Skills remain
+available on each document but are not implicitly included. Resolution needs
+only this generic catalog: consuming-project paths, identities, provenance,
+external `SKILL.md` files and retrieved knowledge are outside the graph.

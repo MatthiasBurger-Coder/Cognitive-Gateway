@@ -79,12 +79,28 @@ project profile reference ┘
 The reverse dependency is prohibited: reusable catalog content must not need a
 project profile to load or validate.
 
+For a context-ready Skill closure, `Registry::resolve_skill(skill_id)` starts
+at one canonical Skill ID and recursively follows only mandatory `requires`
+edges. It returns owned complete Skill documents in deterministic
+dependency-first order. `related_skills` are validated and exposed as
+informational references, but do not activate additional graph members.
+Resolution succeeds against `Registry::load_catalog` alone; an external
+project profile is neither required nor consulted. An independently supplied
+project context can therefore coexist without changing the generic graph
+unless a separate, explicit selection contract chooses another root.
+
 ## Contract independence
 
 Both boundaries use the same strict v2 Agent and Skill contracts. Skill
 semantics are self-contained in structured fields and all cross-Skill edges use
 canonical Skill IDs. Project paths, migration status, provenance metadata and
 external `SKILL.md` content references are outside the runtime contract.
+
+Incomplete context-ready Skill documents (missing authoritative sources,
+rules or verification guidance) fail during graph resolution. Obsolete or
+project-bound fields such as `origin`, `content_ref` or arbitrary project
+metadata fail strict document decoding; project knowledge belongs at runtime
+through retrieval/input ports rather than in the reusable Skill graph.
 
 The CG-03.02 migration matrix remains authoritative for classification,
 canonical IDs, merge targets and deprecated exclusions. CG-03.06 creates the
