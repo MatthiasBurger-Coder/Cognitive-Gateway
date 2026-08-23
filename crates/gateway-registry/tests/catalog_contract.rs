@@ -328,3 +328,67 @@ fn catalog_capability_contracts_are_typed_and_project_independent() {
         }
     }
 }
+
+#[test]
+fn catalog_capability_index_is_deterministic_and_explainable() {
+    let registry = Registry::load_catalog(repository_catalog()).expect("catalog should load");
+    let first = registry
+        .capability_index()
+        .expect("catalog capability declarations should index");
+    let second = registry
+        .capability_index()
+        .expect("the same catalog snapshot should rebuild identically");
+
+    assert_eq!(first, second);
+    assert_eq!(
+        first.ids().map(ToString::to_string).collect::<Vec<_>>(),
+        vec![
+            "architecture.boundary-validation",
+            "architecture.dependency-analysis",
+            "architecture.service-boundary-analysis",
+            "documentation.traceability-analysis",
+            "quality.test-strategy-analysis",
+            "quality.verification-planning",
+            "security.threat-analysis",
+        ]
+    );
+
+    let capability_id =
+        gateway_domain::CapabilityId::new("architecture.dependency-analysis").unwrap();
+    let query = gateway_registry::CapabilityQuery::new(capability_id.clone())
+        .with_class(gateway_domain::CapabilityClass::Inspect)
+        .with_domain(gateway_domain::CapabilityDomain::new("architecture").unwrap())
+        .with_applicability_tag(gateway_domain::CapabilityTag::new("architecture").unwrap());
+    let result = first.query(&query);
+
+    assert_eq!(result.candidates().len(), 2);
+    assert!(result.is_ambiguous());
+    assert_eq!(result.rejections().len(), 0);
+    assert_eq!(
+        result
+            .candidates()
+            .iter()
+            .map(|candidate| candidate.source().canonical_source())
+            .collect::<Vec<_>>(),
+        vec!["agent:system-architect", "skill:architecture-hexagonal"]
+    );
+    assert!(result.candidates().iter().all(|candidate| {
+        candidate.capability_id() == &capability_id
+            && candidate.matched_selectors().iter().any(|selector| {
+                matches!(
+                    selector,
+                    gateway_registry::CapabilitySelector::CapabilityId(id)
+                        if id == &capability_id
+                )
+            })
+    }));
+
+    let no_match = first.query(&gateway_registry::CapabilityQuery::new(
+        gateway_domain::CapabilityId::new("missing.capability").unwrap(),
+    ));
+    assert_eq!(
+        no_match.outcome(),
+        gateway_registry::CapabilityQueryOutcome::NoMatch
+    );
+    assert!(no_match.candidates().is_empty());
+}

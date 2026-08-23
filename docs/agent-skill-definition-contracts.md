@@ -102,6 +102,15 @@ validated. A duplicate ID within one Agent or Skill is rejected. This gives a
 derived capability index a stable contract while preserving all provider
 relationships.
 
+The registry's derived `CapabilityIndex` groups these declarations by
+canonical capability ID and retains every provider. Exact typed queries may
+filter by capability class, domain, input/output kinds, preconditions,
+constraints and applicability tags. Query results include canonical provider
+sources and deterministic mandatory Skill dependency closures. No-match and
+ambiguous results are explicit, while conflicting declarations fail closed
+during registry validation. The index is rebuildable and never changes Git
+catalog membership or policy authority.
+
 ## Reference behavior
 
 Skill IDs are canonical typed identifiers, never repository paths or aliases.

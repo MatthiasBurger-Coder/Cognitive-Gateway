@@ -41,6 +41,35 @@ ID and its transitive `requires` closure. It returns complete Skill documents
 in deterministic dependency-first order. `related_skills` remain informational
 references and do not activate additional graph members.
 
+## Capability index and query
+
+`Registry::capability_index()` builds a rebuildable, owned read model from the
+validated `provided_capabilities` declarations on Agents and Skills. The index
+is not an authority boundary: Git-owned catalog documents remain the source of
+truth, and rebuilding the index does not add or remove catalog membership.
+
+`CapabilityQuery::new(capability_id)` performs an exact canonical ID lookup.
+Queries can additionally use explicit typed selectors for class, domain, input
+and output kinds, intrinsic preconditions and constraints, or applicability
+tags. Selectors are conjunctive and list selectors require the selected value
+to be declared by the capability. `CapabilityQuery::all()` supports a
+structured-selector query across all capability IDs. Matching uses no text
+similarity, embeddings, retrieval or inference.
+
+Results preserve every matching Agent and Skill provider in stable canonical
+order. Each `CapabilityCandidate` includes the matched declaration, its
+canonical source, owner-Agent relationship, direct Skill relationships and the
+mandatory Skill dependency closure in dependency-first order. Rejected
+candidates retain the failed selectors as explainability data. Results
+explicitly report `NoMatch`, `Unique` or `Ambiguous`;
+`CapabilityIndex::resolve_unique` fails closed for the first and last outcomes.
+
+The index builder validates shared capability metadata before materialization.
+If two providers declare one capability ID with different reusable metadata,
+the existing `ConflictingCapabilityDeclaration` integrity error is returned.
+Multiple providers with equivalent metadata remain visible as candidates and
+are never silently collapsed to one provider.
+
 Resolution requires only the built-in catalog. Repository content, project
 configuration, retrieved knowledge, external `SKILL.md` files and runtime
 state are contextual inputs owned by explicit ports or adapters; they cannot

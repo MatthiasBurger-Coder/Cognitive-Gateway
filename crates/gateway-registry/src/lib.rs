@@ -11,6 +11,8 @@
 
 #![forbid(unsafe_code)]
 
+pub mod capability_index;
+
 use std::{
     collections::{BTreeMap, BTreeSet},
     error::Error,
@@ -21,6 +23,13 @@ use std::{
 use gateway_domain::{
     AgentDefinitionDocument, AgentId, CapabilityDefinition, CapabilityId, DefinitionKind,
     SerializationError, SkillDefinitionDocument, SkillId,
+};
+
+pub use capability_index::{
+    CapabilityCandidate, CapabilityIndex, CapabilityIndexEntry, CapabilityProvider,
+    CapabilityProviderKind, CapabilityQuery, CapabilityQueryOutcome, CapabilityQueryResult,
+    CapabilityRejection, CapabilityRejectionReason, CapabilityResolutionError, CapabilitySelector,
+    CapabilitySource,
 };
 
 /// The result of loading one repository-backed registry.
@@ -882,6 +891,15 @@ impl Registry {
         skill_id: &SkillId,
     ) -> Result<ResolvedSkillGraph, RegistryIntegrityError> {
         self.resolve_skill(skill_id)
+    }
+
+    /// Builds a deterministic, rebuildable capability index from this catalog.
+    ///
+    /// The index is a derived read model over validated Agent and Skill
+    /// declarations. It never changes registry membership and does not
+    /// consult project context, retrieval results or runtime capabilities.
+    pub fn capability_index(&self) -> Result<CapabilityIndex, RegistryIntegrityError> {
+        CapabilityIndex::build(self)
     }
 }
 
