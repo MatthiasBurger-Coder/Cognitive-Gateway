@@ -50,6 +50,13 @@ loads the repository catalog, validates all Agent/Skill relationships and
 asserts the complete generic Agent set, including the promoted specialist
 Agents, and the catalog Skill set with generic-boundary checks.
 
+The project-agnostic integration fixture at
+[`../crates/gateway-registry/tests/project_agnostic.rs`](../crates/gateway-registry/tests/project_agnostic.rs)
+proves that the `analysis-storage-architect` Agent and Skill resolve from the
+catalog alone and that the conventional and explicit catalog loading APIs
+produce the same snapshot. External project context is not an input to either
+registry API; it remains an explicit runtime or retrieval concern.
+
 The registry unit tests cover deterministic catalog loading, duplicate
 detection, complete Skill reference integrity and deterministic dependency
 resolution. The architecture guard also prevents external registry roots from

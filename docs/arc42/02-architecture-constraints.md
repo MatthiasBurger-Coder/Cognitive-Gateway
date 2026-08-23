@@ -19,7 +19,12 @@ The gateway core must remain usable without an LLM, RAG backend or external netw
 
 ## 2.3 Source of truth
 
-Git-backed project files are the canonical source for governance, policies, workflow definitions, agent definitions, skill definitions and architecture documentation.
+Git-backed Cognitive Gateway repository files are the canonical source for
+Gateway-owned governance, policies, workflow definitions, Agent definitions,
+Skill definitions and architecture documentation. A consuming project
+repository may provide request-scoped knowledge, configuration, state or
+evidence, but it is not merged into the built-in catalog and cannot change
+registry membership.
 
 RAG may index these artifacts but never becomes their sole authority.
 
