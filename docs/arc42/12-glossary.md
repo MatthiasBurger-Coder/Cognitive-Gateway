@@ -74,7 +74,9 @@ Retrieval-Augmented Generation. In Cognitive Gateway, RAG is a knowledge acceler
 Deterministic component that selects valid workflows, agents and skills from registry data and project state.
 
 ## Skill
-Declarative capability/knowledge contract with dependencies, ownership, constraints and required tools.
+Declarative knowledge and capability requirement with optional ownership,
+skill dependencies, required abstract capabilities and retrieval queries. A
+skill does not grant permission and does not contain a tool implementation.
 
 ## SLM
 Small Language Model used locally for semantic perception tasks such as classification or relevance scoring.

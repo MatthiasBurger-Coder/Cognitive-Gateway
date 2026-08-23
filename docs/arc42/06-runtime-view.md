@@ -12,7 +12,7 @@ Inbound Application Port (submit task)
                 |
                 v
 Application + Domain/Core
-  validate -> resolve -> authorize -> compile
+  validate -> resolve -> authorize -> build IR
                 |
                 v
 Outbound Port (knowledge / runtime / evidence)
@@ -46,10 +46,7 @@ Workflow / Agent / Skill Resolver
 Policy Engine
   |
   v
-Execution Context IR
-  |
-  v
-Context Compiler
+Context Compiler / Execution Context IR
   |
   v
 CLI / Runtime Adapter

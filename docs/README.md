@@ -10,18 +10,17 @@ See [`arc42/`](arc42/) for the living architecture documentation.
 
 See [`adr/`](adr/) for accepted architecture decisions.
 
-## Domain model
+## Core domain contract
 
-See [`domain-model.md`](domain-model.md) for the descriptor and relationship
-contract introduced by CG-02.02, including the CG-02.03 execution state,
-capability and constraint model.
+See [`domain-model.md`](domain-model.md) for the consolidated CG-02 domain
+contract: typed primitives, definitions and relationships, execution state,
+capabilities, constraints and the provider-independent architecture boundary.
 
-See [`execution-context-ir.md`](execution-context-ir.md) for the complete
-CG-02.04 `ExecutionContextIR` v1 contract, field semantics and invariants.
+See [`execution-context-ir.md`](execution-context-ir.md) for the field-level
+`ExecutionContextIR` v1 contract and invariants.
 
-See [`ir-serialization.md`](ir-serialization.md) for the CG-02.05 JSON wire
-schema, validation behavior, public serialization API and version compatibility
-rules.
+See [`ir-serialization.md`](ir-serialization.md) for the JSON wire schema,
+validation behavior, public serialization API and version compatibility rules.
 
 See [`reference-scenarios.md`](reference-scenarios.md) for the CG-02.06
 executable acceptance scenarios covering the complete domain and IR contract.
