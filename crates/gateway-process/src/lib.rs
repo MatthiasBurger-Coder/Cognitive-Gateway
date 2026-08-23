@@ -1,11 +1,16 @@
 #![forbid(unsafe_code)]
 #![doc = "Canonical, deterministic process contracts for Cognitive Gateway."]
 
+mod compiler;
 mod error;
 mod identifiers;
 mod ir;
 mod source;
 
+pub use compiler::{
+    CompilationDiagnostic, CompilationError, CompilationResult, CompilationTraceEntry,
+    SemanticCompiler,
+};
 pub use error::{ProcessError, ValidationCode};
 pub use identifiers::{
     ActivityId, BlockerId, EventOccurrenceId, EventTypeId, EvidenceTypeId, GateId,
@@ -14,9 +19,9 @@ pub use identifiers::{
 };
 pub use ir::{
     ActivityConstraint, ActivityDefinition, BlockerDefinition, DefinitionIdentity,
-    EvidenceRequirement, ExecutionGraphExtension, GateDefinition, GateStatus, GuardExpression,
-    InvariantDefinition, ProcessDefinition, ProcessDefinitionBuilder, ProcessIrVersion,
-    RecoveryPolicy, StateDefinition, TransitionDefinition,
+    EventTypeDefinition, EvidenceRequirement, ExecutionGraphExtension, GateDefinition, GateStatus,
+    GuardExpression, InvariantDefinition, ProcessDefinition, ProcessDefinitionBuilder,
+    ProcessIrVersion, RecoveryPolicy, StateDefinition, TransitionDefinition,
 };
 pub use source::{
     FrontendError, SourceDocument, SourceLocation, SourceRule, SourceScenario, SourceStep,

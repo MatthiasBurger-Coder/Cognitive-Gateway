@@ -50,6 +50,8 @@ pub enum GuardExpression {
     Not(Box<Self>),
     EventAttributeEquals { name: String, value: String },
     EvidencePresent(EvidenceTypeId),
+    CapabilityAvailable(gateway_domain::CapabilityId),
+    BlockerActive(BlockerId),
     GateIs { gate: GateId, status: GateStatus },
 }
 
@@ -127,6 +129,14 @@ pub struct TransitionDefinition {
     to: StateId,
     guard: GuardExpression,
     automatic: bool,
+    required_gates: Vec<GateId>,
+    required_evidence: Vec<EvidenceTypeId>,
+    authorized_activity: Option<ActivityId>,
+    blocker: Option<BlockerId>,
+    pauses: bool,
+    completes: bool,
+    retry_attempts: Option<u32>,
+    repair_target: Option<StateId>,
 }
 
 impl TransitionDefinition {
@@ -144,6 +154,14 @@ impl TransitionDefinition {
             to,
             guard,
             automatic: false,
+            required_gates: Vec::new(),
+            required_evidence: Vec::new(),
+            authorized_activity: None,
+            blocker: None,
+            pauses: false,
+            completes: false,
+            retry_attempts: None,
+            repair_target: None,
         }
     }
     #[must_use]
@@ -174,6 +192,80 @@ impl TransitionDefinition {
     pub fn as_automatic(mut self) -> Self {
         self.automatic = true;
         self
+    }
+    #[must_use]
+    pub fn with_required_gates(mut self, mut values: Vec<GateId>) -> Self {
+        values.sort();
+        self.required_gates = values;
+        self
+    }
+    #[must_use]
+    pub fn with_required_evidence(mut self, mut values: Vec<EvidenceTypeId>) -> Self {
+        values.sort();
+        self.required_evidence = values;
+        self
+    }
+    #[must_use]
+    pub fn with_authorized_activity(mut self, value: ActivityId) -> Self {
+        self.authorized_activity = Some(value);
+        self
+    }
+    #[must_use]
+    pub fn with_blocker(mut self, value: BlockerId) -> Self {
+        self.blocker = Some(value);
+        self
+    }
+    #[must_use]
+    pub fn as_pausing(mut self) -> Self {
+        self.pauses = true;
+        self
+    }
+    #[must_use]
+    pub fn as_completing(mut self) -> Self {
+        self.completes = true;
+        self
+    }
+    #[must_use]
+    pub fn with_retry(mut self, max_attempts: u32) -> Self {
+        self.retry_attempts = Some(max_attempts);
+        self
+    }
+    #[must_use]
+    pub fn with_repair_target(mut self, target: StateId) -> Self {
+        self.repair_target = Some(target);
+        self
+    }
+    #[must_use]
+    pub fn required_gates(&self) -> &[GateId] {
+        &self.required_gates
+    }
+    #[must_use]
+    pub fn required_evidence(&self) -> &[EvidenceTypeId] {
+        &self.required_evidence
+    }
+    #[must_use]
+    pub fn authorized_activity(&self) -> Option<&ActivityId> {
+        self.authorized_activity.as_ref()
+    }
+    #[must_use]
+    pub fn blocker(&self) -> Option<&BlockerId> {
+        self.blocker.as_ref()
+    }
+    #[must_use]
+    pub const fn pauses(&self) -> bool {
+        self.pauses
+    }
+    #[must_use]
+    pub const fn completes(&self) -> bool {
+        self.completes
+    }
+    #[must_use]
+    pub const fn retry_attempts(&self) -> Option<u32> {
+        self.retry_attempts
+    }
+    #[must_use]
+    pub fn repair_target(&self) -> Option<&StateId> {
+        self.repair_target.as_ref()
     }
 }
 
