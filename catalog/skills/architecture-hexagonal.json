@@ -5,11 +5,24 @@
   "name": "architecture hexagonal",
   "description": "Hexagonal boundaries and dependency direction",
   "owner_agent_id": null,
-  "authoritative_sources": [],
-  "rules": [],
-  "verification": [],
+  "authoritative_sources": [
+    "architecture documentation",
+    "boundary and dependency tests"
+  ],
+  "rules": [
+    "Keep domain and application responsibilities independent from adapters, infrastructure and providers.",
+    "Express cross-boundary behavior through explicit ports, requests, results and state.",
+    "Keep technical integrations outside stable domain boundaries."
+  ],
+  "verification": [
+    "Inspect dependency direction and boundary-sensitive changes.",
+    "Run focused architecture tests and the applicable quality gate."
+  ],
   "requires": [],
-  "related_skills": [],
+  "related_skills": [
+    "quality-architecture-validation",
+    "service-decomposition-bounded-context"
+  ],
   "required_capability_ids": [],
   "knowledge_queries": [
     "hexagonal boundaries and dependency direction"

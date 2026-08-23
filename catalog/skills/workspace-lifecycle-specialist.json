@@ -5,11 +5,26 @@
   "name": "workspace lifecycle specialist",
   "description": "Workspace checkout and lifecycle",
   "owner_agent_id": null,
-  "authoritative_sources": [],
-  "rules": [],
-  "verification": [],
-  "requires": [],
-  "related_skills": [],
+  "authoritative_sources": [
+    "workspace lifecycle and repository policy",
+    "checkout, lease and cleanup evidence"
+  ],
+  "rules": [
+    "Model workspace ownership, identity, lease, status, retention and cleanup as explicit state.",
+    "Keep checkout, analysis, failure and cleanup outcomes distinct and preserve diagnostics needed for investigation.",
+    "Restrict cleanup to verified owned boundaries and make repeat operations safe."
+  ],
+  "verification": [
+    "Review workspace creation, reuse, expiry, failure, retention and cleanup behavior.",
+    "Test ownership, cancellation, concurrent-use, path-boundary and cleanup-failure cases."
+  ],
+  "requires": [
+    "resilience-engineering"
+  ],
+  "related_skills": [
+    "git-large-repository-specialist",
+    "security-sandbox-specialist"
+  ],
   "required_capability_ids": [],
   "knowledge_queries": [
     "workspace checkout and lifecycle"

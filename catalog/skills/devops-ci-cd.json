@@ -5,11 +5,26 @@
   "name": "devops ci cd",
   "description": "CI/CD automation boundaries",
   "owner_agent_id": null,
-  "authoritative_sources": [],
-  "rules": [],
-  "verification": [],
-  "requires": [],
-  "related_skills": [],
+  "authoritative_sources": [
+    "build and delivery policy",
+    "pipeline and quality-gate definitions"
+  ],
+  "rules": [
+    "Keep build, delivery and quality commands reproducible, explicit and aligned with repository policy.",
+    "Treat optional infrastructure checks as optional and report unavailable checks without weakening required gates.",
+    "Keep credentials, generated artifacts and environment-specific assumptions out of reusable delivery semantics."
+  ],
+  "verification": [
+    "Identify the applicable build, test, lint, architecture and packaging checks for the change.",
+    "Review pipeline results and confirm skipped or failed checks have an explicit reason."
+  ],
+  "requires": [
+    "resilience-engineering"
+  ],
+  "related_skills": [
+    "quality-gate",
+    "quality-gate-governance"
+  ],
   "required_capability_ids": [],
   "knowledge_queries": [
     "CI/CD automation boundaries"

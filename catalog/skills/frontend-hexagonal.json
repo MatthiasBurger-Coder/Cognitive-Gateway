@@ -5,11 +5,24 @@
   "name": "frontend hexagonal",
   "description": "Frontend/API boundary separation",
   "owner_agent_id": null,
-  "authoritative_sources": [],
-  "rules": [],
-  "verification": [],
+  "authoritative_sources": [
+    "frontend architecture documentation",
+    "UI, state and API boundary tests"
+  ],
+  "rules": [
+    "Separate presentation, state, API adapters and domain-facing data from external transport details.",
+    "Keep UI behavior driven by explicit models and states rather than provider or backend implementation leakage.",
+    "Represent loading, incomplete, failed and degraded states explicitly where relevant."
+  ],
+  "verification": [
+    "Inspect frontend dependency direction and adapter boundaries.",
+    "Run focused state, boundary, accessibility and integration checks for affected behavior."
+  ],
   "requires": [],
-  "related_skills": [],
+  "related_skills": [
+    "frontend-ux-guidelines",
+    "architecture-hexagonal"
+  ],
   "required_capability_ids": [],
   "knowledge_queries": [
     "frontend and API boundary separation"

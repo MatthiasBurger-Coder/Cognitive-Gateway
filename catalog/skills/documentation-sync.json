@@ -5,11 +5,24 @@
   "name": "documentation sync",
   "description": "Documentation and example consistency",
   "owner_agent_id": null,
-  "authoritative_sources": [],
-  "rules": [],
-  "verification": [],
+  "authoritative_sources": [
+    "requirements and architecture documentation",
+    "published examples and documentation checks"
+  ],
+  "rules": [
+    "Keep documentation, examples, decisions and verified implementation behavior synchronized.",
+    "Use one canonical terminology and link or update all affected references when semantics change.",
+    "Do not document planned or inferred behavior as implemented behavior."
+  ],
+  "verification": [
+    "Review changed documentation against source, tests, schemas and decision records.",
+    "Check examples and cross-references for stale names, missing fields and contradictory guidance."
+  ],
   "requires": [],
-  "related_skills": [],
+  "related_skills": [
+    "arc42-architecture-governance",
+    "traceability-engineer"
+  ],
   "required_capability_ids": [],
   "knowledge_queries": [
     "documentation and example consistency"

@@ -5,11 +5,24 @@
   "name": "qms light governance expert",
   "description": "Quality-management governance",
   "owner_agent_id": null,
-  "authoritative_sources": [],
-  "rules": [],
-  "verification": [],
+  "authoritative_sources": [
+    "quality-management requirements",
+    "audit, CAPA and change-control evidence"
+  ],
+  "rules": [
+    "Keep quality objectives, risks, corrective actions, change decisions and review status traceable.",
+    "Use proportionate evidence and preserve the distinction between planned, completed and effective actions.",
+    "Do not close a quality action without verified evidence and ownership."
+  ],
+  "verification": [
+    "Review change, corrective-action and audit records for traceability and status integrity.",
+    "Check that effectiveness evidence and unresolved actions remain visible."
+  ],
   "requires": [],
-  "related_skills": [],
+  "related_skills": [
+    "audit-evidence-manager",
+    "quality-gate-governance"
+  ],
   "required_capability_ids": [],
   "knowledge_queries": [
     "quality-management governance"

@@ -3,5 +3,12 @@
   "kind": "agent",
   "id": "system-architect",
   "description": "Cross-module boundaries and architecture decisions",
-  "skill_ids": ["architecture-hexagonal", "contract-governance-expert"]
+  "skill_ids": [
+    "architecture-hexagonal",
+    "contract-governance-expert",
+    "grpc-ingestion",
+    "microservice-runtime-readiness-expert",
+    "protobuf-contracts",
+    "service-decomposition-bounded-context"
+  ]
 }

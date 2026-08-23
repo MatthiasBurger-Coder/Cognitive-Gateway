@@ -5,11 +5,26 @@
   "name": "git large repository specialist",
   "description": "Large-repository workspace handling",
   "owner_agent_id": null,
-  "authoritative_sources": [],
-  "rules": [],
-  "verification": [],
-  "requires": [],
-  "related_skills": [],
+  "authoritative_sources": [
+    "repository and workspace policy",
+    "repository performance and integrity evidence"
+  ],
+  "rules": [
+    "Keep repository identity, requested revision, checkout mode, workspace ownership and diagnostics explicit.",
+    "Bound expensive repository operations and avoid loading or copying more data than the operation requires.",
+    "Treat repository content as untrusted input and preserve failure evidence during cleanup."
+  ],
+  "verification": [
+    "Review checkout, revision resolution, cleanup and workspace-boundary behavior.",
+    "Measure or test large-repository paths for bounded resource use, cancellation and deterministic results."
+  ],
+  "requires": [
+    "resilience-engineering"
+  ],
+  "related_skills": [
+    "security-sandbox-specialist",
+    "workspace-lifecycle-specialist"
+  ],
   "required_capability_ids": [],
   "knowledge_queries": [
     "large-repository workspace handling"

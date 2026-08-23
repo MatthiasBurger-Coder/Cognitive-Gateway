@@ -5,11 +5,24 @@
   "name": "frontend ux guidelines",
   "description": "Accessible evidence-review UX",
   "owner_agent_id": null,
-  "authoritative_sources": [],
-  "rules": [],
-  "verification": [],
+  "authoritative_sources": [
+    "accessibility and interaction requirements",
+    "UX and visual regression evidence"
+  ],
+  "rules": [
+    "Make information hierarchy, navigation, interaction states and accessibility expectations explicit.",
+    "Design dense operational information for comprehension, safe action and clear incomplete or failed states.",
+    "Keep visual decisions independent from backend or provider implementation details."
+  ],
+  "verification": [
+    "Review affected flows against accessibility, interaction and information-architecture criteria.",
+    "Verify representative states, error handling and responsive or visual behavior with focused evidence."
+  ],
   "requires": [],
-  "related_skills": [],
+  "related_skills": [
+    "frontend-hexagonal",
+    "quality-testing-strategy"
+  ],
   "required_capability_ids": [],
   "knowledge_queries": [
     "accessible evidence-review UX"

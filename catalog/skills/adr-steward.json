@@ -5,11 +5,23 @@
   "name": "adr steward",
   "description": "ADR lifecycle and decision alignment",
   "owner_agent_id": null,
-  "authoritative_sources": [],
-  "rules": [],
-  "verification": [],
+  "authoritative_sources": [
+    "architecture decision records",
+    "architecture and requirements documentation"
+  ],
+  "rules": [
+    "Record durable architecture decisions with their context, alternatives, consequences and status.",
+    "Keep decision references, identifiers and lifecycle changes consistent across affected documentation."
+  ],
+  "verification": [
+    "Review the decision record against the affected requirements and architecture documentation.",
+    "Check that implementation and documentation references identify the current decision status."
+  ],
   "requires": [],
-  "related_skills": [],
+  "related_skills": [
+    "arc42-architecture-governance",
+    "documentation-sync"
+  ],
   "required_capability_ids": [],
   "knowledge_queries": [
     "ADR lifecycle and decision alignment"

@@ -5,11 +5,26 @@
   "name": "quality gate governance",
   "description": "Quality policy and evidence selection",
   "owner_agent_id": null,
-  "authoritative_sources": [],
-  "rules": [],
-  "verification": [],
-  "requires": [],
-  "related_skills": [],
+  "authoritative_sources": [
+    "quality policy and gate definitions",
+    "test, coverage and verification evidence"
+  ],
+  "rules": [
+    "Select quality checks from declared change impact and repository policy.",
+    "Keep required gates strict and report optional, unavailable or skipped checks explicitly.",
+    "Preserve command, scope, result, threshold and diagnostic evidence for every gate."
+  ],
+  "verification": [
+    "Identify and execute the applicable checks for each affected boundary.",
+    "Review gate evidence for completeness, reproducibility and unmodified thresholds."
+  ],
+  "requires": [
+    "resilience-engineering"
+  ],
+  "related_skills": [
+    "quality-gate",
+    "quality-testing-strategy"
+  ],
   "required_capability_ids": [],
   "knowledge_queries": [
     "quality policy and evidence selection"

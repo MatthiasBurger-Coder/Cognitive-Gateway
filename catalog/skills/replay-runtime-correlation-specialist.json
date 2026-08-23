@@ -5,11 +5,24 @@
   "name": "replay runtime correlation specialist",
   "description": "Replay and trace correlation semantics",
   "owner_agent_id": null,
-  "authoritative_sources": [],
-  "rules": [],
-  "verification": [],
+  "authoritative_sources": [
+    "replay and trace contracts",
+    "correlation and temporal-consistency evidence"
+  ],
+  "rules": [
+    "Preserve event identity, ordering, timestamps, causality and correlation across replayed runtime observations.",
+    "Distinguish observed, reconstructed, inferred and missing events.",
+    "Keep replay and correlation outputs derived; they must not overwrite authoritative source evidence."
+  ],
+  "verification": [
+    "Review correlation keys, temporal ordering, missing-data handling and reconstruction status.",
+    "Test replay with complete, partial, duplicated and out-of-order inputs."
+  ],
   "requires": [],
-  "related_skills": [],
+  "related_skills": [
+    "observability-runtime-diagnostics",
+    "source-analysis-pipeline"
+  ],
   "required_capability_ids": [],
   "knowledge_queries": [
     "replay and trace correlation semantics"

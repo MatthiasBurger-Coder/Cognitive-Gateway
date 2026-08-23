@@ -5,11 +5,26 @@
   "name": "distributed systems architect",
   "description": "Long-running distributed execution",
   "owner_agent_id": null,
-  "authoritative_sources": [],
-  "rules": [],
-  "verification": [],
-  "requires": [],
-  "related_skills": [],
+  "authoritative_sources": [
+    "distributed runtime requirements",
+    "failure and consistency tests"
+  ],
+  "rules": [
+    "Model ownership, lifecycle, backpressure, consistency, failure and recovery for every distributed operation.",
+    "Bound asynchronous work with cancellation, capacity and observable state transitions.",
+    "Keep duplicate delivery, retries and partial completion explicit rather than treating them as success."
+  ],
+  "verification": [
+    "Review worker, queue, storage and service interactions for lifecycle and failure completeness.",
+    "Verify timeout, capacity, retry, consistency and recovery scenarios with deterministic tests."
+  ],
+  "requires": [
+    "resilience-engineering"
+  ],
+  "related_skills": [
+    "microservice-runtime-readiness-expert",
+    "observability-runtime-diagnostics"
+  ],
   "required_capability_ids": [],
   "knowledge_queries": [
     "long-running distributed execution"
