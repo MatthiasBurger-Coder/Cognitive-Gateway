@@ -7,3 +7,14 @@ compiles and validates every definition, then derives runtime registry state.
 
 Catalog membership is never inferred from a consuming project, retrieval
 result, agent, tool or external workflow runtime.
+
+The current migrated, project-agnostic definitions are:
+
+- `implementation-lifecycle`
+- `requirement-readiness`
+- `verification-quality-gate`
+- `repair-recovery`
+- `release-qualification`
+
+Their TSW provenance and explicit execution-graph gaps are recorded in
+[`../../docs/tiny-swarm-world-process-inventory.md`](../../docs/tiny-swarm-world-process-inventory.md).
