@@ -24,7 +24,6 @@ fn an_external_project_fixture_does_not_change_a_generic_skill_graph() {
     let profile_skill = profile.join("skills/external-project-only.json");
     fs::create_dir_all(profile_skill.parent().expect("skill has a parent"))
         .expect("neutral profile directory should be created");
-    fs::create_dir_all(profile.join("agents")).expect("neutral agent boundary should be created");
     fs::write(
         &profile_skill,
         r#"{"schema_version":2,"kind":"skill","id":"external-project-only","name":"External project context","description":"Neutral external context used only as an input fixture","owner_agent_id":null,"authoritative_sources":["external context fixture"],"rules":["Do not alter generic catalog membership."],"verification":["Compare the resolved graph with the standalone result."],"requires":[],"related_skills":[],"required_capability_ids":[],"knowledge_queries":[]}"#,

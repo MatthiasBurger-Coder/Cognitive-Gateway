@@ -39,8 +39,10 @@ collision. There is no implicit precedence or override behavior.
 
 ## Current migration
 
-The catalog contains reusable Agent and Skill definitions. Project-specific
-and deprecated definitions remain outside this catalog.
+The catalog contains every reusable Agent and Skill definition, including
+narrow technology specialists. Project-specific knowledge and deprecated
+definitions remain outside this catalog. A consuming profile cannot define,
+override or partition Agents.
 
 Skill applicability is represented through the v2 self-contained contract:
 structured content, optional agent ownership, abstract capability

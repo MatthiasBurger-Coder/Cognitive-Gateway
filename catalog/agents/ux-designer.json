@@ -2,9 +2,8 @@
   "schema_version": 2,
   "kind": "agent",
   "id": "ux-designer",
-  "description": "Operational UI and evidence-review usability",
+  "description": "User-experience and evidence-review usability",
   "skill_ids": [
-    "frontend-react",
     "frontend-ux-guidelines"
   ]
 }

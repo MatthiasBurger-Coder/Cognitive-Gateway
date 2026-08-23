@@ -119,7 +119,6 @@ Python cognitive services remain optional and sit outside the deterministic Rust
 
 ```text
 profiles/<project>/
-├── agents/
 ├── skills/
 ├── workflows/
 ├── policies/
@@ -127,4 +126,6 @@ profiles/<project>/
 └── tools/
 ```
 
-Profiles configure the generic gateway without embedding product-specific logic in the core.
+Profiles configure the generic gateway without embedding product-specific
+logic in the core. Agents are loaded from the generic catalog; profiles do not
+provide an Agent partition.

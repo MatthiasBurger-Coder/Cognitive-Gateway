@@ -65,7 +65,9 @@ Project phase: `DEVELOPMENT`, `HARDENING` or `RELEASE_QUALIFICATION`.
 A core-owned interface defining how the application communicates with an external actor. Inbound ports accept requests; outbound ports request external knowledge, capabilities, runtime execution or evidence persistence.
 
 ## Project Profile
-Project-specific declarative agents, skills, workflows, policies, retrieval metadata and tool bindings.
+Project-specific declarative Skills, workflows, policies, retrieval metadata
+and tool bindings. Reusable Agents are catalog definitions and are not
+profile-owned.
 
 ## RAG
 Retrieval-Augmented Generation. In Cognitive Gateway, RAG is a knowledge accelerator and never the sole governance authority.
