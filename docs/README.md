@@ -43,8 +43,10 @@ See [`catalog-profile-boundaries.md`](catalog-profile-boundaries.md) for the
 CG-03.06 generic catalog and Tiny Swarm World profile layout, ownership rules,
 loading APIs and fail-closed conflict semantics.
 
-See the materialized reusable definitions under [`../catalog/`](../catalog/)
-for the CG-03.07 generic Agent and Skill migration.
+See the materialized reusable Agent definitions under [`../catalog/agents/`](../catalog/agents/)
+for CG-03.07 and the reusable Skill definitions under [`../catalog/skills/`](../catalog/skills/)
+for CG-03.08. TSW-specific material remains reserved for CG-03.09 under
+[`../profiles/tiny-swarm-world/`](../profiles/tiny-swarm-world/).
 
 ## Documentation Policy
 

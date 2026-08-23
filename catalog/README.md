@@ -38,7 +38,13 @@ collision. There is no implicit precedence or override behavior.
 
 ## Current migration
 
-CG-03.07 materializes the reusable Tiny Swarm World candidates selected by the
-CG-03.02 migration matrix: eight catalog Agents and 37 canonical catalog
-Skills. Merged skills retain all source paths in `origin.source`; deferred,
+CG-03.07 materializes the eight reusable Agent candidates selected by the
+CG-03.02 migration matrix. CG-03.08 materializes the 37 reusable Skill
+candidates. Merged skills retain all source paths in `origin.source`; deferred,
 project-specific and deprecated candidates remain outside this catalog.
+
+Skill applicability is deliberately represented only through the v1 contract:
+catalog ownership, optional agent ownership, abstract capability requirements,
+knowledge queries and explicit Skill dependencies. A generic Skill does not
+gain a TSW/profile selector or an execution permission; profile applicability
+and capability authorization remain later registry/policy concerns.

@@ -278,3 +278,23 @@ Run the check from the repository root with:
 ```powershell
 pwsh -NoProfile -File scripts/check-migration-matrix.ps1
 ```
+
+## CG-03.08 materialization record
+
+The reusable Skill candidates selected by this matrix are materialized under
+[`../catalog/skills/`](../catalog/skills/). The catalog contains exactly the
+37 canonical Skill IDs classified as catalog-owned: generic core, development,
+quality, architecture, documentation and declarative governance skills.
+
+Each document uses the CG-03.03 v1 Skill contract. Its normalized
+responsibility is stored in `description`, retrieval hints in
+`knowledge_queries`, and both `dependency_ids` and
+`required_capability_ids` are present as explicit ordered arrays. Empty arrays
+mean that this migration does not assert a dependency or abstract capability
+requirement; they are not an implicit execution grant.
+
+The three merged canonical skills preserve every source path in `origin.source`:
+`architecture-hexagonal`, `contract-governance-expert` and
+`observability-diagnostics`. Project-specific, process-only, scope-gated and
+deprecated candidates remain outside the generic catalog for CG-03.09 or the
+later workflow/governance slices.
