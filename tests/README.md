@@ -59,8 +59,16 @@ registry API; it remains an explicit runtime or retrieval concern.
 
 The registry unit tests cover deterministic catalog loading, duplicate
 detection, complete Skill reference integrity and deterministic dependency
-resolution. The architecture guard also prevents external registry roots from
-being reintroduced.
+resolution, capability indexing and fail-closed query resolution. The
+CG-03 registry and registry-CLI slices are gated at 95% line coverage by CI:
+
+```text
+cargo llvm-cov -p gateway-registry --all-targets --fail-under-lines 95
+cargo llvm-cov -p gateway-daemon --all-targets --fail-under-lines 95
+```
+
+The architecture guard also prevents external registry roots from being
+reintroduced.
 
 Application boundary tests cover explicit project context on execution and
 retrieval requests. Domain retrieval tests cover validated content and

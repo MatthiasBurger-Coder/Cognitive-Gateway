@@ -37,6 +37,14 @@ cargo clippy --workspace --all-targets -- -D warnings
 
 The GitHub Actions workflow `.github/workflows/rust.yml` runs the same quality baseline for pull requests and pushes to `main`.
 
+CG-03 registry and registry-CLI code is also subject to a 95% line-coverage
+gate. Run the local coverage checks with `cargo-llvm-cov`:
+
+```bash
+cargo llvm-cov -p gateway-registry --all-targets --fail-under-lines 95
+cargo llvm-cov -p gateway-daemon --all-targets --fail-under-lines 95
+```
+
 ### Run the registry CLI from WSL/Linux
 
 Build and install the read-only `cg-registry` CLI from the repository root:
