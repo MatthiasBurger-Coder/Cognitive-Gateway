@@ -107,13 +107,22 @@ typed_identifier! {
     ConstraintId
 }
 
+typed_identifier! {
+    /// Identifies an execution runtime without coupling the domain to a
+    /// concrete runtime provider.
+    ExecutionRuntimeId
+}
+
+/// Short name for an execution runtime identity used by integration ports.
+pub type RuntimeId = ExecutionRuntimeId;
+
 #[cfg(test)]
 mod tests {
     use std::str::FromStr;
 
     use super::{
-        AgentId, CapabilityId, ConstraintId, ExecutionContextId, PolicyId, SkillId, TaskId,
-        WorkflowId,
+        AgentId, CapabilityId, ConstraintId, ExecutionContextId, ExecutionRuntimeId, PolicyId,
+        SkillId, TaskId, WorkflowId,
     };
 
     #[test]
@@ -155,6 +164,10 @@ mod tests {
         assert_eq!(
             ConstraintId::new("constraint").unwrap().as_str(),
             "constraint"
+        );
+        assert_eq!(
+            ExecutionRuntimeId::new("runtime").unwrap().as_str(),
+            "runtime"
         );
     }
 }

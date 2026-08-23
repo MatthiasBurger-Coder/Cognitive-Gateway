@@ -16,6 +16,9 @@ See [`domain-model.md`](domain-model.md) for the descriptor and relationship
 contract introduced by CG-02.02, including the CG-02.03 execution state,
 capability and constraint model.
 
+See [`execution-context-ir.md`](execution-context-ir.md) for the complete
+CG-02.04 `ExecutionContextIR` v1 contract, field semantics and invariants.
+
 ## Documentation Policy
 
 - Repository documentation is the technical source of truth.
