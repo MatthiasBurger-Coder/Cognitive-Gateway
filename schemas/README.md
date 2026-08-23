@@ -11,6 +11,10 @@ The bootstrap slice reserves the following schema boundaries:
 - `project-state.schema.json`
 - `execution-context.schema.json`
 
-The schemas themselves, profile loading and deterministic validation are implemented in CG-03. Keeping the boundary here makes the repository layout explicit without coupling the Rust core to a serialization or validation framework.
+The machine-readable schema documents, profile loading and deterministic
+profile validation are implemented in CG-03. The CG-02.05 JSON wire contract
+for `ExecutionContextIR` is documented and implemented by the domain crate in
+[`../docs/ir-serialization.md`](../docs/ir-serialization.md); the JSON Schema
+artifact remains part of the later schema-loading slice.
 
 Schema documents must be versioned, fail closed on invalid input and remain independent of concrete RAG, MCP and execution-runtime technologies.

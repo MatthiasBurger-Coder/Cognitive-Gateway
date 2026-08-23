@@ -19,6 +19,10 @@ capability and constraint model.
 See [`execution-context-ir.md`](execution-context-ir.md) for the complete
 CG-02.04 `ExecutionContextIR` v1 contract, field semantics and invariants.
 
+See [`ir-serialization.md`](ir-serialization.md) for the CG-02.05 JSON wire
+schema, validation behavior, public serialization API and version compatibility
+rules.
+
 ## Documentation Policy
 
 - Repository documentation is the technical source of truth.

@@ -10,8 +10,15 @@ fail() {
 DOMAIN="crates/gateway-domain/Cargo.toml"
 APPLICATION="crates/gateway-application/Cargo.toml"
 
-if grep -Eq '^\[dependencies\]' "$DOMAIN"; then
-  fail "gateway-domain must not declare outward dependencies"
+domain_dependencies=$(awk '
+  /^\[dependencies\]/ { in_dependencies=1; next }
+  /^\[/ { in_dependencies=0 }
+  in_dependencies && $0 !~ /^[[:space:]]*(#|$)/ { print }
+' "$DOMAIN")
+
+if [[ -n "$domain_dependencies" ]] && printf '%s\n' "$domain_dependencies" \
+  | grep -Eqv '^[[:space:]]*(serde|serde_json)(\.workspace)?[[:space:]]*='; then
+  fail "gateway-domain may only declare serde serialization dependencies"
 fi
 
 for manifest in "$DOMAIN" "$APPLICATION"; do

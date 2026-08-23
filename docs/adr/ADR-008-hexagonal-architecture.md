@@ -27,6 +27,11 @@ Driving Adapters -> Inbound Ports -> Application + Domain/Core
 Application + Domain/Core -> Outbound Ports -> Driven Adapters
 ```
 
+Pure serialization libraries (`serde` and `serde_json`) are the explicitly
+allowed exception for versioned domain wire contracts. They do not connect the
+core to an external system or provider; all provider, transport, persistence
+and integration dependencies remain outside the domain.
+
 Dependencies point inward toward stable abstractions. The core must not depend on OpenAI or another model provider, Codex, PraisonAI, concrete MCP implementations, vector or graph databases, GitHub APIs, filesystem/Git infrastructure details, or UI/transport frameworks.
 
 ## Knowledge, capability and runtime adapters

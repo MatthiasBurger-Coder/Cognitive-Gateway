@@ -74,5 +74,6 @@ slices and typed values. `validate` checks context-local invariants, while
 
 `ExecutionRuntimeId` (also available as `RuntimeId`) is intentionally only a
 validated identity. Runtime adapters own all provider-specific configuration.
-Serialization and compatibility handling are the responsibility of the next
-schema/serialization slice; this issue defines the in-memory v1 contract.
+The JSON serialization and compatibility contract is defined in
+[`ir-serialization.md`](ir-serialization.md). It keeps the same provider-
+independent fields and validates every value again while deserializing.

@@ -30,6 +30,8 @@ The current domain-primitive slice is covered by unit tests colocated with its i
   profiles, workflow/gate/blocker states and constraint kinds;
 - explicit lifecycle transitions and coordinated execution-state invariants;
 - inspect/mutate capability classification and mode/profile constraint checks.
+- strict `ExecutionContextIR` JSON round trips, malformed payload handling,
+  unknown enum rejection and unsupported-version rejection.
 
 The context component has an integration test at [`../crates/gateway-context/tests/context_compiler.rs`](../crates/gateway-context/tests/context_compiler.rs). It verifies context compilation, preservation of domain values and all nine combinations of the three operating modes with the three independent execution profiles.
 
