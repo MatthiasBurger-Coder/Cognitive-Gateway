@@ -73,7 +73,9 @@ implemented by the candidate definitions: dependency DAG execution, cycle and
 topological scheduling, execution groups, locks and lock conflicts,
 parallelization, joins/barriers, stream distribution metadata and concrete
 agent/runtime orchestration. The gap dispositions are machine-readable in the
-JSON inventory and must remain visible in later catalog documentation.
+JSON inventory and in the
+[`CG-04.16 gap matrix`](execution-graph-migration-gaps.json); they must remain
+visible in later catalog documentation.
 
 ## Boundary conclusion
 

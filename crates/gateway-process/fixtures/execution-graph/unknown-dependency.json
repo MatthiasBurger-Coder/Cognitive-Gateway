@@ -1,0 +1,13 @@
+{
+  "fixture_version": "cg-04.16-v1",
+  "fixture_kind": "execution_graph",
+  "graph_id": "neutral-unknown-dependency",
+  "nodes": [
+    {"id": "slice-a", "depends_on": ["slice-missing"]}
+  ],
+  "expected": {
+    "acyclic": true,
+    "disposition": "reject-before-execution",
+    "reason": "unknown-dependency"
+  }
+}

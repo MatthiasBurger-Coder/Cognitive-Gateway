@@ -1,0 +1,82 @@
+{
+  "fixture_version": "cg-04.16-v1",
+  "fixture_kind": "execution_graph",
+  "graph_id": "neutral-implementation-graph",
+  "nodes": [
+    {
+      "id": "slice-intake",
+      "depends_on": [],
+      "execution_group": "serial-intake",
+      "required_locks": []
+    },
+    {
+      "id": "slice-implementation-a",
+      "depends_on": ["slice-intake"],
+      "execution_group": "parallel-implementation",
+      "required_locks": ["contract-alpha"]
+    },
+    {
+      "id": "slice-implementation-b",
+      "depends_on": ["slice-intake"],
+      "execution_group": "parallel-implementation",
+      "required_locks": ["contract-beta"]
+    },
+    {
+      "id": "slice-verify",
+      "depends_on": ["slice-implementation-a", "slice-implementation-b"],
+      "execution_group": "serial-verify",
+      "required_locks": []
+    }
+  ],
+  "execution_groups": [
+    {
+      "id": "serial-intake",
+      "mode": "sequential",
+      "members": ["slice-intake"]
+    },
+    {
+      "id": "parallel-implementation",
+      "mode": "parallel",
+      "members": ["slice-implementation-a", "slice-implementation-b"]
+    },
+    {
+      "id": "serial-verify",
+      "mode": "sequential",
+      "members": ["slice-verify"]
+    }
+  ],
+  "locks": [
+    {"id": "contract-alpha", "kind": "contract", "mode": "exclusive"},
+    {"id": "contract-beta", "kind": "contract", "mode": "exclusive"}
+  ],
+  "join_barriers": [
+    {
+      "id": "implementation-join",
+      "waits_for": ["slice-implementation-a", "slice-implementation-b"],
+      "unlocks": "slice-verify"
+    }
+  ],
+  "parallelization": {
+    "decision": "explicit-input",
+    "allowed": true,
+    "requires": "disjoint-lock-sets"
+  },
+  "stream_distribution": {
+    "mode": "broadcast",
+    "targets": ["slice-implementation-a", "slice-implementation-b"],
+    "metadata": {"partition-key": "work-item"}
+  },
+  "failure_routing": {
+    "verification-failed": "repair"
+  },
+  "expected": {
+    "acyclic": true,
+    "topological_order": [
+      "slice-intake",
+      "slice-implementation-a",
+      "slice-implementation-b",
+      "slice-verify"
+    ],
+    "process_ir_v1_support": "not-evaluated"
+  }
+}
