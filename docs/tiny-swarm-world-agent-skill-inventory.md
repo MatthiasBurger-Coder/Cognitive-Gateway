@@ -3,9 +3,9 @@
 ## Status and provenance
 
 This is the CG-03.01 factual migration baseline. It records what exists in
-Tiny Swarm World; it does not migrate, normalize or authorize any asset.
-Migration classification is intentionally `UNCLASSIFIED` and is deferred to
-CG-03.02.
+Tiny Swarm World; it does not migrate or authorize any asset. Classification
+and normalization decisions are recorded in the CG-03.02 decision register:
+[`tiny-swarm-world-agent-skill-migration.md`](tiny-swarm-world-agent-skill-migration.md).
 
 | Field | Value |
 | --- | --- |
@@ -15,7 +15,7 @@ CG-03.02.
 | Inventory repository | `MatthiasBurger-Coder/Cognitive-Gateway` |
 | Inventory scope | tracked files at the source commit |
 | Inventory date | 2026-08-23 |
-| Migration decision | `UNCLASSIFIED` for every candidate |
+| Migration decision | See CG-03.02 decision register |
 
 The source worktree had unrelated uncommitted changes outside the inventoried
 candidate subtrees. Three untracked evidence files existed under
@@ -73,7 +73,8 @@ directories use their frontmatter `name`.
 
 Every row has a source path, candidate ID, responsibility, required skill
 references and a migration placeholder. “Signals” are observations for
-CG-03.02, not migration decisions.
+CG-03.02, not the final migration decisions. The completed decision matrix is
+maintained in the CG-03.02 register linked above.
 
 | Candidate ID | Source path | Responsibility | Required skill IDs | Signals | Migration |
 | --- | --- | --- | --- | --- | --- |
@@ -101,8 +102,9 @@ CG-03.02, not migration decisions.
 
 The `description` column is the source frontmatter purpose/responsibility. A
 blank dependency means no dependency is declared in the skill's frontmatter or
-body; role references are captured in the role table above. All rows retain the
-same `UNCLASSIFIED` migration placeholder.
+body; role references are captured in the role table above. The migration
+placeholder is retained as historical inventory evidence; CG-03.02 decisions
+are recorded in the separate decision matrix.
 
 | Candidate ID | Source path | Declared purpose / responsibility | Signals | Migration |
 | --- | --- | --- | --- | --- |
