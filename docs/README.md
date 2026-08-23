@@ -31,6 +31,10 @@ See [`tiny-swarm-world-agent-skill-inventory.md`](tiny-swarm-world-agent-skill-i
 for the CG-03.01 source-pinned inventory of Tiny Swarm World roles, skills and
 supporting Codex runtime assets.
 
+See [`tiny-swarm-world-agent-skill-migration.md`](tiny-swarm-world-agent-skill-migration.md)
+for the CG-03.02 classification, canonical-ID mapping, ownership boundary and
+duplicate/deprecation decisions.
+
 ## Documentation Policy
 
 - Repository documentation is the technical source of truth.
