@@ -113,10 +113,9 @@ Validation is fail-closed and deterministic:
    converted through CG-02 constructors.
 5. The deterministic registry loader discovers JSON files, parses every
    definition file in lexical relative-path order, rejects duplicate canonical
-   IDs and exposes accepted documents in canonical ID order. Cross-document
-   references and dependency cycles are validated by the separate registry
-   integrity layer; document parsing does not infer references from text or
-   retrieval.
+IDs and exposes accepted documents in canonical ID order. Cross-document
+references and dependency cycles are validated by the registry integrity API;
+document parsing does not infer references from text or retrieval.
 
 The Rust API is exposed from `gateway_domain` as
 `AgentDefinitionDocument` and `SkillDefinitionDocument` (also available as
@@ -154,7 +153,10 @@ and duplicate-ID path are reproducible. Valid documents are then sorted by
 their canonical typed ID for stable iteration and binary-search lookup.
 
 `Registry::load(profile_directory)` loads the conventional `agents/` and
-`skills/` directories together. Missing roots, unreadable files, malformed
+`skills/` directories together. `Registry::validate_integrity()` then checks
+Agent-to-Skill references, Skill owner Agents, missing Skill dependencies and
+dependency cycles. Its `dependency_graph()` result provides a deterministic
+dependency-first topological order. Missing roots, unreadable files, malformed
 JSON, wrong kinds, unsupported schema versions and domain-invalid values all
 fail the load; invalid JSON files are never silently skipped. Files with other
 extensions are ignored because JSON is the only repository adapter currently
