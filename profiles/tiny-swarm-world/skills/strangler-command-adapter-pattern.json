@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0",
+  "kind": "skill",
+  "id": "strangler-command-adapter-pattern",
+  "description": "TSW legacy adapter replacement",
+  "owner_agent_id": null,
+  "dependency_ids": [],
+  "required_capability_ids": [],
+  "knowledge_queries": [
+    "TSW legacy adapter replacement"
+  ],
+  "origin": {
+    "project": "Tiny-Swarm-World",
+    "source": ".agents/skills/strangler-command-adapter-pattern/SKILL.md",
+    "migration_status": "MIGRATED"
+  }
+}
+

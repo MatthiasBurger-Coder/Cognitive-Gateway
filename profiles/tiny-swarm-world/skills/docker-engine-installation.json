@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0",
+  "kind": "skill",
+  "id": "docker-engine-installation",
+  "description": "Docker host prerequisites",
+  "owner_agent_id": null,
+  "dependency_ids": [],
+  "required_capability_ids": [],
+  "knowledge_queries": [
+    "Docker host prerequisites"
+  ],
+  "origin": {
+    "project": "Tiny-Swarm-World",
+    "source": ".agents/skills/docker-engine-installation/SKILL.md",
+    "migration_status": "MIGRATED"
+  }
+}
+

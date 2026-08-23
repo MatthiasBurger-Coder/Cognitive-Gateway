@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0",
+  "kind": "skill",
+  "id": "documentation-audience-architect",
+  "description": "TSW documentation audience structure",
+  "owner_agent_id": null,
+  "dependency_ids": [],
+  "required_capability_ids": [],
+  "knowledge_queries": [
+    "TSW documentation audience structure"
+  ],
+  "origin": {
+    "project": "Tiny-Swarm-World",
+    "source": ".agents/skills/documentation-audience-architect/SKILL.md",
+    "migration_status": "MIGRATED"
+  }
+}
+

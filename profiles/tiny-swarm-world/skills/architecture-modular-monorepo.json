@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0",
+  "kind": "skill",
+  "id": "architecture-modular-monorepo",
+  "description": "Gradle/module boundary review",
+  "owner_agent_id": null,
+  "dependency_ids": [],
+  "required_capability_ids": [],
+  "knowledge_queries": [
+    "Gradle/module boundary review"
+  ],
+  "origin": {
+    "project": "Tiny-Swarm-World",
+    "source": ".agents/skills/architecture-modular-monorepo/SKILL.md",
+    "migration_status": "MIGRATED"
+  }
+}
+

@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0",
+  "kind": "skill",
+  "id": "swarm-node-management",
+  "description": "Docker Swarm node lifecycle",
+  "owner_agent_id": null,
+  "dependency_ids": [],
+  "required_capability_ids": [],
+  "knowledge_queries": [
+    "Docker Swarm node lifecycle"
+  ],
+  "origin": {
+    "project": "Tiny-Swarm-World",
+    "source": ".agents/skills/swarm-node-management/SKILL.md",
+    "migration_status": "MIGRATED"
+  }
+}
+

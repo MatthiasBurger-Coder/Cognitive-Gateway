@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0",
+  "kind": "skill",
+  "id": "platform-reset-and-recovery",
+  "description": "Safe platform recovery",
+  "owner_agent_id": null,
+  "dependency_ids": [],
+  "required_capability_ids": [],
+  "knowledge_queries": [
+    "Safe platform recovery"
+  ],
+  "origin": {
+    "project": "Tiny-Swarm-World",
+    "source": ".agents/skills/platform-reset-and-recovery/SKILL.md",
+    "migration_status": "MIGRATED"
+  }
+}
+

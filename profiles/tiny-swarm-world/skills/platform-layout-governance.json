@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0",
+  "kind": "skill",
+  "id": "platform-layout-governance",
+  "description": "TSW repository layout",
+  "owner_agent_id": null,
+  "dependency_ids": [],
+  "required_capability_ids": [],
+  "knowledge_queries": [
+    "TSW repository layout"
+  ],
+  "origin": {
+    "project": "Tiny-Swarm-World",
+    "source": ".agents/skills/platform-layout-governance/SKILL.md",
+    "migration_status": "MIGRATED"
+  }
+}
+

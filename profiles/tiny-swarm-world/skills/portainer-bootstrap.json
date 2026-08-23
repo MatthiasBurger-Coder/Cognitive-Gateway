@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0",
+  "kind": "skill",
+  "id": "portainer-bootstrap",
+  "description": "Portainer bootstrap guidance",
+  "owner_agent_id": null,
+  "dependency_ids": [],
+  "required_capability_ids": [],
+  "knowledge_queries": [
+    "Portainer bootstrap guidance"
+  ],
+  "origin": {
+    "project": "Tiny-Swarm-World",
+    "source": ".agents/skills/portainer-bootstrap/SKILL.md",
+    "migration_status": "MIGRATED"
+  }
+}
+

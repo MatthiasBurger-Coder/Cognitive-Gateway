@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0",
+  "kind": "skill",
+  "id": "swagger-ui-bootstrap",
+  "description": "Swagger/API UI bootstrap",
+  "owner_agent_id": null,
+  "dependency_ids": [],
+  "required_capability_ids": [],
+  "knowledge_queries": [
+    "Swagger/API UI bootstrap"
+  ],
+  "origin": {
+    "project": "Tiny-Swarm-World",
+    "source": ".agents/skills/swagger-ui-bootstrap/SKILL.md",
+    "migration_status": "MIGRATED"
+  }
+}
+

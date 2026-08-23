@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0",
+  "kind": "skill",
+  "id": "devops-docker",
+  "description": "Docker and optional analysis containers",
+  "owner_agent_id": null,
+  "dependency_ids": [],
+  "required_capability_ids": [],
+  "knowledge_queries": [
+    "Docker and optional analysis containers"
+  ],
+  "origin": {
+    "project": "Tiny-Swarm-World",
+    "source": ".agents/skills/devops-docker/SKILL.md",
+    "migration_status": "MIGRATED"
+  }
+}
+

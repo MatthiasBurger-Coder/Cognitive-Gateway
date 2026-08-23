@@ -41,3 +41,11 @@ boundary alone, or
 `Registry::load_catalog_with_profile("catalog", "profiles/tiny-swarm-world")`
 for the combined registry. Call `validate_integrity()` after loading when
 cross-document Agent/Skill references and dependency graphs must be checked.
+
+## Current migration
+
+CG-03.09 materializes four TSW-specific Agents and 52 TSW-specific Skills
+selected by the CG-03.02 migration matrix. Profile Agents may reference generic
+catalog Skills; the combined loader rejects any duplicate canonical ID.
+Scope-gated candidates remain excluded pending explicit approval, and profile
+ownership does not authorize execution.
