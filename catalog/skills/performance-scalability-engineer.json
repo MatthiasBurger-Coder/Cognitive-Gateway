@@ -5,11 +5,26 @@
   "name": "performance scalability engineer",
   "description": "Performance and resource scaling",
   "owner_agent_id": null,
-  "authoritative_sources": [],
-  "rules": [],
-  "verification": [],
-  "requires": [],
-  "related_skills": [],
+  "authoritative_sources": [
+    "performance and capacity requirements",
+    "benchmark and resource evidence"
+  ],
+  "rules": [
+    "Define measurable budgets for latency, throughput, memory, CPU, storage and concurrency where applicable.",
+    "Protect shared capacity with bounded work, batching, streaming, backpressure or isolation as appropriate.",
+    "Do not trade correctness, evidence integrity or required quality gates for an unmeasured speedup."
+  ],
+  "verification": [
+    "Measure the relevant path against explicit budgets and representative workload characteristics.",
+    "Review resource limits, cancellation and degradation behavior under constrained capacity."
+  ],
+  "requires": [
+    "resilience-engineering"
+  ],
+  "related_skills": [
+    "distributed-systems-architect",
+    "observability-runtime-diagnostics"
+  ],
   "required_capability_ids": [],
   "knowledge_queries": [
     "performance and resource scaling"

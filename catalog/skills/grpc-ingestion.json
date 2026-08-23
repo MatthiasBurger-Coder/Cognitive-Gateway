@@ -5,11 +5,26 @@
   "name": "grpc ingestion",
   "description": "Ingestion adapter mapping and validation",
   "owner_agent_id": null,
-  "authoritative_sources": [],
-  "rules": [],
-  "verification": [],
-  "requires": [],
-  "related_skills": [],
+  "authoritative_sources": [
+    "ingestion contracts",
+    "transport mapping and validation tests"
+  ],
+  "rules": [
+    "Map transport inputs to domain requests through explicit validation and ownership boundaries.",
+    "Preserve schema identity, ordering, correlation, completeness and rejected-input diagnostics.",
+    "Keep malformed or unsupported input explicit; do not convert it into absent or successful evidence."
+  ],
+  "verification": [
+    "Review message-to-domain mapping, validation and error/status behavior.",
+    "Run focused ingestion fixtures for valid, invalid, incomplete, reordered and repeated inputs."
+  ],
+  "requires": [
+    "resilience-engineering"
+  ],
+  "related_skills": [
+    "protobuf-contracts",
+    "ingestion-handoff-review"
+  ],
   "required_capability_ids": [],
   "knowledge_queries": [
     "ingestion adapter mapping and validation"

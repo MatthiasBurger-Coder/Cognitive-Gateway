@@ -5,11 +5,24 @@
   "name": "data ownership persistence steward",
   "description": "Data ownership and persistence boundaries",
   "owner_agent_id": null,
-  "authoritative_sources": [],
-  "rules": [],
-  "verification": [],
+  "authoritative_sources": [
+    "data ownership documentation",
+    "persistence and projection contracts"
+  ],
+  "rules": [
+    "Assign each authoritative data set to one explicit owner and define access through contracts.",
+    "Keep projections, replicas and derived views distinguishable from the source of truth.",
+    "Block direct cross-boundary persistence coupling and preserve consistency and provenance semantics."
+  ],
+  "verification": [
+    "Review owned and non-owned data, write authority and cross-boundary access paths.",
+    "Verify persistence and projection tests cover identity, consistency, failure and recovery behavior."
+  ],
   "requires": [],
-  "related_skills": [],
+  "related_skills": [
+    "analysis-storage-architect",
+    "service-decomposition-bounded-context"
+  ],
   "required_capability_ids": [],
   "knowledge_queries": [
     "data ownership and persistence boundaries"

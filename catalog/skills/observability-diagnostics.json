@@ -5,11 +5,26 @@
   "name": "observability diagnostics",
   "description": "Logging, metrics and trace correlation",
   "owner_agent_id": null,
-  "authoritative_sources": [],
-  "rules": [],
-  "verification": [],
-  "requires": [],
-  "related_skills": [],
+  "authoritative_sources": [
+    "diagnostic and observability requirements",
+    "logging, metrics and redaction tests"
+  ],
+  "rules": [
+    "Preserve available trace and correlation identifiers while keeping diagnostics separate from authoritative evidence.",
+    "Make sampling, retention, status and redaction behavior explicit.",
+    "Do not log secrets, credentials, personal data or unnecessary source content."
+  ],
+  "verification": [
+    "Review logs, metrics and diagnostics for correlation, useful status and sensitive-data exposure.",
+    "Run focused redaction and diagnostic-format tests when behavior changes."
+  ],
+  "requires": [
+    "resilience-engineering"
+  ],
+  "related_skills": [
+    "observability-runtime-diagnostics",
+    "security-threat-modeling"
+  ],
   "required_capability_ids": [],
   "knowledge_queries": [
     "logging, metrics and trace correlation"

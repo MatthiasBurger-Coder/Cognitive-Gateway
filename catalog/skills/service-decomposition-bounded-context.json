@@ -5,11 +5,25 @@
   "name": "service decomposition bounded context",
   "description": "Service ownership and boundaries",
   "owner_agent_id": null,
-  "authoritative_sources": [],
-  "rules": [],
-  "verification": [],
+  "authoritative_sources": [
+    "service and domain architecture documentation",
+    "ownership, contract and runtime-readiness evidence"
+  ],
+  "rules": [
+    "Treat a technical module or package as distinct from a service unless business responsibility, owned data and runtime independence are explicit.",
+    "Require contract-first communication and prohibit direct cross-service database or implementation coupling.",
+    "Keep owned, non-owned and projected data responsibilities distinguishable."
+  ],
+  "verification": [
+    "Review candidate boundary, business capability, data ownership, communication paths and autonomy evidence.",
+    "Verify build, start, test, health, observability and deployment assumptions before claiming readiness."
+  ],
   "requires": [],
-  "related_skills": [],
+  "related_skills": [
+    "contract-governance-expert",
+    "data-ownership-persistence-steward",
+    "microservice-runtime-readiness-expert"
+  ],
   "required_capability_ids": [],
   "knowledge_queries": [
     "service ownership and boundaries"

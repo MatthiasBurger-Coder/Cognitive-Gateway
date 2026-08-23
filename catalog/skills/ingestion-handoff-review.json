@@ -5,11 +5,24 @@
   "name": "ingestion handoff review",
   "description": "Ingestion handoff contract review",
   "owner_agent_id": null,
-  "authoritative_sources": [],
-  "rules": [],
-  "verification": [],
+  "authoritative_sources": [
+    "ingestion handoff contracts",
+    "producer, consumer and integration evidence"
+  ],
+  "rules": [
+    "Make ownership, input/output models, status, correlation and failure handoff explicit between ingestion stages.",
+    "Reject hidden transformations and preserve provenance when data crosses a boundary.",
+    "Keep handoff completion distinct from downstream processing completion."
+  ],
+  "verification": [
+    "Review producer and consumer expectations at every ingestion handoff.",
+    "Verify valid, rejected, partial and retried handoffs with contract or integration tests."
+  ],
   "requires": [],
-  "related_skills": [],
+  "related_skills": [
+    "grpc-ingestion",
+    "contract-governance-expert"
+  ],
   "required_capability_ids": [],
   "knowledge_queries": [
     "ingestion handoff contract review"

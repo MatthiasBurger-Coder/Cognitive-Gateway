@@ -5,11 +5,24 @@
   "name": "security threat modeling",
   "description": "Threat modeling across boundaries",
   "owner_agent_id": null,
-  "authoritative_sources": [],
-  "rules": [],
-  "verification": [],
+  "authoritative_sources": [
+    "security requirements and threat models",
+    "security test and risk evidence"
+  ],
+  "rules": [
+    "Identify assets, trust boundaries, threats, controls, abuse paths and residual risk for the changed flow.",
+    "Cover authentication, authorization, secrets, diagnostics, dependencies, inputs and runtime boundaries as applicable.",
+    "Do not claim a threat is mitigated without an explicit control and verification evidence."
+  ],
+  "verification": [
+    "Review the threat model against current contracts, data flows, dependencies and implementation.",
+    "Check high-impact threats, control ownership, residual risk and negative-path tests."
+  ],
   "requires": [],
-  "related_skills": [],
+  "related_skills": [
+    "security-sandbox-specialist",
+    "supply-chain-security-expert"
+  ],
   "required_capability_ids": [],
   "knowledge_queries": [
     "threat modeling across boundaries"

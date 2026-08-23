@@ -5,11 +5,24 @@
   "name": "resilience engineering",
   "description": "Retry, timeout and failure semantics",
   "owner_agent_id": null,
-  "authoritative_sources": [],
-  "rules": [],
-  "verification": [],
+  "authoritative_sources": [
+    "resilience and failure-management requirements",
+    "failure-path and recovery tests"
+  ],
+  "rules": [
+    "Give external calls, storage, workers and long-running operations explicit bounded timeouts and cancellation.",
+    "Retry only safe, transient, idempotent work within observable attempt and elapsed-time budgets.",
+    "Keep partial failure, cleanup failure, degraded state, retry provenance and sanitized diagnostics explicit."
+  ],
+  "verification": [
+    "Review timeout, retry, idempotency, cleanup, health and degradation behavior for the affected operation.",
+    "Test transient, permanent, repeated, cancelled and partially completed failure paths."
+  ],
   "requires": [],
-  "related_skills": [],
+  "related_skills": [
+    "observability-diagnostics",
+    "quality-testing-strategy"
+  ],
   "required_capability_ids": [],
   "knowledge_queries": [
     "retry, timeout and failure semantics"

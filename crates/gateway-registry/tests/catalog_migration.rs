@@ -139,3 +139,71 @@ fn migrated_skills_preserve_generic_boundaries_and_structured_shape() {
         );
     }
 }
+
+#[test]
+fn catalog_skills_are_complete_and_references_are_canonical() {
+    let registry = Registry::load_catalog(repository_catalog()).expect("catalog should load");
+
+    let skills = registry.skills();
+    assert_eq!(skills.documents().len(), MIGRATED_GENERIC_SKILLS.len());
+
+    for skill in skills.documents() {
+        assert!(
+            !skill.authoritative_sources().is_empty(),
+            "skill {} lacks authoritative source selectors",
+            skill.id()
+        );
+        assert!(
+            !skill.rules().is_empty(),
+            "skill {} lacks rules",
+            skill.id()
+        );
+        assert!(
+            !skill.verification().is_empty(),
+            "skill {} lacks verification guidance",
+            skill.id()
+        );
+
+        for dependency in skill.requires() {
+            assert!(
+                skills.get(dependency).is_some(),
+                "skill {} has an unresolved required reference {}",
+                skill.id(),
+                dependency
+            );
+            assert!(!skill.related_skills().contains(dependency));
+        }
+        for related in skill.related_skills() {
+            assert!(
+                skills.get(related).is_some(),
+                "skill {} has an unresolved related reference {}",
+                skill.id(),
+                related
+            );
+        }
+    }
+
+    let resilience = gateway_domain::SkillId::new("resilience-engineering").unwrap();
+    let resilience_dependents: Vec<_> = skills
+        .documents()
+        .iter()
+        .filter(|skill| skill.requires().contains(&resilience))
+        .map(|skill| skill.id().as_str())
+        .collect();
+    assert_eq!(
+        resilience_dependents,
+        vec![
+            "analysis-storage-architect",
+            "devops-ci-cd",
+            "distributed-systems-architect",
+            "git-large-repository-specialist",
+            "grpc-ingestion",
+            "grpc-streaming-specialist",
+            "observability-diagnostics",
+            "performance-scalability-engineer",
+            "quality-gate-governance",
+            "source-analysis-pipeline",
+            "workspace-lifecycle-specialist",
+        ]
+    );
+}

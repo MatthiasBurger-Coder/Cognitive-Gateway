@@ -5,11 +5,26 @@
   "name": "source analysis pipeline",
   "description": "Source facts and unresolved references",
   "owner_agent_id": null,
-  "authoritative_sources": [],
-  "rules": [],
-  "verification": [],
-  "requires": [],
-  "related_skills": [],
+  "authoritative_sources": [
+    "source-analysis contracts",
+    "analysis artifacts and evidence-integrity tests"
+  ],
+  "rules": [
+    "Keep source identity, parser or analyzer version, facts, artifacts, unresolved references and completeness state explicit.",
+    "Separate raw source observations from normalized facts, projections, reports and hypotheses.",
+    "Treat analyzer failure or unavailable input as an explicit diagnostic, not as missing or successful evidence."
+  ],
+  "verification": [
+    "Review ingestion, fact normalization, artifact identity and unresolved-reference handling.",
+    "Test malformed, incomplete, unsupported and repeated source inputs with deterministic evidence."
+  ],
+  "requires": [
+    "resilience-engineering"
+  ],
+  "related_skills": [
+    "analysis-storage-architect",
+    "replay-runtime-correlation-specialist"
+  ],
   "required_capability_ids": [],
   "knowledge_queries": [
     "source facts and unresolved references"

@@ -5,11 +5,26 @@
   "name": "contract governance expert",
   "description": "API, event and transport contracts",
   "owner_agent_id": null,
-  "authoritative_sources": [],
-  "rules": [],
-  "verification": [],
+  "authoritative_sources": [
+    "service and message contracts",
+    "compatibility and contract-test evidence"
+  ],
+  "rules": [
+    "Require explicit versioned contracts for cross-boundary communication and keep implementations decoupled from them.",
+    "Make request, response, event, error, compatibility, idempotency and timeout semantics explicit when applicable.",
+    "Do not share internal domain, DTO, service, repository or error-model implementations across independent services."
+  ],
+  "verification": [
+    "Review protocol choice, producer and consumer impact, compatibility and error/status behavior.",
+    "Run or inspect contract tests and verify generated transport code remains outside domain and application boundaries."
+  ],
   "requires": [],
-  "related_skills": [],
+  "related_skills": [
+    "grpc-ingestion",
+    "grpc-streaming-specialist",
+    "protobuf-contracts",
+    "service-decomposition-bounded-context"
+  ],
   "required_capability_ids": [],
   "knowledge_queries": [
     "API, event and transport contracts"

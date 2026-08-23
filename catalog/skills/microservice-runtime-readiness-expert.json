@@ -5,11 +5,24 @@
   "name": "microservice runtime readiness expert",
   "description": "Independent service readiness",
   "owner_agent_id": null,
-  "authoritative_sources": [],
-  "rules": [],
-  "verification": [],
+  "authoritative_sources": [
+    "runtime readiness requirements",
+    "service lifecycle and health evidence"
+  ],
+  "rules": [
+    "Define independent build, start, configuration, health, observability and shutdown behavior for each service boundary.",
+    "Distinguish liveness, readiness, dependency availability and degraded operation.",
+    "Do not claim runtime independence without evidence for the complete lifecycle."
+  ],
+  "verification": [
+    "Review service startup, configuration, health, shutdown, diagnostics and deployment assumptions.",
+    "Verify readiness and failure behavior with isolated lifecycle or integration tests."
+  ],
   "requires": [],
-  "related_skills": [],
+  "related_skills": [
+    "service-decomposition-bounded-context",
+    "observability-runtime-diagnostics"
+  ],
   "required_capability_ids": [],
   "knowledge_queries": [
     "independent service readiness"

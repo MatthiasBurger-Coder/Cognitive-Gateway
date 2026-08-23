@@ -5,11 +5,26 @@
   "name": "grpc streaming specialist",
   "description": "Streaming transport behavior",
   "owner_agent_id": null,
-  "authoritative_sources": [],
-  "rules": [],
-  "verification": [],
-  "requires": [],
-  "related_skills": [],
+  "authoritative_sources": [
+    "streaming transport contracts",
+    "stream lifecycle and compatibility tests"
+  ],
+  "rules": [
+    "Define stream lifecycle, ordering, cancellation, deadlines, backpressure and terminal status explicitly.",
+    "Preserve correlation and schema identity across messages and distinguish partial from complete streams.",
+    "Keep retry and reconnect behavior safe for the operation's idempotency and delivery semantics."
+  ],
+  "verification": [
+    "Review streaming contract and client/server lifecycle behavior.",
+    "Test cancellation, deadlines, ordering, partial delivery, reconnect and terminal error cases."
+  ],
+  "requires": [
+    "resilience-engineering"
+  ],
+  "related_skills": [
+    "protobuf-contracts",
+    "contract-governance-expert"
+  ],
   "required_capability_ids": [],
   "knowledge_queries": [
     "streaming transport behavior"

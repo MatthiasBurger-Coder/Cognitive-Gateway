@@ -5,11 +5,26 @@
   "name": "analysis storage architect",
   "description": "Analysis evidence storage and projections",
   "owner_agent_id": null,
-  "authoritative_sources": [],
-  "rules": [],
-  "verification": [],
-  "requires": [],
-  "related_skills": [],
+  "authoritative_sources": [
+    "analysis and persistence contracts",
+    "data ownership and evidence documentation"
+  ],
+  "rules": [
+    "Separate raw inputs, normalized facts, authoritative records and derived projections.",
+    "Preserve stable identity, provenance, ordering, completeness and unresolved state for stored evidence.",
+    "Keep storage technology choices behind explicit ports and ownership boundaries."
+  ],
+  "verification": [
+    "Review storage responsibilities, identity and provenance across domain, application and persistence boundaries.",
+    "Verify large-payload, retention, cleanup and partial-write behavior with focused tests or evidence."
+  ],
+  "requires": [
+    "resilience-engineering"
+  ],
+  "related_skills": [
+    "data-ownership-persistence-steward",
+    "source-analysis-pipeline"
+  ],
   "required_capability_ids": [],
   "knowledge_queries": [
     "analysis evidence storage and projections"

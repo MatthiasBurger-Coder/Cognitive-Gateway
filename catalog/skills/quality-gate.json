@@ -5,11 +5,24 @@
   "name": "quality gate",
   "description": "Required quality-gate execution",
   "owner_agent_id": null,
-  "authoritative_sources": [],
-  "rules": [],
-  "verification": [],
+  "authoritative_sources": [
+    "quality-gate policy",
+    "test and verification command definitions"
+  ],
+  "rules": [
+    "Run the repository's documented quality gate using the host-appropriate, reproducible commands.",
+    "Do not skip, mute, weaken or reconfigure required verification to obtain a green result.",
+    "Report failures, missing tooling and unavailable optional checks explicitly."
+  ],
+  "verification": [
+    "Identify the applicable test, lint, type, architecture and validation commands.",
+    "Record exact commands and outcomes and investigate every failure before completion."
+  ],
   "requires": [],
-  "related_skills": [],
+  "related_skills": [
+    "quality-gate-governance",
+    "quality-testing-strategy"
+  ],
   "required_capability_ids": [],
   "knowledge_queries": [
     "required quality-gate execution"

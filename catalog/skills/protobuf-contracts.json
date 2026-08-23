@@ -5,11 +5,24 @@
   "name": "protobuf contracts",
   "description": "Protobuf contract evolution",
   "owner_agent_id": null,
-  "authoritative_sources": [],
-  "rules": [],
-  "verification": [],
+  "authoritative_sources": [
+    "schema and message contracts",
+    "schema-compatibility and contract tests"
+  ],
+  "rules": [
+    "Treat field identity, numbering, presence, compatibility and reserved values as explicit contract decisions.",
+    "Keep message schemas stable and decouple generated transport types from domain models.",
+    "Reject undocumented breaking changes and preserve explicit error and status semantics."
+  ],
+  "verification": [
+    "Review schema evolution, field compatibility, mapping and generated-code boundaries.",
+    "Run schema, serialization and contract compatibility checks for changed messages."
+  ],
   "requires": [],
-  "related_skills": [],
+  "related_skills": [
+    "contract-governance-expert",
+    "grpc-streaming-specialist"
+  ],
   "required_capability_ids": [],
   "knowledge_queries": [
     "Protobuf contract evolution"

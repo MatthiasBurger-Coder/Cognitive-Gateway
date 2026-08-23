@@ -5,11 +5,24 @@
   "name": "live evidence validation expert",
   "description": "Live evidence validation and redaction",
   "owner_agent_id": null,
-  "authoritative_sources": [],
-  "rules": [],
-  "verification": [],
+  "authoritative_sources": [
+    "evidence integrity requirements",
+    "validation and redaction tests"
+  ],
+  "rules": [
+    "Validate live observations for identity, freshness, completeness, provenance and safe handling.",
+    "Separate live observations from generated summaries, assumptions and verified conclusions.",
+    "Redact secrets and unnecessary sensitive content before diagnostics or evidence publication."
+  ],
+  "verification": [
+    "Check evidence freshness, source identity, completeness and validation outcome.",
+    "Test redaction and ensure invalid, stale or incomplete observations remain explicit."
+  ],
   "requires": [],
-  "related_skills": [],
+  "related_skills": [
+    "audit-evidence-manager",
+    "traceability-engineer"
+  ],
   "required_capability_ids": [],
   "knowledge_queries": [
     "live evidence validation and redaction"
