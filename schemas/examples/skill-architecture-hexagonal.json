@@ -1,0 +1,15 @@
+{
+  "schema_version": "1.0",
+  "kind": "skill",
+  "id": "architecture-hexagonal",
+  "description": "Hexagonal boundaries and dependency direction",
+  "owner_agent_id": "system-architect",
+  "dependency_ids": [],
+  "required_capability_ids": ["repository.read"],
+  "knowledge_queries": ["hexagonal architecture boundaries"],
+  "origin": {
+    "project": "Tiny-Swarm-World",
+    "source": ".agents/skills/architecture-hexagonal/SKILL.md",
+    "migration_status": "MERGED"
+  }
+}

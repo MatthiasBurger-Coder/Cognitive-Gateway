@@ -1,0 +1,108 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cognitive-gateway.dev/schemas/skill.schema.json",
+  "title": "Cognitive Gateway Skill Definition",
+  "description": "The strict v1 repository contract for a reusable skill requirement.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "kind",
+    "id",
+    "description",
+    "owner_agent_id",
+    "dependency_ids",
+    "required_capability_ids",
+    "knowledge_queries",
+    "origin"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0",
+      "description": "The only supported skill-document schema version."
+    },
+    "kind": {
+      "const": "skill"
+    },
+    "id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "description": {
+      "$ref": "#/$defs/description"
+    },
+    "owner_agent_id": {
+      "anyOf": [
+        { "$ref": "#/$defs/identifier" },
+        { "type": "null" }
+      ],
+      "description": "Optional typed AgentId ownership; null means the skill is reusable without one owner."
+    },
+    "dependency_ids": {
+      "type": "array",
+      "description": "Ordered, unique SkillId dependencies. Dependency cycles are rejected by the catalog.",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/identifier"
+      }
+    },
+    "required_capability_ids": {
+      "type": "array",
+      "description": "Ordered, unique abstract CapabilityId requirements; these do not grant permission.",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/identifier"
+      }
+    },
+    "knowledge_queries": {
+      "type": "array",
+      "description": "Ordered retrieval hints represented by CG-02 KnowledgeQuery values.",
+      "items": {
+        "$ref": "#/$defs/description"
+      }
+    },
+    "origin": {
+      "$ref": "#/$defs/origin"
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "description": "The CG-02 identifier grammar: ASCII alphanumeric edges and ASCII identifier punctuation inside.",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9](?:[A-Za-z0-9._-]{0,126}[A-Za-z0-9])?$"
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 16384,
+      "pattern": "\\S",
+      "description": "Required non-whitespace text; domain validation also rejects disallowed control characters."
+    },
+    "origin": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["project", "source", "migration_status"],
+      "properties": {
+        "project": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 16384,
+          "pattern": "\\S",
+          "description": "Source project or repository name."
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 16384,
+          "pattern": "\\S",
+          "description": "Original repository path or other source identifier."
+        },
+        "migration_status": {
+          "type": "string",
+          "enum": ["NATIVE", "MIGRATED", "MERGED"]
+        }
+      }
+    }
+  }
+}

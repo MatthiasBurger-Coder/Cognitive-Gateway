@@ -55,6 +55,14 @@ values fail with `ValidationError`.
 
 ## Definitions and their boundaries
 
+Repository-native versioned Agent and Skill documents are defined in
+[`agent-skill-definition-contracts.md`](agent-skill-definition-contracts.md).
+They are strict document envelopes around the `AgentDefinition` and
+`SkillDefinition` values below: schema version and provenance are document
+metadata, while supported semantic fields map through the existing typed
+constructors. They do not add prompts, runtime/provider fields or workflow
+lifecycle semantics to the core model.
+
 These definitions are immutable value objects. Relationship order is retained
 so deterministic resolution can preserve the declared order. Constructors
 validate local rules; `DefinitionCatalog` validates the complete reference
