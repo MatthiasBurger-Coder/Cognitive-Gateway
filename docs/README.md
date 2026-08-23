@@ -33,6 +33,10 @@ See [`catalog-boundaries.md`](catalog-boundaries.md) for the Agent and Skill
 catalog layout, ownership rules, loading APIs, deterministic capability index
 and query behavior, and fail-closed semantics.
 
+See [`registry-inspection-cli.md`](registry-inspection-cli.md) for the CG-03
+read-only registry and capability inspection commands, JSON output and exit
+codes.
+
 See the materialized reusable Agent definitions under [`../catalog/agents/`](../catalog/agents/)
 and the reusable Skill definitions under [`../catalog/skills/`](../catalog/skills/).
 Specialist Agents are normal catalog entries, and all catalog Skill references
