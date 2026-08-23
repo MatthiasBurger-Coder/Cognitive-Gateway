@@ -1,9 +1,9 @@
 {
   "schema_version": 2,
   "kind": "skill",
-  "id": "python-pip-packaging-expert",
-  "name": "python pip packaging expert",
-  "description": "TSW Python packaging",
+  "id": "project-system-architecture",
+  "name": "project system architecture",
+  "description": "Project Linux/WSL and Swarm architecture",
   "owner_agent_id": null,
   "authoritative_sources": [],
   "rules": [],
@@ -12,6 +12,6 @@
   "related_skills": [],
   "required_capability_ids": [],
   "knowledge_queries": [
-    "TSW Python packaging"
+    "Project Linux/WSL and Swarm architecture"
   ]
 }

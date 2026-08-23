@@ -1,10 +1,9 @@
-# Example Skills
+# Example Project skills
 
-Reserved for project-specific skill contracts, dependencies, abstract
-capability requirements and retrieval queries. Skills describe requirements;
-they do not grant permissions by themselves.
+Place only project-specific Skill definition documents here. Reusable skills belong
+in [`../../../catalog/skills/`](../../../catalog/skills/). Infrastructure and
+repository-specific assumptions remain profile-owned.
 
-Skill definitions in this directory use the strict versioned JSON contract in
-[`../../../schemas/skill.schema.json`](../../../schemas/skill.schema.json).
-`gateway-registry::SkillRegistry` loads them deterministically; dependency
-graph integrity is validated separately from document loading.
+The profile contains example Skill definitions. Entries use the v2 structured
+Skill shape; external process instructions and runtime behavior remain outside
+these documents.

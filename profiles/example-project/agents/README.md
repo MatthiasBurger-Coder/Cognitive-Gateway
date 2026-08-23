@@ -1,8 +1,10 @@
-# Example Agents
+# Example Project agents
 
-Reserved for project-specific agent responsibility declarations. Agent definitions belong to the project profile and must not be embedded in the generic gateway core.
+Place only project-specific Agent definition documents here. Reusable
+responsibilities belong in [`../../../catalog/agents/`](../../../catalog/agents/)
+and should be referenced by canonical skill IDs rather than duplicated.
 
-Agent definitions in this directory use the strict versioned JSON contract in
-[`../../../schemas/agent.schema.json`](../../../schemas/agent.schema.json).
-`gateway-registry::AgentRegistry` loads them deterministically; executable
-agent behavior is outside the registry.
+The profile contains four example Agent definitions. Their skills may
+reference both profile-owned and generic catalog definitions. Process
+execution, capability authorization and conditional activation remain outside
+these documents.

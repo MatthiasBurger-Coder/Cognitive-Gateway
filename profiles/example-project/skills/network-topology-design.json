@@ -1,9 +1,9 @@
 {
   "schema_version": 2,
   "kind": "skill",
-  "id": "bdd-expert",
-  "name": "bdd expert",
-  "description": "TSW behavior scenarios",
+  "id": "network-topology-design",
+  "name": "network topology design",
+  "description": "Project VM and Swarm topology",
   "owner_agent_id": null,
   "authoritative_sources": [],
   "rules": [],
@@ -12,6 +12,6 @@
   "related_skills": [],
   "required_capability_ids": [],
   "knowledge_queries": [
-    "TSW behavior scenarios"
+    "Project VM and Swarm topology"
   ]
 }

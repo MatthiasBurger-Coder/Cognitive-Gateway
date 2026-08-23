@@ -78,7 +78,6 @@ fn migrated_skills_preserve_generic_boundaries_and_structured_shape() {
     let registry = Registry::load_catalog(repository_catalog()).expect("catalog should load");
 
     let forbidden_generic_terms = [
-        "tiny-swarm-world",
         "docker",
         "swarm",
         "lxd",
@@ -135,7 +134,7 @@ fn migrated_skills_preserve_generic_boundaries_and_structured_shape() {
             !forbidden_generic_terms
                 .iter()
                 .any(|term| searchable.contains(term)),
-            "TSW-specific term leaked into generic skill {}",
+            "project-specific term leaked into generic skill {}",
             skill.id()
         );
     }

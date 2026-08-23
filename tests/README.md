@@ -48,8 +48,6 @@ loads the repository catalog, validates all Agent/Skill relationships and
 asserts the complete CG-03.07 Agent set and CG-03.08 Skill set, including
 provenance, merge status and generic-boundary checks.
 
-The profile migration fixture at
-../crates/gateway-registry/tests/profile_migration.rs loads the Tiny Swarm
-World profile, asserts the complete CG-03.09 Agent/Skill set, verifies
-provenance and confirms that scope-gated candidates remain excluded. It also
-validates the combined catalog/profile boundary.
+The registry unit tests and the example-project profile fixture cover
+deterministic catalog/profile loading, combined boundary validation, duplicate
+detection and complete Skill reference integrity.

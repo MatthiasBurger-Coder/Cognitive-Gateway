@@ -35,7 +35,7 @@ Cognitive Gateway is not intended to:
 - platform and DevOps engineers;
 - maintainers of project-specific agent/skill/workflow profiles;
 - security and governance reviewers;
-- downstream consumers such as Tiny Swarm World and Forensic Analytics.
+- downstream consumers such as example projects and Forensic Analytics.
 
 ## 1.5 Primary quality goals
 
