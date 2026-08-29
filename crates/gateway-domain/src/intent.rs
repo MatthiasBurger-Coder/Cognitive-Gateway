@@ -97,9 +97,7 @@ impl FromStr for DecimalValue {
         let (negative, unsigned) = value
             .strip_prefix('-')
             .map_or((false, value), |rest| (true, rest));
-        let (whole, fraction) = unsigned
-            .split_once('.')
-            .map_or((unsigned, ""), |parts| parts);
+        let (whole, fraction) = unsigned.split_once('.').unwrap_or((unsigned, ""));
         if whole.is_empty()
             || !whole.chars().all(|character| character.is_ascii_digit())
             || !fraction.chars().all(|character| character.is_ascii_digit())
