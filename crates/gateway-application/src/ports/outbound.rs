@@ -1,6 +1,14 @@
-use gateway_domain::{CapabilityId, KnowledgeQuery, RetrievedKnowledge};
+use gateway_domain::{
+    CapabilityId, ContextCacheEntryId, ContextScopeId, KnowledgeQuery, RetrievedKnowledge,
+};
 
-use crate::context::ProjectContext;
+use crate::{
+    context::ProjectContext,
+    external_context::{
+        CacheCapabilities, CacheEntry, ContextScope, IngestionResult, ScopedObservationBatch,
+        SourceSnapshot,
+    },
+};
 
 /// A retrieval request with an explicit optional consuming-project scope.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -64,4 +72,41 @@ pub trait EvidencePort {
     type Error;
 
     fn record(&self, event: &str) -> Result<(), Self::Error>;
+}
+
+/// Provider-neutral source adapter contract for repository, Git, CI, runtime
+/// or retrieval-style inputs.
+pub trait ScopedContextSource {
+    type Error;
+
+    fn source_snapshot(&self, scope: &ContextScope) -> Result<SourceSnapshot, Self::Error>;
+
+    fn collect(
+        &self,
+        scope: &ContextScope,
+        snapshot: &SourceSnapshot,
+    ) -> Result<ScopedObservationBatch, Self::Error>;
+}
+
+/// Derived, scoped and explicitly invalidatable external-context cache port.
+pub trait CachePort {
+    type Error;
+
+    fn capabilities(&self) -> CacheCapabilities;
+
+    fn put(&self, entry: CacheEntry) -> Result<IngestionResult, Self::Error>;
+
+    fn get(
+        &self,
+        scope: &ContextScopeId,
+        id: &ContextCacheEntryId,
+    ) -> Result<CacheEntry, Self::Error>;
+
+    fn invalidate(
+        &self,
+        scope: &ContextScopeId,
+        id: &ContextCacheEntryId,
+    ) -> Result<bool, Self::Error>;
+
+    fn clear_scope(&self, scope: &ContextScopeId) -> Result<usize, Self::Error>;
 }
