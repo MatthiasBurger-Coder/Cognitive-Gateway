@@ -5,9 +5,9 @@
 The repository may operate in one explicit mode at a time. During stabilization the active mode is:
 
 ```yaml
-operating_mode: HARDENING
+operating_mode: DEVELOPMENT
 execution_profile: FULL_PATH
-feature_freeze: true
+feature_freeze: false
 authority: git
 ```
 

@@ -138,6 +138,99 @@ typed_identifier! {
 }
 
 typed_identifier! {
+    /// Identifies a versioned declarative context.
+    DeclarativeContextId
+}
+
+typed_identifier! {
+    /// Identifies an intent within a declarative context.
+    IntentId
+}
+
+typed_identifier! {
+    /// Identifies a desired state within an intent.
+    DesiredStateId
+}
+
+typed_identifier! {
+    /// Identifies one desired condition.
+    ConditionId
+}
+
+typed_identifier! {
+    /// Identifies an acceptance criterion within a desired state.
+    AcceptanceCriterionId
+}
+
+typed_identifier! {
+    /// Identifies one reported observation.
+    ObservationId
+}
+
+typed_identifier! {
+    /// Identifies one normalized fact derived from an observation.
+    FactId
+}
+
+typed_identifier! {
+    /// Identifies a supporting or challenging evidence record.
+    EvidenceId
+}
+
+typed_identifier! {
+    /// Identifies the source lineage of a declarative record.
+    ProvenanceId
+}
+
+typed_identifier! {
+    /// Identifies a normalized observed-state snapshot.
+    ObservedStateId
+}
+
+/// Short name for the observed-state identity used by later current-state APIs.
+pub type CurrentStateId = ObservedStateId;
+
+typed_identifier! {
+    /// Identifies a derived assessment.
+    AssessmentId
+}
+
+typed_identifier! {
+    /// Identifies the stable rule contract that produced an assessment or risk.
+    AssessmentRuleId
+}
+
+typed_identifier! {
+    /// Identifies a derived risk.
+    RiskId
+}
+
+typed_identifier! {
+    /// Identifies a complete operational situation snapshot.
+    SituationId
+}
+
+typed_identifier! {
+    /// Identifies an explicitly scoped external-context request boundary.
+    ContextScopeId
+}
+
+typed_identifier! {
+    /// Identifies one derived, scoped external-context cache entry.
+    ContextCacheEntryId
+}
+
+typed_identifier! {
+    /// Identifies a source used for evidence or provenance without naming a provider.
+    SourceId
+}
+
+typed_identifier! {
+    /// Identifies a referenced external artifact without embedding its contents.
+    ReferenceId
+}
+
+typed_identifier! {
     /// Identifies an execution runtime without coupling the domain to a
     /// concrete runtime provider.
     ExecutionRuntimeId
@@ -151,9 +244,12 @@ mod tests {
     use std::str::FromStr;
 
     use super::{
-        AgentId, CapabilityConstraint, CapabilityDomain, CapabilityId, CapabilityInputKind,
-        CapabilityOutputKind, CapabilityPrecondition, CapabilityTag, ConstraintId,
-        ExecutionContextId, ExecutionRuntimeId, PolicyId, SkillId, TaskId, WorkflowId,
+        AcceptanceCriterionId, AgentId, AssessmentId, AssessmentRuleId, CapabilityConstraint,
+        CapabilityDomain, CapabilityId, CapabilityInputKind, CapabilityOutputKind,
+        CapabilityPrecondition, CapabilityTag, ConditionId, ConstraintId, ContextCacheEntryId,
+        ContextScopeId, DeclarativeContextId, DesiredStateId, EvidenceId, ExecutionContextId,
+        ExecutionRuntimeId, FactId, IntentId, ObservationId, ObservedStateId, PolicyId,
+        ProvenanceId, ReferenceId, RiskId, SituationId, SkillId, SourceId, TaskId, WorkflowId,
     };
 
     #[test]
@@ -230,5 +326,44 @@ mod tests {
             ExecutionRuntimeId::new("runtime").unwrap().as_str(),
             "runtime"
         );
+        assert_eq!(
+            DeclarativeContextId::new("context").unwrap().as_str(),
+            "context"
+        );
+        assert_eq!(IntentId::new("intent").unwrap().as_str(), "intent");
+        assert_eq!(DesiredStateId::new("desired").unwrap().as_str(), "desired");
+        assert_eq!(ConditionId::new("condition").unwrap().as_str(), "condition");
+        assert_eq!(
+            AcceptanceCriterionId::new("criterion").unwrap().as_str(),
+            "criterion"
+        );
+        assert_eq!(
+            ObservationId::new("observation").unwrap().as_str(),
+            "observation"
+        );
+        assert_eq!(FactId::new("fact").unwrap().as_str(), "fact");
+        assert_eq!(EvidenceId::new("evidence").unwrap().as_str(), "evidence");
+        assert_eq!(
+            ProvenanceId::new("provenance").unwrap().as_str(),
+            "provenance"
+        );
+        assert_eq!(ObservedStateId::new("state").unwrap().as_str(), "state");
+        assert_eq!(
+            AssessmentId::new("assessment").unwrap().as_str(),
+            "assessment"
+        );
+        assert_eq!(RiskId::new("risk").unwrap().as_str(), "risk");
+        assert_eq!(SituationId::new("situation").unwrap().as_str(), "situation");
+        assert_eq!(
+            AssessmentRuleId::new("assessment-rule").unwrap().as_str(),
+            "assessment-rule"
+        );
+        assert_eq!(ContextScopeId::new("scope").unwrap().as_str(), "scope");
+        assert_eq!(
+            ContextCacheEntryId::new("cache-entry").unwrap().as_str(),
+            "cache-entry"
+        );
+        assert_eq!(SourceId::new("source").unwrap().as_str(), "source");
+        assert_eq!(ReferenceId::new("reference").unwrap().as_str(), "reference");
     }
 }

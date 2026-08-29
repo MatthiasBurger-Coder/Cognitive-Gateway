@@ -49,6 +49,16 @@ pub enum ValidationError {
     },
     /// A set of state values violates a cross-field domain invariant.
     InvalidStateCombination { reason: &'static str },
+    /// A declarative value violates the finite CG-06 value contract.
+    InvalidDeclarativeValue { reason: &'static str },
+    /// A declarative condition is malformed or uses incompatible values.
+    InvalidDeclarativeCondition { reason: &'static str },
+    /// A declarative logical expression is malformed or exceeds supported depth.
+    InvalidDeclarativeExpression { reason: &'static str },
+    /// A declarative collection contains the same typed identity more than once.
+    DuplicateDeclarativeIdentity { kind: &'static str, id: String },
+    /// A declarative expression references an unknown typed identity.
+    MissingDeclarativeIdentity { kind: &'static str, id: String },
     /// A descriptor requires at least one relationship in the named field.
     EmptyRelationship { field: &'static str },
     /// A relationship was listed more than once in the named field.
@@ -119,6 +129,21 @@ impl fmt::Display for ValidationError {
             }
             Self::InvalidStateCombination { reason } => {
                 write!(formatter, "invalid state combination: {reason}")
+            }
+            Self::InvalidDeclarativeValue { reason } => {
+                write!(formatter, "invalid declarative value: {reason}")
+            }
+            Self::InvalidDeclarativeCondition { reason } => {
+                write!(formatter, "invalid declarative condition: {reason}")
+            }
+            Self::InvalidDeclarativeExpression { reason } => {
+                write!(formatter, "invalid declarative expression: {reason}")
+            }
+            Self::DuplicateDeclarativeIdentity { kind, id } => {
+                write!(formatter, "duplicate declarative {kind} identity {id:?}")
+            }
+            Self::MissingDeclarativeIdentity { kind, id } => {
+                write!(formatter, "missing declarative {kind} identity {id:?}")
             }
             Self::EmptyRelationship { field } => {
                 write!(formatter, "{field} must contain at least one reference")
@@ -347,6 +372,23 @@ mod tests {
             },
             ValidationError::InvalidStateCombination {
                 reason: "a completed workflow requires a passed gate",
+            },
+            ValidationError::InvalidDeclarativeValue {
+                reason: "set elements must have one scalar type",
+            },
+            ValidationError::InvalidDeclarativeCondition {
+                reason: "operator requires a value",
+            },
+            ValidationError::InvalidDeclarativeExpression {
+                reason: "logical expression must not be empty",
+            },
+            ValidationError::DuplicateDeclarativeIdentity {
+                kind: "condition",
+                id: "condition-1".to_owned(),
+            },
+            ValidationError::MissingDeclarativeIdentity {
+                kind: "condition",
+                id: "missing".to_owned(),
             },
             ValidationError::EmptyRelationship { field: "skill_ids" },
             ValidationError::DuplicateRelationship { field: "skill_ids" },
