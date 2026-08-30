@@ -14,6 +14,7 @@ pub mod intent;
 pub mod normalization;
 pub mod observation;
 pub mod operating_mode;
+pub mod planning;
 pub mod policy;
 pub mod quality;
 pub mod relationships;
@@ -72,11 +73,11 @@ pub use execution_profile::ExecutionProfile;
 pub use identifiers::{
     AcceptanceCriterionId, AgentId, AssessmentId, AssessmentRuleId, CapabilityConstraint,
     CapabilityDomain, CapabilityId, CapabilityInputKind, CapabilityOutputKind,
-    CapabilityPrecondition, CapabilityTag, ConditionId, ConstraintId, ContextCacheEntryId,
-    ContextScopeId, CurrentStateId, DeclarativeContextId, DesiredStateId, EvidenceId,
-    ExecutionContextId, ExecutionRuntimeId, FactId, IntentId, ObservationId, ObservedStateId,
-    PolicyId, ProvenanceId, ReferenceId, RiskId, RuntimeId, SituationId, SkillId, SourceId, TaskId,
-    WorkflowId,
+    CapabilityPrecondition, CapabilityRequirementId, CapabilityTag, ConditionId, ConstraintId,
+    ContextCacheEntryId, ContextScopeId, CurrentStateId, DeclarativeContextId, DeltaId,
+    DeltaItemId, DesiredStateId, EvidenceId, ExecutionContextId, ExecutionRuntimeId, FactId,
+    IntentId, ObservationId, ObservedStateId, PlanId, PlanStepId, PolicyId, ProvenanceId,
+    ReferenceId, RiskId, RuntimeId, SituationId, SkillId, SourceId, TaskId, WorkflowId,
 };
 pub use observation::{
     AssertionPolarity, ContentDigest, Evidence, EvidenceContent, EvidenceKind, EvidenceLink,
@@ -84,6 +85,11 @@ pub use observation::{
     SourceTimestamp,
 };
 pub use operating_mode::OperatingMode;
+pub use planning::{
+    CapabilityRequirement, DECLARATIVE_PLANNING_IR_VERSION, Delta, DeltaBasis, DeltaItem,
+    DeltaKind, LifecycleRequirement, LifecycleRequirementKind, Plan, PlanCondition, PlanStep,
+    PlanStepKind, PlanningIrVersion, RequiredOutcome, RequiredOutcomeKind, RequirementCardinality,
+};
 pub use state::{
     BlockerState, ExecutionState, GateState, WorkflowState, validate_mode_and_profile,
 };

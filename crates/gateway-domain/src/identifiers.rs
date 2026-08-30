@@ -211,6 +211,31 @@ typed_identifier! {
 }
 
 typed_identifier! {
+    /// Identifies a desired-vs-current delta snapshot.
+    DeltaId
+}
+
+typed_identifier! {
+    /// Identifies one item in a desired-vs-current delta.
+    DeltaItemId
+}
+
+typed_identifier! {
+    /// Identifies one abstract capability requirement in a declarative plan.
+    CapabilityRequirementId
+}
+
+typed_identifier! {
+    /// Identifies a declarative plan.
+    PlanId
+}
+
+typed_identifier! {
+    /// Identifies one step in a declarative plan graph.
+    PlanStepId
+}
+
+typed_identifier! {
     /// Identifies an explicitly scoped external-context request boundary.
     ContextScopeId
 }
