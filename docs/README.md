@@ -66,6 +66,10 @@ See [`planning-application.md`](planning-application.md) for the CG-07.09
 stateless application facade, explicit CG-03/CG-06 snapshots and
 provider-neutral output boundary.
 
+See [`planning-end-to-end.md`](planning-end-to-end.md) for the CG-07.10
+end-to-end acceptance proof, reference external-project scenario, negative
+variants and ownership-boundary evidence.
+
 See [`registry-inspection-cli.md`](registry-inspection-cli.md) for the CG-03
 read-only registry and capability inspection commands, JSON output and exit
 codes.
