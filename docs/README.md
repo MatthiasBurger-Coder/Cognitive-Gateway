@@ -45,6 +45,9 @@ See [`declarative-planning.md`](declarative-planning.md) for the CG-07.01
 Delta and declarative Plan IR v1 contracts, typed identities and ownership
 boundaries.
 
+See [`comparison-semantics.md`](comparison-semantics.md) for the CG-07.02
+deterministic DesiredState-to-CurrentState comparison algebra and trace rules.
+
 See [`registry-inspection-cli.md`](registry-inspection-cli.md) for the CG-03
 read-only registry and capability inspection commands, JSON output and exit
 codes.

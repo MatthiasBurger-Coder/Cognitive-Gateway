@@ -3,6 +3,7 @@
 pub mod agent;
 pub mod capability;
 mod cg06_serialization;
+pub mod comparison;
 pub mod constraint;
 pub mod declarative_context;
 pub mod definition_contract;
@@ -31,6 +32,11 @@ pub mod workflow;
 pub use agent::AgentDefinition;
 pub use capability::{Capability, CapabilityClass, CapabilityContract, CapabilityDefinition};
 pub use cg06_serialization::DeclarativeContextSituationDocument;
+pub use comparison::{
+    COMPARISON_SEMANTICS_VERSION, ComparisonOutcome, ComparisonReasonCode, ComparisonResult,
+    ComparisonRules, ComparisonSemanticsVersion, ComparisonTarget, ComparisonTrace,
+    compare_condition, compare_desired_condition, compare_desired_state,
+};
 pub use constraint::{Constraint, ConstraintDefinition, ConstraintKind};
 pub use declarative_context::{
     CurrentState, DECLARATIVE_CONTEXT_IR_VERSION, DeclarativeContext, DeclarativeContextVersion,
