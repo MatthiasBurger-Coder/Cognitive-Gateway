@@ -2,6 +2,7 @@
 
 pub mod agent;
 pub mod capability;
+pub mod capability_requirements;
 mod cg06_serialization;
 pub mod comparison;
 pub mod constraint;
@@ -11,12 +12,18 @@ pub mod definitions;
 pub mod delta;
 pub mod execution_context;
 pub mod execution_profile;
+pub mod explainability;
 pub mod identifiers;
 pub mod intent;
 pub mod normalization;
 pub mod observation;
 pub mod operating_mode;
+mod plan_graph;
+pub mod planner;
 pub mod planning;
+pub mod planning_input;
+pub mod planning_serialization;
+pub mod planning_validation;
 pub mod policy;
 pub mod quality;
 pub mod relationships;
@@ -32,6 +39,12 @@ pub mod workflow;
 
 pub use agent::AgentDefinition;
 pub use capability::{Capability, CapabilityClass, CapabilityContract, CapabilityDefinition};
+pub use capability_requirements::{
+    CAPABILITY_REQUIREMENTS_VERSION, CapabilityBinding, CapabilityDerivation,
+    CapabilityRequirementDerivation, CapabilityRequirementDiagnostic,
+    CapabilityRequirementDiagnosticCode, CapabilityRequirementRules,
+    derive_capability_requirements,
+};
 pub use cg06_serialization::DeclarativeContextSituationDocument;
 pub use comparison::{
     COMPARISON_SEMANTICS_VERSION, ComparisonOutcome, ComparisonReasonCode, ComparisonResult,
@@ -52,6 +65,9 @@ pub use delta::{
     DELTA_DERIVATION_VERSION, DeltaDerivation, DeltaDerivationRules, derive_delta,
     derive_delta_with_comparison, derive_delta_with_rules,
 };
+pub use explainability::{
+    PLAN_EXPLAINABILITY_VERSION, PlanExplanation, PlanExplanationEntry, explain_plan,
+};
 pub use intent::{
     AcceptanceCriterion, ComparisonOperator, ConditionExpression, DecimalValue,
     DeclarativeConstraint, DesiredCondition, DesiredState, DesiredSubject, DesiredValue, Intent,
@@ -60,6 +76,15 @@ pub use intent::{
 pub use normalization::{
     NormalizationDiagnostic, NormalizationInput, NormalizationReasonCode, NormalizedClaim,
     NormalizedStateEntry, StateLineage, StateStatus, normalize_current_state,
+};
+pub use planner::{
+    DETERMINISTIC_PLANNER_VERSION, PlannerDecision, PlannerDiagnostic, PlannerDiagnosticCode,
+    PlannerResult, PlannerRuleCode, PlannerRules, derive_plan, plan, plan_from_capabilities,
+    plan_from_capability_derivation,
+};
+pub use planning_validation::{
+    PLANNING_VALIDATION_VERSION, PlanningValidationDiagnostic, PlanningValidationDiagnosticCode,
+    PlanningValidationReport, validate_plan, validate_planner_result,
 };
 pub use policy::PolicyDefinition;
 pub use quality::{
@@ -87,8 +112,9 @@ pub use identifiers::{
     CapabilityPrecondition, CapabilityRequirementId, CapabilityTag, ConditionId, ConstraintId,
     ContextCacheEntryId, ContextScopeId, CurrentStateId, DeclarativeContextId, DeltaId,
     DeltaItemId, DesiredStateId, EvidenceId, ExecutionContextId, ExecutionRuntimeId, FactId,
-    IntentId, ObservationId, ObservedStateId, PlanId, PlanStepId, PolicyId, ProvenanceId,
-    ReferenceId, RiskId, RuntimeId, SituationId, SkillId, SourceId, TaskId, WorkflowId,
+    IntentId, ObservationId, ObservedStateId, PlanId, PlanStepId, PlanningInputId, PolicyId,
+    ProvenanceId, ReferenceId, RiskId, RuntimeId, SituationId, SkillId, SourceId, TaskId,
+    WorkflowId,
 };
 pub use observation::{
     AssertionPolarity, ContentDigest, Evidence, EvidenceContent, EvidenceKind, EvidenceLink,
@@ -101,6 +127,11 @@ pub use planning::{
     DeltaKind, DeltaReasonCode, LifecycleRequirement, LifecycleRequirementKind, Plan,
     PlanCondition, PlanStep, PlanStepKind, PlanningIrVersion, RequiredOutcome, RequiredOutcomeKind,
     RequirementCardinality,
+};
+pub use planning_input::{
+    FreshnessRequirement, InformationRequirements, PLANNING_INPUT_VERSION, PlanningInput,
+    PlanningInputCompletion, PlanningInputKind, PlanningInputRules, PlanningInputVerification,
+    derive_planning_input, derive_planning_inputs,
 };
 pub use state::{
     BlockerState, ExecutionState, GateState, WorkflowState, validate_mode_and_profile,

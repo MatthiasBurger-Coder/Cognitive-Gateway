@@ -1055,6 +1055,7 @@ pub struct PlanStep {
     dependencies: Vec<PlanStepId>,
     capability_requirements: Vec<CapabilityRequirementId>,
     delta_items: Vec<DeltaItemId>,
+    prerequisites: Vec<PlanCondition>,
     completion: PlanCondition,
     verification: Option<PlanCondition>,
     lifecycle_requirement: Option<LifecycleRequirement>,
@@ -1077,6 +1078,7 @@ impl PlanStep {
             dependencies: Vec::new(),
             capability_requirements: Vec::new(),
             delta_items: Vec::new(),
+            prerequisites: Vec::new(),
             completion,
             verification: None,
             lifecycle_requirement: None,
@@ -1117,6 +1119,21 @@ impl PlanStep {
         sort_unique(&mut delta_items, "plan_step.delta_items")?;
         self.delta_items = delta_items;
         Ok(self)
+    }
+
+    /// Adds canonical declarative prerequisite conditions.
+    pub fn with_prerequisites(
+        mut self,
+        mut prerequisites: Vec<PlanCondition>,
+    ) -> Result<Self, ValidationError> {
+        sort_unique(&mut prerequisites, "plan_step.prerequisites")?;
+        self.prerequisites = prerequisites;
+        Ok(self)
+    }
+
+    /// Adds one declarative prerequisite condition.
+    pub fn with_prerequisite(self, prerequisite: PlanCondition) -> Result<Self, ValidationError> {
+        self.with_prerequisites(vec![prerequisite])
     }
 
     /// Adds a separate verification condition.
@@ -1167,6 +1184,12 @@ impl PlanStep {
     #[must_use]
     pub fn delta_items(&self) -> &[DeltaItemId] {
         &self.delta_items
+    }
+
+    /// Returns prerequisite conditions in canonical order.
+    #[must_use]
+    pub fn prerequisites(&self) -> &[PlanCondition] {
+        &self.prerequisites
     }
 
     /// Returns the completion condition.
@@ -1264,6 +1287,7 @@ impl Plan {
                 }
             }
         }
+        crate::plan_graph::validate_steps(&steps)?;
         Ok(Self {
             version,
             id,
@@ -1320,6 +1344,9 @@ impl Plan {
             });
         }
         for step in &self.steps {
+            for prerequisite in step.prerequisites() {
+                validate_plan_condition(prerequisite, desired_state)?;
+            }
             validate_plan_condition(step.completion(), desired_state)?;
             if let Some(verification) = step.verification() {
                 validate_plan_condition(verification, desired_state)?;
@@ -1362,6 +1389,50 @@ impl Plan {
     #[must_use]
     pub fn steps(&self) -> &[PlanStep] {
         &self.steps
+    }
+
+    /// Returns step identities in deterministic dependency-first order.
+    pub fn topological_order(&self) -> Result<Vec<PlanStepId>, ValidationError> {
+        crate::plan_graph::topological_order(&self.steps)
+    }
+
+    /// Returns steps in deterministic dependency-first order.
+    pub fn topological_steps(&self) -> Result<Vec<&PlanStep>, ValidationError> {
+        let order = self.topological_order()?;
+        Ok(order
+            .iter()
+            .map(|id| {
+                self.steps
+                    .iter()
+                    .find(|step| step.id() == id)
+                    .expect("topological order only contains Plan steps")
+            })
+            .collect())
+    }
+
+    /// Returns antichain layers whose steps have no dependencies on one
+    /// another and can proceed in parallel after prior layers complete.
+    pub fn parallel_layers(&self) -> Result<Vec<Vec<PlanStepId>>, ValidationError> {
+        crate::plan_graph::parallel_layers(&self.steps)
+    }
+
+    /// Returns the currently independent root steps in canonical order.
+    #[must_use]
+    pub fn parallelizable_step_ids(&self) -> Vec<PlanStepId> {
+        self.steps
+            .iter()
+            .filter(|step| step.dependencies().is_empty())
+            .map(|step| step.id().clone())
+            .collect()
+    }
+
+    /// Returns the currently independent root steps.
+    #[must_use]
+    pub fn parallelizable_steps(&self) -> Vec<&PlanStep> {
+        self.steps
+            .iter()
+            .filter(|step| step.dependencies().is_empty())
+            .collect()
     }
 
     /// Returns whether the Plan contains no work.
@@ -2147,6 +2218,7 @@ mod tests {
         assert!(step.dependencies().is_empty());
         assert_eq!(step.capability_requirements(), &[requirement_id]);
         assert_eq!(step.delta_items(), &[delta_item_id]);
+        assert!(step.prerequisites().is_empty());
         assert!(matches!(
             step.completion(),
             PlanCondition::DesiredCondition(_)
@@ -2183,6 +2255,10 @@ mod tests {
         assert_eq!(plan.capability_requirements().len(), 1);
         assert_eq!(plan.steps(), std::slice::from_ref(&step));
         assert!(!plan.is_noop());
+        assert_eq!(plan.topological_order().unwrap(), vec![step_id.clone()]);
+        assert_eq!(plan.parallelizable_step_ids(), vec![step_id.clone()]);
+        assert_eq!(plan.parallelizable_steps()[0].id(), &step_id);
+        assert_eq!(plan.topological_steps().unwrap()[0].id(), &step_id);
         assert!(
             Plan::new(
                 PlanId::new("empty-plan").unwrap(),
@@ -2328,5 +2404,117 @@ mod tests {
             plan.validate_against_desired_state(&wrong_desired_contract),
             Err(ValidationError::InvalidStateCombination { .. })
         ));
+    }
+
+    #[test]
+    fn plan_graph_orders_dependencies_and_rejects_cycles() {
+        let make_step = |id: &str| {
+            PlanStep::new(
+                PlanStepId::new(id).unwrap(),
+                PlanStepKind::Change,
+                outcome(RequiredOutcomeKind::DomainChange),
+                PlanCondition::outcome(outcome(RequiredOutcomeKind::DomainChange)),
+                "graph step",
+            )
+            .unwrap()
+        };
+        let root = make_step("step-root");
+        let independent = make_step("step-independent");
+        let dependent = make_step("step-dependent")
+            .with_dependencies(vec![PlanStepId::new("step-root").unwrap()])
+            .unwrap();
+        let plan = Plan::new(
+            PlanId::new("graph-plan").unwrap(),
+            DesiredStateId::new("desired-1").unwrap(),
+            DeltaId::new("delta-1").unwrap(),
+            Vec::new(),
+            vec![dependent, independent, root],
+        )
+        .unwrap();
+        assert_eq!(
+            plan.topological_order().unwrap(),
+            vec![
+                PlanStepId::new("step-independent").unwrap(),
+                PlanStepId::new("step-root").unwrap(),
+                PlanStepId::new("step-dependent").unwrap(),
+            ]
+        );
+        assert_eq!(
+            plan.parallel_layers().unwrap(),
+            vec![
+                vec![
+                    PlanStepId::new("step-independent").unwrap(),
+                    PlanStepId::new("step-root").unwrap(),
+                ],
+                vec![PlanStepId::new("step-dependent").unwrap()],
+            ]
+        );
+        assert_eq!(
+            plan.parallelizable_step_ids(),
+            vec![
+                PlanStepId::new("step-independent").unwrap(),
+                PlanStepId::new("step-root").unwrap(),
+            ]
+        );
+
+        let cycle_a = make_step("cycle-a")
+            .with_dependencies(vec![PlanStepId::new("cycle-b").unwrap()])
+            .unwrap();
+        let cycle_b = make_step("cycle-b")
+            .with_dependencies(vec![PlanStepId::new("cycle-a").unwrap()])
+            .unwrap();
+        assert!(matches!(
+            Plan::new(
+                PlanId::new("cycle-plan").unwrap(),
+                DesiredStateId::new("desired-1").unwrap(),
+                DeltaId::new("delta-1").unwrap(),
+                Vec::new(),
+                vec![cycle_a, cycle_b],
+            ),
+            Err(ValidationError::CircularRelationship { .. })
+        ));
+    }
+
+    #[test]
+    fn prerequisite_conditions_are_canonical_and_validated() {
+        let (_, condition, ..) = ids();
+        let prerequisite = PlanCondition::desired_condition(condition.clone());
+        let duplicate = PlanStep::new(
+            PlanStepId::new("duplicate-prerequisite").unwrap(),
+            PlanStepKind::Change,
+            outcome(RequiredOutcomeKind::DomainChange),
+            PlanCondition::outcome(outcome(RequiredOutcomeKind::DomainChange)),
+            "duplicate prerequisites",
+        )
+        .unwrap()
+        .with_prerequisites(vec![prerequisite.clone(), prerequisite.clone()]);
+        assert!(matches!(
+            duplicate,
+            Err(ValidationError::DuplicateRelationship {
+                field: "plan_step.prerequisites"
+            })
+        ));
+
+        let step = PlanStep::new(
+            PlanStepId::new("prerequisite-step").unwrap(),
+            PlanStepKind::Change,
+            outcome(RequiredOutcomeKind::DomainChange),
+            PlanCondition::outcome(outcome(RequiredOutcomeKind::DomainChange)),
+            "validated prerequisites",
+        )
+        .unwrap()
+        .with_prerequisite(prerequisite)
+        .unwrap();
+        assert_eq!(step.prerequisites().len(), 1);
+        let plan = Plan::new(
+            PlanId::new("prerequisite-plan").unwrap(),
+            DesiredStateId::new("desired-1").unwrap(),
+            DeltaId::new("delta-1").unwrap(),
+            Vec::new(),
+            vec![step],
+        )
+        .unwrap();
+        let desired = desired_state(&DesiredStateId::new("desired-1").unwrap(), &condition);
+        assert!(plan.validate_against_desired_state(&desired).is_ok());
     }
 }

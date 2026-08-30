@@ -221,6 +221,11 @@ typed_identifier! {
 }
 
 typed_identifier! {
+    /// Identifies one information-resolution input derived from a Delta item.
+    PlanningInputId
+}
+
+typed_identifier! {
     /// Identifies one abstract capability requirement in a declarative plan.
     CapabilityRequirementId
 }

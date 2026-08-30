@@ -13,10 +13,11 @@ CapabilityRequirement[]
 Plan / PlanStep[]
 ```
 
-The v1 domain contracts are implemented in
-`gateway-domain::planning`. They define the data boundary for later
-comparison and planning algorithms; they do not perform comparison, resolve
-capabilities or execute a plan.
+The v1 domain contracts are implemented in `gateway-domain::planning`, with
+the comparison, Delta, information-input and capability-requirement derivation
+layers in their dedicated modules. They define the provider-independent data
+boundary; they do not select concrete executors or execute a plan. See
+[`capability-requirements.md`](capability-requirements.md) for CG-07.05.
 
 ## Ownership
 
@@ -43,7 +44,12 @@ references fail closed. Delta items must reference their owning
 `DesiredState`. A Plan validates capability-requirement references internally
 and can validate Delta-item references through
 `Plan::validate_against_delta`. Plan-step self-dependencies are rejected;
-complete DAG and topological-order semantics are added in CG-07.06.
+complete DAG and deterministic topological-order semantics are implemented in
+CG-07.06. `Plan::topological_order()` exposes dependency-first order,
+`Plan::parallel_layers()` exposes explicit independent antichains and
+`PlanStep::prerequisites()` keeps prerequisite conditions separate from graph
+edges. Cycles, self-dependencies and dangling edges fail closed at Plan
+construction.
 
 ## Semantic records
 
@@ -53,9 +59,11 @@ complete DAG and topological-order semantics are added in CG-07.06.
 provenance and assessment identities without embedding raw evidence.
 
 `CapabilityRequirement` carries a canonical abstract capability identity,
-mandatory/optional cardinality, optional capability preconditions and
-constraints, the originating Delta item and rationale. It has no fields for
-Agents, Skills, ProcessDefinitions, providers or runtime handles.
+mandatory/optional cardinality, capability-contract preconditions and
+constraints, the originating Delta item and rationale. CG-07.05 derives these
+requirements only from explicit outcome bindings and validates the canonical
+contract's abstract safety class. It has no fields for Agents, Skills,
+ProcessDefinitions, providers or runtime handles.
 
 `PlanStep` carries a typed outcome, dependency references, capability
 requirement references, Delta trace references, a completion condition and an
@@ -64,6 +72,12 @@ generic shape such as `VERIFICATION_AFTER_CHANGE` or `EVIDENCE_BEFORE_CHANGE`;
 it is a declarative hint and never selects a concrete process.
 
 An empty Plan is a valid no-op. An explicit `NO_OP` step is also supported for
-callers that need a traceable no-op node. Deterministic comparison and Delta
-classification are implemented in the CG-07.02 and CG-07.03 modules; graph
-cycles and planner rules remain subsequent CG-07 concerns.
+callers that need a traceable no-op node. Deterministic comparison, Delta
+classification, information-resolution inputs and abstract capability
+requirements are implemented in the CG-07.02 through CG-07.05 modules;
+CG-07.06 adds graph validation and ordering, and CG-07.07 adds the deterministic
+rule-based planner. See [`deterministic-planner.md`](deterministic-planner.md)
+for the planner's generic outcome, dependency and diagnostic semantics.
+CG-07.08 adds the fail-closed cross-artifact validation report, canonical JSON
+round-trip and explainability trace. See [`plan-validation.md`](plan-validation.md)
+for the validation and serialization boundary before CG-08 resolution.

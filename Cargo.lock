@@ -52,6 +52,7 @@ version = "0.1.0"
 dependencies = [
  "gateway-domain",
  "gateway-process",
+ "gateway-registry",
  "serde_json",
 ]
 

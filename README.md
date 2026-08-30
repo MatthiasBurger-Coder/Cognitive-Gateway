@@ -90,6 +90,12 @@ The technical architecture is maintained in the repository as the canonical sour
 - [`docs/adr/`](docs/adr/) — Architecture Decision Records
 - [`docs/registry-inspection-cli.md`](docs/registry-inspection-cli.md) — `cg-registry` installation and inspection commands
 - [`docs/process-application-api.md`](docs/process-application-api.md) — Rust process application ports, simulation and explainability
+- [`docs/declarative-planning.md`](docs/declarative-planning.md) — CG-07 declarative planning IR and capability requirements
+- [`docs/plan-graph.md`](docs/plan-graph.md) — CG-07.06 Plan DAG, deterministic order and verification semantics
+- [`docs/deterministic-planner.md`](docs/deterministic-planner.md) — CG-07.07 deterministic rule-based planner and fail-closed diagnostics
+- [`docs/plan-validation.md`](docs/plan-validation.md) — CG-07.08 plan validation, canonical serialization and explainability
+- [`docs/planning-application.md`](docs/planning-application.md) — CG-07.09 declarative planning application APIs and snapshot boundaries
+- [`docs/planning-end-to-end.md`](docs/planning-end-to-end.md) — CG-07.10 end-to-end planning acceptance proof and boundary matrix
 
 The GitHub Wiki is intended for simplified end-user documentation, tutorials and usage guidance. If Wiki content and repository architecture documentation ever conflict, the repository documentation is authoritative.
 

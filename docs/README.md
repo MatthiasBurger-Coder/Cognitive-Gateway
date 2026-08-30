@@ -51,6 +51,25 @@ deterministic DesiredState-to-CurrentState comparison algebra and trace rules.
 See [`delta-derivation.md`](delta-derivation.md) for the CG-07.03 deterministic
 Delta classification, required outcomes, identity and lineage rules.
 
+See [`planning-inputs.md`](planning-inputs.md) for the CG-07.04 information,
+evidence, freshness, conflict and unresolved-input planning semantics.
+
+See [`deterministic-planner.md`](deterministic-planner.md) for the CG-07.07
+rule-based planner, stable decision identities, dependency semantics and
+fail-closed diagnostics.
+
+See [`plan-validation.md`](plan-validation.md) for the CG-07.08 deterministic
+validation, canonical JSON serialization, semantic round-trip and
+DesiredState-to-Plan explainability contract.
+
+See [`planning-application.md`](planning-application.md) for the CG-07.09
+stateless application facade, explicit CG-03/CG-06 snapshots and
+provider-neutral output boundary.
+
+See [`planning-end-to-end.md`](planning-end-to-end.md) for the CG-07.10
+end-to-end acceptance proof, reference external-project scenario, negative
+variants and ownership-boundary evidence.
+
 See [`registry-inspection-cli.md`](registry-inspection-cli.md) for the CG-03
 read-only registry and capability inspection commands, JSON output and exit
 codes.
