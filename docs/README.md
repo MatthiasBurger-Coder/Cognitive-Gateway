@@ -48,6 +48,9 @@ boundaries.
 See [`comparison-semantics.md`](comparison-semantics.md) for the CG-07.02
 deterministic DesiredState-to-CurrentState comparison algebra and trace rules.
 
+See [`delta-derivation.md`](delta-derivation.md) for the CG-07.03 deterministic
+Delta classification, required outcomes, identity and lineage rules.
+
 See [`registry-inspection-cli.md`](registry-inspection-cli.md) for the CG-03
 read-only registry and capability inspection commands, JSON output and exit
 codes.
