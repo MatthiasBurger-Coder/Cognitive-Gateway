@@ -94,6 +94,7 @@ The technical architecture is maintained in the repository as the canonical sour
 - [`docs/plan-graph.md`](docs/plan-graph.md) — CG-07.06 Plan DAG, deterministic order and verification semantics
 - [`docs/deterministic-planner.md`](docs/deterministic-planner.md) — CG-07.07 deterministic rule-based planner and fail-closed diagnostics
 - [`docs/plan-validation.md`](docs/plan-validation.md) — CG-07.08 plan validation, canonical serialization and explainability
+- [`docs/planning-application.md`](docs/planning-application.md) — CG-07.09 declarative planning application APIs and snapshot boundaries
 
 The GitHub Wiki is intended for simplified end-user documentation, tutorials and usage guidance. If Wiki content and repository architecture documentation ever conflict, the repository documentation is authoritative.
 

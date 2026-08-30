@@ -62,6 +62,10 @@ See [`plan-validation.md`](plan-validation.md) for the CG-07.08 deterministic
 validation, canonical JSON serialization, semantic round-trip and
 DesiredState-to-Plan explainability contract.
 
+See [`planning-application.md`](planning-application.md) for the CG-07.09
+stateless application facade, explicit CG-03/CG-06 snapshots and
+provider-neutral output boundary.
+
 See [`registry-inspection-cli.md`](registry-inspection-cli.md) for the CG-03
 read-only registry and capability inspection commands, JSON output and exit
 codes.

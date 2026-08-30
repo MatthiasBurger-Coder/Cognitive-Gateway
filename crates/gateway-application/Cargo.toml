@@ -8,6 +8,7 @@ rust-version.workspace = true
 [dependencies]
 gateway-domain = { path = "../gateway-domain" }
 gateway-process = { path = "../gateway-process" }
+gateway-registry = { path = "../gateway-registry" }
 
 [dev-dependencies]
 serde_json.workspace = true
