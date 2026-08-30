@@ -18,6 +18,7 @@ pub mod normalization;
 pub mod observation;
 pub mod operating_mode;
 mod plan_graph;
+pub mod planner;
 pub mod planning;
 pub mod planning_input;
 pub mod policy;
@@ -69,6 +70,11 @@ pub use intent::{
 pub use normalization::{
     NormalizationDiagnostic, NormalizationInput, NormalizationReasonCode, NormalizedClaim,
     NormalizedStateEntry, StateLineage, StateStatus, normalize_current_state,
+};
+pub use planner::{
+    DETERMINISTIC_PLANNER_VERSION, PlannerDecision, PlannerDiagnostic, PlannerDiagnosticCode,
+    PlannerResult, PlannerRuleCode, PlannerRules, derive_plan, plan, plan_from_capabilities,
+    plan_from_capability_derivation,
 };
 pub use policy::PolicyDefinition;
 pub use quality::{
