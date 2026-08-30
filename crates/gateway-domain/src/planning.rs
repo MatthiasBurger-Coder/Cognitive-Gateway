@@ -142,6 +142,104 @@ impl FromStr for DeltaKind {
     }
 }
 
+/// The stable machine-readable reason attached to one Delta item.
+///
+/// `DeltaKind` classifies the gap at the planning boundary.  This companion
+/// code retains the semantic reason emitted by comparison so diagnostics and
+/// machine consumers are projections of the same result.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Ord, PartialOrd)]
+pub enum DeltaReasonCode {
+    ConditionSatisfied,
+    ValueMismatch,
+    ExplicitViolation,
+    SubjectNotObserved,
+    StateUnknown,
+    StateConflict,
+    MissingEvidence,
+    StaleEvidence,
+    FreshnessUnknown,
+    IncompleteInformation,
+    IncompatibleTypes,
+    UnsupportedOperation,
+    NegatedAssertionNotComparable,
+    MissingState,
+    UnresolvedInput,
+}
+
+impl DeltaReasonCode {
+    /// Returns the stable machine-readable reason name.
+    #[must_use]
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            Self::ConditionSatisfied => "CONDITION_SATISFIED",
+            Self::ValueMismatch => "VALUE_MISMATCH",
+            Self::ExplicitViolation => "EXPLICIT_VIOLATION",
+            Self::SubjectNotObserved => "SUBJECT_NOT_OBSERVED",
+            Self::StateUnknown => "STATE_UNKNOWN",
+            Self::StateConflict => "STATE_CONFLICT",
+            Self::MissingEvidence => "MISSING_EVIDENCE",
+            Self::StaleEvidence => "STALE_EVIDENCE",
+            Self::FreshnessUnknown => "FRESHNESS_UNKNOWN",
+            Self::IncompleteInformation => "INCOMPLETE_INFORMATION",
+            Self::IncompatibleTypes => "INCOMPATIBLE_TYPES",
+            Self::UnsupportedOperation => "UNSUPPORTED_OPERATION",
+            Self::NegatedAssertionNotComparable => "NEGATED_ASSERTION_NOT_COMPARABLE",
+            Self::MissingState => "MISSING_STATE",
+            Self::UnresolvedInput => "UNRESOLVED_INPUT",
+        }
+    }
+}
+
+impl fmt::Display for DeltaReasonCode {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter.write_str(self.as_str())
+    }
+}
+
+impl FromStr for DeltaReasonCode {
+    type Err = ValidationError;
+
+    fn from_str(value: &str) -> Result<Self, Self::Err> {
+        match value {
+            "CONDITION_SATISFIED" => Ok(Self::ConditionSatisfied),
+            "VALUE_MISMATCH" => Ok(Self::ValueMismatch),
+            "EXPLICIT_VIOLATION" => Ok(Self::ExplicitViolation),
+            "SUBJECT_NOT_OBSERVED" => Ok(Self::SubjectNotObserved),
+            "STATE_UNKNOWN" => Ok(Self::StateUnknown),
+            "STATE_CONFLICT" => Ok(Self::StateConflict),
+            "MISSING_EVIDENCE" => Ok(Self::MissingEvidence),
+            "STALE_EVIDENCE" => Ok(Self::StaleEvidence),
+            "FRESHNESS_UNKNOWN" => Ok(Self::FreshnessUnknown),
+            "INCOMPLETE_INFORMATION" => Ok(Self::IncompleteInformation),
+            "INCOMPATIBLE_TYPES" => Ok(Self::IncompatibleTypes),
+            "UNSUPPORTED_OPERATION" => Ok(Self::UnsupportedOperation),
+            "NEGATED_ASSERTION_NOT_COMPARABLE" => Ok(Self::NegatedAssertionNotComparable),
+            "MISSING_STATE" => Ok(Self::MissingState),
+            "UNRESOLVED_INPUT" => Ok(Self::UnresolvedInput),
+            value => Err(ValidationError::UnknownDomainValue {
+                field: "delta_reason_code",
+                value: value.to_owned(),
+            }),
+        }
+    }
+}
+
+impl DeltaReasonCode {
+    const fn from_kind(kind: DeltaKind) -> Self {
+        match kind {
+            DeltaKind::Satisfied => Self::ConditionSatisfied,
+            DeltaKind::UnsatisfiedCondition => Self::ValueMismatch,
+            DeltaKind::Violation => Self::ExplicitViolation,
+            DeltaKind::MissingState => Self::MissingState,
+            DeltaKind::MissingEvidence => Self::MissingEvidence,
+            DeltaKind::UnknownState => Self::StateUnknown,
+            DeltaKind::Conflict => Self::StateConflict,
+            DeltaKind::UnresolvedInput => Self::UnresolvedInput,
+            DeltaKind::UnsupportedComparison => Self::UnsupportedOperation,
+        }
+    }
+}
+
 /// The generic outcome a Delta item or PlanStep requires.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Ord, PartialOrd)]
 pub enum RequiredOutcomeKind {
@@ -379,6 +477,7 @@ pub struct DeltaItem {
     desired_state: DesiredStateId,
     condition: ConditionId,
     kind: DeltaKind,
+    reason: DeltaReasonCode,
     basis: DeltaBasis,
     required_outcome: RequiredOutcome,
     rationale: NonEmptyText,
@@ -395,11 +494,36 @@ impl DeltaItem {
         required_outcome: RequiredOutcome,
         rationale: impl Into<String>,
     ) -> Result<Self, ValidationError> {
+        Self::new_with_reason(
+            id,
+            desired_state,
+            condition,
+            kind,
+            DeltaReasonCode::from_kind(kind),
+            basis,
+            required_outcome,
+            rationale,
+        )
+    }
+
+    /// Creates one traceable Delta item with an explicit semantic reason.
+    #[allow(clippy::too_many_arguments)]
+    pub fn new_with_reason(
+        id: DeltaItemId,
+        desired_state: DesiredStateId,
+        condition: ConditionId,
+        kind: DeltaKind,
+        reason: DeltaReasonCode,
+        basis: DeltaBasis,
+        required_outcome: RequiredOutcome,
+        rationale: impl Into<String>,
+    ) -> Result<Self, ValidationError> {
         Ok(Self {
             id,
             desired_state,
             condition,
             kind,
+            reason,
             basis,
             required_outcome,
             rationale: NonEmptyText::new_for_field(rationale, "delta_item.rationale")?,
@@ -428,6 +552,18 @@ impl DeltaItem {
     #[must_use]
     pub const fn kind(&self) -> DeltaKind {
         self.kind
+    }
+
+    /// Returns the stable semantic reason for this item.
+    #[must_use]
+    pub const fn reason(&self) -> DeltaReasonCode {
+        self.reason
+    }
+
+    /// Returns whether this item represents actionable work.
+    #[must_use]
+    pub const fn is_actionable(&self) -> bool {
+        !matches!(self.kind, DeltaKind::Satisfied)
     }
 
     /// Returns current-state, Situation and evidence lineage.
@@ -548,11 +684,16 @@ impl Delta {
     /// Returns whether this Delta contains no actionable gap.
     #[must_use]
     pub fn is_noop(&self) -> bool {
-        self.items.is_empty()
-            || self
-                .items
-                .iter()
-                .all(|item| item.kind == DeltaKind::Satisfied)
+        self.items.is_empty() || self.items.iter().all(|item| !item.is_actionable())
+    }
+
+    /// Returns only the items that require follow-up work.
+    #[must_use]
+    pub fn actionable_items(&self) -> Vec<&DeltaItem> {
+        self.items
+            .iter()
+            .filter(|item| item.is_actionable())
+            .collect()
     }
 
     /// Returns whether the Delta contains an item with the supplied identity.
@@ -1435,6 +1576,27 @@ mod tests {
         ] {
             assert_eq!(RequiredOutcomeKind::from_str(kind.as_str()).unwrap(), kind);
         }
+        for reason in [
+            DeltaReasonCode::ConditionSatisfied,
+            DeltaReasonCode::ValueMismatch,
+            DeltaReasonCode::ExplicitViolation,
+            DeltaReasonCode::SubjectNotObserved,
+            DeltaReasonCode::StateUnknown,
+            DeltaReasonCode::StateConflict,
+            DeltaReasonCode::MissingEvidence,
+            DeltaReasonCode::StaleEvidence,
+            DeltaReasonCode::FreshnessUnknown,
+            DeltaReasonCode::IncompleteInformation,
+            DeltaReasonCode::IncompatibleTypes,
+            DeltaReasonCode::UnsupportedOperation,
+            DeltaReasonCode::NegatedAssertionNotComparable,
+            DeltaReasonCode::MissingState,
+            DeltaReasonCode::UnresolvedInput,
+        ] {
+            assert_eq!(reason.to_string(), reason.as_str());
+            assert_eq!(DeltaReasonCode::from_str(reason.as_str()).unwrap(), reason);
+        }
+        assert!(DeltaReasonCode::from_str("NOT_A_DELTA_REASON").is_err());
         assert!(matches!(
             PlanStepKind::from_str("provider-specific"),
             Err(ValidationError::UnknownDomainValue {
@@ -1460,6 +1622,8 @@ mod tests {
 
         let delta_item = item(&desired, &condition, &situation, &state);
         assert_eq!(delta_item.condition(), &condition);
+        assert_eq!(delta_item.reason(), DeltaReasonCode::ValueMismatch);
+        assert!(delta_item.is_actionable());
         assert_eq!(delta_item.basis().evidence()[0].as_str(), "evidence-1");
     }
 
@@ -1485,6 +1649,7 @@ mod tests {
         )
         .unwrap();
         assert_eq!(delta.items()[0].id().as_str(), "delta-item-1");
+        assert_eq!(delta.actionable_items().len(), 1);
         assert!(!delta.is_noop());
 
         let noop = Delta::new(
@@ -1495,6 +1660,7 @@ mod tests {
         )
         .unwrap();
         assert!(noop.is_noop());
+        assert!(noop.actionable_items().is_empty());
     }
 
     #[test]

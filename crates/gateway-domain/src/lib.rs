@@ -8,6 +8,7 @@ pub mod constraint;
 pub mod declarative_context;
 pub mod definition_contract;
 pub mod definitions;
+pub mod delta;
 pub mod execution_context;
 pub mod execution_profile;
 pub mod identifiers;
@@ -47,6 +48,10 @@ pub use definition_contract::{
     VersionedAgentDefinition, VersionedSkillDefinition,
 };
 pub use definitions::DefinitionCatalog;
+pub use delta::{
+    DELTA_DERIVATION_VERSION, DeltaDerivation, DeltaDerivationRules, derive_delta,
+    derive_delta_with_comparison, derive_delta_with_rules,
+};
 pub use intent::{
     AcceptanceCriterion, ComparisonOperator, ConditionExpression, DecimalValue,
     DeclarativeConstraint, DesiredCondition, DesiredState, DesiredSubject, DesiredValue, Intent,
@@ -93,8 +98,9 @@ pub use observation::{
 pub use operating_mode::OperatingMode;
 pub use planning::{
     CapabilityRequirement, DECLARATIVE_PLANNING_IR_VERSION, Delta, DeltaBasis, DeltaItem,
-    DeltaKind, LifecycleRequirement, LifecycleRequirementKind, Plan, PlanCondition, PlanStep,
-    PlanStepKind, PlanningIrVersion, RequiredOutcome, RequiredOutcomeKind, RequirementCardinality,
+    DeltaKind, DeltaReasonCode, LifecycleRequirement, LifecycleRequirementKind, Plan,
+    PlanCondition, PlanStep, PlanStepKind, PlanningIrVersion, RequiredOutcome, RequiredOutcomeKind,
+    RequirementCardinality,
 };
 pub use state::{
     BlockerState, ExecutionState, GateState, WorkflowState, validate_mode_and_profile,
