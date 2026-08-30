@@ -54,6 +54,10 @@ Delta classification, required outcomes, identity and lineage rules.
 See [`planning-inputs.md`](planning-inputs.md) for the CG-07.04 information,
 evidence, freshness, conflict and unresolved-input planning semantics.
 
+See [`deterministic-planner.md`](deterministic-planner.md) for the CG-07.07
+rule-based planner, stable decision identities, dependency semantics and
+fail-closed diagnostics.
+
 See [`registry-inspection-cli.md`](registry-inspection-cli.md) for the CG-03
 read-only registry and capability inspection commands, JSON output and exit
 codes.

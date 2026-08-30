@@ -92,6 +92,7 @@ The technical architecture is maintained in the repository as the canonical sour
 - [`docs/process-application-api.md`](docs/process-application-api.md) — Rust process application ports, simulation and explainability
 - [`docs/declarative-planning.md`](docs/declarative-planning.md) — CG-07 declarative planning IR and capability requirements
 - [`docs/plan-graph.md`](docs/plan-graph.md) — CG-07.06 Plan DAG, deterministic order and verification semantics
+- [`docs/deterministic-planner.md`](docs/deterministic-planner.md) — CG-07.07 deterministic rule-based planner and fail-closed diagnostics
 
 The GitHub Wiki is intended for simplified end-user documentation, tutorials and usage guidance. If Wiki content and repository architecture documentation ever conflict, the repository documentation is authoritative.
 

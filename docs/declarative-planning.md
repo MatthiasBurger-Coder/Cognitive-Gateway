@@ -75,5 +75,6 @@ An empty Plan is a valid no-op. An explicit `NO_OP` step is also supported for
 callers that need a traceable no-op node. Deterministic comparison, Delta
 classification, information-resolution inputs and abstract capability
 requirements are implemented in the CG-07.02 through CG-07.05 modules;
-CG-07.06 adds graph validation and ordering while planner policy remains a
-subsequent CG-07 concern.
+CG-07.06 adds graph validation and ordering, and CG-07.07 adds the deterministic
+rule-based planner. See [`deterministic-planner.md`](deterministic-planner.md)
+for the planner's generic outcome, dependency and diagnostic semantics.
