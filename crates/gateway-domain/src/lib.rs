@@ -17,6 +17,7 @@ pub mod intent;
 pub mod normalization;
 pub mod observation;
 pub mod operating_mode;
+mod plan_graph;
 pub mod planning;
 pub mod planning_input;
 pub mod policy;

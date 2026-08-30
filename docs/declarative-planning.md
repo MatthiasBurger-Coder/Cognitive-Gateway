@@ -44,7 +44,12 @@ references fail closed. Delta items must reference their owning
 `DesiredState`. A Plan validates capability-requirement references internally
 and can validate Delta-item references through
 `Plan::validate_against_delta`. Plan-step self-dependencies are rejected;
-complete DAG and topological-order semantics are added in CG-07.06.
+complete DAG and deterministic topological-order semantics are implemented in
+CG-07.06. `Plan::topological_order()` exposes dependency-first order,
+`Plan::parallel_layers()` exposes explicit independent antichains and
+`PlanStep::prerequisites()` keeps prerequisite conditions separate from graph
+edges. Cycles, self-dependencies and dangling edges fail closed at Plan
+construction.
 
 ## Semantic records
 
@@ -69,5 +74,6 @@ it is a declarative hint and never selects a concrete process.
 An empty Plan is a valid no-op. An explicit `NO_OP` step is also supported for
 callers that need a traceable no-op node. Deterministic comparison, Delta
 classification, information-resolution inputs and abstract capability
-requirements are implemented in the CG-07.02 through CG-07.05 modules; graph
-cycles and planner rules remain subsequent CG-07 concerns.
+requirements are implemented in the CG-07.02 through CG-07.05 modules;
+CG-07.06 adds graph validation and ordering while planner policy remains a
+subsequent CG-07 concern.
