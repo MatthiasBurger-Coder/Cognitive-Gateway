@@ -64,6 +64,7 @@ generic shape such as `VERIFICATION_AFTER_CHANGE` or `EVIDENCE_BEFORE_CHANGE`;
 it is a declarative hint and never selects a concrete process.
 
 An empty Plan is a valid no-op. An explicit `NO_OP` step is also supported for
-callers that need a traceable no-op node. Deterministic comparison and Delta
-classification are implemented in the CG-07.02 and CG-07.03 modules; graph
-cycles and planner rules remain subsequent CG-07 concerns.
+callers that need a traceable no-op node. Deterministic comparison, Delta
+classification and information-resolution inputs are implemented in the
+CG-07.02 through CG-07.04 modules; graph cycles and planner rules remain
+subsequent CG-07 concerns.
