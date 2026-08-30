@@ -12,6 +12,7 @@ pub mod definitions;
 pub mod delta;
 pub mod execution_context;
 pub mod execution_profile;
+pub mod explainability;
 pub mod identifiers;
 pub mod intent;
 pub mod normalization;
@@ -21,6 +22,8 @@ mod plan_graph;
 pub mod planner;
 pub mod planning;
 pub mod planning_input;
+pub mod planning_serialization;
+pub mod planning_validation;
 pub mod policy;
 pub mod quality;
 pub mod relationships;
@@ -62,6 +65,9 @@ pub use delta::{
     DELTA_DERIVATION_VERSION, DeltaDerivation, DeltaDerivationRules, derive_delta,
     derive_delta_with_comparison, derive_delta_with_rules,
 };
+pub use explainability::{
+    PLAN_EXPLAINABILITY_VERSION, PlanExplanation, PlanExplanationEntry, explain_plan,
+};
 pub use intent::{
     AcceptanceCriterion, ComparisonOperator, ConditionExpression, DecimalValue,
     DeclarativeConstraint, DesiredCondition, DesiredState, DesiredSubject, DesiredValue, Intent,
@@ -75,6 +81,10 @@ pub use planner::{
     DETERMINISTIC_PLANNER_VERSION, PlannerDecision, PlannerDiagnostic, PlannerDiagnosticCode,
     PlannerResult, PlannerRuleCode, PlannerRules, derive_plan, plan, plan_from_capabilities,
     plan_from_capability_derivation,
+};
+pub use planning_validation::{
+    PLANNING_VALIDATION_VERSION, PlanningValidationDiagnostic, PlanningValidationDiagnosticCode,
+    PlanningValidationReport, validate_plan, validate_planner_result,
 };
 pub use policy::PolicyDefinition;
 pub use quality::{

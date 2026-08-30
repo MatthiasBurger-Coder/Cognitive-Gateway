@@ -78,3 +78,6 @@ requirements are implemented in the CG-07.02 through CG-07.05 modules;
 CG-07.06 adds graph validation and ordering, and CG-07.07 adds the deterministic
 rule-based planner. See [`deterministic-planner.md`](deterministic-planner.md)
 for the planner's generic outcome, dependency and diagnostic semantics.
+CG-07.08 adds the fail-closed cross-artifact validation report, canonical JSON
+round-trip and explainability trace. See [`plan-validation.md`](plan-validation.md)
+for the validation and serialization boundary before CG-08 resolution.

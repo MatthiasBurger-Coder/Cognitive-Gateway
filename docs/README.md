@@ -58,6 +58,10 @@ See [`deterministic-planner.md`](deterministic-planner.md) for the CG-07.07
 rule-based planner, stable decision identities, dependency semantics and
 fail-closed diagnostics.
 
+See [`plan-validation.md`](plan-validation.md) for the CG-07.08 deterministic
+validation, canonical JSON serialization, semantic round-trip and
+DesiredState-to-Plan explainability contract.
+
 See [`registry-inspection-cli.md`](registry-inspection-cli.md) for the CG-03
 read-only registry and capability inspection commands, JSON output and exit
 codes.
