@@ -90,6 +90,7 @@ The technical architecture is maintained in the repository as the canonical sour
 - [`docs/adr/`](docs/adr/) — Architecture Decision Records
 - [`docs/registry-inspection-cli.md`](docs/registry-inspection-cli.md) — `cg-registry` installation and inspection commands
 - [`docs/process-application-api.md`](docs/process-application-api.md) — Rust process application ports, simulation and explainability
+- [`docs/declarative-planning.md`](docs/declarative-planning.md) — CG-07 declarative planning IR and capability requirements
 
 The GitHub Wiki is intended for simplified end-user documentation, tutorials and usage guidance. If Wiki content and repository architecture documentation ever conflict, the repository documentation is authoritative.
 

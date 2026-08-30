@@ -13,10 +13,11 @@ CapabilityRequirement[]
 Plan / PlanStep[]
 ```
 
-The v1 domain contracts are implemented in
-`gateway-domain::planning`. They define the data boundary for later
-comparison and planning algorithms; they do not perform comparison, resolve
-capabilities or execute a plan.
+The v1 domain contracts are implemented in `gateway-domain::planning`, with
+the comparison, Delta, information-input and capability-requirement derivation
+layers in their dedicated modules. They define the provider-independent data
+boundary; they do not select concrete executors or execute a plan. See
+[`capability-requirements.md`](capability-requirements.md) for CG-07.05.
 
 ## Ownership
 
@@ -53,9 +54,11 @@ complete DAG and topological-order semantics are added in CG-07.06.
 provenance and assessment identities without embedding raw evidence.
 
 `CapabilityRequirement` carries a canonical abstract capability identity,
-mandatory/optional cardinality, optional capability preconditions and
-constraints, the originating Delta item and rationale. It has no fields for
-Agents, Skills, ProcessDefinitions, providers or runtime handles.
+mandatory/optional cardinality, capability-contract preconditions and
+constraints, the originating Delta item and rationale. CG-07.05 derives these
+requirements only from explicit outcome bindings and validates the canonical
+contract's abstract safety class. It has no fields for Agents, Skills,
+ProcessDefinitions, providers or runtime handles.
 
 `PlanStep` carries a typed outcome, dependency references, capability
 requirement references, Delta trace references, a completion condition and an
@@ -65,6 +68,6 @@ it is a declarative hint and never selects a concrete process.
 
 An empty Plan is a valid no-op. An explicit `NO_OP` step is also supported for
 callers that need a traceable no-op node. Deterministic comparison, Delta
-classification and information-resolution inputs are implemented in the
-CG-07.02 through CG-07.04 modules; graph cycles and planner rules remain
-subsequent CG-07 concerns.
+classification, information-resolution inputs and abstract capability
+requirements are implemented in the CG-07.02 through CG-07.05 modules; graph
+cycles and planner rules remain subsequent CG-07 concerns.

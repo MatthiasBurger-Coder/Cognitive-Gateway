@@ -2,6 +2,7 @@
 
 pub mod agent;
 pub mod capability;
+pub mod capability_requirements;
 mod cg06_serialization;
 pub mod comparison;
 pub mod constraint;
@@ -33,6 +34,12 @@ pub mod workflow;
 
 pub use agent::AgentDefinition;
 pub use capability::{Capability, CapabilityClass, CapabilityContract, CapabilityDefinition};
+pub use capability_requirements::{
+    CAPABILITY_REQUIREMENTS_VERSION, CapabilityBinding, CapabilityDerivation,
+    CapabilityRequirementDerivation, CapabilityRequirementDiagnostic,
+    CapabilityRequirementDiagnosticCode, CapabilityRequirementRules,
+    derive_capability_requirements,
+};
 pub use cg06_serialization::DeclarativeContextSituationDocument;
 pub use comparison::{
     COMPARISON_SEMANTICS_VERSION, ComparisonOutcome, ComparisonReasonCode, ComparisonResult,
