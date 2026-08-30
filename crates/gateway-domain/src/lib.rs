@@ -17,6 +17,7 @@ pub mod normalization;
 pub mod observation;
 pub mod operating_mode;
 pub mod planning;
+pub mod planning_input;
 pub mod policy;
 pub mod quality;
 pub mod relationships;
@@ -87,8 +88,9 @@ pub use identifiers::{
     CapabilityPrecondition, CapabilityRequirementId, CapabilityTag, ConditionId, ConstraintId,
     ContextCacheEntryId, ContextScopeId, CurrentStateId, DeclarativeContextId, DeltaId,
     DeltaItemId, DesiredStateId, EvidenceId, ExecutionContextId, ExecutionRuntimeId, FactId,
-    IntentId, ObservationId, ObservedStateId, PlanId, PlanStepId, PolicyId, ProvenanceId,
-    ReferenceId, RiskId, RuntimeId, SituationId, SkillId, SourceId, TaskId, WorkflowId,
+    IntentId, ObservationId, ObservedStateId, PlanId, PlanStepId, PlanningInputId, PolicyId,
+    ProvenanceId, ReferenceId, RiskId, RuntimeId, SituationId, SkillId, SourceId, TaskId,
+    WorkflowId,
 };
 pub use observation::{
     AssertionPolarity, ContentDigest, Evidence, EvidenceContent, EvidenceKind, EvidenceLink,
@@ -101,6 +103,11 @@ pub use planning::{
     DeltaKind, DeltaReasonCode, LifecycleRequirement, LifecycleRequirementKind, Plan,
     PlanCondition, PlanStep, PlanStepKind, PlanningIrVersion, RequiredOutcome, RequiredOutcomeKind,
     RequirementCardinality,
+};
+pub use planning_input::{
+    FreshnessRequirement, InformationRequirements, PLANNING_INPUT_VERSION, PlanningInput,
+    PlanningInputCompletion, PlanningInputKind, PlanningInputRules, PlanningInputVerification,
+    derive_planning_input, derive_planning_inputs,
 };
 pub use state::{
     BlockerState, ExecutionState, GateState, WorkflowState, validate_mode_and_profile,
