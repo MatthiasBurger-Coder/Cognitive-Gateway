@@ -95,6 +95,7 @@ The technical architecture is maintained in the repository as the canonical sour
 - [`docs/deterministic-planner.md`](docs/deterministic-planner.md) — CG-07.07 deterministic rule-based planner and fail-closed diagnostics
 - [`docs/plan-validation.md`](docs/plan-validation.md) — CG-07.08 plan validation, canonical serialization and explainability
 - [`docs/planning-application.md`](docs/planning-application.md) — CG-07.09 declarative planning application APIs and snapshot boundaries
+- [`docs/planning-end-to-end.md`](docs/planning-end-to-end.md) — CG-07.10 end-to-end planning acceptance proof and boundary matrix
 
 The GitHub Wiki is intended for simplified end-user documentation, tutorials and usage guidance. If Wiki content and repository architecture documentation ever conflict, the repository documentation is authoritative.
 
