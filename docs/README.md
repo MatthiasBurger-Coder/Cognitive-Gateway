@@ -41,6 +41,10 @@ See [`declarative-context-situation.md`](declarative-context-situation.md)
 for the CG-06.01 declarative context and situation IR v1 foundations,
 typed identities, aggregate ownership and versioning rules.
 
+See [`declarative-planning.md`](declarative-planning.md) for the CG-07.01
+Delta and declarative Plan IR v1 contracts, typed identities and ownership
+boundaries.
+
 See [`registry-inspection-cli.md`](registry-inspection-cli.md) for the CG-03
 read-only registry and capability inspection commands, JSON output and exit
 codes.
