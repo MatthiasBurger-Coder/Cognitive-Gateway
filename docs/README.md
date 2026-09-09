@@ -20,6 +20,8 @@ See [`resolution-candidates.md`](resolution-candidates.md) for exact typed
 provider matching and the distinction between metadata and applicability.
 See [`resolution-process.md`](resolution-process.md) for optional/pinned
 Process templates, explicit lifecycle mappings and activity contracts.
+See [`resolution-agents.md`](resolution-agents.md) for canonical Agent
+responsibility alternatives and primary/participating role constraints.
 
 See [`domain-model.md`](domain-model.md) for the consolidated CG-02 domain
 contract: typed primitives, definitions and relationships, execution state,

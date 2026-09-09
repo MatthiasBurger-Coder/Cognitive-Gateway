@@ -5,6 +5,7 @@ pub mod external_context;
 pub mod planning_application;
 pub mod ports;
 pub mod resolution;
+pub mod resolution_agents;
 pub mod resolution_candidates;
 pub mod resolution_process;
 pub mod resolution_snapshot;
