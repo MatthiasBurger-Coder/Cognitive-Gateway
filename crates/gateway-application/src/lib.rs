@@ -4,6 +4,7 @@ pub mod context;
 pub mod external_context;
 pub mod planning_application;
 pub mod ports;
+pub mod resolution;
 pub mod situation_application;
 
 pub use external_context::{
