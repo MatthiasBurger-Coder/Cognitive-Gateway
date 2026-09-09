@@ -14,6 +14,8 @@ See [`adr/`](adr/) for accepted architecture decisions.
 
 See [`resolution-contract.md`](resolution-contract.md) for CG-08 resolution
 result semantics, immutable basis references and downstream ownership.
+See [`resolution-snapshots.md`](resolution-snapshots.md) for coherent read-only
+capture, scope isolation, canonical provenance and basis revalidation.
 
 See [`domain-model.md`](domain-model.md) for the consolidated CG-02 domain
 contract: typed primitives, definitions and relationships, execution state,
