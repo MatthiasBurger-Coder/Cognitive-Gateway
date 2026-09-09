@@ -131,6 +131,9 @@ for the neutral CG-07 integration, negative-case matrix, per-file coverage gate
 and the unresolved CG-02/CG-10 projection blocker. Passing resolver tests do not
 constitute final parent acceptance.
 
+The approved CG-02 v2 handoff extension is documented in
+[ExecutionContextIR v2](execution-context-ir-v2.md).
+
 ## Current documented decisions
 
 1. Rust core + Python cognitive services.

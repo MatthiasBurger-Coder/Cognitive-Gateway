@@ -11,6 +11,7 @@ pub mod definition_contract;
 pub mod definitions;
 pub mod delta;
 pub mod execution_context;
+pub mod execution_context_v2;
 pub mod execution_profile;
 pub mod explainability;
 pub mod identifiers;
@@ -105,6 +106,9 @@ pub use skill::SkillDefinition;
 pub use workflow::WorkflowDefinition;
 
 pub use execution_context::{ExecutionContext, ExecutionContextIR, ExecutionContextIr};
+pub use execution_context_v2::{
+    ExecutionContextIRV2, ExecutionProjectionIssue, ExecutionProjectionStatus,
+};
 pub use execution_profile::ExecutionProfile;
 pub use identifiers::{
     AcceptanceCriterionId, AgentId, AssessmentId, AssessmentRuleId, CapabilityConstraint,
