@@ -542,7 +542,7 @@ fn real_catalog_no_match_and_negative_resolution_variants_remain_honest() {
     );
     r.version = SchemaVersion::new(2, 0).unwrap();
     assert!(app.resolve_plan(&input, &r).is_err());
-    // Reuse a separate synthetic fixture to prove dishonest source suggestions never add providers.
+    // A preferred provider with a missing nested contract cannot beat a complete fallback.
     let mut helper = composition::fixture();
     composition::edit_skill(
         &mut helper,
