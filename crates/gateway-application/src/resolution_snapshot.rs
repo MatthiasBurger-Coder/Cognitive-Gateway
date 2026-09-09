@@ -12,7 +12,7 @@ use crate::{
     resolution::{ContentFingerprint, RequirementAlternatives, ResolutionBasis, ResolutionRequest},
 };
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum SnapshotError {
     InputUnavailable,
     UnsupportedVersion,
@@ -20,6 +20,11 @@ pub enum SnapshotError {
     InvalidPlan,
     SituationMismatch,
     InvalidCatalog,
+    MissingSkillDependency {
+        skill: gateway_domain::SkillId,
+        dependency: gateway_domain::SkillId,
+    },
+    SkillCycle(Vec<gateway_domain::SkillId>),
     MixedIndex,
     MissingProcessDefinition,
     InvalidProcess,
@@ -113,7 +118,20 @@ impl ResolutionSnapshot {
         let rebuilt = input
             .registry
             .capability_index()
-            .map_err(|_| SnapshotError::InvalidCatalog)?;
+            .map_err(|error| match error {
+                gateway_registry::RegistryIntegrityError::MissingSkillDependency {
+                    skill_id,
+                    dependency_id,
+                    ..
+                } => SnapshotError::MissingSkillDependency {
+                    skill: skill_id,
+                    dependency: dependency_id,
+                },
+                gateway_registry::RegistryIntegrityError::CircularSkillDependency {
+                    cycle, ..
+                } => SnapshotError::SkillCycle(cycle),
+                _ => SnapshotError::InvalidCatalog,
+            })?;
         if input.index != rebuilt {
             return Err(SnapshotError::MixedIndex);
         }
