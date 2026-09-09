@@ -18,6 +18,8 @@ See [`resolution-snapshots.md`](resolution-snapshots.md) for coherent read-only
 capture, scope isolation, canonical provenance and basis revalidation.
 See [`resolution-candidates.md`](resolution-candidates.md) for exact typed
 provider matching and the distinction between metadata and applicability.
+See [`resolution-process.md`](resolution-process.md) for optional/pinned
+Process templates, explicit lifecycle mappings and activity contracts.
 
 See [`domain-model.md`](domain-model.md) for the consolidated CG-02 domain
 contract: typed primitives, definitions and relationships, execution state,
