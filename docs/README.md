@@ -106,6 +106,9 @@ use canonical IDs from the same built-in catalog.
 
 ## Documentation Policy
 
+See [resolution explainability](resolution-explainability.md) for CG-08.09 typed
+trace graphs, rule fingerprints, consistent projections and privacy boundaries.
+
 See [whole-binding composition](resolution-composition.md) for CG-08.08 bounded
 search, explicit ranking, ambiguity and partial-result semantics.
 

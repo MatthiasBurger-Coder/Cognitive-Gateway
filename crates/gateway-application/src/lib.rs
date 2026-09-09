@@ -1,5 +1,8 @@
 #![forbid(unsafe_code)]
 
+#[cfg(test)]
+extern crate self as gateway_application;
+
 pub mod context;
 pub mod external_context;
 pub mod planning_application;
@@ -9,6 +12,8 @@ pub mod resolution_agents;
 pub mod resolution_applicability;
 pub mod resolution_candidates;
 pub mod resolution_composition;
+mod resolution_encoding;
+pub mod resolution_explain;
 pub mod resolution_process;
 pub mod resolution_skills;
 pub mod resolution_snapshot;

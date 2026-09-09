@@ -10,8 +10,7 @@ gateway-domain = { path = "../gateway-domain" }
 gateway-process = { path = "../gateway-process" }
 gateway-registry = { path = "../gateway-registry" }
 sha2.workspace = true
-
-[dev-dependencies]
+serde.workspace = true
 serde_json.workspace = true
 
 [lints]
