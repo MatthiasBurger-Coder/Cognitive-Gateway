@@ -106,6 +106,9 @@ use canonical IDs from the same built-in catalog.
 
 ## Documentation Policy
 
+See [resolution applicability](resolution-applicability.md) for CG-08.07 readiness,
+completion-evidence and process authority boundaries.
+
 - Repository documentation is the technical source of truth.
 - GitHub Wiki is intended for simplified end-user documentation, tutorials and operational guidance.
 - Architectural or governance changes must update repository documentation in the same development flow as the corresponding code/configuration change.
