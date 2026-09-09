@@ -12,8 +12,8 @@ pub struct ContextCompiler;
 /// Version-aware CG-10 handoff. This boundary does not execute or authorize.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ContextHandoff {
-    V1(ExecutionContextIR),
-    V2(ExecutionContextIRV2),
+    V1(Box<ExecutionContextIR>),
+    V2(Box<ExecutionContextIRV2>),
 }
 
 impl ContextCompiler {
@@ -24,6 +24,13 @@ impl ContextCompiler {
             ContextHandoff::V2(context) => context.validate().map_err(|e| e.to_string())?,
         }
         Ok(handoff)
+    }
+
+    /// Adapts only an executable v2 envelope after strict revalidation.
+    pub fn adapt_executable_v2(
+        handoff: ExecutionContextIRV2,
+    ) -> Result<ExecutionContextIR, String> {
+        handoff.into_executable_v1().map_err(|e| e.to_string())
     }
 
     #[must_use]
