@@ -54,6 +54,7 @@ dependencies = [
  "gateway-process",
  "gateway-registry",
  "serde_json",
+ "sha2",
 ]
 
 [[package]]

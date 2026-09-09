@@ -12,6 +12,9 @@ See [`adr/`](adr/) for accepted architecture decisions.
 
 ## Core domain contract
 
+See [`resolution-contract.md`](resolution-contract.md) for CG-08 resolution
+result semantics, immutable basis references and downstream ownership.
+
 See [`domain-model.md`](domain-model.md) for the consolidated CG-02 domain
 contract: typed primitives, definitions and relationships, execution state,
 capabilities, constraints and the provider-independent architecture boundary.
