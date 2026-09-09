@@ -485,7 +485,7 @@ fn candidate_code(o: crate::resolution_candidates::CandidateOutcome) -> &'static
         Incompatible => "INCOMPATIBLE_CONTRACT",
     }
 }
-fn process_code(o: crate::resolution_process::ProcessSelectionOutcome) -> &'static str {
+pub(crate) fn process_code(o: crate::resolution_process::ProcessSelectionOutcome) -> &'static str {
     use crate::resolution_process::ProcessSelectionOutcome::*;
     match o {
         NoTemplate => "NO_TEMPLATE_REQUIRED",
@@ -496,7 +496,9 @@ fn process_code(o: crate::resolution_process::ProcessSelectionOutcome) -> &'stat
         Unsupported => "UNSUPPORTED_PROCESS",
     }
 }
-fn process_rejection(r: crate::resolution_process::ProcessRejectionReason) -> &'static str {
+pub(crate) fn process_rejection(
+    r: crate::resolution_process::ProcessRejectionReason,
+) -> &'static str {
     use crate::resolution_process::ProcessRejectionReason::*;
     match r {
         DefinitionConstraint => "DEFINITION_CONSTRAINT",
@@ -505,7 +507,7 @@ fn process_rejection(r: crate::resolution_process::ProcessRejectionReason) -> &'
         UnsupportedLifecycle => "UNSUPPORTED_LIFECYCLE",
     }
 }
-fn diagnostic(d: &CompositionDiagnostic) -> (&'static str, SourceKind, String, Value) {
+pub(crate) fn diagnostic(d: &CompositionDiagnostic) -> (&'static str, SourceKind, String, Value) {
     use CompositionDiagnostic::*;
     let empty = || (SourceKind::Diagnostic, "resolution".to_owned(), json!({}));
     match d {

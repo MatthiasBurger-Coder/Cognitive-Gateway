@@ -10,6 +10,7 @@ pub mod ports;
 pub mod resolution;
 pub mod resolution_agents;
 pub mod resolution_applicability;
+pub mod resolution_artifact;
 pub mod resolution_candidates;
 pub mod resolution_composition;
 mod resolution_encoding;
