@@ -207,17 +207,21 @@ pub fn compose_resolution(
     for process in contexts {
         let mut per_step = vec![];
         for (step, output) in snapshot.request().plan().steps().iter().zip(&mut steps) {
-            let activities: Vec<_> = process.map_or_else(
-                || vec![None],
-                |p| {
-                    p.activities
-                        .get(step.id())
-                        .into_iter()
-                        .flatten()
-                        .map(Some)
-                        .collect()
-                },
-            );
+            let activities: Vec<_> = if step.kind() == PlanStepKind::NoOp {
+                vec![None]
+            } else {
+                process.map_or_else(
+                    || vec![None],
+                    |p| {
+                        p.activities
+                            .get(step.id())
+                            .into_iter()
+                            .flatten()
+                            .map(Some)
+                            .collect()
+                    },
+                )
+            };
             let mut choices = vec![];
             for activity in activities {
                 if !budget.tick() {

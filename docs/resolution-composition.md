@@ -72,5 +72,5 @@ $env:CARGO_TARGET_DIR='D:\Projects\Cognitive-Gateway\target\cg08'
 cargo llvm-cov -p gateway-application --all-targets --json --output-path target/cg08-coverage.json
 ```
 
-New production module: **645/656 lines, 98.32%**. Workspace tests, formatting,
+After the CG-08.11 active-process/no-op regression fix: **650/658 lines, 98.78%**. Workspace tests, formatting,
 Clippy with warnings denied and architecture guard pass.

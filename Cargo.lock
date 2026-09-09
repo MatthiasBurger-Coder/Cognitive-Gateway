@@ -51,6 +51,7 @@ name = "gateway-application"
 version = "0.1.0"
 dependencies = [
  "gateway-domain",
+ "gateway-policy",
  "gateway-process",
  "gateway-registry",
  "serde",

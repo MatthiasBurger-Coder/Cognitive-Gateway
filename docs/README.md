@@ -106,6 +106,9 @@ use canonical IDs from the same built-in catalog.
 
 ## Documentation Policy
 
+See [resolution application API](resolution-application-api.md) for CG-08.11 policy
+handoff, every CG-02 v1 field mapping and open owner decision CG08-PROJECTION-01.
+
 See [resolution artifacts](resolution-artifacts.md) for CG-08.10 canonical
 serialization, bounded strict parsing and independent replay validation.
 
