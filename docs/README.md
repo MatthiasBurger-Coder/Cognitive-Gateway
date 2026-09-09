@@ -106,6 +106,9 @@ use canonical IDs from the same built-in catalog.
 
 ## Documentation Policy
 
+See [whole-binding composition](resolution-composition.md) for CG-08.08 bounded
+search, explicit ranking, ambiguity and partial-result semantics.
+
 See [resolution applicability](resolution-applicability.md) for CG-08.07 readiness,
 completion-evidence and process authority boundaries.
 
