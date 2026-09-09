@@ -106,6 +106,9 @@ use canonical IDs from the same built-in catalog.
 
 ## Documentation Policy
 
+See [resolution artifacts](resolution-artifacts.md) for CG-08.10 canonical
+serialization, bounded strict parsing and independent replay validation.
+
 See [resolution explainability](resolution-explainability.md) for CG-08.09 typed
 trace graphs, rule fingerprints, consistent projections and privacy boundaries.
 
