@@ -28,3 +28,7 @@ QA evidence is in `crates/gateway-domain/tests/execution_context_v2.rs` and
 the CG-08 application end-to-end suite. The tests prove round-trip stability,
 non-executable multi-Agent retention, required executable fields, wrong-version
 rejection and strict unknown-field handling.
+
+The CG-10 `ContextCompiler::inspect_handoff` boundary accepts both v1 and v2
+without downgrading v2. A v2 handoff remains a typed record; only a separately
+validated executable projection may be adapted to a runtime context.
