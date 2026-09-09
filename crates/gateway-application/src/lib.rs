@@ -8,6 +8,7 @@ pub mod resolution;
 pub mod resolution_agents;
 pub mod resolution_candidates;
 pub mod resolution_process;
+pub mod resolution_skills;
 pub mod resolution_snapshot;
 pub mod situation_application;
 

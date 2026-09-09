@@ -56,6 +56,8 @@ scope mismatch, invalid Plan, Situation mismatch, invalid catalog, mixed index,
 missing Process definition, invalid Process, stale revision, inconsistent
 Process projection, and invalid resolution request. They contain no raw
 project/evidence data. Only v1 input/rule versions are accepted.
+CG-08.06 additionally preserves CG-03 missing Skill dependency and Skill cycle
+identities as typed errors, without including raw source paths or context.
 
 `cargo test -p gateway-application --test resolution_snapshot` proves capture
 count, isolation, index equivalence under reordered documents, mixed indices,
