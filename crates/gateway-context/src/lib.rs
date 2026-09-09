@@ -26,6 +26,13 @@ impl ContextCompiler {
         Ok(handoff)
     }
 
+    /// Adapts only an executable v2 envelope after strict revalidation.
+    pub fn adapt_executable_v2(
+        handoff: ExecutionContextIRV2,
+    ) -> Result<ExecutionContextIR, String> {
+        handoff.into_executable_v1().map_err(|e| e.to_string())
+    }
+
     #[must_use]
     pub fn compile(
         task: TaskDescriptor,

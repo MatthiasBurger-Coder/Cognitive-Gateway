@@ -6,7 +6,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::ValidationError;
+use crate::{ExecutionContextIR, ValidationError};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
@@ -59,6 +59,7 @@ pub struct ExecutionContextIRV2 {
     pub resolution_basis: String,
     pub status: ExecutionProjectionStatus,
     pub issues: Vec<ExecutionProjectionIssue>,
+    pub executable_v1: Option<ExecutionContextIR>,
 }
 
 impl ExecutionContextIRV2 {
@@ -85,6 +86,7 @@ impl ExecutionContextIRV2 {
             resolution_basis: resolution_basis.into(),
             status,
             issues: Vec::new(),
+            executable_v1: None,
         };
         context.validate()?;
         Ok(context)
@@ -121,6 +123,15 @@ impl ExecutionContextIRV2 {
                     reason: "executable v2 handoff cannot carry incompatibility issues",
                 });
             }
+            if self.executable_v1.is_none() {
+                return Err(ValidationError::InvalidStateCombination {
+                    reason: "executable v2 handoff requires a validated v1 context",
+                });
+            }
+        } else if self.executable_v1.is_some() {
+            return Err(ValidationError::InvalidStateCombination {
+                reason: "non-executable v2 handoff cannot carry an executable v1 context",
+            });
         }
         if matches!(self.status, ExecutionProjectionStatus::EmptySkills)
             && !self.skill_ids.is_empty()
@@ -130,6 +141,56 @@ impl ExecutionContextIRV2 {
             });
         }
         Ok(())
+    }
+
+    pub fn from_executable_v1(
+        id: impl Into<String>,
+        resolution_basis: impl Into<String>,
+        context: ExecutionContextIR,
+    ) -> Result<Self, ValidationError> {
+        let handoff = Self {
+            schema_version: "2.0".to_owned(),
+            id: id.into(),
+            task: Some(context.task().id().to_string()),
+            workflow_id: Some(context.workflow_id().to_string()),
+            primary_agent_id: Some(context.primary_agent_id().to_string()),
+            participating_agent_ids: vec![context.primary_agent_id().to_string()],
+            skill_ids: context
+                .skill_ids()
+                .iter()
+                .map(ToString::to_string)
+                .collect(),
+            operating_mode: context.operating_mode().to_string(),
+            execution_profile: context.execution_profile().to_string(),
+            state: Some(format!("{:?}", context.state())),
+            policy_id: Some(context.policy_id().to_string()),
+            approved_capability_ids: context
+                .approved_capability_ids()
+                .iter()
+                .map(ToString::to_string)
+                .collect(),
+            constraints: context
+                .constraints()
+                .iter()
+                .map(|c| c.id().to_string())
+                .collect(),
+            target_runtime: Some(context.target_runtime().to_string()),
+            resolution_basis: resolution_basis.into(),
+            status: ExecutionProjectionStatus::Executable,
+            issues: Vec::new(),
+            executable_v1: Some(context),
+        };
+        handoff.executable_v1.as_ref().unwrap().validate()?;
+        handoff.validate()?;
+        Ok(handoff)
+    }
+
+    pub fn into_executable_v1(self) -> Result<ExecutionContextIR, ValidationError> {
+        self.validate()?;
+        self.executable_v1
+            .ok_or(ValidationError::InvalidStateCombination {
+                reason: "handoff is not executable",
+            })
     }
 
     pub fn to_json(&self) -> Result<String, serde_json::Error> {
