@@ -41,6 +41,8 @@ selections absent from candidate sets, unknown agent responsibilities, missing
 mandatory coverage, invalid group cardinality, unexplained omissions, and
 inconsistent complete/no-op outcomes. Steps are presented in canonical ID order.
 Candidate order never settles semantic ambiguity.
+Results preserve the request's explicit alternative groups so downstream
+validation cannot lose the cardinality and equivalence semantics used.
 
 A candidate records its CG-03 provider, exact definition fingerprint and typed
 selection/rejection reason. Each candidate set refers to a requirement on the
@@ -105,5 +107,5 @@ Runtime execution E2E is inapplicable to this contract-only work package;
 CG-08.12 owns the complete Plan-to-resolution integration proof.
 
 Measured on 2026-09-09 with cargo-llvm-cov 0.9.0: `src/resolution.rs`
-has **213/213 covered lines (100%)**, with no coverage exclusions. The eight
+has **217/217 covered lines (100%)**, with no coverage exclusions. The eight
 contract tests pass alongside the existing application integration tests.

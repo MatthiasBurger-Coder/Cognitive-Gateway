@@ -232,6 +232,7 @@ pub struct ResolutionResult {
     basis: ResolutionBasis,
     outcome: ResolutionOutcome,
     steps: Vec<StepResolution>,
+    alternatives: Vec<RequirementAlternatives>,
 }
 
 impl ResolutionResult {
@@ -273,6 +274,7 @@ impl ResolutionResult {
             basis: request.basis.clone(),
             outcome,
             steps,
+            alternatives: request.alternatives.clone(),
         })
     }
 
@@ -291,6 +293,12 @@ impl ResolutionResult {
     #[must_use]
     pub fn steps(&self) -> &[StepResolution] {
         &self.steps
+    }
+
+    /// Retains explicit equivalence semantics for downstream revalidation.
+    #[must_use]
+    pub fn alternatives(&self) -> &[RequirementAlternatives] {
+        &self.alternatives
     }
 }
 

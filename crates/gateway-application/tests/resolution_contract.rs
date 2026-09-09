@@ -463,7 +463,10 @@ fn optional_is_not_an_inferred_alternative() {
         assert!(result(&grouped, s.clone()).is_err());
         s.requirements[0].selected = None;
         s.requirements[0].reason = ResolutionReason::OptionalOmitted;
-        assert!(result(&grouped, s.clone()).is_ok());
+        assert_eq!(
+            result(&grouped, s.clone()).unwrap().alternatives(),
+            grouped.alternatives()
+        );
         s.requirements[1].selected = None;
         s.requirements[1].reason = ResolutionReason::OptionalOmitted;
         assert_eq!(
