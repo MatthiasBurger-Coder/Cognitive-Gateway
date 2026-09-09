@@ -12,8 +12,8 @@ pub struct ContextCompiler;
 /// Version-aware CG-10 handoff. This boundary does not execute or authorize.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ContextHandoff {
-    V1(ExecutionContextIR),
-    V2(ExecutionContextIRV2),
+    V1(Box<ExecutionContextIR>),
+    V2(Box<ExecutionContextIRV2>),
 }
 
 impl ContextCompiler {
