@@ -49,3 +49,9 @@ jobs:
         run: cargo llvm-cov -p gateway-daemon --all-targets --fail-under-lines 95
       - name: Clippy
         run: cargo clippy --workspace --all-targets -- -D warnings
+      # Gate each resolver file, with no source exclusions or lower threshold option.
+      - name: CG-08 resolver coverage gate
+        run: |
+          cargo llvm-cov -p gateway-application --all-targets --json --output-path target/cg08-coverage.json
+          pwsh -NoProfile -File scripts/check-resolution-coverage.ps1 -SelfTest
+          pwsh -NoProfile -File scripts/check-resolution-coverage.ps1 -ReportPath target/cg08-coverage.json

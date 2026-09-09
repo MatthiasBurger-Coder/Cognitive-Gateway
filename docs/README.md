@@ -126,6 +126,11 @@ completion-evidence and process authority boundaries.
 - Architectural or governance changes must update repository documentation in the same development flow as the corresponding code/configuration change.
 - Wiki pages should link back to canonical repository documentation where appropriate.
 
+See [CG-08 end-to-end proof and acceptance decision](resolution-end-to-end-proof.md)
+for the neutral CG-07 integration, negative-case matrix, per-file coverage gate
+and the unresolved CG-02/CG-10 projection blocker. Passing resolver tests do not
+constitute final parent acceptance.
+
 ## Current documented decisions
 
 1. Rust core + Python cognitive services.
