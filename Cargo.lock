@@ -53,6 +53,7 @@ dependencies = [
  "gateway-domain",
  "gateway-process",
  "gateway-registry",
+ "serde",
  "serde_json",
  "sha2",
 ]
