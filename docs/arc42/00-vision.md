@@ -21,7 +21,7 @@ The model may change. The organisational knowledge must remain.
 
 The following overview presents the complete organisational target picture: users and organisational sources, Cognitive Gateway core capabilities, organisational memory, governance, active knowledge curation, continuous improvement and the resulting organisational value.
 
-<!-- Strategic raster asset: add as docs/arc42/assets/cognitive-gateway-organisational-vision.png -->
+![Cognitive Gateway — organisational vision](assets/cognitiveGateway-vision.png)
 
 ## 0.2 The guiding metaphor: a new employee who becomes experienced
 
