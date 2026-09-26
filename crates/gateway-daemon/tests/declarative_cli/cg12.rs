@@ -281,6 +281,24 @@ fn observed_quality_goals_reach_compilation_with_lineage_and_minimal_context() {
     let reordered = plan_files(&f, 0);
     assert_eq!(plan, reordered);
     assert_eq!(resolved, f.resolve(&reordered, 0));
+    // Frozen v0.1 outputs protect cross-revision behavior, including Situation,
+    // Delta, Plan, canonical bindings, process/policy reasons and CG-02 projection.
+    // Object key order is irrelevant; array order and every value remain exact.
+    let golden_root =
+        Path::new(env!("CARGO_MANIFEST_DIR")).join("../../tests/fixtures/declarative-v0.1");
+    for name in [
+        "assessment.json",
+        "plan.json",
+        "resolution.json",
+        "explanation.json",
+        "compiled-step-condition.0.0.json",
+        "compiled-step-condition.0.1.json",
+    ] {
+        let actual: Value = serde_json::from_slice(&fs::read(f.root.join(name)).unwrap()).unwrap();
+        let expected: Value =
+            serde_json::from_slice(&fs::read(golden_root.join(name)).unwrap()).unwrap();
+        assert_eq!(actual, expected, "declarative v0.1 regression: {name}");
+    }
     // Optional export makes the exact tested JSON chain independently replayable.
     // A fresh directory is required so existing caller data cannot be overwritten.
     if let Some(destination) = std::env::var_os("CG12_EXPORT_DIR") {

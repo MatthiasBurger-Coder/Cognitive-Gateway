@@ -1,0 +1,188 @@
+{
+  "basis": {
+    "admission": null,
+    "plan": "plan-delta-3343c77626f08e4db8acc85328bd25e5086881b914a29e9b51a809bb7529f6ac",
+    "plan_fingerprint": "6c2823a5f3f16a33765cb4813928acbb50de4006222f8ea9042d38fd1936157d",
+    "process_catalog_fingerprint": "d0beceba0097406ef411e041cca41ad84d82bd4639e43127689a9a97545e40ca",
+    "process_state_fingerprint": "ee0ca85e72de77cc97c8b34681613db8ec7fae9b9e2a2f587bc67f99f71c2012",
+    "registry_fingerprint": "098dee9ecd102769e882ff44554ec081abf32ed5589ffe5d8c95081ae722e956",
+    "rule_version": "1.0",
+    "scope": "external-project",
+    "situation": "external-situation",
+    "situation_fingerprint": "e13a949312ef37296f6da9a971a08e7462fbce85ca075061adc1a5feba2a7a30"
+  },
+  "dynamic": [
+    {
+      "content": "evidence-coverage",
+      "evidence": [
+        "evidence-coverage",
+        "source-coverage"
+      ],
+      "id": "report",
+      "kind": "evidence",
+      "provenance": {
+        "revision": null,
+        "source": "external://reports/coverage"
+      },
+      "quality": {
+        "confidence": {
+          "kind": "SCORE",
+          "value": 0.8
+        },
+        "conflict": "NONE",
+        "freshness": "FRESH",
+        "sensitivity": "PUBLIC",
+        "trust": "OBSERVED_EVIDENCE",
+        "uncertainty": "NONE"
+      },
+      "rationale": "Architecture evidence for this change",
+      "representation": "reference",
+      "scope": "external-project",
+      "step": "step-condition.0.1",
+      "validation": null
+    }
+  ],
+  "execution_context": {
+    "approved_capability_ids": [
+      "project.quality-change"
+    ],
+    "constraints": [],
+    "execution_profile": "FULL_PATH",
+    "id": "compiled-context",
+    "knowledge_queries": [],
+    "operating_mode": "DEVELOPMENT",
+    "policy_id": "inspect-policy",
+    "primary_agent_id": "inspector",
+    "schema_version": "1.0",
+    "skill_ids": [
+      "inspect"
+    ],
+    "state": {
+      "blocker_state": "CLEAR",
+      "gate_state": "PENDING",
+      "workflow_state": "RUNNING"
+    },
+    "target_runtime": "external-runtime",
+    "task": {
+      "classification": null,
+      "id": "inspect-task",
+      "intent": "Apply the selected quality change"
+    },
+    "workflow_id": "inspect-workflow"
+  },
+  "gateway": {
+    "constraints": {
+      "capabilities": [
+        {
+          "applicability_tags": [],
+          "class": "MUTATE",
+          "constraints": [],
+          "description": "Apply a reviewed project quality change",
+          "domain": "quality",
+          "id": "project.quality-change",
+          "input_kinds": [
+            "repository.snapshot"
+          ],
+          "output_kinds": [
+            "repository.patch"
+          ],
+          "preconditions": [
+            "repository.available"
+          ]
+        }
+      ],
+      "desired": [],
+      "process": [],
+      "requirements": [
+        {
+          "capability": "project.quality-change",
+          "cardinality": "MANDATORY",
+          "constraints": [],
+          "id": "requirement-condition.0.1",
+          "originating_delta_item": "condition.0.1",
+          "preconditions": [
+            "repository.available"
+          ],
+          "rationale": "explicit canonical capability binding project.quality-change derives from Delta item condition.0.1 (condition coverage, desired state external-quality, situation external-situation, current state external-state); source rationale: condition coverage on coverage.percent is classified as UNSATISFIED_CONDITION (VALUE_MISMATCH)"
+        }
+      ],
+      "typed": []
+    },
+    "output_contract": {
+      "completion": {
+        "kind": "DESIRED_CONDITION",
+        "value": "coverage"
+      },
+      "verification": null
+    },
+    "policy": {
+      "capability_classes": {
+        "project.quality-change": "MUTATE"
+      },
+      "decision": "ALLOW",
+      "findings": [
+        {
+          "decision": "ALLOW",
+          "reason": "ALLOWED",
+          "subject": "step-condition.0.1"
+        }
+      ],
+      "policies": [
+        "inspect-policy"
+      ],
+      "schema_version": 1,
+      "step": "step-condition.0.1"
+    },
+    "provenance": {
+      "plan": "plan-delta-3343c77626f08e4db8acc85328bd25e5086881b914a29e9b51a809bb7529f6ac",
+      "process_definition": "quality",
+      "process_digest": "dd68f162522e818f285d4c2f48ccd0929c3769d24e0b948c4ddec5b79b308e62",
+      "process_version": "1",
+      "situation": "external-situation",
+      "state_mapping": "operator-state-mapping",
+      "workflow_mapping": "operator-workflow-mapping"
+    },
+    "runtime_state": {
+      "execution": {
+        "blocker_state": "CLEAR",
+        "gate_state": "PENDING",
+        "workflow_state": "RUNNING"
+      },
+      "process": {
+        "activity": "change",
+        "current_state": "START",
+        "instance": "external-instance",
+        "revision": 0,
+        "status": "RUNNING"
+      }
+    },
+    "task": {
+      "classification": null,
+      "id": "inspect-task",
+      "intent": "Apply the selected quality change"
+    }
+  },
+  "schema_version": 1,
+  "scope": "external-project",
+  "stable": {
+    "agent": "inspector",
+    "authority": [
+      "inspect-policy"
+    ],
+    "skills": [
+      "inspect"
+    ],
+    "workflow": "inspect-workflow"
+  },
+  "step": "step-condition.0.1",
+  "user_input": {
+    "content": "Ensure the domain layer does not depend on infrastructure and test coverage is at least 95%.",
+    "kind": "user_input",
+    "provenance": {
+      "situation": "external-situation",
+      "snapshot": "e13a949312ef37296f6da9a971a08e7462fbce85ca075061adc1a5feba2a7a30"
+    },
+    "representation": "inline",
+    "trust": "CALLER_INPUT"
+  }
+}

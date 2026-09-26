@@ -156,3 +156,7 @@ The approved CG-02 v2 handoff extension is documented in
 
 - [CG-11 declarative CLI: commands, JSON inputs, policy boundary and exit codes](declarative-cli.md)
 - [CG-12 external project proof: evidence, authorization and reproducible CLI replay](declarative-end-to-end.md)
+
+## Declarative v0.1 release quality
+
+Run `python3 scripts/quality-gate.py` for the complete CG-13 gate. See [the release checklist](declarative-quality-gates.md) for requirements, evidence and EPIC acceptance traceability.

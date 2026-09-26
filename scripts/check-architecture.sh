@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # This script is intentionally LF-terminated for POSIX shells.
 set -euo pipefail
+cd "$(dirname "$0")/.."
+python3 scripts/check-dependencies.py
 
 fail() {
   echo "architecture violation: $*" >&2

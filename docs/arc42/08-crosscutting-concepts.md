@@ -88,7 +88,7 @@ RAG output therefore remains advisory, MCP/tool output remains capability-scoped
 
 ## 8.10 Architecture guard
 
-The repository provides `scripts/check-architecture.sh` as an initial executable guard against obvious dependency inversions. CI runs this guard before the Rust quality gates. More exhaustive architecture tests may be added later without changing the dependency model.
+The repository provides `scripts/check-architecture.sh` to enforce the reviewed Cargo dependency graph and catalog/project separation. Cargo metadata covers dependency aliases, target-specific dependencies and development/build dependencies. Mutation tests in `tests/architecture/` prove that forbidden edges and substituted sources fail. The complete [declarative v0.1 gate](../declarative-quality-gates.md) runs these checks locally and in CI and retains release evidence.
 
 ## 8.11 Domain primitive validation
 

@@ -45,3 +45,13 @@ Agent, skill, workflow and policy definitions should be declarative and
 schema-validated rather than hard-coded into the daemon. Reusable Agents come
 from the generic catalog; consuming-project context and configuration are
 provided through explicit runtime or adapter inputs.
+
+## 10.8 Declarative v0.1 release evidence
+
+The complete required gate is `python3 scripts/quality-gate.py`. Local and CI
+execution share the same ordered gate manifest. Any failing or unexecuted
+required gate prevents a passing result. Existing 95% crate/file coverage
+thresholds remain mandatory. Frozen CLI fixtures protect Situation, Delta,
+Plan, capability bindings, process/policy explanations and per-step contexts.
+See the [completion checklist](../declarative-quality-gates.md) for EPIC #1
+traceability and the evidence required for release review.

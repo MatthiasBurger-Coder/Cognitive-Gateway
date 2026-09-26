@@ -16,6 +16,7 @@ Initial workspace:
 crates/
 ├── gateway-domain/
 ├── gateway-application/
+├── gateway-process/
 ├── gateway-registry/
 ├── gateway-workflow/
 ├── gateway-policy/
@@ -25,25 +26,22 @@ crates/
 
 ## Build and quality
 
-A Rust toolchain with `rustfmt` and `clippy` is required.
+Run the complete declarative v0.1 gate from the repository root:
 
 ```bash
-./scripts/check-architecture.sh
-cargo fmt --check
-cargo build --workspace
-cargo test --workspace
-cargo clippy --workspace --all-targets -- -D warnings
+python3 scripts/quality-gate.py
 ```
 
-The GitHub Actions workflow `.github/workflows/rust.yml` runs the same quality baseline for pull requests and pushes to `main`.
+Requires Bash, Python 3.11+, Git, Rust with `rustfmt`, `clippy` and
+`llvm-tools-preview`, and `cargo-llvm-cov`. The command runs every workspace
+and architecture test, the CLI installation/replay checks and all established
+95% coverage gates. It retains logs, coverage reports, external-project proof
+and a machine-readable summary under `target/release-evidence/`.
 
-CG-03 registry and registry-CLI code is also subject to a 95% line-coverage
-gate. Run the local coverage checks with `cargo-llvm-cov`:
-
-```bash
-cargo llvm-cov -p gateway-registry --all-targets --fail-under-lines 95
-cargo llvm-cov -p gateway-daemon --all-targets --fail-under-lines 95
-```
+[Quality gates and the release checklist](docs/declarative-quality-gates.md)
+describe evidence review and focused commands. The `Rust Quality` GitHub
+Actions workflow runs the same command and uploads evidence on success or
+failure. A green gate qualifies the tested revision for release review.
 
 ### Run the registry CLI from WSL/Linux
 

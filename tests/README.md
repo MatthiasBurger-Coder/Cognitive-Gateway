@@ -79,3 +79,7 @@ provenance, including fail-closed empty values.
 The [CG-12 CLI suite](../crates/gateway-daemon/tests/declarative_cli/cg12.rs)
 proves the full declarative chain for architecture and coverage goals using
 external temporary files. See [the proof and replay commands](../docs/declarative-end-to-end.md).
+
+## Declarative v0.1 release quality
+
+Run `python3 scripts/quality-gate.py` for the complete CG-13 gate. See [the release checklist](../docs/declarative-quality-gates.md) for requirements, evidence and EPIC acceptance traceability.

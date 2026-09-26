@@ -1,0 +1,74 @@
+[
+  {
+    "name": "Gate regression tests",
+    "command": "python3 -m unittest discover -s tests/architecture -p \"test_*.py\""
+  },
+  {
+    "name": "Architecture guard",
+    "command": "./scripts/check-architecture.sh"
+  },
+  {
+    "name": "Format",
+    "command": "cargo fmt --check"
+  },
+  {
+    "name": "Build",
+    "command": "cargo build --workspace --locked"
+  },
+  {
+    "name": "Test",
+    "command": "cargo test --workspace --locked"
+  },
+  {
+    "name": "Install registry CLI",
+    "command": "cargo install --path crates/gateway-daemon --bin cg-registry --locked --force --root \"$RUNNER_TEMP/cg-registry\""
+  },
+  {
+    "name": "Registry CLI smoke",
+    "command": "set -euo pipefail\ncommand -v cg-registry\ncg-registry --help >/dev/null\ncg-registry agent list --json >/dev/null\ncg-registry agent show system-architect --json >/dev/null\ncg-registry skill list --json >/dev/null\ncg-registry skill show architecture-hexagonal --json >/dev/null\ncg-registry skill graph architecture-hexagonal --json >/dev/null\ncg-registry capability list --json >/dev/null\ncg-registry capability show architecture.dependency-analysis --json >/dev/null\ncg-registry capability resolve architecture.dependency-analysis --json >/dev/null\n"
+  },
+  {
+    "name": "Domain coverage gate",
+    "command": "cargo llvm-cov -p gateway-domain --all-targets --fail-under-lines 95 --json --output-path \"$EVIDENCE_DIR/domain-coverage.json\""
+  },
+  {
+    "name": "CG-03 registry coverage gate",
+    "command": "cargo llvm-cov -p gateway-registry --all-targets --fail-under-lines 95 --json --output-path \"$EVIDENCE_DIR/registry-coverage.json\""
+  },
+  {
+    "name": "CG-03 registry CLI coverage gate",
+    "command": "cargo llvm-cov -p gateway-daemon --all-targets --fail-under-lines 95 --json --output-path \"$EVIDENCE_DIR/cg11-coverage.json\""
+  },
+  {
+    "name": "Install declarative CLI",
+    "command": "cargo install --path crates/gateway-daemon --bin cg --locked --force --root \"$RUNNER_TEMP/cg\""
+  },
+  {
+    "name": "Declarative CLI smoke",
+    "command": "set -euo pipefail\ncli=\"$RUNNER_TEMP/cg/bin/cg\"\nfixture=tests/fixtures/declarative-cli\n\"$cli\" --help\n\"$cli\" assess --context \"$fixture/context.json\" --json > \"$RUNNER_TEMP/assessment.json\"\n\"$cli\" plan --context \"$RUNNER_TEMP/assessment.json\" --intent \"$fixture/intent.json\" --catalog \"$fixture/catalog\" --rules \"$fixture/rules.json\" --json > \"$RUNNER_TEMP/plan.json\"\n\"$cli\" resolve --plan \"$RUNNER_TEMP/plan.json\" --catalog \"$fixture/catalog\" --rules \"$fixture/rules.json\" --process \"$fixture/process.json\" --json > \"$RUNNER_TEMP/resolution.json\"\n\"$cli\" explain --plan \"$RUNNER_TEMP/plan.json\" --catalog \"$fixture/catalog\" --rules \"$fixture/rules.json\" --process \"$fixture/process.json\" --policy \"$fixture/policy.json\" --json > \"$RUNNER_TEMP/explanation.json\"\n\"$cli\" compile --plan \"$RUNNER_TEMP/plan.json\" --catalog \"$fixture/catalog\" --rules \"$fixture/rules.json\" --process \"$fixture/process.json\" --policy \"$fixture/policy.json\" --projection \"$fixture/projection.json\" --json > \"$RUNNER_TEMP/compiled.json\"\n"
+  },
+  {
+    "name": "CG-12 external project acceptance and CLI replay",
+    "command": "set -euo pipefail\nexport CG12_EXPORT_DIR=\"$RUNNER_TEMP/cg12-proof\"\ncargo test -p gateway-daemon --test declarative_cli cg12::\ncli=\"$RUNNER_TEMP/cg/bin/cg\"\ncd \"$CG12_EXPORT_DIR\"\nmkdir replay\n\"$cli\" assess --context external-context.json --json > replay/assessment.json\n\"$cli\" plan --context replay/assessment.json --intent external-intent.json --catalog . --rules rules.json --json > replay/plan.json\n\"$cli\" resolve --plan replay/plan.json --catalog . --rules rules.json --process process.json --json > replay/resolution.json\n\"$cli\" explain --plan replay/plan.json --catalog . --rules rules.json --process process.json --policy policy.json --json > replay/explanation.json\nfor step in step-condition.0.0 step-condition.0.1; do\n  \"$cli\" compile --plan replay/plan.json --catalog . --rules rules.json --process process.json --policy policy.json --projection \"projection-$step.json\" --json > \"replay/compiled-$step.json\"\ndone\npython3 - <<'PYTHON'\nimport json\nfrom pathlib import Path\nartifacts = list(Path(\"replay\").glob(\"*.json\"))\nassert len(artifacts) == 6\nfor replay in artifacts:\n    assert json.loads(replay.read_text()) == json.loads(Path(replay.name).read_text()), replay.name\nPYTHON\n"
+  },
+  {
+    "name": "CG-11 CLI coverage gate",
+    "command": "python3 scripts/check-cli-coverage.py --self-test\npython3 scripts/check-cli-coverage.py \"$EVIDENCE_DIR/cg11-coverage.json\"\n"
+  },
+  {
+    "name": "Clippy",
+    "command": "cargo clippy --workspace --all-targets -- -D warnings"
+  },
+  {
+    "name": "CG-08 resolver coverage gate",
+    "command": "cargo llvm-cov -p gateway-application --all-targets --json --output-path \"$EVIDENCE_DIR/cg08-coverage.json\"\npython3 scripts/check-resolution-coverage.py --self-test\npython3 scripts/check-resolution-coverage.py \"$EVIDENCE_DIR/cg08-coverage.json\"\n"
+  },
+  {
+    "name": "CG-09 policy coverage gate",
+    "command": "cargo llvm-cov -p gateway-policy -p gateway-application --test policy_engine --test policy_application --json --output-path \"$EVIDENCE_DIR/cg09-coverage.json\"\npython3 scripts/check-policy-coverage.py --self-test\npython3 scripts/check-policy-coverage.py \"$EVIDENCE_DIR/cg09-coverage.json\"\n"
+  },
+  {
+    "name": "CG-10 context coverage gate",
+    "command": "cargo llvm-cov -p gateway-context -p gateway-application --test compiled_context --test context_application --test context_compiler --test v2_handoff --json --output-path \"$EVIDENCE_DIR/cg10-coverage.json\"\npython3 scripts/check-context-coverage.py --self-test\npython3 scripts/check-context-coverage.py \"$EVIDENCE_DIR/cg10-coverage.json\"\n"
+  }
+]

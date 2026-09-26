@@ -1,10 +1,17 @@
-# Architecture Tests
+# Architecture tests
 
-Cross-crate architecture tests and dependency-boundary checks belong here. They verify that the source layout and Cargo dependency graph continue to follow the inward dependency rule:
+Run `python3 scripts/quality-gate.py` for the complete release gate, or
+`python3 -m unittest discover -s tests/architecture` for guard regression tests.
 
-```text
-Driving Adapters -> Application Ports -> Domain/Core
-Application + Domain/Core -> Outbound Ports -> Driven Adapters
-```
+`check-architecture.sh` combines Cargo metadata dependency checks with catalog
+and project-storage boundary checks. The exact reviewed dependency graph is
+in [arc42 §5](../../docs/arc42/05-building-block-view.md). Mutation tests reject
+outward and cross-component edges, aliases hiding forbidden packages,
+target/dev/build dependencies, new workspace members and substituted sources.
+Evidence-runner tests verify failure propagation, skipped later gates, log
+retention, complete success and refusal to overwrite an existing bundle.
 
-The current executable check is [`../../scripts/check-architecture.sh`](../../scripts/check-architecture.sh). Future contract tests may be added here without moving domain behavior into this directory.
+Behavioral architecture contracts remain with their Rust owners: versioned IR,
+canonical capability resolution, process/policy authority and minimal context.
+The [release checklist](../../docs/declarative-quality-gates.md) maps them to
+EPIC acceptance criteria and describes frozen fixtures and retained evidence.

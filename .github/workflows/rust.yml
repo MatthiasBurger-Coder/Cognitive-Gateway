@@ -3,8 +3,11 @@ name: Rust Quality
 on:
   pull_request:
   push:
-    branches:
-      - main
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   quality:
@@ -13,95 +16,18 @@ jobs:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
         with:
-          components: rustfmt, clippy
-      - name: Architecture guard
-        run: ./scripts/check-architecture.sh
-      - name: Format
-        run: cargo fmt --check
-      - name: Build
-        run: cargo build --workspace
-      - name: Test
-        run: cargo test --workspace
-      - name: Install registry CLI
-        run: cargo install --path crates/gateway-daemon --bin cg-registry --locked --force --root "$RUNNER_TEMP/cg-registry"
-      - name: Add registry CLI to PATH
-        run: echo "$RUNNER_TEMP/cg-registry/bin" >> "$GITHUB_PATH"
-      - name: Registry CLI smoke
-        run: |
-          set -euo pipefail
-          command -v cg-registry
-          cg-registry --help >/dev/null
-          cg-registry agent list --json >/dev/null
-          cg-registry agent show system-architect --json >/dev/null
-          cg-registry skill list --json >/dev/null
-          cg-registry skill show architecture-hexagonal --json >/dev/null
-          cg-registry skill graph architecture-hexagonal --json >/dev/null
-          cg-registry capability list --json >/dev/null
-          cg-registry capability show architecture.dependency-analysis --json >/dev/null
-          cg-registry capability resolve architecture.dependency-analysis --json >/dev/null
-      - name: Domain coverage
-        uses: taiki-e/install-action@cargo-llvm-cov
-      - name: Domain coverage gate
-        run: cargo llvm-cov -p gateway-domain --all-targets --fail-under-lines 95
-      - name: CG-03 registry coverage gate
-        run: cargo llvm-cov -p gateway-registry --all-targets --fail-under-lines 95
-      - name: CG-03 registry CLI coverage gate
-        run: cargo llvm-cov -p gateway-daemon --all-targets --fail-under-lines 95 --json --output-path target/cg11-coverage.json
-      - name: Install declarative CLI
-        run: cargo install --path crates/gateway-daemon --bin cg --locked --force --root "$RUNNER_TEMP/cg"
-      - name: Declarative CLI smoke
-        run: |
-          set -euo pipefail
-          cli="$RUNNER_TEMP/cg/bin/cg"
-          fixture=tests/fixtures/declarative-cli
-          "$cli" --help
-          "$cli" assess --context "$fixture/context.json" --json > "$RUNNER_TEMP/assessment.json"
-          "$cli" plan --context "$RUNNER_TEMP/assessment.json" --intent "$fixture/intent.json" --catalog "$fixture/catalog" --rules "$fixture/rules.json" --json > "$RUNNER_TEMP/plan.json"
-          "$cli" resolve --plan "$RUNNER_TEMP/plan.json" --catalog "$fixture/catalog" --rules "$fixture/rules.json" --process "$fixture/process.json" --json > "$RUNNER_TEMP/resolution.json"
-          "$cli" explain --plan "$RUNNER_TEMP/plan.json" --catalog "$fixture/catalog" --rules "$fixture/rules.json" --process "$fixture/process.json" --policy "$fixture/policy.json" --json > "$RUNNER_TEMP/explanation.json"
-          "$cli" compile --plan "$RUNNER_TEMP/plan.json" --catalog "$fixture/catalog" --rules "$fixture/rules.json" --process "$fixture/process.json" --policy "$fixture/policy.json" --projection "$fixture/projection.json" --json > "$RUNNER_TEMP/compiled.json"
-      - name: CG-12 external project acceptance and CLI replay
-        run: |
-          set -euo pipefail
-          export CG12_EXPORT_DIR="$RUNNER_TEMP/cg12-proof"
-          cargo test -p gateway-daemon --test declarative_cli cg12::
-          cli="$RUNNER_TEMP/cg/bin/cg"
-          cd "$CG12_EXPORT_DIR"
-          mkdir replay
-          "$cli" assess --context external-context.json --json > replay/assessment.json
-          "$cli" plan --context replay/assessment.json --intent external-intent.json --catalog . --rules rules.json --json > replay/plan.json
-          "$cli" resolve --plan replay/plan.json --catalog . --rules rules.json --process process.json --json > replay/resolution.json
-          "$cli" explain --plan replay/plan.json --catalog . --rules rules.json --process process.json --policy policy.json --json > replay/explanation.json
-          for step in step-condition.0.0 step-condition.0.1; do
-            "$cli" compile --plan replay/plan.json --catalog . --rules rules.json --process process.json --policy policy.json --projection "projection-$step.json" --json > "replay/compiled-$step.json"
-          done
-          python3 - <<'PYTHON'
-          import json
-          from pathlib import Path
-          artifacts = list(Path("replay").glob("*.json"))
-          assert len(artifacts) == 6
-          for replay in artifacts:
-              assert json.loads(replay.read_text()) == json.loads(Path(replay.name).read_text()), replay.name
-          PYTHON
-      - name: CG-11 CLI coverage gate
-        run: |
-          python3 scripts/check-cli-coverage.py --self-test
-          python3 scripts/check-cli-coverage.py target/cg11-coverage.json
-      - name: Clippy
-        run: cargo clippy --workspace --all-targets -- -D warnings
-      # Gate each resolver file, with no source exclusions or lower threshold option.
-      - name: CG-08 resolver coverage gate
-        run: |
-          cargo llvm-cov -p gateway-application --all-targets --json --output-path target/cg08-coverage.json
-          pwsh -NoProfile -File scripts/check-resolution-coverage.ps1 -SelfTest
-          pwsh -NoProfile -File scripts/check-resolution-coverage.ps1 -ReportPath target/cg08-coverage.json
-      - name: CG-09 policy coverage gate
-        run: |
-          cargo llvm-cov -p gateway-policy -p gateway-application --test policy_engine --test policy_application --json --output-path target/cg09-coverage.json
-          python3 scripts/check-policy-coverage.py --self-test
-          python3 scripts/check-policy-coverage.py target/cg09-coverage.json
-      - name: CG-10 context coverage gate
-        run: |
-          cargo llvm-cov -p gateway-context -p gateway-application --test compiled_context --test context_application --test context_compiler --test v2_handoff --json --output-path target/cg10-coverage.json
-          python3 scripts/check-context-coverage.py --self-test
-          python3 scripts/check-context-coverage.py target/cg10-coverage.json
+          components: rustfmt, clippy, llvm-tools-preview
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: taiki-e/install-action@cargo-llvm-cov
+      - name: Declarative v0.1 quality gate
+        run: python3 scripts/quality-gate.py --output target/ci-release-evidence
+      - name: Retain release evidence (including failures)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: declarative-v0.1-${{ github.sha }}-${{ github.run_attempt }}
+          path: target/ci-release-evidence
+          if-no-files-found: error
+          retention-days: 30

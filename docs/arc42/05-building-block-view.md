@@ -52,6 +52,7 @@ Initial crates:
 crates/
 ├── gateway-domain/
 ├── gateway-application/
+├── gateway-process/
 ├── gateway-registry/
 ├── gateway-workflow/
 ├── gateway-policy/
@@ -64,8 +65,10 @@ The intended responsibility of each current crate is:
 - `gateway-domain`: typed identifiers, immutable definitions, execution state,
   capabilities, constraints, `ExecutionContextIR` and domain validation;
 - `gateway-application`: inbound use-case ports, outbound ports and application orchestration;
+- `gateway-process`: deterministic process compilation, lifecycle and activity readiness;
 - `gateway-registry`: deterministic loading and validation of registered definitions;
-- `gateway-workflow`: workflow resolution and execution-state rules;
+- `gateway-workflow`: compile-only placeholder; the former CG-05 registry scope
+  was merged into the single `gateway-process` authority under CG-04;
 - `gateway-policy`: authorization and fail-closed policy evaluation;
 - `gateway-context`: validated context compilation and Execution Context IR handling;
 - `gateway-daemon`: composition root and future process/transport wiring, outside the core.
@@ -81,7 +84,7 @@ into `gateway-domain` or the deterministic core.
   transport or infrastructure dependency; `serde` and `serde_json` are the
   explicitly allowed serialization dependencies for the versioned wire
   contract.
-- `gateway-application` contains application use cases and defines inbound and outbound ports; it depends inward on `gateway-domain`.
+- `gateway-application` contains application use cases and defines inbound and outbound ports; it composes `gateway-domain`, `gateway-registry`, `gateway-process`, `gateway-policy` and `gateway-context`. These deterministic components depend on domain contracts and never depend back on application.
 - `gateway-registry`, `gateway-workflow`, `gateway-policy` and `gateway-context` are deterministic inner components and depend only on inner abstractions required by their responsibility.
 - `gateway-daemon` is the initial outer composition root and may depend on inner crates and, later, on concrete adapters.
 - driving adapters may call inbound ports; driven adapters may implement outbound ports. Both depend on core-defined contracts.
@@ -138,3 +141,28 @@ canonical identity, domain, inspect/mutate class, input/output kinds,
 intrinsic preconditions and deterministic applicability tags. These contracts
 describe reusable provider capability only; policy still decides whether an
 execution may use it.
+
+### Enforced dependency graph (CG-13)
+
+`scripts/check-dependencies.py` checks Cargo metadata for every workspace
+member and every normal, development, build, optional and target dependency.
+The reviewed direct dependency allowlist is:
+
+| Crate | Allowed workspace dependencies | Allowed external dependencies |
+| --- | --- | --- |
+| domain | none | serde, serde_json |
+| application | domain, registry, process, policy, context | serde, serde_json, sha2 |
+| registry | domain | none |
+| workflow | domain | none |
+| process | domain | serde, serde_json, sha2 |
+| policy | domain | serde, serde_json (test support) |
+| context | domain | serde, serde_json |
+| daemon | all seven inner crates | serde, serde_json |
+
+Crate names in the table have the `gateway-` prefix. New workspace members,
+dependency edges or external libraries require a reviewed update to this table
+and the executable allowlist. Renaming a dependency does not change its package
+identity. Core dependencies must resolve to the workspace source. Cargo checks
+its full resolved graph for cycles; the guard also checks workspace edges.
+Transitive serialization/cryptography implementation dependencies remain
+controlled by `Cargo.lock`; this check is not a dependency vulnerability audit.
