@@ -814,3 +814,6 @@ fn maximum_length_desired_state_id_can_produce_valid_derived_ids() {
     assert!(!plan.steps().is_empty());
     assert_eq!(output["desired_state"]["id"], "d".repeat(128));
 }
+
+#[path = "declarative_cli/cg12.rs"]
+mod cg12;

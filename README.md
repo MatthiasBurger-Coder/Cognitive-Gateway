@@ -134,3 +134,7 @@ Use `cg assess`, `cg plan`, `cg resolve`, `cg explain` and `cg compile` to drive
 the deterministic application APIs with structured external context. Install
 with `cargo install --path crates/gateway-daemon --bin cg --locked`.
 See the [CLI contracts and runnable walkthrough](docs/declarative-cli.md).
+
+The [CG-12 external project proof](docs/declarative-end-to-end.md) carries
+architecture and coverage evidence through planning, resolution, authorization
+and compilation, with an exportable CLI replay.

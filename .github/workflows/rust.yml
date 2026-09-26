@@ -60,6 +60,29 @@ jobs:
           "$cli" resolve --plan "$RUNNER_TEMP/plan.json" --catalog "$fixture/catalog" --rules "$fixture/rules.json" --process "$fixture/process.json" --json > "$RUNNER_TEMP/resolution.json"
           "$cli" explain --plan "$RUNNER_TEMP/plan.json" --catalog "$fixture/catalog" --rules "$fixture/rules.json" --process "$fixture/process.json" --policy "$fixture/policy.json" --json > "$RUNNER_TEMP/explanation.json"
           "$cli" compile --plan "$RUNNER_TEMP/plan.json" --catalog "$fixture/catalog" --rules "$fixture/rules.json" --process "$fixture/process.json" --policy "$fixture/policy.json" --projection "$fixture/projection.json" --json > "$RUNNER_TEMP/compiled.json"
+      - name: CG-12 external project acceptance and CLI replay
+        run: |
+          set -euo pipefail
+          export CG12_EXPORT_DIR="$RUNNER_TEMP/cg12-proof"
+          cargo test -p gateway-daemon --test declarative_cli cg12::
+          cli="$RUNNER_TEMP/cg/bin/cg"
+          cd "$CG12_EXPORT_DIR"
+          mkdir replay
+          "$cli" assess --context external-context.json --json > replay/assessment.json
+          "$cli" plan --context replay/assessment.json --intent external-intent.json --catalog . --rules rules.json --json > replay/plan.json
+          "$cli" resolve --plan replay/plan.json --catalog . --rules rules.json --process process.json --json > replay/resolution.json
+          "$cli" explain --plan replay/plan.json --catalog . --rules rules.json --process process.json --policy policy.json --json > replay/explanation.json
+          for step in step-condition.0.0 step-condition.0.1; do
+            "$cli" compile --plan replay/plan.json --catalog . --rules rules.json --process process.json --policy policy.json --projection "projection-$step.json" --json > "replay/compiled-$step.json"
+          done
+          python3 - <<'PYTHON'
+          import json
+          from pathlib import Path
+          artifacts = list(Path("replay").glob("*.json"))
+          assert len(artifacts) == 6
+          for replay in artifacts:
+              assert json.loads(replay.read_text()) == json.loads(Path(replay.name).read_text()), replay.name
+          PYTHON
       - name: CG-11 CLI coverage gate
         run: |
           python3 scripts/check-cli-coverage.py --self-test

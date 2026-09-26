@@ -73,3 +73,9 @@ reintroduced.
 Application boundary tests cover explicit project context on execution and
 retrieval requests. Domain retrieval tests cover validated content and
 provenance, including fail-closed empty values.
+
+## CG-12 external project acceptance
+
+The [CG-12 CLI suite](../crates/gateway-daemon/tests/declarative_cli/cg12.rs)
+proves the full declarative chain for architecture and coverage goals using
+external temporary files. See [the proof and replay commands](../docs/declarative-end-to-end.md).
