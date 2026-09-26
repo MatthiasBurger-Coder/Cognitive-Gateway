@@ -7,6 +7,8 @@ rust-version.workspace = true
 
 [dependencies]
 gateway-domain = { path = "../gateway-domain" }
+serde.workspace = true
+serde_json.workspace = true
 
 [lints]
 workspace = true

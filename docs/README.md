@@ -149,3 +149,7 @@ The approved CG-02 v2 handoff extension is documented in
 ## Policy authorization
 
 - [CG-09 Policy Engine and Inspect/Mutate separation](policy-engine.md)
+
+## Context compilation
+
+- [CG-10 Context Compiler, semantic TAG and ExecutionContext projection](context-compiler.md)

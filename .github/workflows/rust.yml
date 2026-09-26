@@ -60,3 +60,8 @@ jobs:
           cargo llvm-cov -p gateway-policy -p gateway-application --test policy_engine --test policy_application --json --output-path target/cg09-coverage.json
           python3 scripts/check-policy-coverage.py --self-test
           python3 scripts/check-policy-coverage.py target/cg09-coverage.json
+      - name: CG-10 context coverage gate
+        run: |
+          cargo llvm-cov -p gateway-context -p gateway-application --test compiled_context --test context_application --test context_compiler --test v2_handoff --json --output-path target/cg10-coverage.json
+          python3 scripts/check-context-coverage.py --self-test
+          python3 scripts/check-context-coverage.py target/cg10-coverage.json

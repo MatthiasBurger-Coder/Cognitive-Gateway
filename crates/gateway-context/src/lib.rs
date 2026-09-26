@@ -1,5 +1,10 @@
 #![forbid(unsafe_code)]
 
+pub mod compiled;
+pub use compiled::{
+    CompileError, CompiledContext, ContextFragment, FragmentKind, FragmentMetadata,
+};
+
 use gateway_domain::{
     execution_context::ExecutionContext, execution_context::ExecutionContextIR,
     execution_context_v2::ExecutionContextIRV2, execution_profile::ExecutionProfile,

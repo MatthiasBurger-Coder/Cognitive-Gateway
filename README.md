@@ -120,3 +120,10 @@ The deterministic Policy Engine evaluates resolved plan steps against canonical
 capability contracts, governance, explicit authorization, consent and evidence.
 It preserves Inspect/Mutate separation and feeds decisions into Process Engine
 gates. See [Policy Engine](docs/policy-engine.md) for the API and trust boundary.
+
+### Context compilation (CG-10)
+
+The [Context Compiler](docs/context-compiler.md) assembles one authorized plan
+step into a typed semantic context and the existing ExecutionContextIR. It
+preserves source/trust metadata, minimizes selected context and keeps original
+input separate from gateway-generated material.

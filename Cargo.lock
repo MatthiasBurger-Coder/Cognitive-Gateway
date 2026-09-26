@@ -50,6 +50,7 @@ dependencies = [
 name = "gateway-application"
 version = "0.1.0"
 dependencies = [
+ "gateway-context",
  "gateway-domain",
  "gateway-policy",
  "gateway-process",
@@ -64,6 +65,8 @@ name = "gateway-context"
 version = "0.1.0"
 dependencies = [
  "gateway-domain",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]

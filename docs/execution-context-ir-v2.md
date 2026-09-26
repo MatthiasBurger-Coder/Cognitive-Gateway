@@ -32,3 +32,7 @@ rejection and strict unknown-field handling.
 The CG-10 `ContextCompiler::inspect_handoff` boundary accepts both v1 and v2
 without downgrading v2. A v2 handoff remains a typed record; only a separately
 validated executable projection may be adapted to a runtime context.
+
+The [CG-10 application compiler](context-compiler.md) constructs executable v1
+projections only after resolution, catalog and current policy checks. Unsupported
+shapes fail closed; the v2 inspection boundary continues to retain them.
