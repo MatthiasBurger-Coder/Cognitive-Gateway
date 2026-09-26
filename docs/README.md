@@ -153,3 +153,5 @@ The approved CG-02 v2 handoff extension is documented in
 ## Context compilation
 
 - [CG-10 Context Compiler, semantic TAG and ExecutionContext projection](context-compiler.md)
+
+- [CG-11 declarative CLI: commands, JSON inputs, policy boundary and exit codes](declarative-cli.md)

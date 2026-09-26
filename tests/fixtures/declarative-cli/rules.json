@@ -1,0 +1,16 @@
+{
+  "planning": {
+    "observation": "architecture.dependency-analysis"
+  },
+  "resolution": {
+    "required_process": {
+      "digest": "ede133dbdfc91a0af06e8ce9b4205627cac74e093301a910764ea10918d9e7e8",
+      "id": "inspect",
+      "version": 1
+    },
+    "semantics": {
+      "repository.available": "ALWAYS"
+    }
+  },
+  "schema_version": 1
+}

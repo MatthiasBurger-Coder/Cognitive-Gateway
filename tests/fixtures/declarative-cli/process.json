@@ -1,0 +1,21 @@
+{
+  "expected_revision": 0,
+  "instance": {
+    "active_gates": {},
+    "blockers": {},
+    "context_references": [],
+    "current_state": "START",
+    "definition_digest": "ede133dbdfc91a0af06e8ce9b4205627cac74e093301a910764ea10918d9e7e8",
+    "definition_id": "inspect",
+    "definition_version": 1,
+    "evidence": [],
+    "history": [],
+    "id": "external-instance",
+    "previous_state": null,
+    "retry_attempts": {},
+    "revision": 0,
+    "status": "RUNNING",
+    "waiting_condition": null
+  },
+  "schema_version": 1
+}

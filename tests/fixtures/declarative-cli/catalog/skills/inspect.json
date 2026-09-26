@@ -1,0 +1,51 @@
+{
+  "authoritative_sources": [
+    "architecture documentation",
+    "boundary and dependency tests"
+  ],
+  "description": "Hexagonal boundaries and dependency direction",
+  "id": "inspect",
+  "kind": "skill",
+  "knowledge_queries": [
+    "hexagonal boundaries and dependency direction"
+  ],
+  "name": "architecture hexagonal",
+  "owner_agent_id": null,
+  "provided_capabilities": [
+    {
+      "applicability_tags": [
+        "architecture",
+        "dependency-analysis"
+      ],
+      "class": "INSPECT",
+      "constraints": [
+        "read-only"
+      ],
+      "description": "Analyze dependency direction and boundary relationships",
+      "domain": "architecture",
+      "id": "architecture.dependency-analysis",
+      "input_kinds": [
+        "repository.snapshot"
+      ],
+      "output_kinds": [
+        "architecture.dependency-graph"
+      ],
+      "preconditions": [
+        "repository.available"
+      ]
+    }
+  ],
+  "related_skills": [],
+  "required_capability_ids": [],
+  "requires": [],
+  "rules": [
+    "Keep domain and application responsibilities independent from adapters, infrastructure and providers.",
+    "Express cross-boundary behavior through explicit ports, requests, results and state.",
+    "Keep technical integrations outside stable domain boundaries."
+  ],
+  "schema_version": 2,
+  "verification": [
+    "Inspect dependency direction and boundary-sensitive changes.",
+    "Run focused architecture tests and the applicable quality gate."
+  ]
+}

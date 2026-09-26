@@ -127,3 +127,10 @@ The [Context Compiler](docs/context-compiler.md) assembles one authorized plan
 step into a typed semantic context and the existing ExecutionContextIR. It
 preserves source/trust metadata, minimizes selected context and keeps original
 input separate from gateway-generated material.
+
+## Declarative CLI
+
+Use `cg assess`, `cg plan`, `cg resolve`, `cg explain` and `cg compile` to drive
+the deterministic application APIs with structured external context. Install
+with `cargo install --path crates/gateway-daemon --bin cg --locked`.
+See the [CLI contracts and runnable walkthrough](docs/declarative-cli.md).

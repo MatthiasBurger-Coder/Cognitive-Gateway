@@ -77,8 +77,10 @@ dependencies = [
  "gateway-context",
  "gateway-domain",
  "gateway-policy",
+ "gateway-process",
  "gateway-registry",
  "gateway-workflow",
+ "serde",
  "serde_json",
 ]
 

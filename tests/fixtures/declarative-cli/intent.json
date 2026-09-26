@@ -1,0 +1,26 @@
+{
+  "desired_state": {
+    "acceptance_criteria": [],
+    "conditions": [
+      {
+        "expected": {
+          "kind": "BOOLEAN",
+          "value": true
+        },
+        "id": "clean",
+        "operator": "EQUALS",
+        "subject": "architecture.clean"
+      }
+    ],
+    "constraints": [],
+    "expression": {
+      "kind": "CONDITION",
+      "value": "clean"
+    },
+    "id": "external-goal",
+    "schema_version": "1.0"
+  },
+  "id": "external-intent",
+  "original_input": null,
+  "schema_version": "1.0"
+}

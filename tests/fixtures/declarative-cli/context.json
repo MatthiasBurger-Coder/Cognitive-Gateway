@@ -1,0 +1,21 @@
+{
+  "context": {
+    "id": "external-context",
+    "schema_version": "1.0"
+  },
+  "execution_profile": "FULL_PATH",
+  "observed_state_id": "external-state",
+  "operating_mode": "DEVELOPMENT",
+  "records": {
+    "evidence": [],
+    "facts": [],
+    "observations": [],
+    "provenances": []
+  },
+  "schema_version": 1,
+  "scope": "external-project",
+  "situation_id": "external-situation",
+  "unknown_subjects": [
+    "architecture.clean"
+  ]
+}

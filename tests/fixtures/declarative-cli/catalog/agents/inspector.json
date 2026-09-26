@@ -1,0 +1,10 @@
+{
+  "description": "test inspector",
+  "id": "inspector",
+  "kind": "agent",
+  "provided_capabilities": [],
+  "schema_version": 2,
+  "skill_ids": [
+    "inspect"
+  ]
+}

@@ -46,7 +46,24 @@ jobs:
       - name: CG-03 registry coverage gate
         run: cargo llvm-cov -p gateway-registry --all-targets --fail-under-lines 95
       - name: CG-03 registry CLI coverage gate
-        run: cargo llvm-cov -p gateway-daemon --all-targets --fail-under-lines 95
+        run: cargo llvm-cov -p gateway-daemon --all-targets --fail-under-lines 95 --json --output-path target/cg11-coverage.json
+      - name: Install declarative CLI
+        run: cargo install --path crates/gateway-daemon --bin cg --locked --force --root "$RUNNER_TEMP/cg"
+      - name: Declarative CLI smoke
+        run: |
+          set -euo pipefail
+          cli="$RUNNER_TEMP/cg/bin/cg"
+          fixture=tests/fixtures/declarative-cli
+          "$cli" --help
+          "$cli" assess --context "$fixture/context.json" --json > "$RUNNER_TEMP/assessment.json"
+          "$cli" plan --context "$RUNNER_TEMP/assessment.json" --intent "$fixture/intent.json" --catalog "$fixture/catalog" --rules "$fixture/rules.json" --json > "$RUNNER_TEMP/plan.json"
+          "$cli" resolve --plan "$RUNNER_TEMP/plan.json" --catalog "$fixture/catalog" --rules "$fixture/rules.json" --process "$fixture/process.json" --json > "$RUNNER_TEMP/resolution.json"
+          "$cli" explain --plan "$RUNNER_TEMP/plan.json" --catalog "$fixture/catalog" --rules "$fixture/rules.json" --process "$fixture/process.json" --policy "$fixture/policy.json" --json > "$RUNNER_TEMP/explanation.json"
+          "$cli" compile --plan "$RUNNER_TEMP/plan.json" --catalog "$fixture/catalog" --rules "$fixture/rules.json" --process "$fixture/process.json" --policy "$fixture/policy.json" --projection "$fixture/projection.json" --json > "$RUNNER_TEMP/compiled.json"
+      - name: CG-11 CLI coverage gate
+        run: |
+          python3 scripts/check-cli-coverage.py --self-test
+          python3 scripts/check-cli-coverage.py target/cg11-coverage.json
       - name: Clippy
         run: cargo clippy --workspace --all-targets -- -D warnings
       # Gate each resolver file, with no source exclusions or lower threshold option.
