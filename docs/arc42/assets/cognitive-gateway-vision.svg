@@ -1,0 +1,143 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1180" viewBox="0 0 1800 1180">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#0b1f33"/><stop offset="100%" stop-color="#153a5f"/></linearGradient>
+    <linearGradient id="core" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#123c68"/><stop offset="100%" stop-color="#0d2742"/></linearGradient>
+    <style>
+      .title{font:700 46px Arial,sans-serif;fill:white}
+      .sub{font:400 22px Arial,sans-serif;fill:#d9e8f5}
+      .h1{font:700 24px Arial,sans-serif;fill:#0c2e4e}
+      .h2{font:700 21px Arial,sans-serif;fill:white}
+      .txt{font:400 17px Arial,sans-serif;fill:#183149}
+      .small{font:400 15px Arial,sans-serif;fill:#24445f}
+      .white{font:400 16px Arial,sans-serif;fill:#eaf4fb}
+      .box{rx:16;ry:16;stroke:#a8bfd1;stroke-width:2}
+      .arrow{stroke:#4e7899;stroke-width:4;fill:none;marker-end:url(#m)}
+      .dash{stroke:#6c8da8;stroke-width:3;stroke-dasharray:9 7;fill:none;marker-end:url(#m)}
+    </style>
+    <marker id="m" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#4e7899"/></marker>
+  </defs>
+  <rect width="1800" height="1180" fill="#f5f9fc"/>
+  <rect width="1800" height="120" fill="url(#bg)"/>
+  <text x="42" y="58" class="title">Cognitive Gateway (CG) — Vision</text>
+  <text x="42" y="93" class="sub">Organisational memory, deterministic orchestration and replaceable AI processing</text>
+
+  <!-- sources -->
+  <rect x="35" y="155" width="300" height="760" fill="#eaf3fa" class="box"/>
+  <text x="60" y="198" class="h1">Organisation & Sources</text>
+  <text x="60" y="235" class="txt">People & teams</text>
+  <text x="60" y="275" class="txt">Git / source code / ADRs</text>
+  <text x="60" y="315" class="txt">Confluence / wikis / PDFs</text>
+  <text x="60" y="355" class="txt">Tickets / requirements</text>
+  <text x="60" y="395" class="txt">APIs / databases / CMDB</text>
+  <text x="60" y="435" class="txt">Monitoring / incidents / logs</text>
+  <text x="60" y="475" class="txt">Policies / standards / SOPs</text>
+  <text x="60" y="515" class="txt">Chat / e-mail / collaboration</text>
+  <text x="60" y="555" class="txt">External knowledge</text>
+  <line x1="60" y1="590" x2="310" y2="590" stroke="#9fb6c8"/>
+  <text x="60" y="630" class="h1">Entry Points</text>
+  <text x="60" y="670" class="txt">CLI / IDE / Web / API</text>
+  <text x="60" y="710" class="txt">CI/CD / Agents / MCP</text>
+  <text x="60" y="750" class="txt">Human questions</text>
+  <text x="60" y="790" class="txt">Automated observations</text>
+  <text x="60" y="850" class="small">CG starts like a new employee:</text>
+  <text x="60" y="880" class="small">limited context, then it asks,</text>
+  <text x="60" y="905" class="small">observes, verifies and remembers.</text>
+
+  <!-- core -->
+  <rect x="390" y="155" width="1010" height="760" fill="url(#core)" rx="22" ry="22"/>
+  <text x="430" y="205" class="h2">Cognitive Gateway — knowledge-based control and assistance plane</text>
+
+  <!-- row 1 -->
+  <rect x="430" y="240" width="220" height="145" fill="#eaf5fb" class="box"/>
+  <text x="450" y="273" class="h1">1. Intent & Context</text>
+  <text x="450" y="305" class="small">Resolve references</text>
+  <text x="450" y="330" class="small">Detect ambiguity</text>
+  <text x="450" y="355" class="small">Identify knowledge gaps</text>
+
+  <rect x="675" y="240" width="220" height="145" fill="#eef7ef" class="box"/>
+  <text x="695" y="273" class="h1">2. Planning</text>
+  <text x="695" y="305" class="small">Task / process decomposition</text>
+  <text x="695" y="330" class="small">Capability resolution</text>
+  <text x="695" y="355" class="small">Policies & constraints</text>
+
+  <rect x="920" y="240" width="220" height="145" fill="#f3effb" class="box"/>
+  <text x="940" y="273" class="h1">3. Knowledge</text>
+  <text x="940" y="305" class="small">GraphRAG / retrieval</text>
+  <text x="940" y="330" class="small">Evidence & provenance</text>
+  <text x="940" y="355" class="small">Current + historical state</text>
+
+  <rect x="1165" y="240" width="195" height="145" fill="#fff3e8" class="box"/>
+  <text x="1185" y="273" class="h1">4. Execute</text>
+  <text x="1185" y="305" class="small">Tools / APIs / agents</text>
+  <text x="1185" y="330" class="small">Process engine</text>
+  <text x="1185" y="355" class="small">Inspect / mutate</text>
+
+  <!-- memory -->
+  <rect x="430" y="415" width="930" height="190" fill="#efe9fb" class="box"/>
+  <text x="455" y="452" class="h1">Organisational Long-Term Memory</text>
+  <text x="455" y="486" class="txt">Factual memory · Episodic memory · Procedural memory · Situation state · Decision memory</text>
+  <text x="455" y="520" class="small">Versioned, evidence-based, scoped and auditable: fact + source + time + confidence + validity + status</text>
+  <text x="455" y="550" class="small">Human-readable knowledge artefacts (e.g. OKF / Markdown, Gherkin, ADR, OpenAPI, process DSL) compile into canonical CG IR.</text>
+  <text x="455" y="580" class="small">Runtime indexes (graph/vector/full text) are derived projections — not the authority.</text>
+
+  <!-- row 3 -->
+  <rect x="430" y="635" width="285" height="210" fill="#eaf5fb" class="box"/>
+  <text x="450" y="670" class="h1">5. Formalisation</text>
+  <text x="450" y="705" class="small">Natural language → resolved intent</text>
+  <text x="450" y="730" class="small">Strict, non-ambiguous semantics</text>
+  <text x="450" y="755" class="small">Canonical Task / Context / Prompt IR</text>
+  <text x="450" y="780" class="small">Human + machine + LLM readable</text>
+  <text x="450" y="805" class="small">No hidden interpretation in core</text>
+
+  <rect x="740" y="635" width="285" height="210" fill="#eef7ef" class="box"/>
+  <text x="760" y="670" class="h1">6. Model Router</text>
+  <text x="760" y="705" class="small">GPT / Qwen / Claude / local SLM</text>
+  <text x="760" y="730" class="small">Embeddings / classifiers / rules</text>
+  <text x="760" y="755" class="small">Select by task, latency, privacy, cost</text>
+  <text x="760" y="780" class="small">Model-independent organisational memory</text>
+  <text x="760" y="805" class="small">Models are replaceable processors</text>
+
+  <rect x="1050" y="635" width="310" height="210" fill="#fff3e8" class="box"/>
+  <text x="1070" y="670" class="h1">7. Verify, Learn, Govern</text>
+  <text x="1070" y="705" class="small">Schema + evidence verification</text>
+  <text x="1070" y="730" class="small">Detect contradictions and stale knowledge</text>
+  <text x="1070" y="755" class="small">Human-in-the-loop for sensitive changes</text>
+  <text x="1070" y="780" class="small">Store validated outcomes</text>
+  <text x="1070" y="805" class="small">Continuous knowledge quality</text>
+
+  <!-- right -->
+  <rect x="1450" y="155" width="315" height="760" fill="#fff4ef" class="box"/>
+  <text x="1475" y="198" class="h1">Active Assistance</text>
+  <text x="1475" y="240" class="txt">Coding assistant</text>
+  <text x="1475" y="278" class="txt">Requirement refinement</text>
+  <text x="1475" y="316" class="txt">Architecture feedback</text>
+  <text x="1475" y="354" class="txt">Incident / root-cause help</text>
+  <text x="1475" y="392" class="txt">Onboarding / self-service</text>
+  <text x="1475" y="430" class="txt">Process suggestions</text>
+  <line x1="1475" y1="462" x2="1735" y2="462" stroke="#c7a89b"/>
+  <text x="1475" y="505" class="h1">Knowledge Editor</text>
+  <text x="1475" y="545" class="txt">Detect stale pages</text>
+  <text x="1475" y="583" class="txt">Detect contradictions</text>
+  <text x="1475" y="621" class="txt">Propose corrections</text>
+  <text x="1475" y="659" class="txt">Update Confluence / docs</text>
+  <text x="1475" y="697" class="txt">Archive superseded knowledge</text>
+  <text x="1475" y="735" class="txt">Rebuild derived indexes</text>
+  <line x1="1475" y1="770" x2="1735" y2="770" stroke="#c7a89b"/>
+  <text x="1475" y="812" class="h1">Continuous Improvement</text>
+  <text x="1475" y="850" class="txt">Patterns · quality · bottlenecks</text>
+  <text x="1475" y="882" class="txt">Evidence-based recommendations</text>
+
+  <!-- arrows -->
+  <path d="M335 330 C360 330,365 330,390 330" class="arrow"/>
+  <path d="M1400 330 C1420 330,1430 330,1450 330" class="arrow"/>
+  <path d="M1450 600 C1430 600,1420 600,1400 600" class="dash"/>
+  <path d="M890 385 L890 415" class="arrow"/>
+  <path d="M890 605 L890 635" class="arrow"/>
+
+  <!-- bottom -->
+  <rect x="35" y="950" width="1730" height="185" fill="#eaf3fa" class="box"/>
+  <text x="60" y="995" class="h1">Target outcome</text>
+  <text x="60" y="1033" class="txt">CG becomes the organisation's persistent cognitive layer: it understands context, preserves institutional knowledge, orchestrates deterministic work,</text>
+  <text x="60" y="1065" class="txt">feeds the smallest relevant context to replaceable models, verifies results and continuously improves the quality and usability of organisational knowledge.</text>
+  <text x="60" y="1110" class="small">Principle: natural language may be ambiguous; the resolved CG semantics and execution contract must not be.</text>
+</svg>
