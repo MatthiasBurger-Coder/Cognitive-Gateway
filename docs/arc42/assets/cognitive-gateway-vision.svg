@@ -23,8 +23,8 @@
 
   <!-- sources -->
   <rect x="35" y="155" width="300" height="760" fill="#eaf3fa" class="box"/>
-  <text x="60" y="198" class="h1">Organisation & Sources</text>
-  <text x="60" y="235" class="txt">People & teams</text>
+  <text x="60" y="198" class="h1">Organisation &amp; Sources</text>
+  <text x="60" y="235" class="txt">People &amp; teams</text>
   <text x="60" y="275" class="txt">Git / source code / ADRs</text>
   <text x="60" y="315" class="txt">Confluence / wikis / PDFs</text>
   <text x="60" y="355" class="txt">Tickets / requirements</text>
@@ -49,7 +49,7 @@
 
   <!-- row 1 -->
   <rect x="430" y="240" width="220" height="145" fill="#eaf5fb" class="box"/>
-  <text x="450" y="273" class="h1">1. Intent & Context</text>
+  <text x="450" y="273" class="h1">1. Intent &amp; Context</text>
   <text x="450" y="305" class="small">Resolve references</text>
   <text x="450" y="330" class="small">Detect ambiguity</text>
   <text x="450" y="355" class="small">Identify knowledge gaps</text>
@@ -58,12 +58,12 @@
   <text x="695" y="273" class="h1">2. Planning</text>
   <text x="695" y="305" class="small">Task / process decomposition</text>
   <text x="695" y="330" class="small">Capability resolution</text>
-  <text x="695" y="355" class="small">Policies & constraints</text>
+  <text x="695" y="355" class="small">Policies &amp; constraints</text>
 
   <rect x="920" y="240" width="220" height="145" fill="#f3effb" class="box"/>
   <text x="940" y="273" class="h1">3. Knowledge</text>
   <text x="940" y="305" class="small">GraphRAG / retrieval</text>
-  <text x="940" y="330" class="small">Evidence & provenance</text>
+  <text x="940" y="330" class="small">Evidence &amp; provenance</text>
   <text x="940" y="355" class="small">Current + historical state</text>
 
   <rect x="1165" y="240" width="195" height="145" fill="#fff3e8" class="box"/>
