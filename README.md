@@ -113,3 +113,10 @@ The GitHub Wiki is intended for simplified end-user documentation, tutorials and
 - execution runtimes remain replaceable
 
 See EPIC #1 and the CG-01…CG-10 issues for the v0.1 implementation plan.
+
+### Policy authorization (CG-09)
+
+The deterministic Policy Engine evaluates resolved plan steps against canonical
+capability contracts, governance, explicit authorization, consent and evidence.
+It preserves Inspect/Mutate separation and feeds decisions into Process Engine
+gates. See [Policy Engine](docs/policy-engine.md) for the API and trust boundary.

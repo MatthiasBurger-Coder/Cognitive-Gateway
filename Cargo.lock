@@ -92,6 +92,8 @@ name = "gateway-policy"
 version = "0.1.0"
 dependencies = [
  "gateway-domain",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]

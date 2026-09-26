@@ -145,3 +145,7 @@ The approved CG-02 v2 handoff extension is documented in
 7. Versioned Execution Context IR as the core runtime integration contract.
 8. Hexagonal Architecture with inward dependencies and replaceable ports/adapters.
 9. Git is authoritative for declarative Agent/Skill/Workflow/Policy definitions; runtime databases own mutable execution state, while SQL/graph/vector stores used for definition lookup are derived and rebuildable read models.
+
+## Policy authorization
+
+- [CG-09 Policy Engine and Inspect/Mutate separation](policy-engine.md)

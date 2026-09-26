@@ -6,6 +6,7 @@ extern crate self as gateway_application;
 pub mod context;
 pub mod external_context;
 pub mod planning_application;
+pub mod policy_application;
 pub mod ports;
 pub mod resolution;
 pub mod resolution_agents;

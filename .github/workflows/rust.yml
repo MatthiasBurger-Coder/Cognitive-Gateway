@@ -55,3 +55,8 @@ jobs:
           cargo llvm-cov -p gateway-application --all-targets --json --output-path target/cg08-coverage.json
           pwsh -NoProfile -File scripts/check-resolution-coverage.ps1 -SelfTest
           pwsh -NoProfile -File scripts/check-resolution-coverage.ps1 -ReportPath target/cg08-coverage.json
+      - name: CG-09 policy coverage gate
+        run: |
+          cargo llvm-cov -p gateway-policy -p gateway-application --test policy_engine --test policy_application --json --output-path target/cg09-coverage.json
+          python3 scripts/check-policy-coverage.py --self-test
+          python3 scripts/check-policy-coverage.py target/cg09-coverage.json
