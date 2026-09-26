@@ -2,6 +2,7 @@
 
 This directory is the canonical technical architecture documentation for Cognitive Gateway.
 
+0. [Vision](00-vision.md)
 1. [Introduction and Goals](01-introduction-and-goals.md)
 2. [Architecture Constraints](02-architecture-constraints.md)
 3. [Context and Scope](03-context-and-scope.md)
