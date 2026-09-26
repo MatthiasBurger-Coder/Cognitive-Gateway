@@ -4,7 +4,6 @@
 >
 > Cognitive Gateway shall evolve from a deterministic AI context and agent control plane into a persistent organisational cognitive layer: a system that understands organisational context, accumulates evidence-backed long-term knowledge, resolves natural-language intent into unambiguous execution semantics, routes work to replaceable models and tools, and continuously improves the quality, consistency and accessibility of organisational knowledge.
 
-![Cognitive Gateway vision overview](assets/cognitive-gateway-vision.svg)
 
 ## 0.1 Why Cognitive Gateway exists
 
@@ -17,6 +16,12 @@ Cognitive Gateway aims to introduce a stable layer between the organisation and 
 The long-term goal is not to create another foundation model. The goal is to create an organisational memory and deterministic control plane that can supply any suitable model, agent or tool with the smallest relevant, validated and explainable context required for a task.
 
 The model may change. The organisational knowledge must remain.
+
+### Strategic vision overview
+
+The following overview presents the complete organisational target picture: users and organisational sources, Cognitive Gateway core capabilities, organisational memory, governance, active knowledge curation, continuous improvement and the resulting organisational value.
+
+![Cognitive Gateway — organisational vision](assets/cognitive-gateway-organisational-vision.png)
 
 ## 0.2 The guiding metaphor: a new employee who becomes experienced
 
@@ -48,6 +53,12 @@ At the highest level, Cognitive Gateway shall connect four worlds:
 2. **Organisational memory** — structured, versioned and evidence-backed knowledge.
 3. **Deterministic cognition and orchestration** — intent resolution, planning, policy, capability resolution and process execution.
 4. **Replaceable cognitive processors** — LLMs, SLMs, classifiers, embedding models, rules engines and specialised tools.
+
+### Technical architecture view
+
+The following vector diagram complements the strategic overview with a more technical representation of the internal layers, information flow and separation between organisational sources, memory, formalisation, model routing and governed execution.
+
+![Cognitive Gateway — technical architecture view](assets/cognitive-gateway-vision.svg)
 
 The long-term architecture therefore follows this conceptual flow:
 
