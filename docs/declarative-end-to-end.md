@@ -44,7 +44,7 @@ DesiredState conditions; no natural-language parser or LLM is involved.
 Workflow mapping is an explicit projection decision; the CLI does not infer a
 Workflow from prose. Compilation does not execute a change, update process
 state, or claim that the project now meets its goals. Verification after
-execution belongs to the later closed-loop work.
+execution is provided by the separate [CG-14 closed-loop application API](closed-loop-execution.md).
 
 The synthetic catalog carries no external project identity. All caller state,
 knowledge, evidence, policy decisions and outputs are generated at test time.

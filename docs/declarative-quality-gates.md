@@ -23,7 +23,9 @@ project export and independent replay, clippy and every established coverage
 gate. Workspace tests include unit, component, contract and integration tests.
 The domain, registry and daemon each retain their 95% aggregate line floor.
 CG-08 resolver files and the existing CG-09 policy, CG-10 context and CG-11 CLI
-file sets each retain their **per-file 95%** floor. Missing, duplicate, invalid,
+file sets each retain their **per-file 95%** floor. The CG-14 closed-loop
+application module has the same per-file floor, checked from the complete
+application coverage report. Missing, duplicate, invalid,
 zero-line and below-threshold coverage entries fail. Counts are compared before
 rounding. The portable resolver checker discovers every `resolution*.rs` file
 and shares the existing strict Python checker; the PowerShell entry point

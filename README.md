@@ -136,3 +136,9 @@ See the [CLI contracts and runnable walkthrough](docs/declarative-cli.md).
 The [CG-12 external project proof](docs/declarative-end-to-end.md) carries
 architecture and coverage evidence through planning, resolution, authorization
 and compilation, with an exportable CLI replay.
+
+## Closed-loop execution (CG-14)
+
+The [closed-loop application API](docs/closed-loop-execution.md) dispatches
+authorized steps through a replaceable runtime port, reassesses observed
+evidence, and continues or replans within explicit iteration and retry limits.

@@ -70,5 +70,9 @@
   {
     "name": "CG-10 context coverage gate",
     "command": "cargo llvm-cov -p gateway-context -p gateway-application --test compiled_context --test context_application --test context_compiler --test v2_handoff --json --output-path \"$EVIDENCE_DIR/cg10-coverage.json\"\npython3 scripts/check-context-coverage.py --self-test\npython3 scripts/check-context-coverage.py \"$EVIDENCE_DIR/cg10-coverage.json\"\n"
+  },
+  {
+    "name": "CG-14 closed-loop coverage gate",
+    "command": "python3 scripts/check-closed-loop-coverage.py --self-test\npython3 scripts/check-closed-loop-coverage.py \"$EVIDENCE_DIR/cg08-coverage.json\"\n"
   }
 ]

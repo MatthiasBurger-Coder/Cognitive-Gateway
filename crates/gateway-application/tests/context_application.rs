@@ -480,3 +480,6 @@ fn resolution_without_a_process_template_cannot_become_executable_v1() {
         matches!(f.compile(), Err(ContextApplicationError::Incompatible(problems)) if problems.contains(&ProjectionProblem::NoTemplate))
     );
 }
+
+#[path = "support/closed_loop.rs"]
+mod closed_loop;

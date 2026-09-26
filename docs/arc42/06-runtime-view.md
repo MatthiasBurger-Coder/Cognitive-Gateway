@@ -119,3 +119,14 @@ MCP / Tool Adapter
 ```
 
 Mutation requests may require explicit authorization while inspection requests can remain available. The MCP/tool adapter is a driven capability adapter and cannot change the policy decision made by the core.
+
+## 6.6 Closed-loop goal execution
+
+CG-14 adds an event-driven application coordinator: Intent and scoped evidence
+produce a Situation, Delta and Plan; fresh resolution, policy and process
+inputs authorize one compiled step; a replaceable execution port returns a
+correlated Outcome and complete observation snapshot. CG-06 reassessment and
+CG-07 comparison determine success, continuation, replanning, pause or stop.
+Iteration and retry limits bound execution across replans. Every revision and
+execution remains linked in the audit. Process lifecycle mutation remains with
+CG-04. See [the application contract](../closed-loop-execution.md).

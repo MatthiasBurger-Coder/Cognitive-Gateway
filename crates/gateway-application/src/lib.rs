@@ -3,6 +3,7 @@
 #[cfg(test)]
 extern crate self as gateway_application;
 
+pub mod closed_loop;
 pub mod context;
 pub mod context_application;
 pub mod external_context;
