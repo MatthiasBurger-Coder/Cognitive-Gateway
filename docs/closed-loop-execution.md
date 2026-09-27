@@ -28,6 +28,11 @@ history; adapters own runtime invocation and external report acquisition.
    call `refresh` with a complete current snapshot. Success and Stopped are
    terminal. `stop()` records an explicit terminal blocker.
 
+When CG-19 retrieval supplies a sufficiency assessment, the host may call
+`apply_retrieval_assessment`. Missing evidence pauses the run; sufficient
+retrieval leaves its current decision unchanged. A paused run still requires
+fresh CG-06 observations through `refresh` and fresh policy/process inputs.
+
 This is an event-driven Rust API. Calls execute one step each; the host decides
 when to capture inputs and schedule another call. The existing CLI remains a
 read-only assessment/planning/compilation interface. No concrete runtime,

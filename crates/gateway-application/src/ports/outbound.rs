@@ -129,6 +129,31 @@ pub trait KnowledgeRetrievalPort {
         round: gateway_domain::RetrievalRound,
         usage: &gateway_domain::BudgetUsage,
     ) -> Result<gateway_domain::RetrievalBatch, gateway_domain::RetrievalError>;
+
+    /// A failed dispatch still consumes a round. Concrete adapters can
+    /// override this to report measured elapsed time and other consumed work.
+    fn retrieve_measured(
+        &self,
+        plan: &gateway_domain::RetrievalPlan,
+        round: gateway_domain::RetrievalRound,
+        usage: &gateway_domain::BudgetUsage,
+    ) -> Result<gateway_domain::RetrievalBatch, RetrievalAttemptFailure> {
+        self.retrieve(plan, round, usage).map_err(|error| {
+            let mut consumed = usage.clone();
+            consumed.rounds = round.0.get();
+            RetrievalAttemptFailure {
+                error,
+                usage: consumed,
+            }
+        })
+    }
+}
+
+/// Measurement returned for a failed or cancelled retrieval attempt.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct RetrievalAttemptFailure {
+    pub error: gateway_domain::RetrievalError,
+    pub usage: gateway_domain::BudgetUsage,
 }
 
 /// Produces derived vectors with source snapshot and model/version lineage.

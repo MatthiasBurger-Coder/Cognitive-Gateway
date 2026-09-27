@@ -40,12 +40,15 @@ invalidates its index explicitly. Every search compares current document
 snapshots with the indexed sources and reports `StaleIndex` after a change.
 
 `FederatedRetrievalPort` implements the CG-15 `KnowledgeRetrievalPort` for a
-single-round plan. It conservatively accounts query and retained-context bytes
+bounded round. It conservatively accounts query and retained-context bytes
 against token and context budgets, applies the selected fusion policy, and
 publishes only validated `RetrievalBatch` envelopes. Missing optional sources
 produce `Degraded` with an explanation; a failed required source returns an
-error. The current executor rejects multi-round plans. Retrieval results remain
-advisory and cannot grant authority.
+error. CG-19 extends the executor to cumulative multi-round accounting and a
+V2 nonterminal `Partial/MoreInformationNeeded` result. The application owns
+bounded query refinement and sufficiency; see
+[recursive retrieval](recursive-retrieval.md). Retrieval results remain advisory
+and cannot grant authority.
 
 The CG-16 coverage gate checks at least 95% measured line coverage in the
 application pipeline and outer adapter modules. Reproduce it with:

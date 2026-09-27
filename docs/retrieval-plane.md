@@ -1,4 +1,4 @@
-# CG-15: modular retrieval plane (IR v1)
+# CG-15/CG-19: modular retrieval plane (IR v1 and v2)
 
 Issue: [#174](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/issues/174).
 
@@ -27,9 +27,11 @@ flowchart TD
 source/strategy selections. `RetrievalPlan::new` checks explicit adapter support
 and retains the entire immutable request. The plan has an opaque
 `RetrievalPlanId` and `RetrievalVersion`; request and result envelopes also carry
-that version. V1 is the only accepted version. Changes to interpretation require
-an explicit version change; availability never creates a different plan.
-These are Rust contracts, not a new JSON protocol. Future wire adapters must
+that version. V1 and V2 are accepted. V2 adds a nonterminal
+`Partial/MoreInformationNeeded` batch for recursive rounds; V1 retains its
+original semantics. Further changes to interpretation require an explicit
+version change; availability never creates a different plan. These are Rust
+contracts, not a new JSON protocol. Future wire adapters must
 reject unknown fields/versions and use these validated construction boundaries.
 
 ## Required information and isolation
@@ -153,11 +155,12 @@ Rejected candidates can retain their IDs in explanation records without content.
 | Status | Allowed reason / behavior |
 | --- | --- |
 | Complete | EvidenceSatisfied, NoMatches, or BudgetReached |
-| Partial | BudgetReached; accepted subset retained |
+| Partial | BudgetReached for a terminal accepted subset, or V2 MoreInformationNeeded before a hard limit |
 | Degraded | ServiceUnavailable; names an unavailable optional source, strategy or reranker |
 | Failed | ServiceUnavailable or Unsupported; no accepted results |
 
-BudgetReached requires a hard limit to be reached; EvidenceSatisfied requires
+MoreInformationNeeded requires another round to be available and every hard
+budget to remain below its limit. BudgetReached requires a hard limit to be reached; EvidenceSatisfied requires
 the distinct evidence threshold; NoMatches requires an empty result set.
 A pre-dispatch inability to reserve sufficient resources may instead return the
 stable `BudgetExceeded` error. Optional semantic unavailability is visible as

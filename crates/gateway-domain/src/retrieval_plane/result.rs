@@ -28,6 +28,7 @@ pub enum RetrievalReason {
     BudgetReached,
     EvidenceSatisfied,
     NoMatches,
+    MoreInformationNeeded,
     ServiceUnavailable,
     Unsupported,
 }
@@ -102,7 +103,11 @@ impl RetrievalBatch {
                     | RetrievalReason::NoMatches
                     | RetrievalReason::BudgetReached
             ),
-            RetrievalStatus::Partial => input.reason == RetrievalReason::BudgetReached,
+            RetrievalStatus::Partial => {
+                input.reason == RetrievalReason::BudgetReached
+                    || (input.version == RetrievalVersion::V2
+                        && input.reason == RetrievalReason::MoreInformationNeeded)
+            }
             RetrievalStatus::Degraded => input.reason == RetrievalReason::ServiceUnavailable,
             RetrievalStatus::Failed => {
                 input.results.is_empty()
@@ -174,6 +179,12 @@ impl RetrievalBatch {
             evidence.extend(fragment.evidence.iter().cloned());
         }
         if input.reason == RetrievalReason::NoMatches && !input.results.is_empty() {
+            return Err(RetrievalError::InvalidResult);
+        }
+        if input.reason == RetrievalReason::MoreInformationNeeded
+            && (input.round.0.get() >= request.budget.rounds.0.get()
+                || plan.should_stop(&input.usage, &BTreeSet::new())?)
+        {
             return Err(RetrievalError::InvalidResult);
         }
         if input.reason == RetrievalReason::EvidenceSatisfied

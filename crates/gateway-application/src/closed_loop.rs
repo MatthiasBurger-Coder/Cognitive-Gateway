@@ -124,6 +124,29 @@ pub struct ClosedLoop {
 }
 
 impl ClosedLoop {
+    /// Advisory retrieval cannot resume a paused run or authorize a step.
+    /// Missing information pauses this run until CG-06 observations and current
+    /// policy/process inputs are supplied through their existing boundaries.
+    pub fn apply_retrieval_assessment(
+        &mut self,
+        assessment: &gateway_domain::SufficiencyAssessment,
+    ) -> Result<LoopDecision, LoopError> {
+        if self.pending.is_some()
+            || matches!(self.decision, LoopDecision::Success | LoopDecision::Stopped)
+        {
+            return Err(LoopError::NotReady);
+        }
+        self.audit.push(serde_json::json!({"event":"RETRIEVAL_ASSESSMENT",
+            "state":format!("{:?}", assessment.state),
+            "missing_evidence":assessment.missing_evidence.iter().map(EvidenceId::as_str).collect::<Vec<_>>() }));
+        if !assessment
+            .findings
+            .contains(&SufficiencyFinding::Sufficient)
+        {
+            self.record(LoopReason::MissingEvidence);
+        }
+        Ok(self.decision)
+    }
     pub fn start(
         run_id: ReferenceId,
         scope: ContextScopeId,

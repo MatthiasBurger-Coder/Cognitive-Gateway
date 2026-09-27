@@ -16,6 +16,8 @@ See [`retrieval-plane.md`](retrieval-plane.md) for CG-15 versioned retrieval,
 embedding lineage, token estimation, reservations and bounded execution contracts.
 See [`retrieval-pipeline.md`](retrieval-pipeline.md) for CG-16 federated source
 dispatch, contextual metadata, deterministic hybrid fusion and reranking boundaries.
+See [`recursive-retrieval.md`](recursive-retrieval.md) for CG-19 bounded rounds,
+validated evidence sufficiency and CG-14 pause integration.
 
 See [`resolution-contract.md`](resolution-contract.md) for CG-08 resolution
 result semantics, immutable basis references and downstream ownership.

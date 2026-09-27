@@ -1,5 +1,7 @@
 //! Filesystem/Git and in-memory vector adapters at the outer retrieval boundary.
-use gateway_application::ports::outbound::{EmbeddingPort, KnowledgeRetrievalPort};
+use gateway_application::ports::outbound::{
+    EmbeddingPort, KnowledgeRetrievalPort, RetrievalAttemptFailure,
+};
 use gateway_application::retrieval_pipeline::{
     ContextualLocation, FusionPolicy, HybridCandidate, RetrievalReranker, RetrievalSourceAdapter,
     ScoreOrigin, federate, fuse_candidates, rerank,
@@ -10,8 +12,8 @@ use gateway_domain::{
     EmbeddingResult, FreshnessStatus, NonEmptyText, Provenance, ProvenanceId, QualityMetadata,
     ReferenceId, RetrievalBatch, RetrievalBatchInput, RetrievalError, RetrievalExplanation,
     RetrievalExplanationTarget, RetrievalPlan, RetrievalReason, RetrievalRequest, RetrievalResult,
-    RetrievalRound, RetrievalSourceId, RetrievalStatus, RetrievalStrategyId, RetrievedFragment,
-    SensitivityClass, SourceId, SourceKind, TrustClass, Uncertainty,
+    RetrievalRound, RetrievalSourceId, RetrievalStatus, RetrievalStrategyId, RetrievalVersion,
+    RetrievedFragment, SensitivityClass, SourceId, SourceKind, TrustClass, Uncertainty,
 };
 use sha2::{Digest, Sha256};
 use std::{
@@ -492,8 +494,8 @@ fn cosine_score(left: &[f32], right: &[f32]) -> u32 {
 }
 
 /// One bounded retrieval round over explicitly registered source adapters.
-/// The v1 batch contract requires a terminal stop reason, so this executor
-/// accepts single-round plans and accounts that round honestly.
+/// Cumulative usage enters and leaves every call; callers own result selection
+/// and evidence sufficiency across rounds.
 pub struct FederatedRetrievalPort<'a> {
     pub adapters: Vec<&'a dyn RetrievalSourceAdapter>,
     pub fusion: FusionPolicy,
@@ -501,6 +503,34 @@ pub struct FederatedRetrievalPort<'a> {
 }
 
 impl KnowledgeRetrievalPort for FederatedRetrievalPort<'_> {
+    fn retrieve_measured(
+        &self,
+        plan: &RetrievalPlan,
+        round: RetrievalRound,
+        usage: &BudgetUsage,
+    ) -> Result<RetrievalBatch, RetrievalAttemptFailure> {
+        let started = Instant::now();
+        self.retrieve(plan, round, usage).map_err(|error| {
+            let mut consumed = usage.clone();
+            consumed.rounds = round.0.get();
+            consumed.elapsed_ms = consumed
+                .elapsed_ms
+                .saturating_add(u64::try_from(started.elapsed().as_millis()).unwrap_or(u64::MAX));
+            let query_bytes = plan
+                .request()
+                .input()
+                .queries
+                .iter()
+                .fold(0u64, |sum, query| {
+                    sum.saturating_add(query.0.as_str().len() as u64)
+                });
+            consumed.tokens = consumed.tokens.saturating_add(query_bytes);
+            RetrievalAttemptFailure {
+                error,
+                usage: consumed,
+            }
+        })
+    }
     fn retrieve(
         &self,
         plan: &RetrievalPlan,
@@ -508,11 +538,45 @@ impl KnowledgeRetrievalPort for FederatedRetrievalPort<'_> {
         usage: &BudgetUsage,
     ) -> Result<RetrievalBatch, RetrievalError> {
         let input = plan.request().input();
-        if input.budget.rounds.0.get() != 1 || round.0.get() != 1 || usage.rounds != 0 {
+        if input.version == RetrievalVersion::V1 && input.budget.rounds.0.get() != 1 {
+            return Err(RetrievalError::InvalidPlan);
+        }
+        if round.0.get()
+            != usage
+                .rounds
+                .checked_add(1)
+                .ok_or(RetrievalError::ArithmeticOverflow)?
+            || round.0.get() > input.budget.rounds.0.get()
+        {
             return Err(RetrievalError::InvalidPlan);
         }
         usage.validate(&input.budget)?;
-        if usage.results != 0 || plan.should_stop(usage, &BTreeSet::new())? {
+        if plan.should_stop(usage, &BTreeSet::new())? {
+            return Err(RetrievalError::BudgetExceeded);
+        }
+        let query_bytes = input.queries.iter().try_fold(0u64, |sum, query| {
+            sum.checked_add(query.0.as_str().len() as u64)
+                .ok_or(RetrievalError::ArithmeticOverflow)
+        })?;
+        if usage
+            .tokens
+            .checked_add(query_bytes)
+            .is_none_or(|total| total > input.budget.tokens.0)
+        {
+            return Err(RetrievalError::BudgetExceeded);
+        }
+        let reserved_context = input
+            .budget
+            .context
+            .reservations()
+            .get(&ContextBudgetClass::Knowledge)
+            .map_or(0, |value| value.0);
+        let used_context = usage
+            .context
+            .get(&ContextBudgetClass::Knowledge)
+            .copied()
+            .unwrap_or(0);
+        if used_context >= reserved_context {
             return Err(RetrievalError::BudgetExceeded);
         }
         let started = Instant::now();
@@ -572,14 +636,9 @@ impl KnowledgeRetrievalPort for FederatedRetrievalPort<'_> {
         let mut budget_filtered = false;
         let mut context = usage.context.clone();
         let mut tokens = usage.tokens;
-        for query in &input.queries {
-            tokens = tokens
-                .checked_add(query.0.as_str().len() as u64)
-                .ok_or(RetrievalError::ArithmeticOverflow)?;
-        }
-        if tokens > input.budget.tokens.0 {
-            return Err(RetrievalError::BudgetExceeded);
-        }
+        tokens = tokens
+            .checked_add(query_bytes)
+            .ok_or(RetrievalError::ArithmeticOverflow)?;
         let available_context = input
             .budget
             .context
@@ -591,7 +650,11 @@ impl KnowledgeRetrievalPort for FederatedRetrievalPort<'_> {
             .copied()
             .unwrap_or(0);
         for mut ranked in ranked.ranked {
-            if accepted.len() as u64 >= input.budget.results.0.get() {
+            if usage
+                .results
+                .checked_add(accepted.len() as u64)
+                .is_none_or(|count| count >= input.budget.results.0.get())
+            {
                 budget_filtered = true;
                 break;
             }
@@ -672,9 +735,15 @@ impl KnowledgeRetrievalPort for FederatedRetrievalPort<'_> {
             .try_into()
             .map_err(|_| RetrievalError::ArithmeticOverflow)?;
         let final_usage = BudgetUsage {
-            results: accepted.len() as u64,
-            rounds: 1,
-            elapsed_ms,
+            results: usage
+                .results
+                .checked_add(accepted.len() as u64)
+                .ok_or(RetrievalError::ArithmeticOverflow)?,
+            rounds: round.0.get(),
+            elapsed_ms: usage
+                .elapsed_ms
+                .checked_add(elapsed_ms)
+                .ok_or(RetrievalError::ArithmeticOverflow)?,
             cost: usage.cost,
             cost_unit: usage.cost_unit.clone(),
             tokens,
@@ -686,6 +755,13 @@ impl KnowledgeRetrievalPort for FederatedRetrievalPort<'_> {
             (
                 RetrievalStatus::Degraded,
                 RetrievalReason::ServiceUnavailable,
+            )
+        } else if round.0.get() < input.budget.rounds.0.get()
+            && !plan.should_stop(&final_usage, &BTreeSet::new())?
+        {
+            (
+                RetrievalStatus::Partial,
+                RetrievalReason::MoreInformationNeeded,
             )
         } else if accepted.is_empty() && !budget_filtered {
             (RetrievalStatus::Complete, RetrievalReason::NoMatches)
