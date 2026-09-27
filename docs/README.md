@@ -12,6 +12,9 @@ See [`adr/`](adr/) for accepted architecture decisions.
 
 ## Core domain contract
 
+See [`retrieval-plane.md`](retrieval-plane.md) for CG-15 versioned retrieval,
+embedding lineage, token estimation, reservations and bounded execution contracts.
+
 See [`resolution-contract.md`](resolution-contract.md) for CG-08 resolution
 result semantics, immutable basis references and downstream ownership.
 See [`resolution-snapshots.md`](resolution-snapshots.md) for coherent read-only

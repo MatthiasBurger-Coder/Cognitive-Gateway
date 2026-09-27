@@ -110,3 +110,39 @@ pub trait CachePort {
 
     fn clear_scope(&self, scope: &ContextScopeId) -> Result<usize, Self::Error>;
 }
+
+/// Plans advisory information acquisition from an explicit immutable request.
+/// Implementations must preserve the request's scope, requirements, limits and order.
+pub trait RetrievalPlanner {
+    fn plan(
+        &self,
+        request: &gateway_domain::RetrievalRequest,
+    ) -> Result<gateway_domain::RetrievalPlan, gateway_domain::RetrievalError>;
+}
+
+/// Executes one bounded round. Implementations reserve usage before dispatch,
+/// validate cumulative accounting and return explicit unavailable/degraded outcomes.
+pub trait KnowledgeRetrievalPort {
+    fn retrieve(
+        &self,
+        plan: &gateway_domain::RetrievalPlan,
+        round: gateway_domain::RetrievalRound,
+        usage: &gateway_domain::BudgetUsage,
+    ) -> Result<gateway_domain::RetrievalBatch, gateway_domain::RetrievalError>;
+}
+
+/// Produces derived vectors with source snapshot and model/version lineage.
+pub trait EmbeddingPort {
+    fn embed(
+        &self,
+        request: &gateway_domain::EmbeddingRequest,
+    ) -> Result<gateway_domain::EmbeddingResult, gateway_domain::RetrievalError>;
+}
+
+/// Replaceable tokenizer/estimator boundary. Unknown counts must stay unknown.
+pub trait TokenEstimatorPort {
+    fn estimate(
+        &self,
+        request: &gateway_domain::TokenEstimateRequest,
+    ) -> Result<gateway_domain::TokenEstimate, gateway_domain::RetrievalError>;
+}
