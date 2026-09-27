@@ -78,5 +78,9 @@
   {
     "name": "CG-15 retrieval coverage gate",
     "command": "python3 scripts/check-retrieval-coverage.py --self-test\npython3 scripts/check-retrieval-coverage.py \"$EVIDENCE_DIR/domain-coverage.json\"\n"
+  },
+  {
+    "name": "CG-16 retrieval pipeline coverage gate",
+    "command": "CARGO_BUILD_JOBS=1 cargo llvm-cov --workspace --tests --json --output-path \"$EVIDENCE_DIR/cg16-coverage.json\"\npython3 scripts/check-cg16-coverage.py --self-test\npython3 scripts/check-cg16-coverage.py \"$EVIDENCE_DIR/cg16-coverage.json\"\n"
   }
 ]

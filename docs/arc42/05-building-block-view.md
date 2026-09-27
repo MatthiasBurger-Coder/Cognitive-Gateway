@@ -123,6 +123,12 @@ counts. The application owns all four new outbound traits. No new dependency
 edge is needed. See [the retrieval contract](../retrieval-plane.md) and
 [ADR-011](../adr/ADR-011-modular-retrieval-plane.md).
 
+CG-16 adds deterministic federation, fusion and reranking contracts in
+`gateway-application` and filesystem/Git plus in-memory vector adapters in
+the outer `gateway-daemon` crate. The vector adapter uses the embedding port
+and checks source snapshots before search. See
+[the retrieval pipeline](../retrieval-pipeline.md).
+
 ## 5.3 Proposed Python services
 
 ```text
@@ -168,7 +174,7 @@ The reviewed direct dependency allowlist is:
 | process | domain | serde, serde_json, sha2 |
 | policy | domain | serde, serde_json (test support) |
 | context | domain | serde, serde_json |
-| daemon | all seven inner crates | serde, serde_json |
+| daemon | all seven inner crates | serde, serde_json, sha2 |
 
 Crate names in the table have the `gateway-` prefix. New workspace members,
 dependency edges or external libraries require a reviewed update to this table

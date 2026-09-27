@@ -141,7 +141,8 @@ selection, redistribution policies and compaction.
 
 ## Explainability and failure semantics
 
-`RetrievalExplanation` identifies a source, strategy, or result, whether it was
+`RetrievalExplanation` identifies a source, strategy, result, or optional CG-16
+reranker, whether it was
 selected, a stable `RetrievalReason` variant, and a nonempty explanation. V1
 reason names are fixed Rust codes: `ExplicitSelection`, `Relevant`,
 `TrustRejected`, `FreshnessRejected`, `SensitivityRejected`, `Duplicate`,
@@ -153,7 +154,7 @@ Rejected candidates can retain their IDs in explanation records without content.
 | --- | --- |
 | Complete | EvidenceSatisfied, NoMatches, or BudgetReached |
 | Partial | BudgetReached; accepted subset retained |
-| Degraded | ServiceUnavailable; names an unavailable optional source/strategy |
+| Degraded | ServiceUnavailable; names an unavailable optional source, strategy or reranker |
 | Failed | ServiceUnavailable or Unsupported; no accepted results |
 
 BudgetReached requires a hard limit to be reached; EvidenceSatisfied requires
@@ -163,7 +164,7 @@ stable `BudgetExceeded` error. Optional semantic unavailability is visible as
 Degraded; a required service must fail. The same plan is retained in either case.
 `RetrievalError` codes distinguish unsupported versions/sources/strategies,
 malformed plans/budgets, overflow, exhausted budgets, duplicate identities,
-scope mismatches, malformed results, embedding incompatibility, invalid token
+scope mismatches, malformed results, embedding incompatibility, stale indexes, invalid token
 estimates and service unavailability. Errors contain no raw source content.
 
 ## Embedding and token estimation

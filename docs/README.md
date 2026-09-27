@@ -14,6 +14,8 @@ See [`adr/`](adr/) for accepted architecture decisions.
 
 See [`retrieval-plane.md`](retrieval-plane.md) for CG-15 versioned retrieval,
 embedding lineage, token estimation, reservations and bounded execution contracts.
+See [`retrieval-pipeline.md`](retrieval-pipeline.md) for CG-16 federated source
+dispatch, contextual metadata, deterministic hybrid fusion and reranking boundaries.
 
 See [`resolution-contract.md`](resolution-contract.md) for CG-08 resolution
 result semantics, immutable basis references and downstream ownership.

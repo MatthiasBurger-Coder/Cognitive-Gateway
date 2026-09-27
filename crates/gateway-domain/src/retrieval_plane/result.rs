@@ -36,6 +36,7 @@ pub enum RetrievalExplanationTarget {
     Source(RetrievalSourceId),
     Strategy(RetrievalStrategyId),
     Result(ReferenceId),
+    Reranker,
 }
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct RetrievalExplanation {
@@ -131,6 +132,7 @@ impl RetrievalBatch {
                     false,
                     input.results.iter().any(|r| &r.fragment.id == id),
                 ),
+                RetrievalExplanationTarget::Reranker => (true, true, false),
             };
             if !known
                 || (!explanation.selected && returned)
