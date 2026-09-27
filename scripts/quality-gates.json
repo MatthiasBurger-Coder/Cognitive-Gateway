@@ -74,5 +74,9 @@
   {
     "name": "CG-14 closed-loop coverage gate",
     "command": "python3 scripts/check-closed-loop-coverage.py --self-test\npython3 scripts/check-closed-loop-coverage.py \"$EVIDENCE_DIR/cg08-coverage.json\"\n"
+  },
+  {
+    "name": "CG-15 retrieval coverage gate",
+    "command": "python3 scripts/check-retrieval-coverage.py --self-test\npython3 scripts/check-retrieval-coverage.py \"$EVIDENCE_DIR/domain-coverage.json\"\n"
   }
 ]

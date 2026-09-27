@@ -94,7 +94,11 @@ into `gateway-domain` or the deterministic core.
 ### Adapter attachment points
 
 ```text
-KnowledgePort       <- Git / filesystem / vector / graph RAG adapters
+KnowledgePort       <- existing Git / filesystem knowledge adapters
+RetrievalPlanner    <- explicit bounded retrieval planning
+KnowledgeRetrievalPort <- lexical / semantic / graph / memory adapters
+EmbeddingPort       <- replaceable embedding services
+TokenEstimatorPort  <- replaceable tokenizer / estimation services
 CapabilityPort      <- MCP / Git / quality / GitHub / runtime-tool adapters
 ExecutionRuntimePort<- Codex / PraisonAI / local/cloud LLM adapters
 EvidencePort        <- audit/evidence persistence adapters
@@ -111,6 +115,13 @@ authority-bearing execution field.
 The adapter technologies are replaceable implementation choices. Their
 provider-specific configuration and behavior do not belong in the domain
 contract.
+
+CG-15 adds versioned retrieval IR in `gateway-domain::retrieval_plane` with
+immutable executable plans, explicit finite budgets and stop conditions,
+scoped provenance, derived embedding lineage, and exact/estimated/unknown token
+counts. The application owns all four new outbound traits. No new dependency
+edge is needed. See [the retrieval contract](../retrieval-plane.md) and
+[ADR-011](../adr/ADR-011-modular-retrieval-plane.md).
 
 ## 5.3 Proposed Python services
 

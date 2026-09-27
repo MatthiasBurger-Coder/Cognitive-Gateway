@@ -29,6 +29,7 @@ pub mod policy;
 pub mod quality;
 pub mod relationships;
 pub mod retrieval;
+pub mod retrieval_plane;
 pub mod serialization;
 pub mod situation;
 pub mod skill;
@@ -93,6 +94,7 @@ pub use quality::{
     SensitivityClass, TrustClass, Uncertainty, UnixTimestamp, ValidityInterval, evaluate_freshness,
 };
 pub use retrieval::{KnowledgeProvenance, KnowledgeQuery, RetrievedKnowledge};
+pub use retrieval_plane::*;
 pub use serialization::SerializationError;
 pub use situation::{
     ASSESSMENT_RULE_VERSION, Assessment, AssessmentBasis, AssessmentConclusion, AssessmentKind,
