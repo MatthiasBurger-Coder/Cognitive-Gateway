@@ -141,6 +141,24 @@ fn fragment(id: &str) -> RetrievedFragment {
 }
 
 #[test]
+fn sufficiency_audit_reasons_are_stable_codes_without_source_text() {
+    let all = [
+        SufficiencyFinding::Sufficient,
+        SufficiencyFinding::Partial,
+        SufficiencyFinding::Insufficient,
+        SufficiencyFinding::Conflicting,
+        SufficiencyFinding::Stale,
+        SufficiencyFinding::Untrusted,
+        SufficiencyFinding::Contaminated,
+        SufficiencyFinding::BudgetExhausted,
+    ];
+    for finding in all {
+        assert!(finding.as_str().starts_with("SUFFICIENCY_"));
+        assert!(!finding.as_str().contains("Ignore rules"));
+    }
+}
+
+#[test]
 fn sufficiency_requires_validated_links_and_preserves_combined_failures() {
     let required = input().required;
     let id = EvidenceId::new("architecture-evidence").unwrap();
@@ -153,6 +171,10 @@ fn sufficiency_requires_validated_links_and_preserves_combined_failures() {
     let empty = assess_sufficiency(&required, &[unchecked], false);
     assert_eq!(empty.state, SufficiencyFinding::Insufficient);
     assert!(empty.accepted.is_empty());
+    assert_eq!(
+        empty.rejection_reasons[&base.id],
+        BTreeSet::from([SufficiencyFinding::Insufficient])
+    );
 
     let verified = AssessedFragment {
         fragment: base.clone(),
@@ -176,6 +198,10 @@ fn sufficiency_requires_validated_links_and_preserves_combined_failures() {
     stale.contaminated = true;
     let finding = assess_sufficiency(&required, &[verified, stale], true);
     assert_eq!(finding.state, SufficiencyFinding::Contaminated);
+    assert!(
+        finding.rejection_reasons[&ReferenceId::new("stale").unwrap()]
+            .contains(&SufficiencyFinding::Contaminated)
+    );
     for expected in [
         SufficiencyFinding::Partial,
         SufficiencyFinding::Stale,
@@ -676,6 +702,90 @@ fn results_preserve_advisory_content_scope_and_lineage() {
             Err(RetrievalError::InvalidResult)
         );
     }
+}
+
+#[test]
+fn retrieval_explanations_discard_adapter_supplied_secret_text() {
+    let mut batch_input = batch();
+    let mut explanation = batch_input.explanations.pop_first().unwrap();
+    explanation.detail = text("canary-secret-from-tool-output");
+    batch_input.explanations.insert(explanation);
+    let validated = RetrievalBatch::new(batch_input, &plan()).unwrap();
+    assert_eq!(
+        validated
+            .input()
+            .explanations
+            .iter()
+            .next()
+            .unwrap()
+            .detail
+            .as_str(),
+        RetrievalReason::Relevant.as_str()
+    );
+    assert!(!format!("{:?}", validated.input().explanations).contains("canary-secret"));
+    let mut request = input();
+    request.required.description = text("canary-secret-in-query");
+    let support = support(&request);
+    let plan = RetrievalPlan::new(
+        RetrievalPlanId::new("plan").unwrap(),
+        RetrievalRequest::new(request).unwrap(),
+        &support,
+    )
+    .unwrap();
+    assert!(
+        plan.explanations()
+            .iter()
+            .all(|item| item.detail.as_str() == RetrievalReason::ExplicitSelection.as_str())
+    );
+}
+
+#[test]
+fn retrieval_reason_codes_cover_every_public_variant() {
+    let all = [
+        RetrievalReason::ExplicitSelection,
+        RetrievalReason::Relevant,
+        RetrievalReason::TrustRejected,
+        RetrievalReason::FreshnessRejected,
+        RetrievalReason::SensitivityRejected,
+        RetrievalReason::Duplicate,
+        RetrievalReason::BudgetReached,
+        RetrievalReason::EvidenceSatisfied,
+        RetrievalReason::NoMatches,
+        RetrievalReason::MoreInformationNeeded,
+        RetrievalReason::ServiceUnavailable,
+        RetrievalReason::Unsupported,
+    ];
+    let codes: BTreeSet<_> = all.into_iter().map(RetrievalReason::as_str).collect();
+    assert_eq!(codes.len(), all.len());
+    assert!(codes.iter().all(|code| code.starts_with("RETRIEVAL_")));
+}
+
+#[test]
+fn retrieved_content_cannot_claim_canonical_authority_even_if_requested() {
+    let mut request = input();
+    request
+        .required
+        .accepted_trust
+        .insert(TrustClass::CanonicalReference);
+    let support = support(&request);
+    let plan = RetrievalPlan::new(
+        RetrievalPlanId::new("plan").unwrap(),
+        RetrievalRequest::new(request).unwrap(),
+        &support,
+    )
+    .unwrap();
+    let mut result = batch();
+    result.results[0].fragment.quality = QualityMetadata::new(
+        TrustClass::CanonicalReference,
+        SensitivityClass::Public,
+        Confidence::Unknown,
+        FreshnessStatus::Fresh,
+        Uncertainty::None,
+    );
+    assert_eq!(
+        RetrievalBatch::new(result, &plan),
+        Err(RetrievalError::InvalidResult)
+    );
 }
 #[test]
 fn empty_partial_failed_and_optional_degradation_are_explicit() {

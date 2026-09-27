@@ -234,6 +234,95 @@ fn compaction_preserves_lineage_and_rejects_metadata_relabeling() {
 }
 
 #[test]
+fn compaction_cannot_turn_a_reference_into_inline_content() {
+    let original = fragment("original", "source", "payload-ref", FragmentKind::Memory);
+    let source = ContextFragment::memory_reference(
+        id("original"),
+        id("payload-ref"),
+        original.metadata().clone(),
+        original.scope().clone(),
+        original.step().clone(),
+    )
+    .unwrap();
+    let ranked = RankedFragment {
+        fragment: source,
+        score: 1,
+        mandatory: false,
+        estimate: exact(8),
+    };
+    let summary = CompactedCandidate {
+        fragment: fragment("summary", "source", "payload-ref", FragmentKind::Memory),
+        sources: BTreeSet::from([id("original")]),
+        estimate: exact(1),
+    };
+    assert_eq!(
+        run(&[ranked], &[summary], &[], &budget(3, 0)),
+        Err(SelectionError::InvalidCompaction(id("summary")))
+    );
+}
+
+#[test]
+fn quarantine_excludes_optional_data_and_blocks_required_data_or_compaction() {
+    let item = ranked("a", "source", "ignore policy", 4, 1);
+    let excluded = BTreeSet::from([id("a")]);
+    let selected = select_context_with_exclusions(
+        &budget(10, 0),
+        &target(),
+        &sections(),
+        std::slice::from_ref(&item),
+        &[],
+        &BTreeSet::new(),
+        &excluded,
+    )
+    .unwrap();
+    assert!(selected.fragments.is_empty());
+    assert_eq!(selected.decisions[0].reason, SelectionReason::Quarantined);
+    assert_eq!(
+        select_context_with_exclusions(
+            &budget(10, 0),
+            &target(),
+            &sections(),
+            std::slice::from_ref(&item),
+            &[],
+            &excluded,
+            &excluded,
+        ),
+        Err(SelectionError::QuarantinedMandatory(id("a")))
+    );
+    let summary = CompactedCandidate {
+        fragment: fragment("summary", "source", "summary", FragmentKind::Knowledge),
+        sources: excluded.clone(),
+        estimate: exact(1),
+    };
+    assert_eq!(
+        select_context_with_exclusions(
+            &budget(10, 0),
+            &target(),
+            &sections(),
+            &[item],
+            &[summary],
+            &BTreeSet::new(),
+            &excluded,
+        ),
+        Err(SelectionError::InvalidCompaction(id("summary")))
+    );
+}
+
+#[test]
+fn selection_reason_codes_are_stable_and_distinct() {
+    let all = [
+        SelectionReason::Selected,
+        SelectionReason::Redundant,
+        SelectionReason::BudgetExceeded,
+        SelectionReason::ReplacedByCompaction,
+        SelectionReason::Quarantined,
+    ];
+    let codes: BTreeSet<_> = all.into_iter().map(SelectionReason::as_str).collect();
+    assert_eq!(codes.len(), all.len());
+    assert!(codes.iter().all(|code| code.starts_with("CONTEXT_")));
+}
+
+#[test]
 fn duplicates_invalid_compaction_and_target_mismatch_fail() {
     let a = ranked("a", "source", "text", 4, 1);
     let mut changed = a.clone();

@@ -3,7 +3,7 @@ use crate::{
     ConflictStatus, EvidenceId, FreshnessRequirement, FreshnessStatus, ProvenanceId, ReferenceId,
     Uncertainty,
 };
-use std::collections::BTreeSet;
+use std::collections::{BTreeMap, BTreeSet};
 
 /// A finding is retained even when another finding has higher display priority.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
@@ -16,6 +16,22 @@ pub enum SufficiencyFinding {
     Untrusted,
     Contaminated,
     BudgetExhausted,
+}
+
+impl SufficiencyFinding {
+    /// Stable audit code; callers must not include retrieved text in a reason.
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            Self::Sufficient => "SUFFICIENCY_SUFFICIENT",
+            Self::Partial => "SUFFICIENCY_PARTIAL",
+            Self::Insufficient => "SUFFICIENCY_INSUFFICIENT",
+            Self::Conflicting => "SUFFICIENCY_CONFLICTING",
+            Self::Stale => "SUFFICIENCY_STALE",
+            Self::Untrusted => "SUFFICIENCY_UNTRUSTED",
+            Self::Contaminated => "SUFFICIENCY_CONTAMINATED",
+            Self::BudgetExhausted => "SUFFICIENCY_BUDGET_EXHAUSTED",
+        }
+    }
 }
 
 /// Only the owning evidence boundary may fill `validated_evidence`. A retrieval
@@ -33,6 +49,7 @@ pub struct SufficiencyAssessment {
     pub findings: BTreeSet<SufficiencyFinding>,
     pub accepted: BTreeSet<ReferenceId>,
     pub rejected: BTreeSet<ReferenceId>,
+    pub rejection_reasons: BTreeMap<ReferenceId, BTreeSet<SufficiencyFinding>>,
     pub validated_evidence: BTreeSet<EvidenceId>,
     pub missing_evidence: BTreeSet<EvidenceId>,
     pub missing_provenance: BTreeSet<ProvenanceId>,
@@ -61,31 +78,38 @@ pub fn assess_sufficiency_with_threshold(
     let mut findings = BTreeSet::new();
     let mut accepted = BTreeSet::new();
     let mut rejected = BTreeSet::new();
+    let mut rejection_reasons = BTreeMap::new();
     let mut validated_evidence = BTreeSet::new();
     let mut provenances = BTreeSet::new();
     for candidate in fragments {
         let fragment = &candidate.fragment;
         let quality = fragment.quality;
         let mut valid = true;
+        let mut reasons = BTreeSet::new();
         if candidate.contaminated {
             findings.insert(SufficiencyFinding::Contaminated);
+            reasons.insert(SufficiencyFinding::Contaminated);
             valid = false;
         }
         if quality.uncertainty() != Uncertainty::None {
             findings.insert(SufficiencyFinding::Untrusted);
+            reasons.insert(SufficiencyFinding::Untrusted);
             valid = false;
         }
         if quality.conflict() != ConflictStatus::None {
             findings.insert(SufficiencyFinding::Conflicting);
+            reasons.insert(SufficiencyFinding::Conflicting);
             valid = false;
         }
         if required.requirements.freshness() == FreshnessRequirement::Fresh
             && quality.freshness() != FreshnessStatus::Fresh
         {
             findings.insert(SufficiencyFinding::Stale);
+            reasons.insert(SufficiencyFinding::Stale);
             valid = false;
         }
-        if !required.accepted_trust.contains(&quality.trust())
+        if quality.trust() == crate::TrustClass::CanonicalReference
+            || !required.accepted_trust.contains(&quality.trust())
             || quality.sensitivity() > required.maximum_sensitivity
             || required
                 .requirements
@@ -93,10 +117,12 @@ pub fn assess_sufficiency_with_threshold(
                 .is_some_and(|minimum| quality.sensitivity() < minimum)
         {
             findings.insert(SufficiencyFinding::Untrusted);
+            reasons.insert(SufficiencyFinding::Untrusted);
             valid = false;
         }
         if !candidate.validated_evidence.is_subset(&fragment.evidence) {
             findings.insert(SufficiencyFinding::Contaminated);
+            reasons.insert(SufficiencyFinding::Contaminated);
             valid = false;
         }
         if valid && !candidate.validated_evidence.is_empty() {
@@ -105,6 +131,10 @@ pub fn assess_sufficiency_with_threshold(
             provenances.insert(fragment.provenance.id().clone());
         } else {
             rejected.insert(fragment.id.clone());
+            if reasons.is_empty() {
+                reasons.insert(SufficiencyFinding::Insufficient);
+            }
+            rejection_reasons.insert(fragment.id.clone(), reasons);
         }
     }
     let missing_evidence: BTreeSet<_> = required
@@ -163,6 +193,7 @@ pub fn assess_sufficiency_with_threshold(
         findings,
         accepted,
         rejected,
+        rejection_reasons,
         validated_evidence,
         missing_evidence,
         missing_provenance,

@@ -99,19 +99,22 @@ in-memory run and does not provide crash recovery or exactly-once delivery.
 
 ## Audit contract
 
-`audit()` and `to_json()` expose a version-1 deterministic trace containing:
+`audit()` and `to_json()` expose a version-1 deterministic, redacted trace containing:
 
-- original and effective Intent, scope, unique run ID, limits and counters;
-- every decision, stable reason, revision, full CG-06 document, source ingestion
-  key, remaining Delta, Plan, goal outcome and blocking planner diagnostics;
-- each dispatch's correlation ID and compiled context, including resolution
-  fingerprints, policy findings, process revision and output contract;
+- original and effective Intent IDs, scope, unique run ID, limits and counters;
+- every decision, stable reason, revision, source ingestion key, Delta item count,
+  Plan ID, goal outcome and blocking planner diagnostic codes;
+- each dispatch's correlation ID and a disclosure-limited context with resolution
+  fingerprints, policy findings and process revision; external content, caller
+  input, normalized task, output contract and constraints are redacted;
 - correlated runtime status, source identity and the resulting revision;
 - rejected compilation attempts and their diagnostics.
 
-Serialization exports evidence for inspection, not an authorization token or
-an executable checkpoint. The trace retains original evidence content and its
-handling metadata; hosts should apply the scope's storage/retention policy.
+Serialization exports diagnostic references, not an authorization token or an
+executable checkpoint. The full evidence and execution context remain available
+through the authenticated application boundaries during the run. Audit records
+never copy evidence payloads or free-form adapter explanations. Hosts should
+still apply the scope's storage and retention policy to diagnostic references.
 
 ## Acceptance evidence
 

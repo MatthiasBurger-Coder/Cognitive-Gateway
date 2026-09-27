@@ -82,7 +82,7 @@ by ascending priority then ID; duplicate IDs are rejected even if their other
 metadata differs. Priority is semantic and is never discarded. Each selected
 source/strategy is eligible for the explicit plan; adapters must not introduce
 additional IDs or silently substitute services. Plan explanations record the
-explicit selections and required-information rationale.
+explicit selections with stable reason codes, without copying query text.
 
 Result relevance is an integer in `[0, 1_000_000]` representing millionths on a
 common relevance scale. Adapters must normalize native scores to that scale;
@@ -146,7 +146,9 @@ redistribution. See [context budgeting](context-budgeting.md).
 
 `RetrievalExplanation` identifies a source, strategy, result, or optional CG-16
 reranker, whether it was
-selected, a stable `RetrievalReason` variant, and a nonempty explanation. V1
+selected, a stable `RetrievalReason` variant, and a nonempty explanation. Validated
+batch explanations replace adapter-supplied prose with `RETRIEVAL_*` reason codes.
+V1
 reason names are fixed Rust codes: `ExplicitSelection`, `Relevant`,
 `TrustRejected`, `FreshnessRejected`, `SensitivityRejected`, `Duplicate`,
 `BudgetReached`, `EvidenceSatisfied`, `NoMatches`, `ServiceUnavailable`,

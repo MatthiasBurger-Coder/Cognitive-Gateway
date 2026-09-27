@@ -645,6 +645,9 @@ fn evidence_context_uses_captured_provenance_and_omits_raw_evidence() {
     projection["fragments"] = json!([{"id":"evidence-fragment","kind":"evidence","content":"evidence","scope":"external-project","step":plan["plan"]["steps"][0]["id"],
         "source":"untrusted://relabel","quality":{"trust":"OBSERVED_EVIDENCE","sensitivity":"PUBLIC","confidence":{"kind":"SCORE","value":1.0},"freshness":"FRESH","uncertainty":"NONE","conflict":"NONE"},"rationale":"source reference needed"}]);
     projection["selected"] = json!(["evidence-fragment"]);
+    let rejected = f.downstream("compile", &plan, &policy, Some(&projection), 9);
+    assert_eq!(rejected["error"]["code"], "INVALID_FRAGMENT");
+    projection["fragments"][0]["source"] = json!("repo://external");
     let output = f.downstream("compile", &plan, &policy, Some(&projection), 0);
     assert_eq!(output["dynamic"][0]["representation"], "reference");
     assert_eq!(

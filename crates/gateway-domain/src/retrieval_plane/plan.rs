@@ -151,20 +151,18 @@ impl RetrievalPlan {
                 target: RetrievalExplanationTarget::Source(source.id.clone()),
                 selected: true,
                 reason: RetrievalReason::ExplicitSelection,
-                detail: request.0.required.description.clone(),
+                detail: NonEmptyText::new(RetrievalReason::ExplicitSelection.as_str())
+                    .expect("stable reason is nonempty"),
             })
-            .chain(
-                request
-                    .0
-                    .strategies
-                    .iter()
-                    .map(|strategy| RetrievalExplanation {
-                        target: RetrievalExplanationTarget::Strategy(strategy.id.clone()),
-                        selected: true,
-                        reason: RetrievalReason::ExplicitSelection,
-                        detail: request.0.required.description.clone(),
-                    }),
-            )
+            .chain(request.0.strategies.iter().map(|strategy| {
+                RetrievalExplanation {
+                    target: RetrievalExplanationTarget::Strategy(strategy.id.clone()),
+                    selected: true,
+                    reason: RetrievalReason::ExplicitSelection,
+                    detail: NonEmptyText::new(RetrievalReason::ExplicitSelection.as_str())
+                        .expect("stable reason is nonempty"),
+                }
+            }))
             .collect();
         Ok(Self {
             id,

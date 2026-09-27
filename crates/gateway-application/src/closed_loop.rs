@@ -6,6 +6,7 @@ use crate::{
         CompileStepInput, CompiledStep, ContextApplication, ContextApplicationError,
     },
 };
+use gateway_context::ContextDisclosurePolicy;
 use gateway_domain::*;
 use gateway_policy::PolicyDecision;
 use serde::Serialize;
@@ -218,7 +219,8 @@ impl ClosedLoop {
     pub fn to_json(&self) -> Result<String, serde_json::Error> {
         serde_json::to_string(
             &serde_json::json!({"schema_version":1, "run_id":self.run_id, "scope":self.scope,
-            "intent":self.original_intent, "execution_intent": self.intent,
+            "intent":{"id":self.original_intent.id().as_str(),"representation":"redacted"},
+            "execution_intent":{"id":self.intent.id().as_str(),"representation":"redacted"},
             "max_iterations":self.rules.max_iterations, "max_retries":self.rules.max_retries,
             "pending_execution":self.pending,
             "iterations":self.iterations, "retries":self.retries, "decision":self.decision,
@@ -267,7 +269,7 @@ impl ClosedLoop {
                     };
                 self.audit.push(
                     serde_json::json!({"event":"DISPATCH_REJECTED", "revision":self.revision,
-                    "plan":snapshot.plan.id().as_str(), "error":format!("{error:?}")}),
+                    "plan":snapshot.plan.id().as_str(), "reason":reason}),
                 );
                 self.record(reason);
                 return Err(LoopError::Compilation(error));
@@ -276,8 +278,16 @@ impl ClosedLoop {
         self.iterations += 1;
         let execution = ReferenceId::new(format!("{}-execution-{}", self.run_id, self.iterations))?;
         self.pending = Some(execution.clone());
-        self.audit.push(serde_json::json!({"event":"EXECUTION", "execution":execution,
-            "revision":self.revision, "context":serde_json::from_str::<serde_json::Value>(&compiled.to_json().expect("compiled context serializes")).expect("compiled JSON")}));
+        self.audit.push(
+            serde_json::json!({"event":"EXECUTION", "execution":execution,
+            "revision":self.revision, "context":serde_json::from_str::<serde_json::Value>(
+                &compiled.to_json_with_policy(ContextDisclosurePolicy {
+                    maximum_sensitivity: SensitivityClass::Public,
+                    include_caller_input: false,
+                    include_external_content: false,
+                }).expect("compiled context serializes")
+            ).expect("compiled JSON")}),
+        );
         let outcome = runtime.execute(&execution, &compiled);
         self.ingest(outcome)
     }
@@ -394,10 +404,12 @@ impl ClosedLoop {
         };
         self.audit.push(serde_json::json!({"event":"DECISION", "revision":self.revision,
             "decision":self.decision, "reason":reason, "iterations":self.iterations, "retries":self.retries,
-            "assessment": {"document":serde_json::from_str::<serde_json::Value>(&self.assessment.document.to_json().expect("valid document serializes")).expect("document JSON"),
-                "delta":self.assessment.delta, "plan":self.assessment.plan, "goal_outcome":self.assessment.comparison.outcome().as_str(),
+            "assessment": {"document":{"representation":"redacted"},
+                "delta_items":self.assessment.delta.items().len(),
+                "plan":self.assessment.plan.as_ref().map(|plan| plan.id().as_str()),
+                "goal_outcome":self.assessment.comparison.outcome().as_str(),
                 "source": self.assessment.source.source_id(), "ingestion_key":self.assessment.ingestion_key.as_str(),
-                "diagnostics":self.assessment.diagnostics.iter().map(|d| serde_json::json!({"code":d.code().as_str(), "delta_item":d.delta_item().map(DeltaItemId::as_str), "blocking":d.is_blocking(), "rationale":d.rationale()})).collect::<Vec<_>>()}}));
+                "diagnostics":self.assessment.diagnostics.iter().map(|d| serde_json::json!({"code":d.code().as_str(), "delta_item":d.delta_item().map(DeltaItemId::as_str), "blocking":d.is_blocking()})).collect::<Vec<_>>()}}));
     }
 }
 

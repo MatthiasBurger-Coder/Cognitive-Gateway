@@ -11,6 +11,7 @@ pub enum SelectionError {
     InvalidSectionEstimate(ContextBudgetClass),
     DuplicateId(ReferenceId),
     InvalidCompaction(ReferenceId),
+    QuarantinedMandatory(ReferenceId),
     MissingMandatory(ReferenceId),
     MandatoryOverBudget(ContextBudgetClass),
     TotalOverBudget,
@@ -23,6 +24,18 @@ pub enum SelectionReason {
     Redundant,
     BudgetExceeded,
     ReplacedByCompaction,
+    Quarantined,
+}
+impl SelectionReason {
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            Self::Selected => "CONTEXT_SELECTED",
+            Self::Redundant => "CONTEXT_REDUNDANT",
+            Self::BudgetExceeded => "CONTEXT_BUDGET_EXCEEDED",
+            Self::ReplacedByCompaction => "CONTEXT_REPLACED_BY_COMPACTION",
+            Self::Quarantined => "CONTEXT_QUARANTINED",
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -93,6 +106,28 @@ pub fn select_context(
     compacted: &[CompactedCandidate],
     required: &BTreeSet<ReferenceId>,
 ) -> Result<BudgetedSelection, SelectionError> {
+    select_context_with_exclusions(
+        budget,
+        target,
+        sections,
+        candidates,
+        compacted,
+        required,
+        &BTreeSet::new(),
+    )
+}
+
+/// The host supplies quarantined IDs from its authenticated contamination
+/// decision. A compacted artifact cannot launder an excluded source back in.
+pub fn select_context_with_exclusions(
+    budget: &ContextBudget,
+    target: &NonEmptyText,
+    sections: &BTreeMap<ContextBudgetClass, TokenEstimate>,
+    candidates: &[RankedFragment],
+    compacted: &[CompactedCandidate],
+    required: &BTreeSet<ReferenceId>,
+    excluded: &BTreeSet<ReferenceId>,
+) -> Result<BudgetedSelection, SelectionError> {
     use ContextBudgetClass::{
         AuthorityReserved, OutputContractReserved, SafetyMargin, TaskReserved,
     };
@@ -147,7 +182,9 @@ pub fn select_context(
             return Err(SelectionError::InvalidEstimate(id.clone()));
         }
         if by_id.contains_key(id)
+            || excluded.contains(id)
             || artifact.sources.is_empty()
+            || !artifact.sources.is_disjoint(excluded)
             || !matches!(
                 artifact.fragment.kind(),
                 FragmentKind::Knowledge | FragmentKind::Memory
@@ -159,6 +196,7 @@ pub fn select_context(
                         || original.fragment.metadata() != artifact.fragment.metadata()
                         || original.fragment.scope() != artifact.fragment.scope()
                         || original.fragment.step() != artifact.fragment.step()
+                        || original.fragment.is_reference() != artifact.fragment.is_reference()
                 })
             })
         {
@@ -168,6 +206,9 @@ pub fn select_context(
     for id in required {
         if !by_id.contains_key(id) {
             return Err(SelectionError::MissingMandatory(id.clone()));
+        }
+        if excluded.contains(id) {
+            return Err(SelectionError::QuarantinedMandatory(id.clone()));
         }
     }
 
@@ -186,6 +227,16 @@ pub fn select_context(
     let mut consumed = BTreeSet::new();
     for item in order {
         let id = item.fragment.id().clone();
+        if excluded.contains(&id) {
+            if item.mandatory {
+                return Err(SelectionError::QuarantinedMandatory(id));
+            }
+            decisions.push(SelectionDecision {
+                id,
+                reason: SelectionReason::Quarantined,
+            });
+            continue;
+        }
         if consumed.contains(&id) {
             continue;
         }

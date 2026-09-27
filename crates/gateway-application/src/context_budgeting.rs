@@ -5,9 +5,10 @@ use crate::{
     },
     ports::outbound::{ContextTokenEstimateRequest, TokenEstimatorPort},
 };
+use gateway_context::ContextDisclosurePolicy;
 use gateway_context::budgeted::{
     BudgetedSelection, CompactedCandidate, RankedFragment, SelectionError, fragment_budget_class,
-    select_context,
+    select_context_with_exclusions,
 };
 use gateway_domain::{
     ContextBudget, ContextBudgetClass, NonEmptyText, RetrievalError, TokenCount, TokenEstimate,
@@ -27,6 +28,12 @@ pub struct BudgetedCompiledStep {
     pub selection: BudgetedSelection,
     pub section_estimates: BTreeMap<ContextBudgetClass, TokenEstimate>,
     pub total_estimate: TokenEstimate,
+}
+
+/// Host-authenticated selection decisions; excluded IDs cannot be compacted.
+pub struct ContextSelectionPolicy<'a> {
+    pub required: &'a BTreeSet<gateway_domain::ReferenceId>,
+    pub excluded: &'a BTreeSet<gateway_domain::ReferenceId>,
 }
 fn estimate_json(estimate: &TokenEstimate) -> serde_json::Value {
     let count = match &estimate.count {
@@ -50,18 +57,28 @@ impl BudgetedCompiledStep {
     /// Carries the trace with the semantic envelope; compacted source IDs never
     /// disappear from the handoff even when their original bytes were omitted.
     pub fn to_json(&self) -> Result<String, serde_json::Error> {
-        let mut value: serde_json::Value = serde_json::from_str(
-            &self
-                .step
-                .to_json()
-                .expect("validated semantic envelope serializes"),
-        )
-        .expect("validated semantic envelope is JSON");
+        self.serialize(None)
+    }
+    pub fn to_json_with_policy(
+        &self,
+        policy: ContextDisclosurePolicy,
+    ) -> Result<String, serde_json::Error> {
+        self.serialize(Some(policy))
+    }
+    fn serialize(
+        &self,
+        policy: Option<ContextDisclosurePolicy>,
+    ) -> Result<String, serde_json::Error> {
+        let step = match policy {
+            Some(policy) => self.step.to_json_with_policy(policy)?,
+            None => self.step.to_json()?,
+        };
+        let mut value: serde_json::Value = serde_json::from_str(&step)?;
         value["context_selection"] = serde_json::json!({
             "usage": self.selection.usage.iter().map(|(class, tokens)|
                 (format!("{class:?}"), *tokens)).collect::<BTreeMap<_, _>>(),
             "decisions": self.selection.decisions.iter().map(|decision|
-                serde_json::json!({"id": decision.id.as_str(), "reason": format!("{:?}", decision.reason)})).collect::<Vec<_>>(),
+                serde_json::json!({"id": decision.id.as_str(), "reason": decision.reason.as_str()})).collect::<Vec<_>>(),
             "lineage": self.selection.lineage.iter().map(|(id, sources)|
                 (id.as_str(), sources.iter().map(gateway_domain::ReferenceId::as_str).collect::<Vec<_>>())).collect::<BTreeMap<_, _>>(),
             "estimates": self.selection.estimates.iter().map(|(id, estimate)|
@@ -70,6 +87,12 @@ impl BudgetedCompiledStep {
                 (format!("{class:?}"), estimate_json(estimate))).collect::<BTreeMap<_, _>>(),
             "total_estimate": estimate_json(&self.total_estimate),
         });
+        if policy.is_some_and(|policy| !policy.include_external_content) {
+            for field in ["estimates", "section_estimates", "total_estimate"] {
+                value["context_selection"][field] =
+                    serde_json::json!({"representation":"redacted"});
+            }
+        }
         serde_json::to_string(&value)
     }
 }
@@ -83,6 +106,30 @@ pub fn compile_budgeted_step(
     ranked: &[RankedFragment],
     compacted: &[CompactedCandidate],
     required: &BTreeSet<gateway_domain::ReferenceId>,
+    estimator: &dyn TokenEstimatorPort,
+) -> Result<BudgetedCompiledStep, BudgetedCompileError> {
+    compile_budgeted_step_with_exclusions(
+        input,
+        budget,
+        target,
+        ranked,
+        compacted,
+        ContextSelectionPolicy {
+            required,
+            excluded: &BTreeSet::new(),
+        },
+        estimator,
+    )
+}
+
+/// Applies an authenticated quarantine set before context compilation.
+pub fn compile_budgeted_step_with_exclusions(
+    input: CompileStepInput<'_>,
+    budget: &ContextBudget,
+    target: &NonEmptyText,
+    ranked: &[RankedFragment],
+    compacted: &[CompactedCandidate],
+    policy: ContextSelectionPolicy<'_>,
     estimator: &dyn TokenEstimatorPort,
 ) -> Result<BudgetedCompiledStep, BudgetedCompileError> {
     let empty_candidates = [];
@@ -138,8 +185,16 @@ pub fn compile_budgeted_step(
             .map_err(BudgetedCompileError::Estimator)?;
         sections.insert(class, estimate);
     }
-    let selection = select_context(budget, target, &sections, ranked, compacted, required)
-        .map_err(BudgetedCompileError::Selection)?;
+    let selection = select_context_with_exclusions(
+        budget,
+        target,
+        &sections,
+        ranked,
+        compacted,
+        policy.required,
+        policy.excluded,
+    )
+    .map_err(BudgetedCompileError::Selection)?;
     let step = ContextApplication
         .compile_step(CompileStepInput {
             resolved: input.resolved,
@@ -151,7 +206,7 @@ pub fn compile_budgeted_step(
             selected: &selection.selected,
         })
         .map_err(BudgetedCompileError::Compilation)?;
-    for id in required {
+    for id in policy.required {
         if !step
             .context()
             .fragments()

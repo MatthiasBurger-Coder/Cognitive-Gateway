@@ -1,7 +1,7 @@
 use super::*;
 use crate::{
     ContentDigest, ContextScopeId, EvidenceId, FreshnessRequirement, FreshnessStatus, NonEmptyText,
-    Provenance, QualityMetadata, ReferenceId,
+    Provenance, QualityMetadata, ReferenceId, TrustClass,
 };
 use std::collections::BTreeSet;
 
@@ -31,6 +31,24 @@ pub enum RetrievalReason {
     MoreInformationNeeded,
     ServiceUnavailable,
     Unsupported,
+}
+impl RetrievalReason {
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            Self::ExplicitSelection => "RETRIEVAL_EXPLICIT_SELECTION",
+            Self::Relevant => "RETRIEVAL_RELEVANT",
+            Self::TrustRejected => "RETRIEVAL_TRUST_REJECTED",
+            Self::FreshnessRejected => "RETRIEVAL_FRESHNESS_REJECTED",
+            Self::SensitivityRejected => "RETRIEVAL_SENSITIVITY_REJECTED",
+            Self::Duplicate => "RETRIEVAL_DUPLICATE",
+            Self::BudgetReached => "RETRIEVAL_BUDGET_REACHED",
+            Self::EvidenceSatisfied => "RETRIEVAL_EVIDENCE_SATISFIED",
+            Self::NoMatches => "RETRIEVAL_NO_MATCHES",
+            Self::MoreInformationNeeded => "RETRIEVAL_MORE_INFORMATION_NEEDED",
+            Self::ServiceUnavailable => "RETRIEVAL_SERVICE_UNAVAILABLE",
+            Self::Unsupported => "RETRIEVAL_UNSUPPORTED",
+        }
+    }
 }
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub enum RetrievalExplanationTarget {
@@ -165,6 +183,7 @@ impl RetrievalBatch {
                     .required
                     .accepted_trust
                     .contains(&fragment.quality.trust())
+                || fragment.quality.trust() == TrustClass::CanonicalReference
                 || fragment.quality.sensitivity() > request.required.maximum_sensitivity
                 || (request.required.requirements.freshness() == FreshnessRequirement::Fresh
                     && fragment.quality.freshness() != FreshnessStatus::Fresh)
@@ -205,6 +224,15 @@ impl RetrievalBatch {
         {
             return Err(RetrievalError::InvalidResult);
         }
+        input.explanations = input
+            .explanations
+            .into_iter()
+            .map(|mut explanation| {
+                explanation.detail = NonEmptyText::new(explanation.reason.as_str())
+                    .expect("stable reason is nonempty");
+                explanation
+            })
+            .collect();
         input.results.sort_by(|a, b| {
             b.score
                 .cmp(&a.score)

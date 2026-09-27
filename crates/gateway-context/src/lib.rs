@@ -3,7 +3,8 @@
 pub mod budgeted;
 pub mod compiled;
 pub use compiled::{
-    CompileError, CompiledContext, ContextFragment, FragmentKind, FragmentMetadata,
+    CompileError, CompiledContext, ContextDisclosurePolicy, ContextFragment, FragmentKind,
+    FragmentMetadata,
 };
 
 use gateway_domain::{

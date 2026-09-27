@@ -364,7 +364,7 @@ fn cg15_adapter_rejects_wrong_selection_and_empty_matches() {
 }
 
 #[test]
-fn graph_paths_survive_federation_as_inspectable_batch_explanations() {
+fn graph_result_preserves_inferred_quality_without_leaking_path_detail() {
     let store = InMemoryGraphStore::new(manifest('a'));
     store.replace(projection()).unwrap();
     let adapter = GraphRetrievalAdapter::new(
@@ -439,7 +439,5 @@ fn graph_paths_survive_federation_as_inspectable_batch_explanations() {
         .unwrap()
         .detail
         .as_str();
-    assert!(detail.contains("graph root a -> b"));
-    assert!(detail.contains("edge"));
-    assert!(detail.contains("PROBABILISTIC"));
+    assert_eq!(detail, RetrievalReason::Relevant.as_str());
 }
