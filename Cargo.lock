@@ -82,6 +82,7 @@ dependencies = [
  "gateway-workflow",
  "serde",
  "serde_json",
+ "sha2",
 ]
 
 [[package]]

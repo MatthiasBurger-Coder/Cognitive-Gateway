@@ -16,7 +16,7 @@ ALLOWED = {
     "gateway-workflow": {"gateway-domain"},
     "gateway-daemon": {"gateway-domain", "gateway-application", "gateway-context",
                        "gateway-process", "gateway-policy", "gateway-registry",
-                       "gateway-workflow", "serde", "serde_json"},
+                       "gateway-workflow", "serde", "serde_json", "sha2"},
 }
 
 

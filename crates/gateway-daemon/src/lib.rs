@@ -2,3 +2,4 @@
 
 pub mod declarative_cli;
 pub mod registry_cli;
+pub mod retrieval;

@@ -41,7 +41,7 @@ pub use tokens::*;
 use crate::{NonEmptyText, ValidationError};
 
 /// Stable failure codes. These are information-processing failures, never policy decisions.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum RetrievalError {
     UnsupportedVersion,
     UnsupportedSource,
@@ -55,6 +55,7 @@ pub enum RetrievalError {
     ScopeMismatch,
     InvalidResult,
     IncompatibleEmbedding,
+    StaleIndex,
     InvalidEstimate,
     ServiceUnavailable,
 }
