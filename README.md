@@ -24,42 +24,29 @@ crates/
 └── gateway-daemon/
 ```
 
-## Build and quality
+## Installation on Linux
 
-Run the complete declarative v0.1 gate from the repository root:
-
-```bash
-python3 scripts/quality-gate.py
-```
-
-Requires Bash, Python 3.11+, Git, Rust with `rustfmt`, `clippy` and
-`llvm-tools-preview`, and `cargo-llvm-cov`. The command runs every workspace
-and architecture test, the CLI installation/replay checks and all established
-95% coverage gates. It retains logs, coverage reports, external-project proof
-and a machine-readable summary under `target/release-evidence/`.
-
-[Quality gates and the release checklist](docs/declarative-quality-gates.md)
-describe evidence review and focused commands. The `Rust Quality` GitHub
-Actions workflow runs the same command and uploads evidence on success or
-failure. A green gate qualifies the tested revision for release review.
-
-### Install the CLIs on Linux
-
-With Rust and Cargo installed, run the native Linux installer from this checkout:
+With Rust and Cargo installed, run the installer from the repository root:
 
 ```bash
-bash scripts/install-linux.sh
+./scripts/install-linux.sh
+export PATH="$HOME/.cargo/bin:$PATH"
+cg --help
+cg-registry --help
 ```
 
-It installs `cg` and `cg-registry` into Cargo's user bin directory. Use
-`bash scripts/install-linux.sh --root /absolute/path` to choose another root;
-the executables are placed in that root's `bin` directory. Add that directory
-to `PATH` if needed. The script works from any current directory and can be
-rerun to install the current checkout. It does not install a daemon service.
+The script installs `cg` and `cg-registry` from this checkout. By default,
+it uses `CARGO_INSTALL_ROOT`, `CARGO_HOME`, or `$HOME/.cargo` as the install
+root, in that order. The executables are placed in the root's `bin` directory.
+The `PATH` command above applies to the `$HOME/.cargo` default.
+For a custom location, run `./scripts/install-linux.sh --root /absolute/path`
+and add `/absolute/path/bin` to `PATH`. Rerunning the script updates both CLIs
+to the current checkout. The script can also be called from another directory
+by its absolute path.
 
-### Run the registry CLI from WSL/Linux
+### Run the registry CLI
 
-Build and install the read-only `cg-registry` CLI from the repository root:
+To install only the read-only `cg-registry` CLI manually, run from the repository root:
 
 ```bash
 cargo build --workspace
@@ -93,6 +80,25 @@ cg-registry capability resolve architecture.dependency-analysis
 The same commands can be run without installation through Cargo with
 `cargo run --bin cg-registry -- <command>`, but the installation flow above
 makes `cg-registry` directly resolvable from the shell.
+
+## Build and quality
+
+Run the complete declarative v0.1 gate from the repository root:
+
+```bash
+python3 scripts/quality-gate.py
+```
+
+Requires Bash, Python 3.11+, Git, Rust with `rustfmt`, `clippy` and
+`llvm-tools-preview`, and `cargo-llvm-cov`. The command runs every workspace
+and architecture test, the CLI installation/replay checks and all established
+95% coverage gates. It retains logs, coverage reports, external-project proof
+and a machine-readable summary under `target/release-evidence/`.
+
+[Quality gates and the release checklist](docs/declarative-quality-gates.md)
+describe evidence review and focused commands. The `Rust Quality` GitHub
+Actions workflow runs the same command and uploads evidence on success or
+failure. A green gate qualifies the tested revision for release review.
 
 ## Documentation
 
@@ -143,8 +149,9 @@ input separate from gateway-generated material.
 ## Declarative CLI
 
 Use `cg assess`, `cg plan`, `cg resolve`, `cg explain` and `cg compile` to drive
-the deterministic application APIs with structured external context. Install
-with `cargo install --path crates/gateway-daemon --bin cg --locked`.
+the deterministic application APIs with structured external context. The
+Linux installation script above installs `cg`; a manual alternative is
+`cargo install --path crates/gateway-daemon --bin cg --locked`.
 See the [CLI contracts and runnable walkthrough](docs/declarative-cli.md).
 
 The [CG-12 external project proof](docs/declarative-end-to-end.md) carries
