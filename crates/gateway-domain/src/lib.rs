@@ -29,6 +29,7 @@ pub mod planning_serialization;
 pub mod planning_validation;
 pub mod policy;
 pub mod quality;
+pub mod reasoning_strategy;
 pub mod relationships;
 pub mod retrieval;
 pub mod retrieval_plane;
@@ -95,6 +96,7 @@ pub use quality::{
     Confidence, ConflictStatus, FreshnessPolicy, FreshnessStatus, QualityMetadata,
     SensitivityClass, TrustClass, Uncertainty, UnixTimestamp, ValidityInterval, evaluate_freshness,
 };
+pub use reasoning_strategy::*;
 pub use retrieval::{KnowledgeProvenance, KnowledgeQuery, RetrievedKnowledge};
 pub use retrieval_plane::*;
 pub use serialization::SerializationError;

@@ -99,6 +99,7 @@ RetrievalPlanner    <- explicit bounded retrieval planning
 KnowledgeRetrievalPort <- lexical / semantic / graph / memory adapters
 EmbeddingPort       <- replaceable embedding services
 TokenEstimatorPort  <- replaceable tokenizer / estimation services
+ReasoningAdapter    <- provider strategy support and bounded attempt adapters
 CapabilityPort      <- MCP / Git / quality / GitHub / runtime-tool adapters
 ExecutionRuntimePort<- Codex / PraisonAI / local/cloud LLM adapters
 EvidencePort        <- audit/evidence persistence adapters

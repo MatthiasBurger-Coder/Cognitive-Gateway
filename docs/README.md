@@ -18,6 +18,8 @@ See [`retrieval-pipeline.md`](retrieval-pipeline.md) for CG-16 federated source
 dispatch, contextual metadata, deterministic hybrid fusion and reranking boundaries.
 See [`recursive-retrieval.md`](recursive-retrieval.md) for CG-19 bounded rounds,
 validated evidence sufficiency and CG-14 pause integration.
+See [`reasoning-strategy.md`](reasoning-strategy.md) for CG-20C versioned
+reasoning strategies, aggregate budgets and the typed adapter handoff.
 See [`knowledge-plane-hardening.md`](knowledge-plane-hardening.md) for CG-20A
 trust boundaries, disclosure limited handoffs, and adversarial verification.
 
