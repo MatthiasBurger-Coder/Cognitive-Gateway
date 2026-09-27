@@ -20,6 +20,10 @@ See [`recursive-retrieval.md`](recursive-retrieval.md) for CG-19 bounded rounds,
 validated evidence sufficiency and CG-14 pause integration.
 See [`reasoning-strategy.md`](reasoning-strategy.md) for CG-20C versioned
 reasoning strategies, aggregate budgets and the typed adapter handoff.
+See [`epic-02-evaluation.md`](epic-02-evaluation.md) for CG-20 objective
+evaluation, baseline policy, profiling and curated learning export.
+See [`epic-02-release-qualification.md`](epic-02-release-qualification.md)
+for CG-20D requirement traceability and release readiness.
 See [`knowledge-plane-hardening.md`](knowledge-plane-hardening.md) for CG-20A
 trust boundaries, disclosure limited handoffs, and adversarial verification.
 

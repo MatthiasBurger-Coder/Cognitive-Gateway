@@ -90,5 +90,9 @@
   {
     "name": "CG-19 recursive retrieval coverage gate",
     "command": "python3 scripts/check-cg19-coverage.py --self-test\npython3 scripts/check-cg19-coverage.py \"$EVIDENCE_DIR/cg16-coverage.json\"\n"
+  },
+  {
+    "name": "CG-20 evaluation and coverage gate",
+    "command": "set -euo pipefail\nCG20_EVALUATION_OUTPUT=\"$EVIDENCE_DIR/cg20-evaluation.json\" cargo test -p gateway-domain --test evaluation versioned_golden_replay_and_release_policy -- --exact\ntest -s \"$EVIDENCE_DIR/cg20-evaluation.json\"\nCG20_INTEGRATION_OUTPUT=\"$EVIDENCE_DIR/cg20-integration.json\" cargo test -p gateway-application --test context_application closed_loop::epic02_external_project_full_path_and_bounded_degradation -- --exact\ntest -s \"$EVIDENCE_DIR/cg20-integration.json\"\npython3 scripts/check-cg20-coverage.py --self-test\npython3 scripts/check-cg20-coverage.py \"$EVIDENCE_DIR/cg16-coverage.json\"\n"
   }
 ]

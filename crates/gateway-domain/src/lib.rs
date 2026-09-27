@@ -10,6 +10,7 @@ pub mod declarative_context;
 pub mod definition_contract;
 pub mod definitions;
 pub mod delta;
+pub mod evaluation;
 pub mod execution_context;
 pub mod execution_context_v2;
 pub mod execution_profile;

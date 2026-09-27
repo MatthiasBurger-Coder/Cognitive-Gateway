@@ -1,0 +1,188 @@
+{
+  "version": 1,
+  "dataset": "epic02-golden-v1",
+  "scope": "external-project-a",
+  "source_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "index_version": "fixture-index-v1",
+  "embedding_version": "fake-embedding-v1",
+  "model_version": "none",
+  "estimator_version": "fake-estimator-v1",
+  "strategy_version": "cg20c-v1",
+  "evaluator_version": "cg20-v1",
+  "baseline": "epic02-baseline-v1",
+  "cases": [
+    {
+      "id": "positive",
+      "relevant": [
+        "lexical",
+        "semantic"
+      ],
+      "returned": [
+        "lexical",
+        "semantic"
+      ],
+      "expected": "SUFFICIENT",
+      "actual": "SUFFICIENT",
+      "provenance": true,
+      "freshness": true,
+      "contamination_rejected": true,
+      "token_budget": 100,
+      "tokens_used": 70,
+      "latency_ms": 10,
+      "cost_units": 1,
+      "justified_tokens": 70
+    },
+    {
+      "id": "hard-negative",
+      "relevant": [
+        "lexical"
+      ],
+      "returned": [
+        "irrelevant"
+      ],
+      "expected": "INSUFFICIENT",
+      "actual": "INSUFFICIENT",
+      "provenance": true,
+      "freshness": true,
+      "contamination_rejected": true,
+      "token_budget": 100,
+      "tokens_used": 20,
+      "latency_ms": 4,
+      "cost_units": 0,
+      "justified_tokens": 0
+    },
+    {
+      "id": "no-match",
+      "relevant": [
+        "lexical"
+      ],
+      "returned": [],
+      "expected": "INSUFFICIENT",
+      "actual": "INSUFFICIENT",
+      "provenance": true,
+      "freshness": true,
+      "contamination_rejected": true,
+      "token_budget": 100,
+      "tokens_used": 5,
+      "latency_ms": 2,
+      "cost_units": 0,
+      "justified_tokens": 0
+    },
+    {
+      "id": "partial",
+      "relevant": [
+        "lexical",
+        "graph"
+      ],
+      "returned": [
+        "lexical"
+      ],
+      "expected": "PARTIAL",
+      "actual": "PARTIAL",
+      "provenance": true,
+      "freshness": true,
+      "contamination_rejected": true,
+      "token_budget": 100,
+      "tokens_used": 30,
+      "latency_ms": 6,
+      "cost_units": 1,
+      "justified_tokens": 30
+    },
+    {
+      "id": "stale",
+      "relevant": [],
+      "returned": [],
+      "expected": "STALE",
+      "actual": "STALE",
+      "provenance": true,
+      "freshness": true,
+      "contamination_rejected": true,
+      "token_budget": 100,
+      "tokens_used": 0,
+      "latency_ms": 1,
+      "cost_units": 0,
+      "justified_tokens": 0
+    },
+    {
+      "id": "conflicting",
+      "relevant": [],
+      "returned": [],
+      "expected": "CONFLICTING",
+      "actual": "CONFLICTING",
+      "provenance": true,
+      "freshness": true,
+      "contamination_rejected": true,
+      "token_budget": 100,
+      "tokens_used": 0,
+      "latency_ms": 1,
+      "cost_units": 0,
+      "justified_tokens": 0
+    },
+    {
+      "id": "untrusted",
+      "relevant": [],
+      "returned": [],
+      "expected": "UNTRUSTED",
+      "actual": "UNTRUSTED",
+      "provenance": true,
+      "freshness": true,
+      "contamination_rejected": true,
+      "token_budget": 100,
+      "tokens_used": 0,
+      "latency_ms": 1,
+      "cost_units": 0,
+      "justified_tokens": 0
+    },
+    {
+      "id": "contaminated",
+      "relevant": [],
+      "returned": [],
+      "expected": "CONTAMINATED",
+      "actual": "CONTAMINATED",
+      "provenance": true,
+      "freshness": true,
+      "contamination_rejected": true,
+      "token_budget": 100,
+      "tokens_used": 0,
+      "latency_ms": 1,
+      "cost_units": 0,
+      "justified_tokens": 0
+    },
+    {
+      "id": "budget-exhausted",
+      "relevant": [],
+      "returned": [],
+      "expected": "BUDGET_EXHAUSTED",
+      "actual": "BUDGET_EXHAUSTED",
+      "provenance": true,
+      "freshness": true,
+      "contamination_rejected": true,
+      "token_budget": 10,
+      "tokens_used": 10,
+      "latency_ms": 1,
+      "cost_units": 0,
+      "justified_tokens": 0
+    }
+  ],
+  "baseline_scores": {
+    "precision": 600000,
+    "recall": 500000,
+    "sufficiency": 1000000,
+    "provenance": 1000000,
+    "freshness": 1000000,
+    "contamination": 1000000,
+    "budget": 1000000,
+    "token_efficiency": 740740
+  },
+  "floors": {
+    "precision": 600000,
+    "recall": 500000,
+    "sufficiency": 1000000,
+    "provenance": 1000000,
+    "freshness": 1000000,
+    "contamination": 1000000,
+    "budget": 1000000,
+    "token_efficiency": 740740
+  },
+  "allowed_regression": 0
+}

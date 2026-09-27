@@ -143,6 +143,13 @@ the evidence port validates links. Retrieval findings may pause CG-14 but
 cannot authorize execution or alter process state. See
 [recursive retrieval](../recursive-retrieval.md).
 
+CG-20 adds provider-independent evaluation and release-threshold contracts in
+`gateway-domain`, reference-only curated export and diagnostic profiling in
+`gateway-application`, and versioned datasets and gate automation outside the
+core. CG-20D consumes these contracts in an external-project fake-port replay.
+Neither evaluation scores nor exported memory grant process or policy authority.
+See [EPIC-02 evaluation](../epic-02-evaluation.md) and [ADR-014](../adr/ADR-014-versioned-evaluation-and-learning-export.md).
+
 ## 5.3 Proposed Python services
 
 ```text
