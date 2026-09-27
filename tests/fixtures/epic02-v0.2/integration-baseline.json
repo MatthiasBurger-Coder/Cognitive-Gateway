@@ -1,0 +1,60 @@
+{
+  "version": 1,
+  "dataset": "epic02-integrated-v1",
+  "baseline": "integrated-baseline-v1",
+  "floors": {
+    "precision": 1000000,
+    "recall": 1000000,
+    "sufficiency": 1000000,
+    "provenance": 1000000,
+    "freshness": 1000000,
+    "contamination": 1000000,
+    "budget": 1000000,
+    "token_efficiency": 1000000
+  },
+  "baseline_scores": {
+    "precision": 1000000,
+    "recall": 1000000,
+    "sufficiency": 1000000,
+    "provenance": 1000000,
+    "freshness": 1000000,
+    "contamination": 1000000,
+    "budget": 1000000,
+    "token_efficiency": 1000000
+  },
+  "allowed_regression": 0,
+  "cases": [
+    {
+      "id": "full-path",
+      "expected_sufficiency": "SUFFICIENT"
+    },
+    {
+      "id": "semantic-outage",
+      "expected_sufficiency": "BUDGET_EXHAUSTED"
+    },
+    {
+      "id": "no-match",
+      "expected_sufficiency": "INSUFFICIENT"
+    },
+    {
+      "id": "budget",
+      "expected_sufficiency": "BUDGET_EXHAUSTED"
+    },
+    {
+      "id": "stale",
+      "expected_sufficiency": "STALE"
+    },
+    {
+      "id": "conflict",
+      "expected_sufficiency": "CONFLICTING"
+    },
+    {
+      "id": "untrusted",
+      "expected_sufficiency": "UNTRUSTED"
+    },
+    {
+      "id": "contaminated",
+      "expected_sufficiency": "CONTAMINATED"
+    }
+  ]
+}

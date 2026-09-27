@@ -1,3 +1,6 @@
+use gateway_application::evaluation::{
+    DataDefect, ExportError, export_snapshot, profile, revalidate_snapshot,
+};
 use gateway_application::memory::{
     MemoryAction, MemoryApplication, MemoryChange, MemoryError, MemoryStore,
 };
@@ -46,6 +49,139 @@ fn record(project: &str, name: &str, snapshot: &str) -> ExperienceRecord {
 }
 fn app() -> MemoryApplication<InMemoryMemoryStore> {
     MemoryApplication::new(InMemoryMemoryStore::default())
+}
+
+#[test]
+fn curated_export_is_deterministic_and_revocation_invalidates_existing_snapshot() {
+    let mut app = app();
+    let s = scope("project-a");
+    let key = id("memory-1");
+    assert_eq!(
+        export_snapshot(&app, &s, UnixTimestamp::new(20), "commit-a"),
+        Err(ExportError::Empty)
+    );
+    assert_eq!(
+        export_snapshot(&app, &s, UnixTimestamp::new(20), " "),
+        Err(ExportError::InvalidSourceRevision)
+    );
+    app.admit(
+        record("project-a", "memory-1", "snapshot-1"),
+        id("admit"),
+        UnixTimestamp::new(10),
+    )
+    .unwrap();
+    app.curate(
+        &s,
+        &key,
+        1,
+        MemoryChange {
+            action: MemoryAction::Validate,
+            reason: id("validate"),
+            at: UnixTimestamp::new(20),
+            replacement: None,
+            successor: None,
+        },
+    )
+    .unwrap();
+    let snapshot = export_snapshot(&app, &s, UnixTimestamp::new(20), "commit-a").unwrap();
+    assert_eq!(snapshot.items.len(), 1);
+    assert_eq!(snapshot.items[0].eligibility.scope, s);
+    assert_eq!(snapshot.items[0].payload_reference, None);
+    assert_eq!(snapshot.digest.len(), 64);
+    assert_eq!(
+        snapshot,
+        export_snapshot(&app, &s, UnixTimestamp::new(20), "commit-a").unwrap()
+    );
+    revalidate_snapshot(&app, &snapshot, UnixTimestamp::new(20)).unwrap();
+    let mut changed = snapshot.clone();
+    changed.items[0].outcome = Some("tampered".into());
+    assert_eq!(
+        revalidate_snapshot(&app, &changed, UnixTimestamp::new(20)),
+        Err(ExportError::Revoked)
+    );
+    let mut changed = snapshot.clone();
+    changed.items[0].eligibility.scope = scope("project-b");
+    assert_eq!(
+        revalidate_snapshot(&app, &changed, UnixTimestamp::new(20)),
+        Err(ExportError::Revoked)
+    );
+    assert_eq!(
+        revalidate_snapshot(&app, &snapshot, UnixTimestamp::new(101)),
+        Err(ExportError::Revoked)
+    );
+    app.curate(
+        &s,
+        &key,
+        2,
+        MemoryChange {
+            action: MemoryAction::Forget,
+            reason: id("forget"),
+            at: UnixTimestamp::new(21),
+            replacement: None,
+            successor: None,
+        },
+    )
+    .unwrap();
+    assert_eq!(
+        revalidate_snapshot(&app, &snapshot, UnixTimestamp::new(21)),
+        Err(ExportError::Revoked)
+    );
+    assert!(
+        app.store()
+            .get(&s, &key)
+            .unwrap()
+            .unwrap()
+            .record
+            .payload
+            .is_none()
+    );
+    assert_eq!(
+        export_snapshot(&app, &s, UnixTimestamp::new(21), "commit-a"),
+        Err(ExportError::Empty)
+    );
+}
+
+#[test]
+fn profile_reports_defects_with_denominators_and_no_payload() {
+    let empty = profile(&[], UnixTimestamp::new(20));
+    assert_eq!(empty.records, 0);
+    assert_eq!(empty.age_range_seconds, None);
+    assert_eq!(empty.denominators[&DataDefect::NearDuplicate], 0);
+    let first = record("project-a", "memory-1", "snapshot-1");
+    let mut second = record("project-a", "memory-2", "snapshot-1");
+    second.outcome = None;
+    second.label_basis = None;
+    second.schema_version = 2;
+    second.quality = QualityMetadata::new(
+        TrustClass::CallerInput,
+        SensitivityClass::Confidential,
+        Confidence::Unknown,
+        FreshnessStatus::Stale,
+        Uncertainty::None,
+    )
+    .with_conflict(ConflictStatus::Unresolved);
+    let result = profile(&[first, second], UnixTimestamp::new(200));
+    assert_eq!(result.records, 2);
+    assert_eq!(result.denominators[&DataDefect::NearDuplicate], 2);
+    assert_eq!(result.denominators[&DataDefect::Stale], 2);
+    assert_eq!(result.age_range_seconds, Some((191, 191)));
+    for defect in [
+        DataDefect::MissingLabel,
+        DataDefect::MissingOutcome,
+        DataDefect::DuplicateSnapshot,
+        DataDefect::NearDuplicate,
+        DataDefect::Conflict,
+        DataDefect::Stale,
+        DataDefect::Untrusted,
+        DataDefect::InvalidSchema,
+        DataDefect::SensitiveInline,
+    ] {
+        assert!(result.defects.contains_key(&defect), "{defect:?}");
+    }
+    assert_eq!(
+        result.sensitivity_counts[&SensitivityClass::Confidential],
+        1
+    );
 }
 
 #[test]
@@ -440,6 +576,7 @@ fn sensitive_reference_is_kept_as_reference_in_context() {
         Uncertainty::None,
     );
     input.payload = Some(MemoryPayload::Reference(id("vault-object-1")));
+    input.outcome = Some(NonEmptyText::new("sensitive result").unwrap());
     app.admit(input, id("rule"), UnixTimestamp::new(10))
         .unwrap();
     app.curate(
@@ -465,6 +602,13 @@ fn sensitive_reference_is_kept_as_reference_in_context() {
         .unwrap();
     assert!(fragment.is_reference());
     assert_eq!(fragment.content(), "vault-object-1");
+    let snapshot = export_snapshot(&app, &s, UnixTimestamp::new(20), "commit-a").unwrap();
+    assert_eq!(snapshot.items[0].outcome, None);
+    assert_eq!(
+        snapshot.items[0].payload_reference,
+        Some(id("vault-object-1"))
+    );
+    revalidate_snapshot(&app, &snapshot, UnixTimestamp::new(20)).unwrap();
 }
 
 #[test]

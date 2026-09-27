@@ -31,6 +31,12 @@ rounding. The portable resolver checker discovers every `resolution*.rs` file
 and shares the existing strict Python checker; the PowerShell entry point
 remains available. No production source exclusions are added.
 
+The CG-20 evaluation gate replays the versioned golden dataset, retains raw
+objective metrics in `cg20-evaluation.json`, and enforces 95% line coverage
+for both new evaluation production modules from the workspace report. See
+[EPIC-02 evaluation](epic-02-evaluation.md). The synthetic dataset report and
+the external-project fake-port replay are separate evidence types.
+
 For focused diagnosis, use `./scripts/check-architecture.sh`,
 `python3 -m unittest discover -s tests/architecture`, or the exact command
 recorded for a failed step. Focused checks do not substitute for a complete run.
