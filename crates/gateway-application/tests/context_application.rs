@@ -483,3 +483,660 @@ fn resolution_without_a_process_template_cannot_become_executable_v1() {
 
 #[path = "support/closed_loop.rs"]
 mod closed_loop;
+
+struct SemanticEstimator;
+impl gateway_application::ports::outbound::TokenEstimatorPort for SemanticEstimator {
+    fn estimate(&self, _: &TokenEstimateRequest) -> Result<TokenEstimate, RetrievalError> {
+        Err(RetrievalError::InvalidEstimate)
+    }
+    fn estimate_context(
+        &self,
+        request: &gateway_application::ports::outbound::ContextTokenEstimateRequest<'_>,
+    ) -> Result<TokenEstimate, RetrievalError> {
+        assert!(!request.content.is_empty());
+        Ok(TokenEstimate {
+            estimator: TokenEstimatorId::new("fixture-estimator").unwrap(),
+            version: TokenEstimatorVersion::new("v1").unwrap(),
+            count: TokenCount::Exact {
+                tokens: 1,
+                target: request.target.clone(),
+            },
+        })
+    }
+}
+#[test]
+fn budgeted_selection_flows_through_current_policy_and_compiler() {
+    use gateway_application::context_budgeting::*;
+    use gateway_context::budgeted::RankedFragment;
+    use std::collections::BTreeMap;
+    let f = Fixture::new();
+    let scope = f.projection.mapping.basis.scope.clone();
+    let step = f.projection.mapping.step.clone();
+    let fragment = ContextFragment::external(
+        ReferenceId::new("needed").unwrap(),
+        FragmentKind::Knowledge,
+        "retrieved text",
+        FragmentMetadata {
+            provenance: KnowledgeProvenance::new("repository", Some("rev-1")).unwrap(),
+            evidence: BTreeSet::new(),
+            quality: QualityMetadata::new(
+                TrustClass::RetrievedContent,
+                SensitivityClass::Normal,
+                Confidence::Unknown,
+                FreshnessStatus::Unknown,
+                Uncertainty::Probabilistic,
+            ),
+            rationale: NonEmptyText::new("supports active step").unwrap(),
+            validation: None,
+        },
+        scope,
+        step,
+    )
+    .unwrap();
+    let estimate = TokenEstimate {
+        estimator: TokenEstimatorId::new("fixture-estimator").unwrap(),
+        version: TokenEstimatorVersion::new("v1").unwrap(),
+        count: TokenCount::Estimated {
+            tokens: 2,
+            upper_bound: Some(3),
+            semantics: NonEmptyText::new("upper bound").unwrap(),
+        },
+    };
+    let ranked = [RankedFragment {
+        fragment,
+        score: 10,
+        mandatory: true,
+        estimate,
+    }];
+    let budget = ContextBudget::new(
+        TokenBudget(100),
+        BTreeMap::from([
+            (ContextBudgetClass::AuthorityReserved, TokenBudget(1)),
+            (ContextBudgetClass::TaskReserved, TokenBudget(1)),
+            (ContextBudgetClass::OutputContractReserved, TokenBudget(1)),
+            (ContextBudgetClass::RuntimeState, TokenBudget(1)),
+            (ContextBudgetClass::SafetyMargin, TokenBudget(2)),
+            (ContextBudgetClass::Knowledge, TokenBudget(3)),
+        ]),
+    )
+    .unwrap();
+    let target = NonEmptyText::new("runtime:model:v1").unwrap();
+    let none_selected = BTreeSet::new();
+    let input = || CompileStepInput {
+        resolved: &f.resolved,
+        authority: &f.authority,
+        policy_context: &f.policy,
+        catalog: &f.catalog,
+        projection: &f.projection,
+        candidates: &[],
+        selected: &none_selected,
+    };
+    let result = compile_budgeted_step(
+        input(),
+        &budget,
+        &target,
+        &ranked,
+        &[],
+        &BTreeSet::from([ReferenceId::new("needed").unwrap()]),
+        &SemanticEstimator,
+    )
+    .unwrap();
+    assert_eq!(result.step.context().fragments().len(), 1);
+    assert_eq!(result.selection.usage[&ContextBudgetClass::Knowledge], 3);
+    let json: serde_json::Value = serde_json::from_str(&result.to_json().unwrap()).unwrap();
+    assert_eq!(
+        json["context_selection"]["estimates"]["needed"]["count"]["kind"],
+        "estimated"
+    );
+    assert_eq!(json["context_selection"]["lineage"]["needed"][0], "needed");
+    let mut smaller = budget.clone();
+    smaller = ContextBudget::new(
+        smaller.total(),
+        BTreeMap::from([
+            (ContextBudgetClass::AuthorityReserved, TokenBudget(1)),
+            (ContextBudgetClass::TaskReserved, TokenBudget(1)),
+            (ContextBudgetClass::OutputContractReserved, TokenBudget(1)),
+            (ContextBudgetClass::RuntimeState, TokenBudget(1)),
+            (ContextBudgetClass::Knowledge, TokenBudget(2)),
+        ]),
+    )
+    .unwrap();
+    assert!(matches!(
+        compile_budgeted_step(
+            input(),
+            &smaller,
+            &target,
+            &ranked,
+            &[],
+            &BTreeSet::from([ReferenceId::new("needed").unwrap()]),
+            &SemanticEstimator
+        ),
+        Err(BudgetedCompileError::Selection(_))
+    ));
+    let mut denied = Fixture::new();
+    denied.policy.steps.clear();
+    assert!(matches!(
+        compile_budgeted_step(
+            CompileStepInput {
+                resolved: &denied.resolved,
+                authority: &denied.authority,
+                policy_context: &denied.policy,
+                catalog: &denied.catalog,
+                projection: &denied.projection,
+                candidates: &[],
+                selected: &BTreeSet::new()
+            },
+            &budget,
+            &target,
+            &[],
+            &[],
+            &BTreeSet::new(),
+            &SemanticEstimator
+        ),
+        Err(BudgetedCompileError::Compilation(
+            ContextApplicationError::NotAuthorized(_)
+        ))
+    ));
+}
+
+struct FinalEstimator {
+    final_count: Option<u64>,
+    unknown_final: bool,
+}
+impl gateway_application::ports::outbound::TokenEstimatorPort for FinalEstimator {
+    fn estimate(&self, _: &TokenEstimateRequest) -> Result<TokenEstimate, RetrievalError> {
+        Err(RetrievalError::InvalidEstimate)
+    }
+    fn estimate_context(
+        &self,
+        request: &gateway_application::ports::outbound::ContextTokenEstimateRequest<'_>,
+    ) -> Result<TokenEstimate, RetrievalError> {
+        if request.content.contains("\"id\":\"needed\"") && !request.content.contains("\"gateway\"")
+        {
+            if self.unknown_final {
+                return Ok(TokenEstimate {
+                    estimator: TokenEstimatorId::new("fixture").unwrap(),
+                    version: TokenEstimatorVersion::new("v1").unwrap(),
+                    count: TokenCount::Unknown {
+                        reason: NonEmptyText::new("unavailable").unwrap(),
+                    },
+                });
+            }
+            if let Some(count) = self.final_count {
+                return Ok(TokenEstimate {
+                    estimator: TokenEstimatorId::new("fixture").unwrap(),
+                    version: TokenEstimatorVersion::new("v1").unwrap(),
+                    count: TokenCount::Estimated {
+                        tokens: 1,
+                        upper_bound: Some(count),
+                        semantics: NonEmptyText::new("upper").unwrap(),
+                    },
+                });
+            }
+        }
+        SemanticEstimator.estimate_context(request)
+    }
+}
+#[test]
+fn budgeted_final_measurement_and_estimator_failure_are_explicit() {
+    use gateway_application::context_budgeting::*;
+    use gateway_application::ports::outbound::TokenEstimatorPort;
+    use gateway_context::budgeted::RankedFragment;
+    use std::collections::BTreeMap;
+    let f = Fixture::new();
+    let fragment = ContextFragment::external(
+        ReferenceId::new("needed").unwrap(),
+        FragmentKind::Knowledge,
+        "retrieved text",
+        FragmentMetadata {
+            provenance: KnowledgeProvenance::new("source", Some("rev")).unwrap(),
+            evidence: BTreeSet::new(),
+            quality: QualityMetadata::new(
+                TrustClass::RetrievedContent,
+                SensitivityClass::Normal,
+                Confidence::Unknown,
+                FreshnessStatus::Unknown,
+                Uncertainty::None,
+            ),
+            rationale: NonEmptyText::new("needed").unwrap(),
+            validation: None,
+        },
+        f.projection.mapping.basis.scope.clone(),
+        f.projection.mapping.step.clone(),
+    )
+    .unwrap();
+    let estimate = TokenEstimate {
+        estimator: TokenEstimatorId::new("fixture").unwrap(),
+        version: TokenEstimatorVersion::new("v1").unwrap(),
+        count: TokenCount::Exact {
+            tokens: 1,
+            target: NonEmptyText::new("runtime").unwrap(),
+        },
+    };
+    let ranked = [RankedFragment {
+        fragment,
+        score: 1,
+        mandatory: true,
+        estimate,
+    }];
+    let budget = ContextBudget::new(
+        TokenBudget(20),
+        BTreeMap::from([
+            (ContextBudgetClass::AuthorityReserved, TokenBudget(1)),
+            (ContextBudgetClass::TaskReserved, TokenBudget(1)),
+            (ContextBudgetClass::OutputContractReserved, TokenBudget(1)),
+            (ContextBudgetClass::RuntimeState, TokenBudget(1)),
+            (ContextBudgetClass::Knowledge, TokenBudget(2)),
+        ]),
+    )
+    .unwrap();
+    let target = NonEmptyText::new("runtime").unwrap();
+    let none = BTreeSet::new();
+    let input = || CompileStepInput {
+        resolved: &f.resolved,
+        authority: &f.authority,
+        policy_context: &f.policy,
+        catalog: &f.catalog,
+        projection: &f.projection,
+        candidates: &[],
+        selected: &none,
+    };
+    let required = BTreeSet::from([ReferenceId::new("needed").unwrap()]);
+    let foreign = ContextFragment::external(
+        ReferenceId::new("needed").unwrap(),
+        FragmentKind::Knowledge,
+        ranked[0].fragment.content(),
+        ranked[0].fragment.metadata().clone(),
+        ContextScopeId::new("foreign").unwrap(),
+        f.projection.mapping.step.clone(),
+    )
+    .unwrap();
+    let foreign_ranked = [RankedFragment {
+        fragment: foreign,
+        ..ranked[0].clone()
+    }];
+    assert!(matches!(
+        compile_budgeted_step(
+            input(),
+            &budget,
+            &target,
+            &foreign_ranked,
+            &[],
+            &required,
+            &SemanticEstimator
+        ),
+        Err(BudgetedCompileError::Compilation(
+            ContextApplicationError::Assembly(CompileError::ScopeMismatch)
+        ))
+    ));
+    let exact_limit = compile_budgeted_step(
+        input(),
+        &budget,
+        &target,
+        &ranked,
+        &[],
+        &required,
+        &FinalEstimator {
+            final_count: Some(2),
+            unknown_final: false,
+        },
+    )
+    .unwrap();
+    assert_eq!(
+        exact_limit.selection.usage[&ContextBudgetClass::Knowledge],
+        2
+    );
+    let mut uncertain_trace = exact_limit.clone();
+    uncertain_trace.total_estimate.count = TokenCount::Unknown {
+        reason: NonEmptyText::new("unavailable after compilation").unwrap(),
+    };
+    let trace: serde_json::Value =
+        serde_json::from_str(&uncertain_trace.to_json().unwrap()).unwrap();
+    assert_eq!(
+        trace["context_selection"]["total_estimate"]["count"]["kind"],
+        "unknown"
+    );
+    assert!(
+        exact_limit
+            .to_json()
+            .unwrap()
+            .contains("\"kind\":\"estimated\"")
+    );
+    assert!(matches!(
+        compile_budgeted_step(
+            input(),
+            &budget,
+            &target,
+            &ranked,
+            &[],
+            &required,
+            &FinalEstimator {
+                final_count: Some(3),
+                unknown_final: false
+            }
+        ),
+        Err(BudgetedCompileError::Selection(
+            gateway_context::budgeted::SelectionError::MandatoryOverBudget(
+                ContextBudgetClass::Knowledge
+            )
+        ))
+    ));
+    assert!(matches!(
+        compile_budgeted_step(
+            input(),
+            &budget,
+            &target,
+            &ranked,
+            &[],
+            &required,
+            &FinalEstimator {
+                final_count: None,
+                unknown_final: true
+            }
+        ),
+        Err(BudgetedCompileError::Selection(
+            gateway_context::budgeted::SelectionError::InvalidEstimate(_)
+        ))
+    ));
+    struct NoContext;
+    impl TokenEstimatorPort for NoContext {
+        fn estimate(&self, _: &TokenEstimateRequest) -> Result<TokenEstimate, RetrievalError> {
+            Err(RetrievalError::InvalidEstimate)
+        }
+    }
+    assert_eq!(
+        compile_budgeted_step(
+            input(),
+            &budget,
+            &target,
+            &ranked,
+            &[],
+            &required,
+            &NoContext
+        ),
+        Err(BudgetedCompileError::Estimator(
+            RetrievalError::InvalidEstimate
+        ))
+    );
+    struct TotalEstimator(bool);
+    impl TokenEstimatorPort for TotalEstimator {
+        fn estimate(&self, _: &TokenEstimateRequest) -> Result<TokenEstimate, RetrievalError> {
+            Err(RetrievalError::InvalidEstimate)
+        }
+        fn estimate_context(
+            &self,
+            request: &gateway_application::ports::outbound::ContextTokenEstimateRequest<'_>,
+        ) -> Result<TokenEstimate, RetrievalError> {
+            if request.content.contains("\"gateway\":") {
+                let count = if self.0 {
+                    TokenCount::Unknown {
+                        reason: NonEmptyText::new("tokenizer offline").unwrap(),
+                    }
+                } else {
+                    TokenCount::Estimated {
+                        tokens: 20,
+                        upper_bound: Some(21),
+                        semantics: NonEmptyText::new("conservative").unwrap(),
+                    }
+                };
+                Ok(TokenEstimate {
+                    estimator: TokenEstimatorId::new("fixture").unwrap(),
+                    version: TokenEstimatorVersion::new("v1").unwrap(),
+                    count,
+                })
+            } else {
+                SemanticEstimator.estimate_context(request)
+            }
+        }
+    }
+    for mode in [false, true] {
+        assert_eq!(
+            compile_budgeted_step(
+                input(),
+                &budget,
+                &target,
+                &ranked,
+                &[],
+                &required,
+                &TotalEstimator(mode)
+            ),
+            Err(BudgetedCompileError::Selection(
+                gateway_context::budgeted::SelectionError::TotalOverBudget
+            ))
+        );
+    }
+    struct FailingEstimator(bool);
+    impl TokenEstimatorPort for FailingEstimator {
+        fn estimate(&self, _: &TokenEstimateRequest) -> Result<TokenEstimate, RetrievalError> {
+            Err(RetrievalError::InvalidEstimate)
+        }
+        fn estimate_context(
+            &self,
+            request: &gateway_application::ports::outbound::ContextTokenEstimateRequest<'_>,
+        ) -> Result<TokenEstimate, RetrievalError> {
+            if (self.0 && request.content.contains("\"gateway\":"))
+                || (!self.0
+                    && request.content.contains("\"id\":\"needed\"")
+                    && !request.content.contains("\"gateway\":"))
+            {
+                Err(RetrievalError::ServiceUnavailable)
+            } else {
+                SemanticEstimator.estimate_context(request)
+            }
+        }
+    }
+    for at_total in [false, true] {
+        assert_eq!(
+            compile_budgeted_step(
+                input(),
+                &budget,
+                &target,
+                &ranked,
+                &[],
+                &required,
+                &FailingEstimator(at_total)
+            ),
+            Err(BudgetedCompileError::Estimator(
+                RetrievalError::ServiceUnavailable
+            ))
+        );
+    }
+}
+
+#[test]
+fn required_id_cannot_disappear_during_compiler_deduplication() {
+    use gateway_application::context_budgeting::*;
+    use gateway_context::budgeted::{RankedFragment, SelectionError};
+    use std::collections::BTreeMap;
+    let f = Fixture::new();
+    let one = ContextFragment::external(
+        ReferenceId::new("one").unwrap(),
+        FragmentKind::Knowledge,
+        "same",
+        FragmentMetadata {
+            provenance: KnowledgeProvenance::new("source", Some("rev")).unwrap(),
+            evidence: BTreeSet::new(),
+            quality: QualityMetadata::new(
+                TrustClass::RetrievedContent,
+                SensitivityClass::Normal,
+                Confidence::Unknown,
+                FreshnessStatus::Unknown,
+                Uncertainty::None,
+            ),
+            rationale: NonEmptyText::new("needed").unwrap(),
+            validation: None,
+        },
+        f.projection.mapping.basis.scope.clone(),
+        f.projection.mapping.step.clone(),
+    )
+    .unwrap();
+    let two = ContextFragment::external(
+        ReferenceId::new("two").unwrap(),
+        FragmentKind::Knowledge,
+        one.content(),
+        one.metadata().clone(),
+        f.projection.mapping.basis.scope.clone(),
+        f.projection.mapping.step.clone(),
+    )
+    .unwrap();
+    let token = || TokenEstimate {
+        estimator: TokenEstimatorId::new("fixture").unwrap(),
+        version: TokenEstimatorVersion::new("v1").unwrap(),
+        count: TokenCount::Exact {
+            tokens: 1,
+            target: NonEmptyText::new("runtime").unwrap(),
+        },
+    };
+    let ranked = [
+        RankedFragment {
+            fragment: one,
+            score: 1,
+            mandatory: true,
+            estimate: token(),
+        },
+        RankedFragment {
+            fragment: two,
+            score: 1,
+            mandatory: true,
+            estimate: token(),
+        },
+    ];
+    let budget = ContextBudget::new(
+        TokenBudget(20),
+        BTreeMap::from([
+            (ContextBudgetClass::AuthorityReserved, TokenBudget(1)),
+            (ContextBudgetClass::TaskReserved, TokenBudget(1)),
+            (ContextBudgetClass::OutputContractReserved, TokenBudget(1)),
+            (ContextBudgetClass::RuntimeState, TokenBudget(1)),
+            (ContextBudgetClass::Knowledge, TokenBudget(2)),
+        ]),
+    )
+    .unwrap();
+    let none = BTreeSet::new();
+    let result = compile_budgeted_step(
+        CompileStepInput {
+            resolved: &f.resolved,
+            authority: &f.authority,
+            policy_context: &f.policy,
+            catalog: &f.catalog,
+            projection: &f.projection,
+            candidates: &[],
+            selected: &none,
+        },
+        &budget,
+        &NonEmptyText::new("runtime").unwrap(),
+        &ranked,
+        &[],
+        &BTreeSet::from([
+            ReferenceId::new("one").unwrap(),
+            ReferenceId::new("two").unwrap(),
+        ]),
+        &SemanticEstimator,
+    );
+    assert!(matches!(
+        result,
+        Err(BudgetedCompileError::Selection(
+            SelectionError::MissingMandatory(_)
+        ))
+    ));
+}
+
+#[test]
+fn final_measurement_rejects_arithmetic_overflow() {
+    use gateway_application::context_budgeting::*;
+    use gateway_application::ports::outbound::TokenEstimatorPort;
+    use gateway_context::budgeted::{RankedFragment, SelectionError};
+    use std::collections::BTreeMap;
+    let f = Fixture::new();
+    let fragment = ContextFragment::external(
+        ReferenceId::new("overflow").unwrap(),
+        FragmentKind::UserInput,
+        "caller text",
+        FragmentMetadata {
+            provenance: KnowledgeProvenance::new("caller", None::<String>).unwrap(),
+            evidence: BTreeSet::new(),
+            quality: QualityMetadata::new(
+                TrustClass::CallerInput,
+                SensitivityClass::Normal,
+                Confidence::Unknown,
+                FreshnessStatus::Unknown,
+                Uncertainty::None,
+            ),
+            rationale: NonEmptyText::new("needed").unwrap(),
+            validation: None,
+        },
+        f.projection.mapping.basis.scope.clone(),
+        f.projection.mapping.step.clone(),
+    )
+    .unwrap();
+    let target = NonEmptyText::new("runtime").unwrap();
+    let estimate = TokenEstimate {
+        estimator: TokenEstimatorId::new("fixture").unwrap(),
+        version: TokenEstimatorVersion::new("v1").unwrap(),
+        count: TokenCount::Exact {
+            tokens: u64::MAX - 1,
+            target: target.clone(),
+        },
+    };
+    let ranked = [RankedFragment {
+        fragment,
+        score: 1,
+        mandatory: true,
+        estimate,
+    }];
+    let budget = ContextBudget::new(
+        TokenBudget(u64::MAX),
+        BTreeMap::from([(ContextBudgetClass::TaskReserved, TokenBudget(u64::MAX))]),
+    )
+    .unwrap();
+    struct OverflowEstimator;
+    impl TokenEstimatorPort for OverflowEstimator {
+        fn estimate(&self, _: &TokenEstimateRequest) -> Result<TokenEstimate, RetrievalError> {
+            Err(RetrievalError::InvalidEstimate)
+        }
+        fn estimate_context(
+            &self,
+            request: &gateway_application::ports::outbound::ContextTokenEstimateRequest<'_>,
+        ) -> Result<TokenEstimate, RetrievalError> {
+            let tokens = if request.content.contains("\"id\":\"overflow\"") {
+                u64::MAX
+            } else if request.content.contains("\"user_input\"") {
+                1
+            } else {
+                0
+            };
+            Ok(TokenEstimate {
+                estimator: TokenEstimatorId::new("fixture").unwrap(),
+                version: TokenEstimatorVersion::new("v1").unwrap(),
+                count: TokenCount::Exact {
+                    tokens,
+                    target: request.target.clone(),
+                },
+            })
+        }
+    }
+    let none = BTreeSet::new();
+    let result = compile_budgeted_step(
+        CompileStepInput {
+            resolved: &f.resolved,
+            authority: &f.authority,
+            policy_context: &f.policy,
+            catalog: &f.catalog,
+            projection: &f.projection,
+            candidates: &[],
+            selected: &none,
+        },
+        &budget,
+        &target,
+        &ranked,
+        &[],
+        &BTreeSet::from([ReferenceId::new("overflow").unwrap()]),
+        &OverflowEstimator,
+    );
+    assert_eq!(
+        result,
+        Err(BudgetedCompileError::Selection(
+            SelectionError::ArithmeticOverflow
+        ))
+    );
+}

@@ -6,6 +6,7 @@ extern crate self as gateway_application;
 pub mod closed_loop;
 pub mod context;
 pub mod context_application;
+pub mod context_budgeting;
 pub mod external_context;
 pub mod graph_retrieval;
 pub mod memory;

@@ -207,3 +207,8 @@ in memory; production persistence must provide durable atomic commits and retain
 revocation history. CG-10 receives only eligible memory as a derived-assessment
 fragment with validation and revision. Memory text has no authority over policy,
 capabilities or process state. See [governed memory](../governed-memory.md).
+
+CG-20B keeps deterministic context selection in `gateway-context`, composes
+current authorization and estimation in `gateway-application`, and exposes
+optional tokenizer and compaction ports to outer adapters. See
+[context budgeting](../context-budgeting.md).

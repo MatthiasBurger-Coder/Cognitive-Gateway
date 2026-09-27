@@ -17,6 +17,9 @@ clock access or provider prompt rendering.
 | CG-10.06 Projection | Application revalidates CG-08 resolution, reevaluates CG-09 policy and checks its constructed v1 context against the existing CG-08/CG-02 compatibility boundary. |
 | CG-10.07 Quality proof | Compiler/application integration tests, workspace checks and CI coverage gates at 95% per production file. |
 
+For token bounded selection before this compilation boundary, see
+[CG-20B context budgeting](context-budgeting.md).
+
 ## Application API
 
 Use `gateway_application::context_application`:
@@ -149,7 +152,7 @@ cargo clippy --workspace --all-targets -- -D warnings
 cargo fmt --check
 bash scripts/check-architecture.sh
 cargo llvm-cov -p gateway-context -p gateway-application \
-  --test compiled_context --test context_application \
+  --test compiled_context --test budgeted_selection --test context_application \
   --test context_compiler --test v2_handoff \
   --json --output-path target/cg10-coverage.json
 python3 scripts/check-context-coverage.py --self-test

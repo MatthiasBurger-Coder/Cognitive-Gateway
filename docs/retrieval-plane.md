@@ -138,8 +138,9 @@ Reservations are disjoint caps that protect each class from the others. Their
 checked sum cannot exceed the total. A missing class has capacity zero;
 unallocated tokens are unavailable; no implicit borrowing occurs. The safety
 margin is kept unused by the assembler. Reservation labels confer no authority
-and do not allow retrieval to create authority fragments. CG-20B will own
-selection, redistribution policies and compaction.
+and do not allow retrieval to create authority fragments. CG-20B owns
+deterministic selection and optional validated compaction, with no implicit
+redistribution. See [context budgeting](context-budgeting.md).
 
 ## Explainability and failure semantics
 

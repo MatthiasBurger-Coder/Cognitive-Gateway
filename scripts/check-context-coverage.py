@@ -6,7 +6,9 @@ import sys
 EXPECTED = (
     "crates/gateway-context/src/lib.rs",
     "crates/gateway-context/src/compiled.rs",
+    "crates/gateway-context/src/budgeted.rs",
     "crates/gateway-application/src/context_application.rs",
+    "crates/gateway-application/src/context_budgeting.rs",
 )
 
 
