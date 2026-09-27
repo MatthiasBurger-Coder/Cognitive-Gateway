@@ -170,4 +170,29 @@ pub trait TokenEstimatorPort {
         &self,
         request: &gateway_domain::TokenEstimateRequest,
     ) -> Result<gateway_domain::TokenEstimate, gateway_domain::RetrievalError>;
+
+    /// Counts one semantic context section for the named target. Implementations
+    /// that only support retrieved fragments fail closed through this default.
+    fn estimate_context(
+        &self,
+        _request: &ContextTokenEstimateRequest<'_>,
+    ) -> Result<gateway_domain::TokenEstimate, gateway_domain::RetrievalError> {
+        Err(gateway_domain::RetrievalError::InvalidEstimate)
+    }
+}
+
+pub struct ContextTokenEstimateRequest<'a> {
+    pub scope: &'a gateway_domain::ContextScopeId,
+    pub target: &'a gateway_domain::NonEmptyText,
+    pub content: &'a str,
+}
+
+/// Optional non-authoritative compaction boundary. The selector validates each
+/// derived artifact and its source lineage before it can enter compilation.
+pub trait ContextCompactionPort {
+    fn compact(
+        &self,
+        sources: &[gateway_context::ContextFragment],
+        target: &gateway_domain::NonEmptyText,
+    ) -> Result<Vec<gateway_context::budgeted::CompactedCandidate>, gateway_domain::RetrievalError>;
 }

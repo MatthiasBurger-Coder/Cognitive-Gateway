@@ -175,6 +175,12 @@ impl ContextFragment {
     pub fn id(&self) -> &ReferenceId {
         &self.id
     }
+    pub fn scope(&self) -> &ContextScopeId {
+        &self.scope
+    }
+    pub fn step(&self) -> &PlanStepId {
+        &self.step
+    }
     pub fn kind(&self) -> FragmentKind {
         self.kind
     }

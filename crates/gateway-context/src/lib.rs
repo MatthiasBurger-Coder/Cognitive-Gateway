@@ -1,5 +1,6 @@
 #![forbid(unsafe_code)]
 
+pub mod budgeted;
 pub mod compiled;
 pub use compiled::{
     CompileError, CompiledContext, ContextFragment, FragmentKind, FragmentMetadata,
