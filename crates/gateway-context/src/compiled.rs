@@ -99,6 +99,25 @@ impl ContextFragment {
             reference_only: false,
         })
     }
+    /// Emits a governed memory payload reference without treating it as inline text.
+    pub fn memory_reference(
+        id: ReferenceId,
+        reference: ReferenceId,
+        metadata: FragmentMetadata,
+        scope: ContextScopeId,
+        step: PlanStepId,
+    ) -> Result<Self, CompileError> {
+        let mut fragment = Self::external(
+            id,
+            FragmentKind::Memory,
+            reference.as_str(),
+            metadata,
+            scope,
+            step,
+        )?;
+        fragment.reference_only = true;
+        Ok(fragment)
+    }
     /// Retains retrieval content and source revision exactly; metadata cannot relabel its source.
     pub fn knowledge(
         id: ReferenceId,

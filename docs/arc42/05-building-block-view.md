@@ -190,3 +190,14 @@ identity. Core dependencies must resolve to the workspace source. Cargo checks
 its full resolved graph for cycles; the guard also checks workspace edges.
 Transitive serialization/cryptography implementation dependencies remain
 controlled by `Cargo.lock`; this check is not a dependency vulnerability audit.
+
+## CG-18 governed memory boundary
+
+`gateway-domain::memory` defines versioned experience, curation and eligibility references.
+`gateway-application::memory` owns admission, lifecycle decisions, scoped recall and
+revalidation of pinned learning references through `MemoryStore`. The outer
+`gateway-daemon::memory` adapter proves atomic revision checks and payload erasure
+in memory; production persistence must provide durable atomic commits and retain
+revocation history. CG-10 receives only eligible memory as a derived-assessment
+fragment with validation and revision. Memory text has no authority over policy,
+capabilities or process state. See [governed memory](../governed-memory.md).

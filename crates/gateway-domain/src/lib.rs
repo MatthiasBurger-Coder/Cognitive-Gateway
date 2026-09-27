@@ -17,6 +17,7 @@ pub mod explainability;
 pub mod identifiers;
 pub mod intent;
 pub mod knowledge_graph;
+pub mod memory;
 pub mod normalization;
 pub mod observation;
 pub mod operating_mode;

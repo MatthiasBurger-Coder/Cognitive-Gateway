@@ -304,3 +304,41 @@ fn existing_versioned_handoffs_are_revalidated() {
     v2.schema_version = "invalid".into();
     assert!(ContextCompiler::inspect_handoff(ContextHandoff::V2(Box::new(v2))).is_err());
 }
+
+#[test]
+fn governed_memory_reference_preserves_representation_and_trust() {
+    let id = ReferenceId::new("memory-reference").unwrap();
+    let reference = ReferenceId::new("vault-object").unwrap();
+    let scope = ContextScopeId::new("scope").unwrap();
+    let step = PlanStepId::new("step").unwrap();
+    let memory = ContextFragment::memory_reference(
+        id.clone(),
+        reference.clone(),
+        metadata(TrustClass::DerivedAssessment),
+        scope.clone(),
+        step.clone(),
+    )
+    .unwrap();
+    assert!(memory.is_reference());
+    assert_eq!(memory.content(), reference.as_str());
+    let compiled = assemble(&[memory], &[id.as_str()]).unwrap();
+    let json: serde_json::Value = serde_json::from_str(&compiled.to_json().unwrap()).unwrap();
+    assert_eq!(json["dynamic"][0]["representation"], "reference");
+    assert_eq!(json["dynamic"][0]["validation"], "validation-1");
+    assert_eq!(
+        ContextFragment::memory_reference(
+            id.clone(),
+            reference.clone(),
+            metadata(TrustClass::CanonicalReference),
+            scope.clone(),
+            step.clone()
+        ),
+        Err(CompileError::InvalidTrust)
+    );
+    let mut missing = metadata(TrustClass::DerivedAssessment);
+    missing.validation = None;
+    assert_eq!(
+        ContextFragment::memory_reference(id, reference, missing, scope, step),
+        Err(CompileError::InvalidMetadata)
+    );
+}
