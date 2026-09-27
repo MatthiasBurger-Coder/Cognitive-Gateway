@@ -1085,6 +1085,277 @@ fn required_id_cannot_disappear_during_compiler_deduplication() {
 }
 
 #[test]
+fn strategy_handoff_uses_authorized_bounded_context_and_keeps_aggregate_usage() {
+    use gateway_application::context_budgeting::compile_budgeted_step;
+    use gateway_application::reasoning_strategy::*;
+    use std::{cell::Cell, collections::BTreeMap};
+
+    struct DirectAdapter(Cell<u32>);
+    impl ReasoningAdapter for DirectAdapter {
+        fn supported_strategies(&self) -> BTreeSet<ReasoningStrategy> {
+            BTreeSet::from([ReasoningStrategy::Direct])
+        }
+        fn capabilities(&self) -> BTreeSet<ReasoningCapability> {
+            BTreeSet::new()
+        }
+        fn attempt(
+            &self,
+            handoff: StrategyHandoff<'_>,
+        ) -> Result<StrategyAttempt, StrategyAttemptFailure> {
+            assert_eq!(handoff.selection.selected, ReasoningStrategy::Direct);
+            assert_eq!(handoff.prior_usage.iterations, 1);
+            assert!(!handoff.step.to_json().unwrap().is_empty());
+            self.0.set(self.0.get() + 1);
+            Ok(StrategyAttempt {
+                output_reference: ReferenceId::new("output-1").unwrap(),
+                provenance_references: BTreeSet::new(),
+                cost_unit: "microcredits".into(),
+                usage: StrategyUsage {
+                    tokens: 2,
+                    cost: 1,
+                    latency_ms: 3,
+                    ..StrategyUsage::default()
+                },
+            })
+        }
+    }
+
+    let f = Fixture::new();
+    let selected = BTreeSet::new();
+    let budget = ContextBudget::new(
+        TokenBudget(1_000),
+        BTreeMap::from([
+            (ContextBudgetClass::AuthorityReserved, TokenBudget(100)),
+            (ContextBudgetClass::TaskReserved, TokenBudget(100)),
+            (ContextBudgetClass::OutputContractReserved, TokenBudget(100)),
+            (ContextBudgetClass::RuntimeState, TokenBudget(100)),
+            (ContextBudgetClass::SafetyMargin, TokenBudget(100)),
+        ]),
+    )
+    .unwrap();
+    let step = compile_budgeted_step(
+        CompileStepInput {
+            resolved: &f.resolved,
+            authority: &f.authority,
+            policy_context: &f.policy,
+            catalog: &f.catalog,
+            projection: &f.projection,
+            candidates: &[],
+            selected: &selected,
+        },
+        &budget,
+        &NonEmptyText::new("fixture-model").unwrap(),
+        &[],
+        &[],
+        &BTreeSet::new(),
+        &SemanticEstimator,
+    )
+    .unwrap();
+    let assessment = SufficiencyAssessment {
+        state: SufficiencyFinding::Sufficient,
+        findings: BTreeSet::from([SufficiencyFinding::Sufficient]),
+        accepted: BTreeSet::new(),
+        rejected: BTreeSet::new(),
+        rejection_reasons: BTreeMap::new(),
+        validated_evidence: BTreeSet::new(),
+        missing_evidence: BTreeSet::new(),
+        missing_provenance: BTreeSet::new(),
+        missing_evidence_count: 0,
+    };
+    let limits = StrategyBudget {
+        iterations: 1,
+        retrieval_rounds: 0,
+        cost: 1,
+        cost_unit: "microcredits".into(),
+        latency_ms: 3,
+        tokens: 2,
+    };
+    let contract = |fallback| {
+        ReasoningStrategyContract::new(
+            ReasoningStrategy::MultiPass,
+            BTreeSet::from([ReasoningCapability::MultiplePasses]),
+            "application/json".into(),
+            VerificationExpectation::None,
+            limits.clone(),
+            fallback,
+            "1.0",
+        )
+        .unwrap()
+    };
+    let adapter = DirectAdapter(Cell::new(0));
+    let mut rejected = StrategySession::new(contract(None));
+    assert_eq!(
+        rejected.attempt(&adapter, &step, &assessment),
+        Err(StrategyDispatchError::Contract(
+            StrategyError::UnsupportedStrategy
+        ))
+    );
+    assert_eq!(adapter.0.get(), 0);
+    let mut session = StrategySession::new(contract(Some(StrategyFallback {
+        strategy: ReasoningStrategy::Direct,
+        reason: "single attempt accepted".into(),
+    })));
+    let decision = session.attempt(&adapter, &step, &assessment).unwrap();
+    assert_eq!(adapter.0.get(), 1);
+    assert_eq!(session.usage().iterations, 1);
+    assert_eq!(session.usage().tokens, 2);
+
+    struct ReportAdapter(u8);
+    impl ReasoningAdapter for ReportAdapter {
+        fn supported_strategies(&self) -> BTreeSet<ReasoningStrategy> {
+            BTreeSet::from([ReasoningStrategy::Direct])
+        }
+        fn capabilities(&self) -> BTreeSet<ReasoningCapability> {
+            BTreeSet::new()
+        }
+        fn attempt(
+            &self,
+            _: StrategyHandoff<'_>,
+        ) -> Result<StrategyAttempt, StrategyAttemptFailure> {
+            let usage = StrategyUsage {
+                iterations: u64::from(self.0 == 2),
+                tokens: if self.0 == 1 { 3 } else { 1 },
+                ..StrategyUsage::default()
+            };
+            if self.0 == 0 || self.0 == 4 {
+                Err(StrategyAttemptFailure {
+                    reason: "service-unavailable".into(),
+                    cost_unit: if self.0 == 4 {
+                        "other-unit"
+                    } else {
+                        "microcredits"
+                    }
+                    .into(),
+                    usage,
+                })
+            } else {
+                Ok(StrategyAttempt {
+                    output_reference: ReferenceId::new("report-1").unwrap(),
+                    provenance_references: BTreeSet::new(),
+                    cost_unit: if self.0 == 3 {
+                        "other-unit"
+                    } else {
+                        "microcredits"
+                    }
+                    .into(),
+                    usage,
+                })
+            }
+        }
+    }
+    let direct = ReasoningStrategyContract::new(
+        ReasoningStrategy::Direct,
+        BTreeSet::new(),
+        "application/json".into(),
+        VerificationExpectation::None,
+        StrategyBudget {
+            iterations: 2,
+            retrieval_rounds: 0,
+            cost: 0,
+            cost_unit: "microcredits".into(),
+            latency_ms: 10,
+            tokens: 2,
+        },
+        None,
+        "1.0",
+    )
+    .unwrap();
+    let mut failed = StrategySession::new(direct.clone());
+    assert_eq!(
+        failed.attempt(&ReportAdapter(0), &step, &assessment),
+        Err(StrategyDispatchError::Adapter("service-unavailable".into()))
+    );
+    assert_eq!(failed.usage().iterations, 1);
+    assert_eq!(failed.usage().tokens, 1);
+    let mut over = StrategySession::new(direct.clone());
+    assert_eq!(
+        over.attempt(&ReportAdapter(1), &step, &assessment),
+        Err(StrategyDispatchError::Contract(
+            StrategyError::BudgetExceeded
+        ))
+    );
+    assert_eq!(
+        over.attempt(&ReportAdapter(1), &step, &assessment),
+        Err(StrategyDispatchError::Terminal)
+    );
+    let mut invalid = StrategySession::new(direct);
+    assert_eq!(
+        invalid.attempt(&ReportAdapter(2), &step, &assessment),
+        Err(StrategyDispatchError::InvalidReport)
+    );
+    assert_eq!(
+        invalid.attempt(&ReportAdapter(2), &step, &assessment),
+        Err(StrategyDispatchError::Terminal)
+    );
+    let mut mismatched_unit = StrategySession::new(
+        ReasoningStrategyContract::new(
+            ReasoningStrategy::Direct,
+            BTreeSet::new(),
+            "application/json".into(),
+            VerificationExpectation::None,
+            StrategyBudget {
+                iterations: 2,
+                retrieval_rounds: 0,
+                cost: 0,
+                cost_unit: "microcredits".into(),
+                latency_ms: 10,
+                tokens: 2,
+            },
+            None,
+            "1.0",
+        )
+        .unwrap(),
+    );
+    assert_eq!(
+        mismatched_unit.attempt(&ReportAdapter(3), &step, &assessment),
+        Err(StrategyDispatchError::InvalidReport)
+    );
+    assert_eq!(
+        mismatched_unit.attempt(&ReportAdapter(3), &step, &assessment),
+        Err(StrategyDispatchError::Terminal)
+    );
+    let mut mismatched_failure = StrategySession::new(
+        ReasoningStrategyContract::new(
+            ReasoningStrategy::Direct,
+            BTreeSet::new(),
+            "application/json".into(),
+            VerificationExpectation::None,
+            StrategyBudget {
+                iterations: 2,
+                retrieval_rounds: 0,
+                cost: 0,
+                cost_unit: "microcredits".into(),
+                latency_ms: 10,
+                tokens: 2,
+            },
+            None,
+            "1.0",
+        )
+        .unwrap(),
+    );
+    assert_eq!(
+        mismatched_failure.attempt(&ReportAdapter(4), &step, &assessment),
+        Err(StrategyDispatchError::InvalidReport)
+    );
+    assert_eq!(decision.cumulative_usage.tokens, 2);
+    assert_eq!(
+        &decision.context_id,
+        step.step.context().execution_context().id()
+    );
+    assert_eq!(
+        decision.selection.fallback_reason.as_deref(),
+        Some("single attempt accepted")
+    );
+    assert_eq!(
+        session.attempt(&adapter, &step, &assessment),
+        Err(StrategyDispatchError::Contract(
+            StrategyError::BudgetExceeded
+        ))
+    );
+    assert_eq!(adapter.0.get(), 1);
+}
+
+#[test]
 fn final_measurement_rejects_arithmetic_overflow() {
     use gateway_application::context_budgeting::*;
     use gateway_application::ports::outbound::TokenEstimatorPort;

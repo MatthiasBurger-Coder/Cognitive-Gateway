@@ -13,6 +13,7 @@ pub mod memory;
 pub mod planning_application;
 pub mod policy_application;
 pub mod ports;
+pub mod reasoning_strategy;
 pub mod recursive_retrieval;
 pub mod resolution;
 pub mod resolution_agents;
