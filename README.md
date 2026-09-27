@@ -43,6 +43,20 @@ describe evidence review and focused commands. The `Rust Quality` GitHub
 Actions workflow runs the same command and uploads evidence on success or
 failure. A green gate qualifies the tested revision for release review.
 
+### Install the CLIs on Linux
+
+With Rust and Cargo installed, run the native Linux installer from this checkout:
+
+```bash
+bash scripts/install-linux.sh
+```
+
+It installs `cg` and `cg-registry` into Cargo's user bin directory. Use
+`bash scripts/install-linux.sh --root /absolute/path` to choose another root;
+the executables are placed in that root's `bin` directory. Add that directory
+to `PATH` if needed. The script works from any current directory and can be
+rerun to install the current checkout. It does not install a daemon service.
+
 ### Run the registry CLI from WSL/Linux
 
 Build and install the read-only `cg-registry` CLI from the repository root:
