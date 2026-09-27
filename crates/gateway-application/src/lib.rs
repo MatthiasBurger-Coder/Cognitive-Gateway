@@ -7,6 +7,7 @@ pub mod closed_loop;
 pub mod context;
 pub mod context_application;
 pub mod external_context;
+pub mod graph_retrieval;
 pub mod planning_application;
 pub mod policy_application;
 pub mod ports;

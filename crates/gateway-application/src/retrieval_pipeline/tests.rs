@@ -1,4 +1,6 @@
 use super::*;
+use crate::graph_retrieval::GraphPath;
+use gateway_domain::knowledge_graph::{GraphNode, GraphNodeId, GraphVersion};
 use gateway_domain::*;
 use std::{
     collections::{BTreeMap, BTreeSet},
@@ -88,6 +90,44 @@ fn exact_identifier_hit_survives_semantic_score_and_duplicate_merge() {
             .provenance
             .source_reference()
             .contains("docs/adr.md")
+    );
+}
+
+#[test]
+fn duplicate_fusion_retains_every_inspectable_graph_path() {
+    let policy = FusionPolicy {
+        lexical_weight: 1,
+        semantic_weight: 1,
+        exact_match_floor: 900_000,
+    };
+    let mut first = candidate("one", "same fact", "repo", false, Some(100), None);
+    let mut second = candidate("two", "SAME FACT", "repo", true, Some(200), None);
+    let mut third = candidate("three", "same fact", "repo", false, Some(50), None);
+    for (id, hit) in [
+        ("one", &mut first),
+        ("two", &mut second),
+        ("three", &mut third),
+    ] {
+        hit.graph_paths.push(GraphPath {
+            root: GraphNode {
+                id: GraphNodeId::new(id).unwrap(),
+                version: GraphVersion::V1,
+                fragment: hit.result.fragment.clone(),
+            },
+            steps: Vec::new(),
+        });
+    }
+    let output = fuse_candidates([first, second, third], policy).unwrap();
+    assert_eq!(output.len(), 1);
+    assert_eq!(output[0].result().fragment.id.as_str(), "two");
+    assert_eq!(output[0].graph_paths.len(), 3);
+    assert_eq!(
+        output[0]
+            .graph_paths
+            .iter()
+            .map(|path| path.root.id.as_str())
+            .collect::<Vec<_>>(),
+        vec!["one", "three", "two"]
     );
 }
 

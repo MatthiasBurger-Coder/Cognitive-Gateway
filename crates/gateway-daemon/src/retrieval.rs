@@ -641,6 +641,20 @@ impl KnowledgeRetrievalPort for FederatedRetrievalPort<'_> {
                     contributor.strategy.as_str()
                 ));
             }
+            for path in &ranked.candidate.graph_paths {
+                detail.push_str(&format!("; graph root {}", path.root.id.as_str()));
+                for step in &path.steps {
+                    detail.push_str(&format!(
+                        " -> {} [{:?}, {:?}, source {}, snapshot {}, uncertainty {}]",
+                        step.node.id.as_str(),
+                        step.edge.relation,
+                        step.edge.basis,
+                        step.edge.provenance.source_reference(),
+                        step.edge.snapshot.as_str(),
+                        step.edge.quality.uncertainty().as_str(),
+                    ));
+                }
+            }
             explanations.insert(RetrievalExplanation {
                 target: RetrievalExplanationTarget::Result(
                     ranked.candidate.result().fragment.id.clone(),

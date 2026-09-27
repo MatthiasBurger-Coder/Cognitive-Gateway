@@ -129,6 +129,13 @@ the outer `gateway-daemon` crate. The vector adapter uses the embedding port
 and checks source snapshots before search. See
 [the retrieval pipeline](../retrieval-pipeline.md).
 
+CG-17 adds versioned graph nodes, edges and derived projection manifests in
+`gateway-domain`. `gateway-application` owns bounded, deterministic traversal
+and the replaceable `GraphProjectionPort`. An in-memory graph store and a CG-16
+graph source adapter live in `gateway-daemon`. Source snapshots determine
+projection eligibility; graph paths retain original scope and provenance and
+cannot grant authority. See [knowledge graph and graph retrieval](../knowledge-graph.md).
+
 ## 5.3 Proposed Python services
 
 ```text

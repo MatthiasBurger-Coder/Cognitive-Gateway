@@ -3,6 +3,7 @@
 //! Source adapters still own repository/Git/vector access. This module combines
 //! their validated candidates while keeping scope, trust, sensitivity and source
 //! lineage attached to the original immutable fragment.
+use crate::graph_retrieval::GraphPath;
 use gateway_domain::{
     NonEmptyText, ReferenceId, RetrievalError, RetrievalResult, RetrievalSourceId,
     RetrievalStrategyId,
@@ -28,6 +29,8 @@ pub struct HybridCandidate {
     pub exact_match: bool,
     pub lexical_score: Option<u32>,
     pub semantic_score: Option<u32>,
+    /// Inspectable graph lineage when a graph adapter produced this hit.
+    pub graph_paths: Vec<GraphPath>,
 }
 
 impl HybridCandidate {
@@ -53,6 +56,7 @@ impl HybridCandidate {
             exact_match,
             lexical_score,
             semantic_score,
+            graph_paths: Vec::new(),
         })
     }
 
@@ -107,7 +111,7 @@ pub fn fuse_candidates(
 ) -> Result<Vec<HybridCandidate>, RetrievalError> {
     let policy = policy.validate()?;
     let mut merged: BTreeMap<_, HybridCandidate> = BTreeMap::new();
-    for candidate in candidates {
+    for mut candidate in candidates {
         let normalized = canonical_content(candidate.result.fragment.content.as_str());
         if normalized.is_empty() {
             return Err(RetrievalError::InvalidResult);
@@ -144,9 +148,13 @@ pub fn fuse_candidates(
                     // Keep the winning source's complete fragment and provenance intact.
                     let mut contributors = std::mem::take(&mut existing.contributors);
                     contributors.push(existing.result.clone());
+                    candidate
+                        .graph_paths
+                        .extend(std::mem::take(&mut existing.graph_paths));
                     *existing = candidate;
                     existing.contributors.extend(contributors);
                 } else {
+                    existing.graph_paths.append(&mut candidate.graph_paths);
                     existing.contributors.push(candidate.result);
                     existing.contributors.extend(candidate.contributors);
                 }
@@ -161,6 +169,15 @@ pub fn fuse_candidates(
     }
     let mut values: Vec<_> = merged.into_values().collect();
     for candidate in &mut values {
+        candidate.graph_paths.sort_by(|a, b| {
+            a.root.id.cmp(&b.root.id).then_with(|| {
+                a.steps
+                    .iter()
+                    .map(|step| &step.edge.id)
+                    .cmp(b.steps.iter().map(|step| &step.edge.id))
+            })
+        });
+        candidate.graph_paths.dedup();
         candidate.contributors.sort_by(|a, b| {
             a.source
                 .cmp(&b.source)
