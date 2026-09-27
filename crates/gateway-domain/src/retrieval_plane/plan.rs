@@ -95,6 +95,11 @@ impl RetrievalRequest {
             || input.sources.is_empty()
             || input.strategies.is_empty()
             || input.required.accepted_trust.is_empty()
+            || input
+                .required
+                .requirements
+                .minimum_sensitivity()
+                .is_some_and(|minimum| minimum > input.required.maximum_sensitivity)
         {
             return Err(RetrievalError::InvalidPlan);
         }
@@ -179,6 +184,17 @@ impl RetrievalPlan {
     pub fn version(&self) -> RetrievalVersion {
         self.request.0.version
     }
+    /// Change only the bounded query set. Scope, selections, requirements, plan
+    /// identity and all budgets remain fixed; the executor carries usage forward.
+    pub fn with_queries(&self, queries: BTreeSet<RetrievalQuery>) -> Result<Self, RetrievalError> {
+        let mut input = self.request.0.clone();
+        input.queries = queries;
+        Ok(Self {
+            id: self.id.clone(),
+            request: RetrievalRequest::new(input)?,
+            explanations: self.explanations.clone(),
+        })
+    }
     /// Stop before starting work that would exceed a limit. Unknown costs/token bounds
     /// require an explicit failure; callers must reserve an upper bound before dispatch.
     pub fn should_stop(
@@ -191,7 +207,7 @@ impl RetrievalPlan {
         Ok(usage.results == input.budget.results.0.get()
             || usage.rounds == input.budget.rounds.0.get()
             || usage.elapsed_ms == input.budget.latency.0.get()
-            || usage.cost == input.budget.cost.maximum
+            || (input.budget.cost.maximum > 0 && usage.cost == input.budget.cost.maximum)
             || usage.tokens == input.budget.tokens.0
             || matches!(input.stop, Some(StopCondition::EvidenceSatisfied(n)) if evidence.len() as u64 >= n.get()))
     }

@@ -30,12 +30,14 @@ mod budget;
 mod embedding;
 mod plan;
 mod result;
+mod sufficiency;
 mod tokens;
 
 pub use budget::*;
 pub use embedding::*;
 pub use plan::*;
 pub use result::*;
+pub use sufficiency::*;
 pub use tokens::*;
 
 use crate::{NonEmptyText, ValidationError};
@@ -58,6 +60,8 @@ pub enum RetrievalError {
     StaleIndex,
     InvalidEstimate,
     ServiceUnavailable,
+    TimedOut,
+    Cancelled,
 }
 
 macro_rules! identity {
@@ -87,8 +91,10 @@ identity!(
 pub struct RetrievalVersion(u16);
 impl RetrievalVersion {
     pub const V1: Self = Self(1);
+    /// V2 adds nonterminal multi-round batches.
+    pub const V2: Self = Self(2);
     pub fn new(value: u16) -> Result<Self, RetrievalError> {
-        if value != 1 {
+        if !matches!(value, 1 | 2) {
             return Err(RetrievalError::UnsupportedVersion);
         }
         Ok(Self(value))

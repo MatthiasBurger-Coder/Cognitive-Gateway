@@ -136,6 +136,12 @@ graph source adapter live in `gateway-daemon`. Source snapshots determine
 projection eligibility; graph paths retain original scope and provenance and
 cannot grant authority. See [knowledge graph and graph retrieval](../knowledge-graph.md).
 
+CG-19 adds deterministic sufficiency assessment to the domain and bounded
+round orchestration to the application. Refiners propose only query sets;
+the evidence port validates links. Retrieval findings may pause CG-14 but
+cannot authorize execution or alter process state. See
+[recursive retrieval](../recursive-retrieval.md).
+
 ## 5.3 Proposed Python services
 
 ```text

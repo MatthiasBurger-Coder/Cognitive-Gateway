@@ -112,6 +112,53 @@ fn start(iterations: u32, retries: u32) -> ClosedLoop {
     )
     .unwrap()
 }
+
+#[test]
+fn retrieval_gap_pauses_without_authorizing_execution() {
+    let mut run = start(3, 1);
+    assert_eq!(run.decision(), LoopDecision::Replan);
+    let required = RequiredInformation {
+        description: NonEmptyText::new("quality report").unwrap(),
+        requirements: InformationRequirements::new(
+            FreshnessRequirement::Fresh,
+            None,
+            vec![EvidenceId::new("report").unwrap()],
+            vec![],
+        )
+        .unwrap(),
+        accepted_trust: BTreeSet::from([TrustClass::ObservedEvidence]),
+        maximum_sensitivity: SensitivityClass::Public,
+    };
+    let gap = assess_sufficiency(&required, &[], true);
+    let mut sufficient = gap.clone();
+    sufficient.findings = BTreeSet::from([SufficiencyFinding::Sufficient]);
+    sufficient.state = SufficiencyFinding::Sufficient;
+    assert_eq!(
+        run.apply_retrieval_assessment(&sufficient).unwrap(),
+        LoopDecision::Replan
+    );
+    assert_eq!(
+        run.apply_retrieval_assessment(&gap).unwrap(),
+        LoopDecision::Pause
+    );
+    assert_eq!(
+        run.apply_retrieval_assessment(&gap).unwrap(),
+        LoopDecision::Pause
+    );
+    assert_eq!(
+        run.refresh(batch(Some(true), true, true)).unwrap(),
+        LoopDecision::Success
+    );
+    assert_eq!(
+        run.apply_retrieval_assessment(&gap),
+        Err(LoopError::NotReady)
+    );
+    assert!(
+        run.audit()
+            .iter()
+            .any(|event| event["event"] == "RETRIEVAL_ASSESSMENT")
+    );
+}
 fn fixture_for(run: &ClosedLoop) -> Fixture {
     let mut input = input();
     let assessment = run.assessment();

@@ -478,15 +478,14 @@ fn unavailable_reranker_and_budget_exhaustion_are_explicit() {
         fusion: fusion(),
         reranker: None,
     };
-    let batch = port
-        .retrieve(&budgeted, RetrievalRound(n(1)), &usage())
-        .unwrap();
-    assert_eq!(batch.input().reason, RetrievalReason::BudgetReached);
-    assert!(batch.input().results.is_empty());
+    assert_eq!(
+        port.retrieve(&budgeted, RetrievalRound(n(1)), &usage()),
+        Err(RetrievalError::BudgetExceeded)
+    );
 }
 
 #[test]
-fn no_match_required_source_failure_and_multi_round_plan_are_distinct() {
+fn no_match_required_source_failure_and_multi_round_accounting() {
     let fixture = Fixture::new();
     let repo = repository(&fixture.0);
     let port = FederatedRetrievalPort {
@@ -509,10 +508,39 @@ fn no_match_required_source_failure_and_multi_round_plan_are_distinct() {
         empty.retrieve(&plan("ADR-011", false), RetrievalRound(n(1)), &usage()),
         Err(RetrievalError::ServiceUnavailable)
     );
+    let measured = empty
+        .retrieve_measured(&plan("ADR-011", false), RetrievalRound(n(1)), &usage())
+        .unwrap_err();
+    assert_eq!(measured.error, RetrievalError::ServiceUnavailable);
+    assert_eq!(measured.usage.rounds, 1);
+    assert!(measured.usage.tokens >= "ADR-011".len() as u64);
 
     let original = plan("ADR-011", false);
     let mut input = original.request().input().clone();
     input.budget.rounds = RoundBudget(n(2));
+    let old_support = RetrievalSupport {
+        sources: input
+            .sources
+            .iter()
+            .map(|source| (source.id.clone(), source.kind))
+            .collect(),
+        strategies: input
+            .strategies
+            .iter()
+            .map(|strategy| (strategy.id.clone(), strategy.kind))
+            .collect(),
+    };
+    let old_multi = RetrievalPlan::new(
+        original.id().clone(),
+        RetrievalRequest::new(input.clone()).unwrap(),
+        &old_support,
+    )
+    .unwrap();
+    assert_eq!(
+        port.retrieve(&old_multi, RetrievalRound(n(1)), &usage()),
+        Err(RetrievalError::InvalidPlan)
+    );
+    input.version = RetrievalVersion::V2;
     let support = RetrievalSupport {
         sources: input
             .sources
@@ -531,8 +559,21 @@ fn no_match_required_source_failure_and_multi_round_plan_are_distinct() {
         &support,
     )
     .unwrap();
+    let first = port
+        .retrieve(&multi, RetrievalRound(n(1)), &usage())
+        .unwrap();
+    assert_eq!(first.input().status, RetrievalStatus::Partial);
+    assert_eq!(first.input().reason, RetrievalReason::MoreInformationNeeded);
+    let second = port
+        .retrieve(&multi, RetrievalRound(n(2)), &first.input().usage)
+        .unwrap();
+    assert_eq!(second.input().status, RetrievalStatus::Complete);
+    assert_eq!(second.input().reason, RetrievalReason::BudgetReached);
+    assert_eq!(second.input().usage.rounds, 2);
+    assert_eq!(second.input().usage.results, 2);
+    assert!(second.input().usage.tokens > first.input().usage.tokens);
     assert_eq!(
-        port.retrieve(&multi, RetrievalRound(n(1)), &usage()),
+        port.retrieve(&multi, RetrievalRound(n(3)), &second.input().usage),
         Err(RetrievalError::InvalidPlan)
     );
 }

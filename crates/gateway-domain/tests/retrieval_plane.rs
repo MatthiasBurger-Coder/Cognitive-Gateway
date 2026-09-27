@@ -139,6 +139,254 @@ fn fragment(id: &str) -> RetrievedFragment {
         evidence: BTreeSet::from([EvidenceId::new("architecture-evidence").unwrap()]),
     }
 }
+
+#[test]
+fn sufficiency_requires_validated_links_and_preserves_combined_failures() {
+    let required = input().required;
+    let id = EvidenceId::new("architecture-evidence").unwrap();
+    let base = fragment("base");
+    let unchecked = AssessedFragment {
+        fragment: base.clone(),
+        validated_evidence: BTreeSet::new(),
+        contaminated: false,
+    };
+    let empty = assess_sufficiency(&required, &[unchecked], false);
+    assert_eq!(empty.state, SufficiencyFinding::Insufficient);
+    assert!(empty.accepted.is_empty());
+
+    let verified = AssessedFragment {
+        fragment: base.clone(),
+        validated_evidence: BTreeSet::from([id.clone()]),
+        contaminated: false,
+    };
+    let complete = assess_sufficiency(&required, std::slice::from_ref(&verified), false);
+    assert_eq!(complete.state, SufficiencyFinding::Sufficient);
+    assert_eq!(complete.validated_evidence, BTreeSet::from([id]));
+
+    let mut stale = verified.clone();
+    stale.fragment.id = ReferenceId::new("stale").unwrap();
+    stale.fragment.quality = QualityMetadata::new(
+        TrustClass::CallerInput,
+        SensitivityClass::Public,
+        Confidence::score(0.99).unwrap(),
+        FreshnessStatus::Stale,
+        Uncertainty::None,
+    )
+    .with_conflict(ConflictStatus::Unresolved);
+    stale.contaminated = true;
+    let finding = assess_sufficiency(&required, &[verified, stale], true);
+    assert_eq!(finding.state, SufficiencyFinding::Contaminated);
+    for expected in [
+        SufficiencyFinding::Partial,
+        SufficiencyFinding::Stale,
+        SufficiencyFinding::Untrusted,
+        SufficiencyFinding::Conflicting,
+        SufficiencyFinding::Contaminated,
+    ] {
+        assert!(finding.findings.contains(&expected));
+    }
+    assert!(
+        finding
+            .findings
+            .contains(&SufficiencyFinding::BudgetExhausted)
+    );
+}
+
+#[test]
+fn sufficiency_reports_missing_references_and_exhaustion() {
+    let mut required = input().required;
+    required.requirements = InformationRequirements::new(
+        FreshnessRequirement::Fresh,
+        None,
+        vec![EvidenceId::new("needed").unwrap()],
+        vec![ProvenanceId::new("different-origin").unwrap()],
+    )
+    .unwrap();
+    let candidate = AssessedFragment {
+        fragment: fragment("present"),
+        validated_evidence: BTreeSet::from([EvidenceId::new("architecture-evidence").unwrap()]),
+        contaminated: false,
+    };
+    let finding = assess_sufficiency(&required, &[candidate], true);
+    assert_eq!(finding.state, SufficiencyFinding::BudgetExhausted);
+    assert!(finding.findings.contains(&SufficiencyFinding::Partial));
+    assert_eq!(finding.missing_evidence.len(), 1);
+    assert_eq!(finding.missing_provenance.len(), 1);
+}
+
+#[test]
+fn sufficiency_state_matrix_rejects_quality_and_unverified_claims() {
+    let required = input().required;
+    let verified = BTreeSet::from([EvidenceId::new("architecture-evidence").unwrap()]);
+    let quality = |trust, freshness, uncertainty, conflict| {
+        QualityMetadata::new(
+            trust,
+            SensitivityClass::Public,
+            Confidence::score(1.0).unwrap(),
+            freshness,
+            uncertainty,
+        )
+        .with_conflict(conflict)
+    };
+    let cases = [
+        (
+            quality(
+                TrustClass::RetrievedContent,
+                FreshnessStatus::Stale,
+                Uncertainty::None,
+                ConflictStatus::None,
+            ),
+            false,
+            SufficiencyFinding::Stale,
+        ),
+        (
+            quality(
+                TrustClass::CallerInput,
+                FreshnessStatus::Fresh,
+                Uncertainty::None,
+                ConflictStatus::None,
+            ),
+            false,
+            SufficiencyFinding::Untrusted,
+        ),
+        (
+            quality(
+                TrustClass::RetrievedContent,
+                FreshnessStatus::Fresh,
+                Uncertainty::Incomplete,
+                ConflictStatus::None,
+            ),
+            false,
+            SufficiencyFinding::Untrusted,
+        ),
+        (
+            quality(
+                TrustClass::RetrievedContent,
+                FreshnessStatus::Fresh,
+                Uncertainty::None,
+                ConflictStatus::Unresolved,
+            ),
+            false,
+            SufficiencyFinding::Conflicting,
+        ),
+        (
+            quality(
+                TrustClass::RetrievedContent,
+                FreshnessStatus::Fresh,
+                Uncertainty::None,
+                ConflictStatus::None,
+            ),
+            true,
+            SufficiencyFinding::Contaminated,
+        ),
+    ];
+    for (quality, contaminated, expected) in cases {
+        let mut fragment = fragment("case");
+        fragment.quality = quality;
+        let outcome = assess_sufficiency(
+            &required,
+            &[AssessedFragment {
+                fragment,
+                validated_evidence: verified.clone(),
+                contaminated,
+            }],
+            false,
+        );
+        assert_eq!(outcome.state, expected);
+        assert!(outcome.accepted.is_empty());
+    }
+    let mut invalid = fragment("invalid-link");
+    invalid.evidence.clear();
+    let outcome = assess_sufficiency(
+        &required,
+        &[AssessedFragment {
+            fragment: invalid,
+            validated_evidence: verified,
+            contaminated: false,
+        }],
+        false,
+    );
+    assert_eq!(outcome.state, SufficiencyFinding::Contaminated);
+}
+
+#[test]
+fn query_refinement_keeps_every_plan_boundary_and_rejects_empty_queries() {
+    let original = plan();
+    let changed = original
+        .with_queries(BTreeSet::from([RetrievalQuery(text("new query"))]))
+        .unwrap();
+    assert_eq!(changed.id(), original.id());
+    assert_eq!(
+        changed.request().input().scope,
+        original.request().input().scope
+    );
+    assert_eq!(
+        changed.request().input().sources,
+        original.request().input().sources
+    );
+    assert_eq!(
+        changed.request().input().strategies,
+        original.request().input().strategies
+    );
+    assert_eq!(
+        changed.request().input().budget,
+        original.request().input().budget
+    );
+    assert_eq!(
+        changed.request().input().required,
+        original.request().input().required
+    );
+    assert_eq!(
+        changed.with_queries(BTreeSet::new()),
+        Err(RetrievalError::InvalidPlan)
+    );
+}
+
+#[test]
+fn evidence_stop_threshold_is_a_distinct_link_requirement() {
+    let required = input().required;
+    let candidate = AssessedFragment {
+        fragment: fragment("one"),
+        validated_evidence: BTreeSet::from([EvidenceId::new("architecture-evidence").unwrap()]),
+        contaminated: false,
+    };
+    let assessment = assess_sufficiency_with_threshold(&required, &[candidate], 2, true);
+    assert_eq!(assessment.state, SufficiencyFinding::BudgetExhausted);
+    assert_eq!(assessment.missing_evidence_count, 1);
+    assert!(assessment.findings.contains(&SufficiencyFinding::Partial));
+}
+
+#[test]
+fn nonterminal_batch_is_explicitly_version_two() {
+    let mut old = input();
+    old.stop = Some(StopCondition::BudgetExhausted);
+    let support = support(&old);
+    let old = RetrievalPlan::new(
+        RetrievalPlanId::new("old").unwrap(),
+        RetrievalRequest::new(old.clone()).unwrap(),
+        &support,
+    )
+    .unwrap();
+    let mut result = batch();
+    result.plan = old.id().clone();
+    result.status = RetrievalStatus::Partial;
+    result.reason = RetrievalReason::MoreInformationNeeded;
+    assert_eq!(
+        RetrievalBatch::new(result.clone(), &old),
+        Err(RetrievalError::InvalidResult)
+    );
+    let mut updated = old.request().input().clone();
+    updated.version = RetrievalVersion::V2;
+    let new = RetrievalPlan::new(
+        RetrievalPlanId::new("new").unwrap(),
+        RetrievalRequest::new(updated).unwrap(),
+        &support,
+    )
+    .unwrap();
+    result.version = RetrievalVersion::V2;
+    result.plan = new.id().clone();
+    assert!(RetrievalBatch::new(result, &new).is_ok());
+}
 fn batch() -> RetrievalBatchInput {
     let f = fragment("fragment");
     RetrievalBatchInput {
@@ -167,7 +415,8 @@ fn batch() -> RetrievalBatchInput {
 #[test]
 fn versions_and_identities_fail_closed() {
     assert_eq!(RetrievalVersion::new(1).unwrap().number(), 1);
-    for version in [0, 2, u16::MAX] {
+    assert_eq!(RetrievalVersion::new(2).unwrap().number(), 2);
+    for version in [0, 3, u16::MAX] {
         assert_eq!(
             RetrievalVersion::new(version),
             Err(RetrievalError::UnsupportedVersion)
