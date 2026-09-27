@@ -310,6 +310,18 @@ fn original_input_keeps_inline_bytes_and_reference_semantics() {
         assert_eq!(compiled.original_input(), Some(&original));
         let json: serde_json::Value = serde_json::from_str(&compiled.to_json().unwrap()).unwrap();
         assert_eq!(json["user_input"]["trust"], "CALLER_INPUT");
+        let limited = compiled
+            .to_json_with_policy(gateway_context::ContextDisclosurePolicy {
+                maximum_sensitivity: SensitivityClass::Public,
+                include_caller_input: false,
+                include_external_content: false,
+            })
+            .unwrap();
+        let limited: serde_json::Value = serde_json::from_str(&limited).unwrap();
+        assert_eq!(limited["user_input"]["representation"], "redacted");
+        assert_eq!(limited["user_input"]["content"], "[REDACTED]");
+        assert_eq!(limited["gateway"]["task"]["representation"], "redacted");
+        assert_eq!(limited["execution_context"]["representation"], "redacted");
         match original {
             OriginalInput::Inline(text) => assert_eq!(json["user_input"]["content"], text.as_str()),
             OriginalInput::Reference(id) => {
@@ -589,6 +601,37 @@ fn budgeted_selection_flows_through_current_policy_and_compiler() {
         "estimated"
     );
     assert_eq!(json["context_selection"]["lineage"]["needed"][0], "needed");
+    let audit_json = result
+        .to_json_with_policy(gateway_context::ContextDisclosurePolicy {
+            maximum_sensitivity: SensitivityClass::Secret,
+            include_caller_input: false,
+            include_external_content: false,
+        })
+        .unwrap();
+    assert!(!audit_json.contains("retrieved text"));
+    let audit_json: serde_json::Value = serde_json::from_str(&audit_json).unwrap();
+    assert_eq!(
+        audit_json["context_selection"]["estimates"]["representation"],
+        "redacted"
+    );
+    let quarantined = BTreeSet::from([ReferenceId::new("needed").unwrap()]);
+    assert!(matches!(
+        compile_budgeted_step_with_exclusions(
+            input(),
+            &budget,
+            &target,
+            &ranked,
+            &[],
+            ContextSelectionPolicy {
+                required: &quarantined,
+                excluded: &quarantined,
+            },
+            &SemanticEstimator,
+        ),
+        Err(BudgetedCompileError::Selection(
+            gateway_context::budgeted::SelectionError::QuarantinedMandatory(_)
+        ))
+    ));
     let mut smaller = budget.clone();
     smaller = ContextBudget::new(
         smaller.total(),

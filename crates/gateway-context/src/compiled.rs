@@ -1,7 +1,7 @@
 //! Semantic TAG assembly. No fragment grants permission or changes execution IR.
 use gateway_domain::{
     ContextScopeId, Evidence, ExecutionContextIR, KnowledgeProvenance, NonEmptyText, PlanStepId,
-    Provenance, QualityMetadata, ReferenceId, RetrievedKnowledge, TrustClass,
+    Provenance, QualityMetadata, ReferenceId, RetrievedKnowledge, SensitivityClass, TrustClass,
 };
 use serde::Serialize;
 use std::collections::{BTreeMap, BTreeSet};
@@ -41,6 +41,16 @@ pub enum CompileError {
     MissingSelection,
     ScopeMismatch,
     InvalidProjection,
+}
+
+/// The host supplies this policy from an authenticated disclosure decision.
+/// It is deliberately separate from retrieved content and model output.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct ContextDisclosurePolicy {
+    pub maximum_sensitivity: SensitivityClass,
+    pub include_caller_input: bool,
+    /// Audit exports can omit all external payloads, even those labeled public.
+    pub include_external_content: bool,
 }
 
 /// Explicit source metadata; quality is carried unchanged, never interpreted as permission.
@@ -122,11 +132,13 @@ impl ContextFragment {
     pub fn knowledge(
         id: ReferenceId,
         knowledge: &RetrievedKnowledge,
-        mut metadata: FragmentMetadata,
+        metadata: FragmentMetadata,
         scope: ContextScopeId,
         step: PlanStepId,
     ) -> Result<Self, CompileError> {
-        metadata.provenance = knowledge.provenance().clone();
+        if &metadata.provenance != knowledge.provenance() {
+            return Err(CompileError::InvalidMetadata);
+        }
         Self::external(
             id,
             FragmentKind::Knowledge,
@@ -149,18 +161,23 @@ impl ContextFragment {
         if evidence.provenance() != provenance.id() {
             return Err(CompileError::InvalidMetadata);
         }
-        metadata.provenance = KnowledgeProvenance::new(
+        let actual_provenance = KnowledgeProvenance::new(
             provenance.source_reference(),
             provenance.source_timestamp().map(|t| t.as_str()),
         )
         .map_err(|_| CompileError::InvalidMetadata)?;
-        metadata.evidence.insert(
+        if metadata.provenance != actual_provenance {
+            return Err(CompileError::InvalidMetadata);
+        }
+        let verified_links = BTreeSet::from([
             ReferenceId::new(evidence.id().as_str()).map_err(|_| CompileError::InvalidMetadata)?,
-        );
-        metadata.evidence.insert(
             ReferenceId::new(provenance.id().as_str())
                 .map_err(|_| CompileError::InvalidMetadata)?,
-        );
+        ]);
+        if !metadata.evidence.is_subset(&verified_links) {
+            return Err(CompileError::InvalidMetadata);
+        }
+        metadata.evidence = verified_links;
         let mut fragment = Self::external(
             id,
             FragmentKind::Evidence,
@@ -194,7 +211,22 @@ impl ContextFragment {
     pub fn metadata(&self) -> &FragmentMetadata {
         &self.metadata
     }
-    fn json(&self) -> serde_json::Value {
+    fn json(&self, policy: Option<ContextDisclosurePolicy>) -> serde_json::Value {
+        let redacted = policy.is_some_and(|policy| {
+            !policy.include_external_content
+                || self.metadata.quality.sensitivity() > policy.maximum_sensitivity
+                || (self.kind == FragmentKind::UserInput && !policy.include_caller_input)
+        });
+        if redacted {
+            return serde_json::json!({
+                "id": self.id.as_str(), "kind": self.kind,
+                "content": "[REDACTED]", "representation": "redacted",
+                "scope": self.scope.as_str(), "step": self.step.as_str(),
+                "provenance": {"source": "[REDACTED]", "revision": null},
+                "evidence": [], "quality": self.metadata.quality,
+                "rationale": "[REDACTED]", "validation": null,
+            });
+        }
         serde_json::json!({
             "id": self.id.as_str(), "kind": self.kind, "content": self.content(),
             "representation": if self.reference_only { "reference" } else { "inline" },
@@ -271,7 +303,21 @@ impl CompiledContext {
     }
     /// Stable catalog references are deliberately separate from dynamic data.
     pub fn to_json(&self) -> Result<String, serde_json::Error> {
-        serde_json::to_string(&serde_json::json!({
+        self.serialize(None)
+    }
+    /// Export a disclosure-limited envelope. Redacted fragments retain their
+    /// typed quality and ID, but no source-controlled descriptive strings.
+    pub fn to_json_with_policy(
+        &self,
+        policy: ContextDisclosurePolicy,
+    ) -> Result<String, serde_json::Error> {
+        self.serialize(Some(policy))
+    }
+    fn serialize(
+        &self,
+        policy: Option<ContextDisclosurePolicy>,
+    ) -> Result<String, serde_json::Error> {
+        let mut value = serde_json::json!({
             "schema_version": 1, "scope": self.scope.as_str(), "step": self.step.as_str(),
             "stable": {
                 "authority": [self.projection.policy_id().as_str()],
@@ -279,9 +325,15 @@ impl CompiledContext {
                 "agent": self.projection.primary_agent_id().as_str(),
                 "skills": self.projection.skill_ids().iter().map(|id| id.as_str()).collect::<Vec<_>>(),
             },
-            "dynamic": self.dynamic.iter().map(ContextFragment::json).collect::<Vec<_>>(),
+            "dynamic": self.dynamic.iter().map(|fragment| fragment.json(policy)).collect::<Vec<_>>(),
             "execution_context": self.projection,
-        }))
+        });
+        if policy.is_some_and(|policy| !policy.include_caller_input) {
+            value["execution_context"] = serde_json::json!({
+                "id": self.projection.id().as_str(), "representation": "redacted",
+            });
+        }
+        serde_json::to_string(&value)
     }
     /// Diagnostics intentionally omit user input and external payload bytes.
     pub fn explain(&self) -> String {

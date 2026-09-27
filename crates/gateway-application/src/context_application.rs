@@ -8,7 +8,7 @@ use crate::{
         WorkflowProjectionMapping,
     },
 };
-use gateway_context::{CompileError, CompiledContext, ContextFragment};
+use gateway_context::{CompileError, CompiledContext, ContextDisclosurePolicy, ContextFragment};
 use gateway_domain::{
     DefinitionCatalog, ExecutionContextIR, ExecutionContextId, ExecutionRuntimeId, ExecutionState,
     KnowledgeQuery, OriginalInput, ReferenceId, TaskDescriptor, ValidationError,
@@ -82,7 +82,24 @@ impl CompiledStep {
         &self.policy
     }
     pub fn to_json(&self) -> Result<String, serde_json::Error> {
-        let mut value: serde_json::Value = serde_json::from_str(&self.context.to_json()?)?;
+        self.serialize(None)
+    }
+    /// Export with a host-authenticated disclosure policy for external data.
+    pub fn to_json_with_policy(
+        &self,
+        policy: ContextDisclosurePolicy,
+    ) -> Result<String, serde_json::Error> {
+        self.serialize(Some(policy))
+    }
+    fn serialize(
+        &self,
+        policy: Option<ContextDisclosurePolicy>,
+    ) -> Result<String, serde_json::Error> {
+        let context_json = match policy {
+            Some(policy) => self.context.to_json_with_policy(policy)?,
+            None => self.context.to_json()?,
+        };
+        let mut value: serde_json::Value = serde_json::from_str(&context_json)?;
         value["basis"] = crate::resolution_encoding::basis_json(&self.basis);
         value["stable"]["authority"] = serde_json::json!(self.policy.policies);
         value["user_input"] = self.original_input.as_ref().map(|original| {
@@ -90,6 +107,10 @@ impl CompiledStep {
                 OriginalInput::Inline(text) => ("inline", text.as_str()),
                 OriginalInput::Reference(id) => ("reference", id.as_str()),
             };
+            if policy.is_some_and(|policy| !policy.include_caller_input) {
+                return serde_json::json!({"kind": "user_input", "trust": "CALLER_INPUT",
+                    "representation": "redacted", "content": "[REDACTED]"});
+            }
             serde_json::json!({"kind": "user_input", "trust": "CALLER_INPUT", "representation": representation,
                 "content": content, "provenance": {"situation": self.basis.situation.as_str(), "snapshot": self.basis.situation_fingerprint.as_str()}})
         }).unwrap_or(serde_json::Value::Null);
@@ -108,6 +129,11 @@ impl CompiledStep {
                 "process_digest": self.mapping.process.digest().as_str(),
             },
         });
+        if policy.is_some_and(|policy| !policy.include_caller_input) {
+            for field in ["task", "output_contract", "constraints"] {
+                value["gateway"][field] = serde_json::json!({"representation":"redacted"});
+            }
+        }
         serde_json::to_string(&value)
     }
     pub fn explain(&self) -> String {

@@ -237,6 +237,13 @@ fn observes_success_and_retains_complete_deterministic_audit() {
     assert_eq!(fixture.resolved.snapshot.input().registry, registry);
     assert!(run.assessment().delta.is_noop());
     let json: serde_json::Value = serde_json::from_str(&run.to_json().unwrap()).unwrap();
+    assert!(!run.to_json().unwrap().contains("Ensure quality passes"));
+    assert!(!run.to_json().unwrap().contains("captured tool output"));
+    assert!(!run.to_json().unwrap().contains("test report"));
+    assert_eq!(
+        json["audit"][1]["context"]["execution_context"]["representation"],
+        "redacted"
+    );
     assert_eq!(json["audit"][1]["event"], "EXECUTION");
     assert_eq!(json["audit"][2]["event"], "OUTCOME");
     assert_eq!(json["audit"][3]["reason"], "GOAL_SATISFIED");

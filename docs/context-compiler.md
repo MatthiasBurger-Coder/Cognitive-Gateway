@@ -122,8 +122,9 @@ process gate merely by being included. CG-09 owns evidence authorization.
 
 The evidence adapter emits only the Evidence ID plus its verified provenance
 reference and source information. The complete CG-06 evidence/provenance record
-remains upstream. The retrieval adapter always takes source/revision from the
-actual `RetrievedKnowledge`, preventing metadata from relabeling that source.
+remains upstream. The retrieval adapter rejects source/revision metadata that
+differs from the actual `RetrievedKnowledge`. The evidence adapter rejects a
+mismatched source or unverified evidence link, then adds the verified references.
 
 ## Failure and version boundaries
 

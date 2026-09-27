@@ -378,14 +378,15 @@ fn hybrid_result_keeps_exact_identifier_ahead_of_model_reranking() {
             .input()
             .explanations
             .iter()
-            .any(|item| item.detail.as_str().contains("fixture-reranker@v1"))
+            .any(|item| item.reason == RetrievalReason::Relevant
+                && item.detail.as_str() == RetrievalReason::Relevant.as_str())
     );
     assert!(
         batch
             .input()
             .explanations
             .iter()
-            .any(|item| item.detail.as_str().contains("duplicate from vector"))
+            .all(|item| item.detail.as_str() == item.reason.as_str())
     );
 }
 
