@@ -1,3 +1,8 @@
+---
+name: hardening-workflow
+description: Apply the Cognitive Gateway hardening workflow when the repository operates in HARDENING mode and a hardening slice is requested.
+---
+
 # Hardening Workflow
 
 ## Purpose
