@@ -4,41 +4,43 @@
 
 v0.1 is a local developer-side deployment.
 
-```text
-Developer Workstation
-├── Cognitive Gateway CLI/Core (Rust)
-├── Project Repository
-└── Local request configuration and runtime context
+```mermaid
+flowchart TB
+    HOST[Developer Workstation]
+    HOST --> CG[Cognitive Gateway CLI / Core<br/>Rust]
+    HOST --> REPO[Project Repository]
+    HOST --> CFG[Local Request Configuration<br/>and Runtime Context]
 ```
 
 No external AI service is required for deterministic validation and resolution.
 
 ## 7.2 Planned daemon deployment
 
-```text
-Developer Workstation / Host
-├── Clients
-│   ├── CLI / IDE / CI
-│   └── Codex (planned EPIC-04)
-├── Cognitive Gateway Daemon (Rust)
-│   ├── registry / process / policy
-│   ├── planning / context compiler
-│   ├── retrieval / evidence ports
-│   ├── local inference port
-│   └── MCP connector client/runtime (planned EPIC-07)
-├── Optional Local Model Runtime (separate container/process)
-│   ├── qualified model profile
-│   ├── persistent model volume
-│   └── CPU baseline / optional GPU acceleration
-├── Optional Cognitive Services
-│   ├── embeddings
-│   ├── retrieval
-│   └── graph/index services
-└── External MCP Servers
-    ├── GitHub
-    ├── Confluence / Jira
-    ├── filesystem / web
-    └── custom enterprise services
+```mermaid
+flowchart TB
+    HOST[Developer Workstation / Host]
+    HOST --> CLIENTS[Clients]
+    CLIENTS --> CLI[CLI / IDE / CI]
+    CLIENTS --> CODEX[Codex<br/>planned EPIC-04]
+    HOST --> CG[Cognitive Gateway Daemon<br/>Rust]
+    CG --> CORE[Registry / Process / Policy]
+    CG --> PLAN[Planning / Context Compiler]
+    CG --> RET[Retrieval / Evidence Ports]
+    CG --> INF[Local Inference Port]
+    CG --> MCP[MCP Connector Client / Runtime<br/>planned EPIC-07]
+    HOST --> MODEL[Optional Local Model Runtime<br/>separate container/process]
+    MODEL --> PROFILE[Qualified Model Profile]
+    MODEL --> VOL[Persistent Model Volume]
+    MODEL --> HW[CPU Baseline / Optional GPU]
+    HOST --> COG[Optional Cognitive Services]
+    COG --> EMB[Embeddings]
+    COG --> RAG[Retrieval]
+    COG --> GRAPH[Graph / Index Services]
+    MCP --> EXT[External MCP Servers]
+    EXT --> GH[GitHub]
+    EXT --> CJ[Confluence / Jira]
+    EXT --> FW[Filesystem / Web]
+    EXT --> CUSTOM[Custom Enterprise Services]
 ```
 
 ## 7.3 Model deployment
