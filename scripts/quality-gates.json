@@ -37,7 +37,7 @@
   },
   {
     "name": "CG-03 registry CLI coverage gate",
-    "command": "cargo llvm-cov -p gateway-daemon --all-targets --fail-under-lines 95 --json --output-path \"$EVIDENCE_DIR/cg11-coverage.json\""
+    "command": "cargo llvm-cov -p gateway-daemon --all-targets --fail-under-lines 95 --json --output-path \"$EVIDENCE_DIR/cg11-coverage.json\" -- --include-ignored"
   },
   {
     "name": "Install declarative CLI",

@@ -1,6 +1,8 @@
 use gateway_application::{
-    experience_patterns::{PatternError, PatternLimits, VerifiedExecution, inspect_patterns},
-    memory::{MemoryAction, MemoryApplication, MemoryChange, MemoryStore},
+    experience_patterns::{
+        ExperienceIngestionPort, PatternError, PatternLimits, VerifiedExecution, inspect_patterns,
+    },
+    memory::{MemoryAction, MemoryApplication, MemoryChange, MemoryError, MemoryStore},
 };
 use gateway_daemon::{
     postgres_experience::{PostgresExperienceError, PostgresExperienceStore, RetentionPolicy},
@@ -119,6 +121,36 @@ fn execution(name: &str) -> VerifiedExecution {
 #[ignore = "requires the PostgreSQL Compose service; run scripts/test-postgres.sh"]
 fn postgres_round_trip_revalidates_and_preserves_negative_evidence() {
     let config = config();
+    let connection_string = format!(
+        "host=127.0.0.1 port={} user=cognitive_gateway dbname=cognitive_gateway password={}",
+        config.get_ports()[0],
+        String::from_utf8_lossy(config.get_password().unwrap())
+    );
+    let alternate_memory = PostgresMemoryStore::connect(&connection_string).unwrap();
+    let alternate_experience =
+        PostgresExperienceStore::connect(&connection_string, RetentionPolicy::default()).unwrap();
+    assert!(
+        alternate_memory
+            .list(&scope("cg22-empty-scope"))
+            .unwrap()
+            .is_empty()
+    );
+    assert_eq!(
+        alternate_experience
+            .count(&scope("cg22-empty-scope"))
+            .unwrap(),
+        0
+    );
+    assert!(matches!(
+        PostgresExperienceStore::connect_config(
+            &config,
+            RetentionPolicy {
+                max_rows_per_scope: 0,
+                ..RetentionPolicy::default()
+            }
+        ),
+        Err(PostgresExperienceError::InvalidRetention)
+    ));
     let project = format!(
         "cg22-test-{}-{}",
         std::process::id(),
@@ -154,6 +186,67 @@ fn postgres_round_trip_revalidates_and_preserves_negative_evidence() {
             .inserted
     );
     assert_eq!(store.count(&project).unwrap(), 3);
+    assert!(matches!(
+        store.list_verified(
+            &project,
+            PatternLimits {
+                max_inputs: 1,
+                ..PatternLimits::default()
+            }
+        ),
+        Err(PatternError::TooManyInputs)
+    ));
+    assert!(matches!(
+        store.list_verified(
+            &project,
+            PatternLimits {
+                max_inputs: usize::MAX,
+                ..PatternLimits::default()
+            }
+        ),
+        Err(PatternError::InvalidLimits)
+    ));
+    let mut stale_store = PostgresMemoryStore::connect_config(&config).unwrap();
+    let current_a = memory.store().get(&project, &id("a")).unwrap().unwrap();
+    let decision_a = memory.store().decisions(&project, &id("a")).unwrap()[1].clone();
+    assert!(matches!(
+        stale_store.commit(Some(1), current_a, decision_a),
+        Err(MemoryError::RevisionConflict)
+    ));
+    let mut tamper = config.connect(postgres::NoTls).unwrap();
+    let original = tamper
+        .query_one(
+            "SELECT execution_json, eligibility_json, trace FROM cg_verified_executions WHERE scope = $1 AND memory_id = 'b'",
+            &[&project.as_str()],
+        )
+        .unwrap();
+    for (column, original_value) in [
+        ("execution_json", original.get::<_, String>(0)),
+        ("eligibility_json", original.get::<_, String>(1)),
+        ("trace", original.get::<_, String>(2)),
+    ] {
+        let corrupted = if column == "trace" {
+            "wrong-trace"
+        } else {
+            "{}"
+        };
+        tamper
+            .execute(
+                &format!("UPDATE cg_verified_executions SET {column} = $1 WHERE scope = $2 AND memory_id = 'b'"),
+                &[&corrupted, &project.as_str()],
+            )
+            .unwrap();
+        assert!(matches!(
+            store.list_verified(&project, PatternLimits::default()),
+            Err(PatternError::Storage)
+        ));
+        tamper
+            .execute(
+                &format!("UPDATE cg_verified_executions SET {column} = $1 WHERE scope = $2 AND memory_id = 'b'"),
+                &[&original_value, &project.as_str()],
+            )
+            .unwrap();
+    }
     validated(&mut memory, project.as_str(), "d", "SUCCESS");
     assert!(matches!(
         store.record_verified(&memory, &project, at(), execution("d")),
@@ -205,6 +298,49 @@ fn postgres_round_trip_revalidates_and_preserves_negative_evidence() {
     let cli_report: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
     assert_eq!(cli_report["metrics"]["candidate_count"], 1);
     assert_eq!(cli_report["findings"][0]["observed_failure_count"], 1);
+    let cli = env!("CARGO_BIN_EXE_cg");
+    let current = std::process::Command::new(cli)
+        .args(["patterns", "--scope", project.as_str(), "--json"])
+        .output()
+        .unwrap();
+    assert!(current.status.success());
+    let invalid_scope = std::process::Command::new(cli)
+        .args(["patterns", "--scope", "bad scope", "--json"])
+        .output()
+        .unwrap();
+    assert_eq!(invalid_scope.status.code(), Some(3));
+    let invalid_time = std::process::Command::new(cli)
+        .args([
+            "patterns",
+            "--scope",
+            project.as_str(),
+            "--at",
+            "invalid",
+            "--json",
+        ])
+        .output()
+        .unwrap();
+    assert_eq!(invalid_time.status.code(), Some(3));
+    let test_config = std::env::temp_dir().join(format!("{project}-postgres.env"));
+    for (contents, code) in [
+        ("CG_POSTGRES_PORT=55432\n", "DATABASE_CONFIG"),
+        (
+            "CG_POSTGRES_PASSWORD=test-only\nCG_POSTGRES_PORT=invalid\n",
+            "DATABASE_CONFIG",
+        ),
+        ("CG_POSTGRES_PASSWORD=wrong-password\n", "DATABASE_ERROR"),
+    ] {
+        std::fs::write(&test_config, contents).unwrap();
+        let failed = std::process::Command::new(cli)
+            .args(["patterns", "--scope", project.as_str(), "--json"])
+            .env("CG_POSTGRES_ENV_FILE", &test_config)
+            .output()
+            .unwrap();
+        assert!(!failed.status.success());
+        let response: serde_json::Value = serde_json::from_slice(&failed.stdout).unwrap();
+        assert_eq!(response["error"]["code"], code);
+    }
+    std::fs::remove_file(test_config).unwrap();
 
     memory
         .curate(
@@ -244,6 +380,56 @@ fn postgres_round_trip_revalidates_and_preserves_negative_evidence() {
         .unwrap();
     assert_eq!(receipt.pruned_rows, 3);
     assert_eq!(retaining.count(&project).unwrap(), 1);
+
+    memory
+        .admit(record(project.as_str(), "e", "SUCCESS"), id("admit"), at())
+        .unwrap();
+    memory
+        .curate(
+            &project,
+            &id("e"),
+            1,
+            MemoryChange {
+                action: MemoryAction::Reject,
+                reason: id("reject"),
+                at: at(),
+                replacement: None,
+                successor: None,
+            },
+        )
+        .unwrap();
+    assert_eq!(
+        memory
+            .store()
+            .get(&project, &id("e"))
+            .unwrap()
+            .unwrap()
+            .state,
+        CurationState::Rejected
+    );
+    memory
+        .curate(
+            &project,
+            &id("b"),
+            2,
+            MemoryChange {
+                action: MemoryAction::Supersede,
+                reason: id("supersede"),
+                at: at(),
+                replacement: None,
+                successor: Some(id("d")),
+            },
+        )
+        .unwrap();
+    assert_eq!(
+        memory
+            .store()
+            .get(&project, &id("b"))
+            .unwrap()
+            .unwrap()
+            .state,
+        CurationState::Superseded
+    );
 
     memory
         .curate(

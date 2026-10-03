@@ -12,6 +12,20 @@ permissions:
 jobs:
   quality:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_DB: cognitive_gateway
+          POSTGRES_USER: cognitive_gateway
+          POSTGRES_PASSWORD: ci-local-only
+        ports:
+          - 55432:5432
+        options: >-
+          --health-cmd "pg_isready -U cognitive_gateway -d cognitive_gateway"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 12
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
@@ -21,6 +35,11 @@ jobs:
         with:
           python-version: '3.11'
       - uses: taiki-e/install-action@cargo-llvm-cov
+      - name: Configure PostgreSQL integration test
+        run: |
+          printf 'CG_POSTGRES_PASSWORD=ci-local-only\nCG_POSTGRES_PORT=55432\n' > "$RUNNER_TEMP/postgres.env"
+          chmod 600 "$RUNNER_TEMP/postgres.env"
+          echo "CG_POSTGRES_ENV_FILE=$RUNNER_TEMP/postgres.env" >> "$GITHUB_ENV"
       - name: Declarative v0.1 quality gate
         run: python3 scripts/quality-gate.py --output target/ci-release-evidence
       - name: Retain release evidence (including failures)
