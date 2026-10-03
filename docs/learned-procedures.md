@@ -58,11 +58,19 @@ Historical experience is evidence for learning, not permission.
 
 The implemented lifecycle allows governed transitions such as:
 
-```text
-DRAFT -> EVALUATED -> APPROVED -> ACTIVE
-   \        \            \        \
-    -> REJECTED            -> RETIRED
-                           ACTIVE -> SUSPENDED -> ACTIVE/RETIRED
+```mermaid
+stateDiagram-v2
+    [*] --> Draft
+    Draft --> Evaluated
+    Draft --> Rejected
+    Evaluated --> Approved
+    Evaluated --> Rejected
+    Approved --> Active
+    Approved --> Retired
+    Active --> Suspended
+    Active --> Retired
+    Suspended --> Active
+    Suspended --> Retired
 ```
 
 Transitions are explicit, correlated to a decision and actor/provenance, and projected append-only for a procedure version.
