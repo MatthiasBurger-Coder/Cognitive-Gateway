@@ -7,17 +7,17 @@ proof is in
 
 ## Vertical path
 
-```text
-catalog/processes/*.feature
-  -> SourceDocument frontend
-  -> SemanticCompiler
-  -> canonical Process IR v1 + digest
-  -> ProcessValidator + ProcessRegistry
-  -> pinned ProcessInstance
-  -> EventOccurrence + typed inputs
-  -> TransitionEvaluator
-  -> AtomicProcessMutation
-  -> idempotent state/history/evidence outcome
+```mermaid
+flowchart LR
+    F[catalog/processes/*.feature] --> S[SourceDocument Frontend]
+    S --> C[SemanticCompiler]
+    C --> IR[Canonical Process IR v1 + Digest]
+    IR --> V[ProcessValidator + ProcessRegistry]
+    V --> P[Pinned ProcessInstance]
+    P --> E[EventOccurrence + Typed Inputs]
+    E --> T[TransitionEvaluator]
+    T --> A[AtomicProcessMutation]
+    A --> O[Idempotent State / History / Evidence Outcome]
 ```
 
 The representative path uses `implementation-lifecycle` and reaches
