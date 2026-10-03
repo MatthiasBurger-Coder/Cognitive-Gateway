@@ -94,15 +94,15 @@ The system should become increasingly useful because validated outcomes and obse
 
 This creates a feedback loop:
 
-```text
-observe
-  -> understand
-  -> resolve
-  -> act
-  -> verify
-  -> remember
-  -> improve
-  -> observe ...
+```mermaid
+flowchart LR
+    O[Observe] --> U[Understand]
+    U --> R[Resolve]
+    R --> A[Act]
+    A --> V[Verify]
+    V --> M[Remember]
+    M --> I[Improve]
+    I --> O
 ```
 
 ## 0.4 Current foundation and future direction
@@ -293,17 +293,19 @@ Graph retrieval can combine these relationships with semantic and lexical retrie
 
 The intended retrieval strategy is hybrid:
 
-```text
-structured knowledge
-        |
-        +--> graph traversal
-        +--> vector similarity
-        +--> full-text search
-        +--> metadata filtering
-        +--> evidence history
-        |
-        v
-context planner
+```mermaid
+flowchart TB
+    K[Structured Knowledge]
+    K --> G[Graph Traversal]
+    K --> V[Vector Similarity]
+    K --> F[Full-text Search]
+    K --> M[Metadata Filtering]
+    K --> E[Evidence History]
+    G --> C[Context Planner]
+    V --> C
+    F --> C
+    M --> C
+    E --> C
 ```
 
 Retrieval remains subordinate to policy, provenance and deterministic context construction.
@@ -518,21 +520,26 @@ The knowledge editor may:
 
 A typical lifecycle is:
 
-```text
-active
-  -> suspected_stale
-  -> stale
-  -> deprecated
-  -> archived
-  -> optionally deleted
+```mermaid
+stateDiagram-v2
+    [*] --> Active
+    Active --> SuspectedStale
+    SuspectedStale --> Stale
+    Stale --> Deprecated
+    Deprecated --> Archived
+    Archived --> Deleted: optional
 ```
 
 Deletion should be exceptional because historical knowledge can remain valuable for audit, incident analysis and understanding why the current architecture exists.
 
 Sensitive content should normally follow:
 
-```text
-observe -> propose -> review -> approve -> write
+```mermaid
+flowchart LR
+    O[Observe] --> P[Propose]
+    P --> R[Review]
+    R --> A[Approve]
+    A --> W[Write]
 ```
 
 Low-risk mechanical updates may eventually be fully automated under explicit policy.
