@@ -54,7 +54,7 @@ def validate(schema, value):
 class Runtime:
     def __init__(self, endpoint=None, timeout=None, acceleration=None):
         self.endpoint = endpoint or os.environ.get('CG_MODEL_RUNTIME_ENDPOINT', 'http://127.0.0.1:11434')
-        self.timeout = float(timeout or os.environ.get('CG_MODEL_TIMEOUT', '180'))
+        self.timeout = float(timeout if timeout is not None else os.environ.get('CG_MODEL_TIMEOUT', '180'))
         self.acceleration = acceleration or os.environ.get('CG_MODEL_ACCELERATION', 'cpu')
         if self.acceleration == 'gpu':
             self.acceleration = 'nvidia'
@@ -96,6 +96,8 @@ class Runtime:
             raise ModelError('runtime_response_invalid') from error
 
     def check(self, profile):
+        if profile['runtime'] != 'ollama':
+            raise ModelError('runtime_unsupported')
         identity = self.identity(profile)
         if any(profile[key] != value for key, value in identity.items()):
             raise ModelError('provenance_changed')
@@ -131,6 +133,13 @@ class Runtime:
         validate(schema, proposal)
         return {'schema_version': '1.0', 'kind': 'proposal', 'model_id': profile['model_id'],
                 'artifact_digest': profile['artifact_digest'], 'proposal': proposal,
+                'provenance': {'model_version': profile['model_version'],
+                               'runtime': profile['runtime'], 'runtime_version': profile['runtime_version'],
+                               'runtime_configuration': {'acceleration': self.acceleration, 'options': options,
+                                                         'think': False, 'keep_alive': '5m'},
+                               'prompt_version': profile['prompt_version'],
+                               'template_digest': profile['template_digest'], 'system_digest': digest(system),
+                               'input_contract': request['input_contract'], 'output_contract': request['output_contract']},
                 'metrics': {'latency_seconds': time.monotonic() - started,
                             'load_seconds': result.get('load_duration', 0) / 1e9,
                             'tokens_per_second': result.get('eval_count', 0) / max(result.get('eval_duration', 0) / 1e9, 1e-9)}}
@@ -192,6 +201,8 @@ class Registry:
     def install(self, path):
         profile = load(path)
         validate(load(SCHEMA), profile)
+        if profile['runtime'] != 'ollama':
+            raise ModelError('runtime_unsupported')
         if profile['lifecycle'] != 'candidate' or profile['qualification_status'] != 'unqualified':
             raise ModelError('candidate_required')
         if profile['model_id'] in self.state['profiles']:

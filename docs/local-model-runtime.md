@@ -258,3 +258,102 @@ These measurements describe the recorded host and configuration. GPU deployment
 configuration and qualification bindings passed checks; GPU hardware performance
 was not measured. The replacement replay used two profiles of the same Qwen
 artifact; the distinct future-family upgrade fixture remains simulated.
+
+## CG-27 signal adapters and standalone benchmarks
+
+`services/local-model/signals.py` supplies a `CognitiveSignalAdapter` for
+classification, ranking, extraction and matching. It accepts a replaceable
+backend, immutable profile and versioned task definitions. It checks declared
+capabilities/contracts, input/output schemas, identity and provenance before
+returning a proposal. Ollama and the deterministic rules fixture implement that
+boundary. Consumers must still validate applicability and obtain Process/Policy
+authorization; a matching result never activates a procedure.
+
+Every inference proposal now retains model version, runtime/version, actual
+runtime options, prompt version, template digest, system prompt digest and
+input/output contracts. Model identity and artifact digest remain in the outer
+envelope. The Rust HTTP adapter rejects missing provenance and mismatched
+contracts. Deploy the updated service with the updated adapter; an older service
+response without provenance is rejected. Implementation changes invalidate
+qualification bindings: install and qualify a fresh candidate before switching
+the active alias, following the upgrade procedure above.
+
+`schemas/model-profile.schema.json` allows provider-specific runtime names;
+Ollama installation explicitly rejects unsupported runtimes. Other adapters can
+consume the same manifest without becoming core dependencies.
+
+Run an offline baseline without downloading models or starting containers:
+
+```bash
+target/model-venv/bin/python scripts/benchmark-local-model.py \
+  --warm-rounds 3 --output target/cg27-fixture.json
+```
+
+`models/datasets/cognitive-signals-v1.json` contains 14 synthetic representative
+cases: request classification, candidate relevance ordering with ties, explicit
+filename extraction with ambiguity/injection, and exact fingerprint matching
+with near matches, missing facts and conflicts. Dataset schema validation rejects
+unsupported tasks, duplicate case IDs and invalid expected outputs. Exact-match
+quality includes failed samples in its denominator. The dataset is a small
+bounded regression baseline, not evidence of general production accuracy.
+The deterministic fixture computes outputs independently of expected labels.
+Its reports declare `evidence_kind: deterministic-fixture`; model load time,
+token throughput and resident model memory are null because they do not apply.
+
+For a real model run, export an installed immutable profile (from `inspect`) to
+JSON. Declare the capabilities and output contracts being evaluated in a separate
+**unqualified benchmark profile**, with the same verified runtime artifact and
+template digests. Use a new model ID and prompt version for the benchmark. The
+profile must declare `classification`, `ranking`, `extraction`, `matching` and
+`classification-proposal/1.0`, `ranking-proposal/1.0`,
+`extraction-proposal/1.0`, `matching-proposal/1.0`. The standalone harness invokes
+the reference runtime adapter directly; it does not expand the serving alias's
+qualified `semantic-proposal/1.0` contract or promote the benchmark profile.
+
+```bash
+target/model-venv/bin/python scripts/benchmark-local-model.py \
+  --adapter ollama --profile target/installed-benchmark-profile.json \
+  --endpoint http://127.0.0.1:11434 --acceleration cpu \
+  --warm-rounds 3 --output target/cg27-cpu.json
+# On an independently configured GPU runtime, retain a separate report:
+target/model-venv/bin/python scripts/benchmark-local-model.py \
+  --adapter ollama --profile target/installed-benchmark-profile.json \
+  --endpoint http://127.0.0.1:11434 --acceleration nvidia \
+  --warm-rounds 3 --output target/cg27-nvidia.json
+```
+
+The Compose runtime is intentionally private. Run `benchmark.py` inside the
+model-service container when using Compose; its runtime endpoint is
+`http://runtime:11434`. Transfer a profile into the container and copy the report
+out afterwards. Running the harness does not modify registry state, aliases,
+qualification or authoritative state. Model unload/generation changes runtime
+residency, so schedule measurements without concurrent inference traffic.
+
+Reports embed the exact dataset/profile, canonical dataset digest, implementation
+and schema hashes, runtime identity, CPU/memory environment, backend and all
+samples. They separate the first cold call from repeated warm calls and report
+wall latency p50/p95, successful requests/second, generated-token throughput,
+per-task exact-match quality and resident model/VRAM snapshots. Memory snapshots
+are runtime observations, not process peak RSS. Cold means unloading the model
+before the first call; the OS file cache is not flushed. Timing includes adapter
+identity checks; runtime generation latency is retained separately. Replaying the
+declared inputs reproduces the experiment, not necessarily identical timings or
+model outputs across hosts.
+
+CPU runs explicitly disable GPU offload and reject observed VRAM use. GPU runs
+require observed nonzero VRAM; unsupported hardware returns an unavailable report
+and deterministic-core fallback rather than recording CPU work as GPU evidence.
+Schema/quality/provenance failures produce a nonzero CLI exit while preserving
+samples. Reports never overwrite an existing file. `product_claim: false` makes
+these observations distinct from product claims. The quality gate exports a
+fixture report; real CPU and GPU measurements remain separate hardware runs.
+
+### Recorded CG-27 evidence
+
+[Fixture report](evidence/CG-27-fixture-benchmark.json) covers all four tasks with
+independent deterministic rules. [CPU model report](evidence/CG-27-cpu-signals.json)
+records the Qwen3-8B Q4_K_M artifact on the named dataset, with pinned profile,
+implementation, prompts and hardware. The CPU model failed ranking tie-break and
+negative matching cases. Those failures remain visible in the report and prevent
+a passing benchmark outcome; the profile remains unqualified. The active service
+registry was unchanged by the run. No GPU hardware benchmark was performed.

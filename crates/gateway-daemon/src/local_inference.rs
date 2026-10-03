@@ -87,14 +87,25 @@ impl LocalInferencePort for HttpLocalInferenceAdapter {
         if proposal.schema_version != "1.0"
             || proposal.kind != "proposal"
             || proposal.model_id.is_empty()
-            || !proposal.artifact_digest.starts_with("sha256:")
-            || proposal.artifact_digest.len() != 71
-            || !proposal.artifact_digest[7..]
-                .bytes()
-                .all(|byte| byte.is_ascii_hexdigit())
+            || !valid_digest(&proposal.artifact_digest)
+            || !valid_digest(&proposal.provenance.template_digest)
+            || !valid_digest(&proposal.provenance.system_digest)
+            || proposal.provenance.model_version.is_empty()
+            || proposal.provenance.runtime.is_empty()
+            || proposal.provenance.runtime_version.is_empty()
+            || proposal.provenance.prompt_version.is_empty()
+            || !proposal.provenance.runtime_configuration.is_object()
+            || proposal.provenance.input_contract != request.input_contract
+            || proposal.provenance.output_contract != request.output_contract
         {
             return Err(LocalInferenceError::InvalidProposal);
         }
         Ok(proposal)
     }
+}
+
+fn valid_digest(value: &str) -> bool {
+    value.starts_with("sha256:")
+        && value.len() == 71
+        && value[7..].bytes().all(|byte| byte.is_ascii_hexdigit())
 }

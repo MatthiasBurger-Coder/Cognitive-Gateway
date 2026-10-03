@@ -176,7 +176,7 @@ The approved CG-02 v2 handoff extension is documented in
 - [CGSL, SemanticTaskIR and natural-language interpretation](semantic-language-and-interpretation.md) — EPIC-05 target boundary; natural-language compilation is not yet a completed runtime path.
 - [Codex local integration](codex-local-integration.md) — EPIC-04 planned Codex -> CG local no-key MCP boundary.
 - [MCP connector/plugin runtime](mcp-connector-runtime.md) — EPIC-07 planned CG -> external systems boundary.
-- [Local model runtime / SLM-LxM boundary](local-model-runtime.md) — CG-27.01 optional containerized local inference service and qualification lifecycle; Qwen3-8B is a reference candidate only.
+- [Local model runtime / SLM-LxM boundary](local-model-runtime.md) — CG-27 signal adapters and standalone CPU/GPU benchmark framework; CG-27.01 optional service and qualification lifecycle; Qwen3-8B is a reference candidate only.
 - [Learned procedures](learned-procedures.md) — CG-21 domain foundation implemented on 2026-10-03; the broader EPIC-03 learning/reflex runtime remains incremental.
 - [Learned procedure evaluation](procedure-evaluation.md) — CG-23 validation, replay, simulation and evaluation evidence.
 - [Learned procedure promotion](procedure-promotion.md) — CG-24 authoritative version registry, canary, supersession, rollback and audit inspection.

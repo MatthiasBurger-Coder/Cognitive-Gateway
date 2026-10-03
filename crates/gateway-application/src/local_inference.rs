@@ -23,6 +23,23 @@ pub struct LocalInferenceProposal {
     pub artifact_digest: String,
     pub proposal: Value,
     pub metrics: Value,
+    pub provenance: LocalInferenceProvenance,
+}
+
+/// Immutable model and invocation inputs retained with every signal. This
+/// records origin, not permission to apply the proposed output.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct LocalInferenceProvenance {
+    pub model_version: String,
+    pub runtime: String,
+    pub runtime_version: String,
+    pub runtime_configuration: Value,
+    pub prompt_version: String,
+    pub template_digest: String,
+    pub system_digest: String,
+    pub input_contract: String,
+    pub output_contract: String,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]

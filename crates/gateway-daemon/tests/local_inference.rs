@@ -59,7 +59,12 @@ fn invoke(
 fn provider_neutral_proposals_and_failures() {
     let valid = json!({"schema_version":"1.0", "kind":"proposal", "model_id":"replacement",
                       "artifact_digest":format!("sha256:{}", "a".repeat(64)),
-                      "proposal":{"action":"read"}, "metrics":{}});
+                      "proposal":{"action":"read"}, "metrics":{},
+                      "provenance": {"model_version":"1", "runtime":"replaceable", "runtime_version":"1",
+                        "runtime_configuration":{"acceleration":"cpu"}, "prompt_version":"v1",
+                        "template_digest":format!("sha256:{}", "b".repeat(64)),
+                        "system_digest":format!("sha256:{}", "c".repeat(64)),
+                        "input_contract":"local-inference/1.0", "output_contract":"semantic-proposal/1.0"}});
     assert_eq!(
         invoke(200, valid.to_string()).unwrap().model_id,
         "replacement"
@@ -85,6 +90,30 @@ fn provider_neutral_proposals_and_failures() {
             LocalInferenceError::InvalidProposal
         );
     }
+    for (key, value) in [
+        ("model_version", json!("")),
+        ("runtime", json!("")),
+        ("runtime_version", json!("")),
+        ("prompt_version", json!("")),
+        ("template_digest", json!("mutable")),
+        ("system_digest", json!("mutable")),
+        ("runtime_configuration", json!(null)),
+        ("input_contract", json!("foreign")),
+        ("output_contract", json!("foreign")),
+    ] {
+        let mut bad = valid.clone();
+        bad["provenance"][key] = value;
+        assert_eq!(
+            invoke(200, bad.to_string()).unwrap_err(),
+            LocalInferenceError::InvalidProposal
+        );
+    }
+    let mut missing = valid;
+    missing.as_object_mut().unwrap().remove("provenance");
+    assert_eq!(
+        invoke(200, missing.to_string()).unwrap_err(),
+        LocalInferenceError::InvalidProposal
+    );
 }
 
 #[test]

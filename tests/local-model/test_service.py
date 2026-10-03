@@ -151,6 +151,15 @@ class TransportTests(unittest.TestCase):
         with self.assertRaisesRegex(s.ModelError, 'contract_invalid'):
             s.validate({'type': 'invalid-type'}, {})
 
+    def test_unsupported_runtime_and_zero_timeout(self):
+        profile = s.load(ROOT / 'models/qwen3-8b-q4.json')
+        profile['runtime'] = 'replacement-provider'
+        s.validate(s.load(s.SCHEMA), profile)
+        with self.assertRaisesRegex(s.ModelError, 'runtime_unsupported'):
+            s.Runtime().check(profile)
+        with self.assertRaisesRegex(s.ModelError, 'configuration_invalid'):
+            s.Runtime(timeout=0)
+
     def test_reference_profile_schema(self):
         s.validate(s.load(s.SCHEMA), s.load(ROOT / 'models/qwen3-8b-q4.json'))
         bad = s.load(ROOT / 'models/qwen3-8b-q4.json')
@@ -174,6 +183,9 @@ class GenerationTests(unittest.TestCase):
             result = runtime.generate(self.profile, self.request, self.suite['system'], cold=True)
             self.assertEqual(result['kind'], 'proposal')
             self.assertEqual(result['metrics']['tokens_per_second'], 20)
+            self.assertEqual(result['provenance']['model_version'], self.profile['model_version'])
+            self.assertEqual(result['provenance']['system_digest'], s.digest(self.suite['system']))
+            self.assertEqual(result['provenance']['runtime_configuration']['options']['seed'], 0)
             self.assertEqual(call.call_args_list[0].args[1]['keep_alive'], 0)
             payload = call.call_args_list[-1].args[1]
             self.assertEqual(payload['options']['num_gpu'], 0)
