@@ -83,3 +83,5 @@ external temporary files. See [the proof and replay commands](../docs/declarativ
 ## Declarative v0.1 release quality
 
 Run `python3 scripts/quality-gate.py` for the complete CG-13 gate. See [the release checklist](../docs/declarative-quality-gates.md) for requirements, evidence and EPIC acceptance traceability.
+
+CG-30 v0.3 acceptance lives in `gateway-application/tests/support/cg30.rs`, under the context application test target. It retains fixture classification, routing, failure and lifecycle evidence. See [the qualification report](../docs/epic-03-release-qualification.md) for thresholds and reproduction. `tests/architecture/test_cg30_qualification.py` proves release admission rejects incomplete, altered, failed and dirty-candidate bundles.
