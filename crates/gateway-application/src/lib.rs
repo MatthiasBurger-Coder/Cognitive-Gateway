@@ -20,6 +20,7 @@ pub mod procedure_evaluation;
 pub mod procedure_promotion;
 pub mod reasoning_strategy;
 pub mod recursive_retrieval;
+pub mod reflex;
 pub mod resolution;
 pub mod resolution_agents;
 pub mod resolution_applicability;

@@ -154,4 +154,6 @@ scope, cohort, time and outcome budgets. Supersession and rollback atomically
 change active versions while preserving evidence and historical outcomes.
 The read-only `cg procedures` command inspects the complete journal without a model.
 Reuse still requires current process, capability and policy authorization;
-automatic discovery and reflex dispatch remain incremental EPIC-03 work.
+[CG-25](../reflex-engine.md) adds exact ACTIVE matching, evidence gates, compiled
+Process/Policy dispatch, budgets and post-execution verification. Automated
+discovery and host routing integration remain incremental EPIC-03 work.

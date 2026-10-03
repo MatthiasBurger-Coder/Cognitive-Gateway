@@ -106,5 +106,9 @@
   {
     "name": "CG-24 procedure promotion evidence and coverage",
     "command": "set -euo pipefail\nCG24_PROMOTION_OUTPUT=\"$EVIDENCE_DIR/cg24-promotion.json\" cargo test -p gateway-registry --test procedure_promotion versioned_supersession_and_rollback_preserve_all_evidence -- --exact\ntest -s \"$EVIDENCE_DIR/cg24-promotion.json\"\n\"$RUNNER_TEMP/cg/bin/cg\" procedures --registry \"$EVIDENCE_DIR/cg24-promotion.json\" --json > \"$EVIDENCE_DIR/cg24-inspection.json\"\ncargo test -p gateway-domain -p gateway-application --test procedure_promotion\ncargo test -p gateway-daemon --test procedure_promotion_cli\npython3 scripts/check-cg24-coverage.py --self-test\npython3 scripts/check-cg24-coverage.py \"$EVIDENCE_DIR/cg16-coverage.json\"\n"
+  },
+  {
+    "name": "CG-25 deterministic reflex evidence",
+    "command": "set -euo pipefail\nCG25_REFLEX_OUTPUT=\"$EVIDENCE_DIR/cg25-reflex.json\" cargo test -p gateway-application --test context_application reflex_cases\ntest -s \"$EVIDENCE_DIR/cg25-reflex.json\"\n"
   }
 ]

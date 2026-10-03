@@ -2437,3 +2437,6 @@ mod parallel_execution_tests {
         );
     }
 }
+
+#[path = "support/reflex_cases.rs"]
+mod reflex_cases;

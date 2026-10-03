@@ -31,7 +31,7 @@ claims of `PRESENT`/allowed do not authenticate live evidence or grant permissio
 Hashes detect altered content; they are not signatures. Successful simulation is
 an evaluation prerequisite, never approval or runtime authorization. Promotion
 approval is implemented separately in [CG-24](procedure-promotion.md); active reflex
-execution remains separate EPIC-03 work.
+execution is implemented in the [CG-25 reflex coordinator](reflex-engine.md).
 
 ## Evaluation behavior
 
