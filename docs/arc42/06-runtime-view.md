@@ -135,7 +135,7 @@ flowchart LR
 Discovery is not authorization. Mutation retry safety, credentials, trust,
 sensitivity and scope are explicit Gateway-managed concerns.
 
-## 6.9 Local model invocation and upgrade (planned CG-27)
+## 6.9 Local model invocation and upgrade (CG-27.01 reference service)
 
 A logical model role resolves to a qualified model profile. The local inference
 port calls a separately deployable runtime. Candidate model upgrades are
@@ -157,3 +157,7 @@ Reuse still requires current process, capability and policy authorization;
 [CG-25](../reflex-engine.md) adds exact ACTIVE matching, evidence gates, compiled
 Process/Policy dispatch, budgets and post-execution verification. Automated
 discovery and host routing integration remain incremental EPIC-03 work.
+
+The CG-27.01 reference deployment, provider-neutral port and qualification lifecycle
+are implemented; see [the operator guide](../local-model-runtime.md). Full
+SemanticTaskIR interpretation remains EPIC-05.11 work.

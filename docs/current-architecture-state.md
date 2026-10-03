@@ -71,7 +71,7 @@ flowchart LR
 | CGSL / SemanticTaskIR | PLANNED | EPIC-05 #177 defines the formal semantic layer and compiler. |
 | Natural-language-to-IR compiler | PLANNED | Rust parser/compiler work is under EPIC-05, including #186 and related items. |
 | Optional SLM semantic interpreter | PLANNED | EPIC-05.11 consumes model adapters; model output is never authoritative. |
-| Local SLM/LxM runtime | PLANNED | CG-27 #218 and CG-27.01 #249 define replaceable, qualified local inference. |
+| Local SLM/LxM runtime | IMPLEMENTED (reference service) | CG-27.01: separate CPU-first Ollama/Python containers, Rust port/adapter, immutable profiles, qualification, promotion and rollback. Full SemanticTaskIR interpretation remains separate EPIC-05.11 work. |
 | Qwen3-8B reference profile | PLANNED | Reference candidate only; not a mandatory product dependency. |
 | General provider-independent model invocation | PLANNED | EPIC-06 #178 owns the general model invocation boundary. |
 | MCP connector/plugin runtime | PLANNED | EPIC-07 #223 owns external MCP server integration. |

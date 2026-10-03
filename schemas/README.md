@@ -58,3 +58,7 @@ expected outcomes, coverage and evidence-bound lifecycle admission.
 CG-24 promotion journal and commands. Rust replay additionally enforces immutable
 versions, evidence binding, lifecycle edges, canary bounds and exact safe rollback.
 The schema does not authenticate actor/policy claims or confer runtime permission.
+
+`model-profile.schema.json` defines the optional local model service profile v1.0.
+See [the operator guide](../docs/local-model-runtime.md) for runtime discovery,
+qualification binding and lifecycle transitions.

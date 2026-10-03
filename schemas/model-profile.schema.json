@@ -1,0 +1,178 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cognitive-gateway.local/schemas/model-profile/1.0",
+  "title": "Local model profile",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "model_id",
+    "model_family",
+    "model_version",
+    "artifact_digest",
+    "runtime",
+    "runtime_version",
+    "runtime_model",
+    "quantization",
+    "role",
+    "capabilities",
+    "supported_input_contracts",
+    "supported_output_contracts",
+    "structured_output_support",
+    "context_limit",
+    "resources",
+    "prompt_version",
+    "template_digest",
+    "qualification_suite",
+    "qualification_status",
+    "lifecycle",
+    "provenance"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "model_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "model_family": {
+      "type": "string",
+      "minLength": 1
+    },
+    "model_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "artifact_digest": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "runtime": {
+      "const": "ollama"
+    },
+    "runtime_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "runtime_model": {
+      "type": "string",
+      "minLength": 1
+    },
+    "quantization": {
+      "type": "string",
+      "minLength": 1
+    },
+    "role": {
+      "type": "string",
+      "minLength": 1
+    },
+    "capabilities": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "supported_input_contracts": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "supported_output_contracts": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "structured_output_support": {
+      "const": true
+    },
+    "context_limit": {
+      "type": "integer",
+      "minimum": 256,
+      "maximum": 131072
+    },
+    "resources": {
+      "type": "object",
+      "required": [
+        "cpu",
+        "gpu"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "cpu": {
+          "const": true
+        },
+        "gpu": {
+          "enum": [
+            "optional",
+            "none"
+          ]
+        }
+      }
+    },
+    "prompt_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "template_digest": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "qualification_suite": {
+      "type": "string",
+      "minLength": 1
+    },
+    "qualification_status": {
+      "enum": [
+        "unqualified",
+        "passed",
+        "failed"
+      ]
+    },
+    "lifecycle": {
+      "enum": [
+        "candidate",
+        "active",
+        "deprecated",
+        "disabled"
+      ]
+    },
+    "provenance": {
+      "type": "object",
+      "required": [
+        "source",
+        "revision"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "source": {
+          "type": "string",
+          "minLength": 1
+        },
+        "revision": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    }
+  }
+}

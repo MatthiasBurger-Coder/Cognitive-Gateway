@@ -66,3 +66,7 @@ lifecycle and transport configuration remain outside the deterministic core.
 A connector may run locally, in another container or remotely as allowed by the
 selected MCP transport and security profile. Connector admission is explicit
 and scope-isolated.
+
+The CG-27.01 reference deployment, provider-neutral port and qualification lifecycle
+are implemented; see [the operator guide](../local-model-runtime.md). Full
+SemanticTaskIR interpretation remains EPIC-05.11 work.

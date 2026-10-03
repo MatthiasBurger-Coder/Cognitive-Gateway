@@ -1,0 +1,15 @@
+services:
+  runtime:
+    environment:
+      NVIDIA_VISIBLE_DEVICES: ${CG_NVIDIA_VISIBLE_DEVICES:-all}
+      NVIDIA_DRIVER_CAPABILITIES: "compute,utility"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+  model-service:
+    environment:
+      CG_MODEL_ACCELERATION: nvidia

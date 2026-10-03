@@ -128,7 +128,7 @@ failure. A green gate qualifies the tested revision for release review.
 
 The technical architecture is maintained in the repository as the canonical source of truth.
 
-**Start with [`docs/current-architecture-state.md`](docs/current-architecture-state.md)** for the dated implemented-vs-planned status map. This is important because the target architecture now contains planned CGSL, MCP connector and local-model boundaries that are intentionally documented before their complete runtime implementation.
+**Start with [`docs/current-architecture-state.md`](docs/current-architecture-state.md)** for the dated implemented-vs-planned status map. This is important because the target architecture now contains planned CGSL and MCP connector boundaries alongside an implemented optional local model reference service.
 
 Canonical entry points:
 
@@ -138,7 +138,7 @@ Canonical entry points:
 - [`docs/semantic-language-and-interpretation.md`](docs/semantic-language-and-interpretation.md) — planned CGSL / SemanticTaskIR boundary
 - [`docs/codex-local-integration.md`](docs/codex-local-integration.md) — planned Codex -> CG local no-key MCP integration
 - [`docs/mcp-connector-runtime.md`](docs/mcp-connector-runtime.md) — planned CG -> external MCP connector/plugin runtime
-- [`docs/local-model-runtime.md`](docs/local-model-runtime.md) — planned replaceable local SLM/LxM runtime and model lifecycle
+- [`docs/local-model-runtime.md`](docs/local-model-runtime.md) — optional containerized local model service, CPU qualification and model lifecycle
 - [`docs/learned-procedures.md`](docs/learned-procedures.md) — implemented CG-21 learning-domain foundation
 - [`docs/procedure-evaluation.md`](docs/procedure-evaluation.md) — CG-23 validation, replay, simulation and evaluation evidence
 - [`docs/procedure-promotion.md`](docs/procedure-promotion.md) — CG-24 registry, promotion, bounded canary, supersession and rollback
@@ -157,7 +157,7 @@ The GitHub Wiki is intended for simplified end-user documentation, tutorials and
 ## Current product direction
 
 - Rust for the deterministic gateway core and long-running daemon
-- optional cognitive services behind stable ports; local SLM/LxM inference is planned as a separately deployable, replaceable runtime with CPU baseline and explicit model qualification
+- optional cognitive services behind stable ports; local SLM/LxM inference is available as a separately deployable, replaceable reference service with CPU baseline and explicit model qualification
 - Kotlin only if a dedicated IntelliJ integration becomes necessary
 - deterministic workflow/agent/skill resolution before probabilistic retrieval
 - Git as source of truth
@@ -202,3 +202,7 @@ and compilation, with an exportable CLI replay.
 The [closed-loop application API](docs/closed-loop-execution.md) dispatches
 authorized steps through a replaceable runtime port, reassesses observed
 evidence, and continues or replans within explicit iteration and retry limits.
+
+The optional local model service can be started with `scripts/model.sh start`;
+see [the operator guide](docs/local-model-runtime.md) for installation, qualification,
+promotion, rollback and the independent Gateway container.
