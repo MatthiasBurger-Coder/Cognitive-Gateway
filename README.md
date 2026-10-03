@@ -102,9 +102,20 @@ failure. A green gate qualifies the tested revision for release review.
 
 ## Documentation
 
-The technical architecture is maintained in the repository as the canonical source of truth:
+The technical architecture is maintained in the repository as the canonical source of truth.
+
+**Start with [`docs/current-architecture-state.md`](docs/current-architecture-state.md)** for the dated implemented-vs-planned status map. This is important because the target architecture now contains planned CGSL, MCP connector and local-model boundaries that are intentionally documented before their complete runtime implementation.
+
+Canonical entry points:
 
 - [`docs/arc42/`](docs/arc42/) — arc42 architecture documentation
+- [`docs/README.md`](docs/README.md) — complete technical documentation index
+- [`docs/current-architecture-state.md`](docs/current-architecture-state.md) — current implementation/plan status matrix
+- [`docs/semantic-language-and-interpretation.md`](docs/semantic-language-and-interpretation.md) — planned CGSL / SemanticTaskIR boundary
+- [`docs/codex-local-integration.md`](docs/codex-local-integration.md) — planned Codex -> CG local no-key MCP integration
+- [`docs/mcp-connector-runtime.md`](docs/mcp-connector-runtime.md) — planned CG -> external MCP connector/plugin runtime
+- [`docs/local-model-runtime.md`](docs/local-model-runtime.md) — planned replaceable local SLM/LxM runtime and model lifecycle
+- [`docs/learned-procedures.md`](docs/learned-procedures.md) — implemented CG-21 learning-domain foundation
 - [`docs/adr/`](docs/adr/) — Architecture Decision Records
 - [`docs/registry-inspection-cli.md`](docs/registry-inspection-cli.md) — `cg-registry` installation and inspection commands
 - [`docs/process-application-api.md`](docs/process-application-api.md) — Rust process application ports, simulation and explainability
@@ -117,20 +128,22 @@ The technical architecture is maintained in the repository as the canonical sour
 
 The GitHub Wiki is intended for simplified end-user documentation, tutorials and usage guidance. If Wiki content and repository architecture documentation ever conflict, the repository documentation is authoritative.
 
-## Current v0.1 Direction
+## Current product direction
 
 - Rust for the deterministic gateway core and long-running daemon
-- Python for optional cognitive services such as local SLMs, embeddings and RAG
+- optional cognitive services behind stable ports; local SLM/LxM inference is planned as a separately deployable, replaceable runtime with CPU baseline and explicit model qualification
 - Kotlin only if a dedicated IntelliJ integration becomes necessary
 - deterministic workflow/agent/skill resolution before probabilistic retrieval
 - Git as source of truth
 - RAG as knowledge retrieval, not authority
 - consuming-project configuration as request-scoped application input, never
   as catalog membership or execution authority
-- MCP/tool adapters as controlled capabilities
+- MCP/tool adapters as controlled capabilities; EPIC-07 defines the external connector/plugin runtime while EPIC-04 separately defines Codex as an inbound local client
 - execution runtimes remain replaceable
+- CGSL/SemanticTaskIR is the planned formal boundary from natural language into deterministic task semantics
+- learned procedures are governed, immutable/versioned artifacts and never create policy authority
 
-See EPIC #1 and the CG-01…CG-10 issues for the v0.1 implementation plan.
+See [`docs/current-architecture-state.md`](docs/current-architecture-state.md) for the authoritative dated status and the relevant Epic/issue anchors.
 
 ### Policy authorization (CG-09)
 
