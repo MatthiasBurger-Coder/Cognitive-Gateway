@@ -3,6 +3,7 @@ mod inputs;
 mod json_input;
 mod patterns_cli;
 mod pipeline;
+mod procedure_cli;
 
 use serde::{Serialize, de::DeserializeOwned};
 use serde_json::{Value, json};
@@ -20,6 +21,9 @@ Usage:
   cg explain --context <file-or-json> [--intent <file-or-json>] [--rules <file-or-json>] [--catalog <directory>] [--json]
   cg explain --plan <file-or-json> [--catalog <directory>] [--rules <file-or-json>] [--process <file-or-json>] [--policy <file>] [--json]
   cg compile --plan <file-or-json> --policy <file> --projection <file> [--catalog <directory>] [--rules <file-or-json>] [--process <file-or-json>] [--json]
+  cg evaluate --procedure <file> --dataset <file> --runtime-version <id> [--json]
+  cg simulate --procedure <file> --dataset <file> --runtime-version <id> [--json]
+  cg replay --bundle <file> [--json]
   cg patterns --report <file-or-json> [--json]
   cg patterns --scope <project-scope> [--at <unix-seconds>] [--json]
 
@@ -28,7 +32,7 @@ Policy and projection files are explicit operator authority, separate from proje
 No command executes a runtime or persists process transitions.
 Exit codes: 0 success; 2 usage; 3 input/I/O; 4 assessment; 5 planning;
             6 catalog/resolution; 7 process; 8 policy; 9 compilation;
-            10 pattern inspection/database.
+            10 pattern inspection/database; 11 procedure evaluation failed.
 See docs/declarative-cli.md for the input contracts and examples.";
 
 #[derive(Debug)]
@@ -122,6 +126,8 @@ fn parse(arguments: &[String]) -> Result<Options, CliError> {
     let allowed = match command.as_str() {
         "assess" => &["context"][..],
         "patterns" => &["report", "scope", "at"],
+        "evaluate" | "simulate" => &["procedure", "dataset", "runtime-version"],
+        "replay" => &["bundle"],
         "plan" => &["intent", "context", "rules", "catalog"],
         "resolve" | "compile" => &[
             "plan",
@@ -182,6 +188,14 @@ fn parse(arguments: &[String]) -> Result<Options, CliError> {
         json,
     };
     match options.command.as_str() {
+        "evaluate" | "simulate" => {
+            options.required("procedure")?;
+            options.required("dataset")?;
+            options.required("runtime-version")?;
+        }
+        "replay" => {
+            options.required("bundle")?;
+        }
         "assess" => {
             options.required("context")?;
         }

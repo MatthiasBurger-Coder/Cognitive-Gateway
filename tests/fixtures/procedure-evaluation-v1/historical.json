@@ -1,0 +1,107 @@
+{
+  "schema_version": 1,
+  "id": "dataset-1",
+  "version": 1,
+  "cases": [
+    {
+      "id": "positive",
+      "kind": "HISTORICAL_SUCCESS",
+      "expected": "SUCCESS",
+      "snapshot": {
+        "id": "snapshot-success",
+        "at": 10,
+        "scope": "project-1",
+        "signals": [
+          {
+            "kind": "OPERATING_MODE",
+            "value": "DEVELOPMENT"
+          },
+          {
+            "kind": "FACT",
+            "value": "fact-1"
+          }
+        ],
+        "observations": {
+          "observation-1": "PRESENT"
+        },
+        "evidence": {
+          "evidence-1": "PRESENT"
+        },
+        "verification": {
+          "verification-1": "PRESENT"
+        },
+        "experience": {
+          "memory-1": "PRESENT"
+        },
+        "steps": [
+          {
+            "process": {
+              "id": "process-1",
+              "version": 1,
+              "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            },
+            "capability": "inspect",
+            "policy": "policy-1",
+            "capability_available": true,
+            "process_allowed": true,
+            "policy_allowed": true,
+            "process_trace": "fixture: process accepted",
+            "policy_trace": "fixture: policy allow",
+            "execution": "PRESENT"
+          }
+        ]
+      },
+      "snapshot_digest": "84b76eee371cb90351b294e673b6f2d02c2accd178ab4e85d54d74509ec03bf7"
+    },
+    {
+      "id": "failed",
+      "kind": "HISTORICAL_FAILURE",
+      "expected": "EXECUTION_FAILED",
+      "snapshot": {
+        "id": "snapshot-failed",
+        "at": 10,
+        "scope": "project-1",
+        "signals": [
+          {
+            "kind": "OPERATING_MODE",
+            "value": "DEVELOPMENT"
+          },
+          {
+            "kind": "FACT",
+            "value": "fact-1"
+          }
+        ],
+        "observations": {
+          "observation-1": "PRESENT"
+        },
+        "evidence": {
+          "evidence-1": "PRESENT"
+        },
+        "verification": {
+          "verification-1": "PRESENT"
+        },
+        "experience": {
+          "memory-1": "PRESENT"
+        },
+        "steps": [
+          {
+            "process": {
+              "id": "process-1",
+              "version": 1,
+              "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            },
+            "capability": "inspect",
+            "policy": "policy-1",
+            "capability_available": true,
+            "process_allowed": true,
+            "policy_allowed": true,
+            "process_trace": "fixture: process accepted",
+            "policy_trace": "fixture: policy allow",
+            "execution": "FAILED"
+          }
+        ]
+      },
+      "snapshot_digest": "94c4864981f2efa32c26ada0a99443e5c12928e5b689bff5430b4725ebb36bb8"
+    }
+  ]
+}

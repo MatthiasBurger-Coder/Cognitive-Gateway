@@ -16,6 +16,7 @@ pub mod parallel_execution;
 pub mod planning_application;
 pub mod policy_application;
 pub mod ports;
+pub mod procedure_evaluation;
 pub mod reasoning_strategy;
 pub mod recursive_retrieval;
 pub mod resolution;

@@ -220,7 +220,25 @@ fn lifecycle_is_deterministic_and_auditable() {
         1,
     )
     .unwrap();
-    lifecycle.apply(first.clone()).unwrap();
+    assert!(lifecycle.apply(first.clone()).is_err());
+    let mut dataset: gateway_domain::procedure_evaluation::EvaluationDataset =
+        serde_json::from_str(include_str!(
+            "../../../tests/fixtures/procedure-evaluation-v1/historical.json"
+        ))
+        .unwrap();
+    dataset.cases.extend(
+        gateway_domain::procedure_evaluation::counterfactuals(&procedure, &dataset.cases[0])
+            .unwrap(),
+    );
+    let bundle = gateway_domain::procedure_evaluation::EvaluationBundle::evaluate(
+        &procedure,
+        dataset,
+        id("runtime-1"),
+    )
+    .unwrap();
+    let mut evaluated = first.clone();
+    evaluated.decision = id(bundle.digest.as_str());
+    lifecycle.apply_evaluated(evaluated, &bundle).unwrap();
     assert!(lifecycle.apply(first).is_err());
     let second = ProcedureTransition::new(
         &procedure,

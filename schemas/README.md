@@ -48,3 +48,8 @@ Provenance, external content references and consuming-project `SKILL.md` paths
 are not runtime fields. Schema documents must be versioned, fail closed on
 invalid input and remain independent of concrete RAG, MCP and execution-runtime
 technologies.
+
+[`procedure-evaluation.schema.json`](procedure-evaluation.schema.json) describes CG-23
+datasets, replay snapshots, results and reproducible evidence bundles. Rust validation
+additionally verifies canonical procedure content, snapshot/bundle digests, exact
+expected outcomes, coverage and evidence-bound lifecycle admission.

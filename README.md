@@ -140,6 +140,7 @@ Canonical entry points:
 - [`docs/mcp-connector-runtime.md`](docs/mcp-connector-runtime.md) — planned CG -> external MCP connector/plugin runtime
 - [`docs/local-model-runtime.md`](docs/local-model-runtime.md) — planned replaceable local SLM/LxM runtime and model lifecycle
 - [`docs/learned-procedures.md`](docs/learned-procedures.md) — implemented CG-21 learning-domain foundation
+- [`docs/procedure-evaluation.md`](docs/procedure-evaluation.md) — CG-23 validation, replay, simulation and evaluation evidence
 - [`docs/adr/`](docs/adr/) — Architecture Decision Records
 - [`docs/registry-inspection-cli.md`](docs/registry-inspection-cli.md) — `cg-registry` installation and inspection commands
 - [`docs/process-application-api.md`](docs/process-application-api.md) — Rust process application ports, simulation and explainability

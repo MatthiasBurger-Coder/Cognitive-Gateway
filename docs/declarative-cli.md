@@ -290,3 +290,13 @@ Paths are relative to `crates/gateway-daemon`. CI repeats the per-file gate and
 installs `cg` to run the complete documented fixture chain. For shared
 Windows/Linux checkouts, use separate `CARGO_TARGET_DIR` and
 `CARGO_LLVM_COV_TARGET_DIR` directories for Linux artifacts.
+
+## Learned procedure evaluation (CG-23)
+
+`cg evaluate` evaluates a supplied procedure/dataset; `cg simulate` adds
+counterfactuals from historical positives; `cg replay` verifies a self-contained
+evidence bundle. Evaluation and simulation require `--procedure`, `--dataset` and
+`--runtime-version`; replay requires `--bundle`. Use `--json` to retain the complete
+bundle. Exit 11 returns a failed evaluation with its report, and exit 3 rejects
+invalid or altered artifacts. These commands execute no capabilities or process
+mutations. See [the evaluation contract and example](procedure-evaluation.md).

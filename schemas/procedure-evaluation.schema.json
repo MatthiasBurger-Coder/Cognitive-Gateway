@@ -1,0 +1,400 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cognitive-gateway.local/schemas/procedure-evaluation.schema.json",
+  "title": "Learned procedure evaluation v1",
+  "description": "Shapes only; Rust validation recomputes digests, reports, coverage and exact procedure binding. Simulation evidence never grants runtime permission.",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/dataset"
+    },
+    {
+      "$ref": "#/$defs/bundle"
+    }
+  ],
+  "$defs": {
+    "status": {
+      "type": "string",
+      "enum": [
+        "PRESENT",
+        "MISSING",
+        "STALE",
+        "CONFLICTING",
+        "FAILED"
+      ]
+    },
+    "kind": {
+      "type": "string",
+      "enum": [
+        "HISTORICAL_SUCCESS",
+        "HISTORICAL_FAILURE",
+        "NEAR_MATCH",
+        "MISSING_EVIDENCE",
+        "STALE_EVIDENCE",
+        "CONFLICTING_EVIDENCE",
+        "MISSING_OBSERVATION",
+        "INELIGIBLE_EXPERIENCE",
+        "PROCESS_DENIAL",
+        "POLICY_DENIAL",
+        "CAPABILITY_MISSING",
+        "VERSION_CHANGE",
+        "EXECUTION_FAILURE",
+        "VERIFICATION_FAILURE"
+      ]
+    },
+    "outcome": {
+      "type": "string",
+      "enum": [
+        "SUCCESS",
+        "NOT_APPLICABLE",
+        "OBSERVATION_UNAVAILABLE",
+        "EVIDENCE_UNAVAILABLE",
+        "EXPERIENCE_UNAVAILABLE",
+        "PROCESS_DENIED",
+        "POLICY_DENIED",
+        "CAPABILITY_MISSING",
+        "VERSION_MISMATCH",
+        "EXECUTION_FAILED",
+        "VERIFICATION_FAILED"
+      ]
+    },
+    "step": {
+      "type": "object",
+      "required": [
+        "process",
+        "capability",
+        "policy",
+        "capability_available",
+        "process_allowed",
+        "policy_allowed",
+        "process_trace",
+        "policy_trace",
+        "execution"
+      ],
+      "properties": {
+        "process": {
+          "$ref": "learning.schema.json#/$defs/process_reference"
+        },
+        "capability": {
+          "type": "string",
+          "minLength": 1
+        },
+        "policy": {
+          "type": "string",
+          "minLength": 1
+        },
+        "capability_available": {
+          "type": "boolean"
+        },
+        "process_allowed": {
+          "type": "boolean"
+        },
+        "policy_allowed": {
+          "type": "boolean"
+        },
+        "process_trace": {
+          "type": "string",
+          "minLength": 1
+        },
+        "policy_trace": {
+          "type": "string",
+          "minLength": 1
+        },
+        "execution": {
+          "$ref": "#/$defs/status"
+        }
+      },
+      "additionalProperties": false
+    },
+    "snapshot": {
+      "type": "object",
+      "required": [
+        "id",
+        "at",
+        "scope",
+        "signals",
+        "observations",
+        "evidence",
+        "verification",
+        "experience",
+        "steps"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "at": {
+          "type": "integer"
+        },
+        "scope": {
+          "type": "string",
+          "minLength": 1
+        },
+        "signals": {
+          "type": "array",
+          "items": {
+            "$ref": "learning.schema.json#/$defs/fingerprint_signal"
+          },
+          "uniqueItems": true
+        },
+        "observations": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/status"
+          }
+        },
+        "evidence": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/status"
+          }
+        },
+        "verification": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/status"
+          }
+        },
+        "experience": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/status"
+          }
+        },
+        "steps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/step"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "case": {
+      "type": "object",
+      "required": [
+        "id",
+        "kind",
+        "expected",
+        "snapshot",
+        "snapshot_digest"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "$ref": "#/$defs/kind"
+        },
+        "expected": {
+          "$ref": "#/$defs/outcome"
+        },
+        "snapshot": {
+          "$ref": "#/$defs/snapshot"
+        },
+        "snapshot_digest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      },
+      "additionalProperties": false
+    },
+    "dataset": {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "id",
+        "version",
+        "cases"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": 1
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "cases": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/case"
+          },
+          "minItems": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "manifest": {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "evaluator_version",
+        "runtime_version",
+        "candidate",
+        "procedure",
+        "procedure_version",
+        "procedure_digest",
+        "dataset",
+        "dataset_version",
+        "dataset_digest"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": 1
+        },
+        "evaluator_version": {
+          "const": 1
+        },
+        "runtime_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "candidate": {
+          "type": "string",
+          "minLength": 1
+        },
+        "procedure": {
+          "type": "string",
+          "minLength": 1
+        },
+        "procedure_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "procedure_digest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "dataset": {
+          "type": "string",
+          "minLength": 1
+        },
+        "dataset_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "dataset_digest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      },
+      "additionalProperties": false
+    },
+    "result": {
+      "type": "object",
+      "required": [
+        "id",
+        "snapshot_digest",
+        "outcome",
+        "activated",
+        "passed",
+        "critical_false_positive",
+        "completed_steps",
+        "fallback"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "snapshot_digest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "outcome": {
+          "$ref": "#/$defs/outcome"
+        },
+        "activated": {
+          "type": "boolean"
+        },
+        "passed": {
+          "type": "boolean"
+        },
+        "critical_false_positive": {
+          "type": "boolean"
+        },
+        "completed_steps": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "fallback": {
+          "oneOf": [
+            {
+              "type": "string",
+              "enum": [
+                "STOP",
+                "RETURN_TO_PLANNER"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "report": {
+      "type": "object",
+      "required": [
+        "manifest",
+        "results",
+        "missing_coverage",
+        "passed"
+      ],
+      "properties": {
+        "manifest": {
+          "$ref": "#/$defs/manifest"
+        },
+        "results": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/result"
+          }
+        },
+        "missing_coverage": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/kind"
+          },
+          "uniqueItems": true
+        },
+        "passed": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
+    "bundle": {
+      "type": "object",
+      "required": [
+        "procedure",
+        "dataset",
+        "report",
+        "digest"
+      ],
+      "properties": {
+        "procedure": {
+          "$ref": "learning.schema.json#/$defs/learned_procedure"
+        },
+        "dataset": {
+          "$ref": "#/$defs/dataset"
+        },
+        "report": {
+          "$ref": "#/$defs/report"
+        },
+        "digest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

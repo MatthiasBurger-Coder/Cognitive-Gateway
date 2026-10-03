@@ -76,6 +76,17 @@ impl SituationFingerprint {
 
     fn validate(&self) -> Result<(), ValidationError> {
         nonempty_unique(&self.signals, "fingerprint.signals")?;
+        if self
+            .signals
+            .iter()
+            .filter(|signal| matches!(signal, FingerprintSignal::OperatingMode(_)))
+            .count()
+            > 1
+        {
+            return Err(invalid(
+                "fingerprint cannot declare conflicting operating modes",
+            ));
+        }
         if !self
             .signals
             .iter()
@@ -410,6 +421,12 @@ impl LearnedProcedure {
     pub fn fingerprint(&self) -> &SituationFingerprint {
         &self.content.fingerprint
     }
+    pub fn source_candidate(&self) -> &ReferenceId {
+        &self.content.source_candidate
+    }
+    pub fn experience(&self) -> &[ExperienceBasis] {
+        &self.content.experience
+    }
     pub fn steps(&self) -> &[ProcedureStep] {
         &self.content.steps
     }
@@ -507,6 +524,7 @@ impl ProcedureTransition {
 /// Append-only projection of decisions for one immutable procedure version.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ProcedureLifecycle {
+    procedure_digest: ContentDigest,
     procedure_id: ReferenceId,
     procedure_version: u32,
     state: ProcedureState,
@@ -516,6 +534,7 @@ pub struct ProcedureLifecycle {
 impl ProcedureLifecycle {
     pub fn new(procedure: &LearnedProcedure) -> Self {
         Self {
+            procedure_digest: procedure.digest().clone(),
             procedure_id: procedure.id().clone(),
             procedure_version: procedure.version(),
             state: ProcedureState::Draft,
@@ -528,7 +547,31 @@ impl ProcedureLifecycle {
     pub fn history(&self) -> &[ProcedureTransition] {
         &self.history
     }
+    /// Advancing a draft requires a reproducible, passing evaluation for its exact content.
+    pub fn apply_evaluated(
+        &mut self,
+        event: ProcedureTransition,
+        bundle: &crate::procedure_evaluation::EvaluationBundle,
+    ) -> Result<(), ValidationError> {
+        bundle.proves(&bundle.procedure)?;
+        if event.from != ProcedureState::Draft
+            || event.to != ProcedureState::Evaluated
+            || event.decision.as_str() != bundle.digest.as_str()
+            || self.procedure_digest != *bundle.procedure.digest()
+        {
+            return Err(invalid(
+                "evaluation transition must reference exact evidence bundle",
+            ));
+        }
+        self.apply_checked(event)
+    }
     pub fn apply(&mut self, event: ProcedureTransition) -> Result<(), ValidationError> {
+        if event.to == ProcedureState::Evaluated {
+            return Err(invalid("explicit successful evaluation evidence required"));
+        }
+        self.apply_checked(event)
+    }
+    fn apply_checked(&mut self, event: ProcedureTransition) -> Result<(), ValidationError> {
         if event.procedure_id != self.procedure_id
             || event.procedure_version != self.procedure_version
             || event.from != self.state
