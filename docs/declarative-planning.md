@@ -3,14 +3,11 @@
 CG-07 owns the provider-independent semantic chain from a desired state and
 current situation to a declarative plan:
 
-```text
-DesiredState + Situation
-        ↓
-Delta
-        ↓
-CapabilityRequirement[]
-        ↓
-Plan / PlanStep[]
+```mermaid
+flowchart TB
+    DS[DesiredState + Situation] --> D[Delta]
+    D --> C[CapabilityRequirement[]]
+    C --> P[Plan / PlanStep[]]
 ```
 
 The v1 domain contracts are implemented in `gateway-domain::planning`, with
