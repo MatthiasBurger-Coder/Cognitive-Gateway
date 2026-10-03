@@ -4,6 +4,7 @@ use crate::{
     ProvenanceId, QualityMetadata, ReferenceId, SensitivityClass, TrustClass, UnixTimestamp,
     ValidationError,
 };
+use serde::{Deserialize, Serialize};
 
 pub const MEMORY_SCHEMA_VERSION: u16 = 1;
 
@@ -57,6 +58,115 @@ impl ExperienceRecord {
             });
         }
         Ok(())
+    }
+
+    pub fn to_json(&self) -> Result<String, crate::SerializationError> {
+        self.validate()?;
+        Ok(serde_json::to_string(&WireExperienceRecord::from(self))?)
+    }
+
+    pub fn from_json(json: &str) -> Result<Self, crate::SerializationError> {
+        let wire: WireExperienceRecord = serde_json::from_str(json)?;
+        Ok(Self::try_from(wire)?)
+    }
+}
+
+#[derive(Serialize, Deserialize)]
+#[serde(tag = "kind", content = "value", rename_all = "SCREAMING_SNAKE_CASE")]
+enum WireMemoryPayload {
+    Inline(String),
+    Reference(ReferenceId),
+}
+
+#[derive(Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct WireExperienceRecord {
+    schema_version: u16,
+    id: ReferenceId,
+    scope: ContextScopeId,
+    provenance: ProvenanceId,
+    source_snapshot: ReferenceId,
+    source_version: String,
+    source_digest: ContentDigest,
+    created_at: UnixTimestamp,
+    observed_at: UnixTimestamp,
+    valid_from: UnixTimestamp,
+    expires_at: UnixTimestamp,
+    max_age_seconds: u64,
+    quality: QualityMetadata,
+    validation: Option<ReferenceId>,
+    outcome: Option<String>,
+    label_basis: Option<ReferenceId>,
+    payload: Option<WireMemoryPayload>,
+}
+
+impl From<&ExperienceRecord> for WireExperienceRecord {
+    fn from(record: &ExperienceRecord) -> Self {
+        Self {
+            schema_version: record.schema_version,
+            id: record.id.clone(),
+            scope: record.scope.clone(),
+            provenance: record.provenance.clone(),
+            source_snapshot: record.source_snapshot.clone(),
+            source_version: record.source_version.as_str().to_owned(),
+            source_digest: record.source_digest.clone(),
+            created_at: record.created_at,
+            observed_at: record.observed_at,
+            valid_from: record.valid_from,
+            expires_at: record.expires_at,
+            max_age_seconds: record.max_age_seconds,
+            quality: record.quality,
+            validation: record.validation.clone(),
+            outcome: record.outcome.as_ref().map(|text| text.as_str().to_owned()),
+            label_basis: record.label_basis.clone(),
+            payload: record.payload.as_ref().map(|payload| match payload {
+                MemoryPayload::Inline(text) => WireMemoryPayload::Inline(text.as_str().to_owned()),
+                MemoryPayload::Reference(reference) => {
+                    WireMemoryPayload::Reference(reference.clone())
+                }
+            }),
+        }
+    }
+}
+
+impl TryFrom<WireExperienceRecord> for ExperienceRecord {
+    type Error = ValidationError;
+
+    fn try_from(wire: WireExperienceRecord) -> Result<Self, Self::Error> {
+        let record = Self {
+            schema_version: wire.schema_version,
+            id: wire.id,
+            scope: wire.scope,
+            provenance: wire.provenance,
+            source_snapshot: wire.source_snapshot,
+            source_version: NonEmptyText::new_for_field(wire.source_version, "source_version")?,
+            source_digest: wire.source_digest,
+            created_at: wire.created_at,
+            observed_at: wire.observed_at,
+            valid_from: wire.valid_from,
+            expires_at: wire.expires_at,
+            max_age_seconds: wire.max_age_seconds,
+            quality: wire.quality,
+            validation: wire.validation,
+            outcome: wire
+                .outcome
+                .map(|text| NonEmptyText::new_for_field(text, "outcome"))
+                .transpose()?,
+            label_basis: wire.label_basis,
+            payload: wire
+                .payload
+                .map(|payload| match payload {
+                    WireMemoryPayload::Inline(text) => Ok(MemoryPayload::Inline(
+                        NonEmptyText::new_for_field(text, "payload")?,
+                    )),
+                    WireMemoryPayload::Reference(reference) => {
+                        Ok(MemoryPayload::Reference(reference))
+                    }
+                })
+                .transpose()?,
+        };
+        record.validate()?;
+        Ok(record)
     }
 }
 
@@ -198,7 +308,8 @@ impl MemoryEntry {
 }
 
 /// A dataset manifest pins this reference; it is never an eternal grant.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct MemoryEligibilityReference {
     pub schema_version: u16,
     pub scope: ContextScopeId,

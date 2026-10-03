@@ -2,6 +2,11 @@
 
 This directory is the canonical home for versioned, machine-readable project and runtime contracts.
 
+The governed experience v1 wire shape is in
+[`experience.schema.json`](experience.schema.json). The EPIC-03 learning candidate and procedure v1 wire shapes are in
+[`learning.schema.json`](learning.schema.json); their domain invariants and
+digest rules are documented in [`../docs/learning-contracts.md`](../docs/learning-contracts.md).
+
 The bootstrap slice reserves the following schema boundaries:
 
 - `agent.schema.json`

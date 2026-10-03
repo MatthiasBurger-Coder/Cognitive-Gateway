@@ -33,8 +33,8 @@ domain_dependencies=$(awk '
 ' "$DOMAIN")
 
 if [[ -n "$domain_dependencies" ]] && printf '%s\n' "$domain_dependencies" \
-  | grep -Eqv '^[[:space:]]*(serde|serde_json)(\.workspace)?[[:space:]]*='; then
-  fail "gateway-domain may only declare serde serialization dependencies"
+  | grep -Eqv '^[[:space:]]*(serde|serde_json|sha2)(\.workspace)?[[:space:]]*='; then
+  fail "gateway-domain may only declare serde serialization and SHA-256 dependencies"
 fi
 
 for manifest in "$DOMAIN" "$APPLICATION"; do
