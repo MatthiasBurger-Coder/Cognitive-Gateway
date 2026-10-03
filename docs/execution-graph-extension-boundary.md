@@ -22,13 +22,15 @@ The Process IR v1 is authoritative for lifecycle legality:
 An execution graph may enrich an already authorized activity plan, but it may
 not make an illegal lifecycle transition legal. The safe order is:
 
-```text
-event + lifecycle snapshot
-  -> Process IR v1 evaluation
-  -> reject or accept lifecycle transition
-  -> optional execution-graph evaluation for accepted work
-  -> adapter executes the approved plan
-  -> evidence/failure event returns through the lifecycle boundary
+```mermaid
+flowchart LR
+    E[Event + Lifecycle Snapshot] --> P[Process IR v1 Evaluation]
+    P --> D{Lifecycle Transition}
+    D -->|reject| R[Rejected]
+    D -->|accept| G[Optional Execution-Graph Evaluation]
+    G --> A[Adapter Executes Approved Plan]
+    A --> O[Evidence / Failure Event]
+    O --> P
 ```
 
 The current compiler emits the explicit
