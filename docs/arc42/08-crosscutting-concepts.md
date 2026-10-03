@@ -95,3 +95,38 @@ The repository provides `scripts/check-architecture.sh` to enforce the reviewed 
 The domain crate uses distinct validated newtypes for task, agent, skill, workflow, policy, execution-context and capability identifiers. Identifiers are 1–128 characters, use only ASCII letters, digits, `-`, `_` and `.`, and must begin and end with an ASCII alphanumeric character. Identifiers are never silently trimmed or normalized; malformed values are rejected by their constructors and parsing implementations.
 
 Required textual values must contain a non-whitespace character, be no longer than 16,384 characters, and contain no control characters other than tab, line feed and carriage return. `SchemaVersion` is a major/minor value object; major version zero is reserved and malformed version strings fail parsing. These rules are deterministic, side-effect free and independent of serialization frameworks or execution providers.
+
+## 8.12 Semantic determinism and ambiguity
+
+Natural-language interpretation is allowed to be probabilistic at the system
+boundary, but canonical task semantics are not. EPIC-05 requires unresolved,
+ambiguous and conflicting mandatory semantics to remain explicit. Model output
+may nominate candidates but cannot silently fill required facts. CGSL describes
+task meaning and remains separate from Process IR execution semantics and
+provider-specific prompt rendering.
+
+## 8.13 Model provenance and qualification
+
+Local or remote model use must retain provider/model identity and the
+configuration needed to reproduce material behavior where applicable. CG-27
+adds model revision/digest, runtime version, quantization and prompt/template
+provenance plus explicit qualification/promotion/rollback. Model output remains
+non-authoritative even after qualification.
+
+## 8.14 MCP trust and credential isolation
+
+MCP discovery never grants permission or trust. External resource/tool results
+must be normalized into canonical evidence/capability contracts. Credentials
+are resolved in outer runtime infrastructure and must not be serialized into
+Intent, Plan, Evidence, compiled model context or audit payloads. Mutation
+retry safety is explicit and never guessed from model output.
+
+## 8.15 Governed procedural learning
+
+CG-21 separates eligible historical experience, pattern candidates, immutable
+learned procedure content and procedure lifecycle state. A learned procedure
+references existing process/capability/policy identities and therefore cannot
+manufacture authority. Each immutable version is digest-bound and lifecycle
+decisions are append-only, inspectable events. The wider EPIC-03 reflex and
+automatic pattern-discovery behavior remains gated by evaluation, approval and
+verification.
