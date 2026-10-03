@@ -1,0 +1,435 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cognitive-gateway.local/schemas/procedure-promotion.schema.json",
+  "title": "Procedure promotion journal v1",
+  "description": "Trusted history shape; replay validates evaluation evidence and all lifecycle invariants. JSON does not authenticate authority.",
+  "$ref": "#/$defs/journal",
+  "$defs": {
+    "version": {
+      "type": "object",
+      "required": [
+        "id",
+        "version",
+        "digest"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "learning.schema.json#/$defs/id"
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4294967295
+        },
+        "digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      },
+      "additionalProperties": false
+    },
+    "state": {
+      "enum": [
+        "DISCOVERED",
+        "CANDIDATE",
+        "VALIDATED",
+        "EVALUATED",
+        "APPROVED",
+        "CANARY",
+        "ACTIVE",
+        "REJECTED",
+        "DEPRECATED",
+        "ROLLED_BACK",
+        "SUPERSEDED"
+      ]
+    },
+    "metadata": {
+      "type": "object",
+      "required": [
+        "id",
+        "actor",
+        "policy_decision",
+        "at"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "learning.schema.json#/$defs/id"
+        },
+        "actor": {
+          "$ref": "learning.schema.json#/$defs/id"
+        },
+        "policy_decision": {
+          "$ref": "learning.schema.json#/$defs/id"
+        },
+        "at": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9223372036854775807
+        }
+      },
+      "additionalProperties": false
+    },
+    "boundary": {
+      "type": "object",
+      "required": [
+        "scope",
+        "cohorts",
+        "starts_at",
+        "ends_at",
+        "max_executions",
+        "max_failures",
+        "required_successes"
+      ],
+      "properties": {
+        "scope": {
+          "$ref": "learning.schema.json#/$defs/id"
+        },
+        "cohorts": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "learning.schema.json#/$defs/id"
+          }
+        },
+        "starts_at": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9223372036854775807
+        },
+        "ends_at": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9223372036854775807
+        },
+        "max_executions": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4294967295
+        },
+        "max_failures": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "required_successes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4294967295
+        }
+      },
+      "additionalProperties": false
+    },
+    "execution": {
+      "type": "object",
+      "required": [
+        "id",
+        "scope",
+        "cohort",
+        "mode"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "learning.schema.json#/$defs/id"
+        },
+        "scope": {
+          "$ref": "learning.schema.json#/$defs/id"
+        },
+        "cohort": {
+          "$ref": "learning.schema.json#/$defs/id"
+        },
+        "mode": {
+          "enum": [
+            "CANARY",
+            "ACTIVE"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "command": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": [
+            "kind",
+            "procedure",
+            "discovery_evidence"
+          ],
+          "properties": {
+            "kind": {
+              "const": "DISCOVER"
+            },
+            "procedure": {
+              "$ref": "learning.schema.json#/$defs/learned_procedure"
+            },
+            "discovery_evidence": {
+              "$ref": "learning.schema.json#/$defs/id"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "kind",
+            "procedure",
+            "from",
+            "to",
+            "evidence"
+          ],
+          "properties": {
+            "kind": {
+              "const": "ADVANCE"
+            },
+            "procedure": {
+              "$ref": "#/$defs/version"
+            },
+            "from": {
+              "$ref": "#/$defs/state"
+            },
+            "to": {
+              "$ref": "#/$defs/state"
+            },
+            "evidence": {
+              "$ref": "learning.schema.json#/$defs/id"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "kind",
+            "procedure",
+            "bundle"
+          ],
+          "properties": {
+            "kind": {
+              "const": "EVALUATE"
+            },
+            "procedure": {
+              "$ref": "#/$defs/version"
+            },
+            "bundle": {
+              "$ref": "procedure-evaluation.schema.json#/$defs/bundle"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "kind",
+            "procedure",
+            "evaluation_digest"
+          ],
+          "properties": {
+            "kind": {
+              "const": "APPROVE"
+            },
+            "procedure": {
+              "$ref": "#/$defs/version"
+            },
+            "evaluation_digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "kind",
+            "procedure",
+            "boundary"
+          ],
+          "properties": {
+            "kind": {
+              "const": "START_CANARY"
+            },
+            "procedure": {
+              "$ref": "#/$defs/version"
+            },
+            "boundary": {
+              "$ref": "#/$defs/boundary"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "kind",
+            "procedure"
+          ],
+          "properties": {
+            "kind": {
+              "const": "ACTIVATE"
+            },
+            "procedure": {
+              "$ref": "#/$defs/version"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "kind",
+            "procedure",
+            "previous"
+          ],
+          "properties": {
+            "kind": {
+              "const": "SUPERSEDE"
+            },
+            "procedure": {
+              "$ref": "#/$defs/version"
+            },
+            "previous": {
+              "$ref": "#/$defs/version"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "kind",
+            "procedure",
+            "restore"
+          ],
+          "properties": {
+            "kind": {
+              "const": "ROLLBACK"
+            },
+            "procedure": {
+              "$ref": "#/$defs/version"
+            },
+            "restore": {
+              "oneOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "$ref": "#/$defs/version"
+                }
+              ]
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "kind",
+            "procedure",
+            "reason"
+          ],
+          "properties": {
+            "kind": {
+              "const": "DISABLE"
+            },
+            "procedure": {
+              "$ref": "#/$defs/version"
+            },
+            "reason": {
+              "$ref": "learning.schema.json#/$defs/id"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "kind",
+            "procedure",
+            "execution"
+          ],
+          "properties": {
+            "kind": {
+              "const": "RESERVE_EXECUTION"
+            },
+            "procedure": {
+              "$ref": "#/$defs/version"
+            },
+            "execution": {
+              "$ref": "#/$defs/execution"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "kind",
+            "procedure",
+            "execution_id",
+            "outcome",
+            "evidence"
+          ],
+          "properties": {
+            "kind": {
+              "const": "RECORD_OUTCOME"
+            },
+            "procedure": {
+              "$ref": "#/$defs/version"
+            },
+            "execution_id": {
+              "$ref": "learning.schema.json#/$defs/id"
+            },
+            "outcome": {
+              "enum": [
+                "SUCCESS",
+                "EXECUTION_FAILED",
+                "VERIFICATION_FAILED",
+                "REFUSED"
+              ]
+            },
+            "evidence": {
+              "$ref": "learning.schema.json#/$defs/id"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "event": {
+      "type": "object",
+      "required": [
+        "metadata",
+        "command"
+      ],
+      "properties": {
+        "metadata": {
+          "$ref": "#/$defs/metadata"
+        },
+        "command": {
+          "$ref": "#/$defs/command"
+        }
+      },
+      "additionalProperties": false
+    },
+    "journal": {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "events"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": 1
+        },
+        "events": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/event"
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

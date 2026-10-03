@@ -26,4 +26,4 @@ A learned procedure never creates new process or policy authority.
 - Procedure versions are reproducible and tamper-evident through canonical serialization/digest binding.
 - Promotion/suspension/retirement decisions remain explicit and auditable.
 - Memory is evidence for learning, not permission.
-- The CG-21 foundation is implemented; broader EPIC-03 discovery, evaluation, promotion and reflex automation remains incremental.
+- CG-21 contracts, CG-23 evaluation and [CG-24 promotion](../procedure-promotion.md) are implemented. CG-24 uses authenticated application authority and an append-only registry with bounded canary, explicit supersession and rollback; automatic discovery/reflex execution remains incremental.

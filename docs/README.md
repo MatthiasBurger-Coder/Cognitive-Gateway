@@ -179,6 +179,7 @@ The approved CG-02 v2 handoff extension is documented in
 - [Local model runtime / SLM-LxM boundary](local-model-runtime.md) — CG-27/CG-27.01 planned replaceable local inference service; Qwen3-8B is a reference candidate only.
 - [Learned procedures](learned-procedures.md) — CG-21 domain foundation implemented on 2026-10-03; the broader EPIC-03 learning/reflex runtime remains incremental.
 - [Learned procedure evaluation](procedure-evaluation.md) — CG-23 validation, replay, simulation and evaluation evidence.
+- [Learned procedure promotion](procedure-promotion.md) — CG-24 authoritative version registry, canary, supersession, rollback and audit inspection.
 
 ## Policy authorization
 

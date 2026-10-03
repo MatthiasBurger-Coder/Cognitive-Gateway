@@ -12,6 +12,7 @@
 #![forbid(unsafe_code)]
 
 pub mod capability_index;
+pub mod learned_procedures;
 
 use std::{
     collections::{BTreeMap, BTreeSet},

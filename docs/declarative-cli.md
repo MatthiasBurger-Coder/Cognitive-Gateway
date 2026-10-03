@@ -300,3 +300,12 @@ evidence bundle. Evaluation and simulation require `--procedure`, `--dataset` an
 bundle. Exit 11 returns a failed evaluation with its report, and exit 3 rejects
 invalid or altered artifacts. These commands execute no capabilities or process
 mutations. See [the evaluation contract and example](procedure-evaluation.md).
+
+## Learned procedure registry inspection (CG-24)
+
+`cg procedures --registry <journal-file> [--json]` validates and reconstructs the
+CG-24 journal, showing immutable versions, lifecycle states, evaluation evidence,
+canary bounds, predecessor references, execution outcomes and complete audit history.
+It supports stdin (`--registry -`) and inline JSON. Invalid journals exit 3; missing
+arguments exit 2. The command requires no LLM and writes no registry state. See
+[procedure promotion](procedure-promotion.md) for authority and rollback contracts.
