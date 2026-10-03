@@ -202,3 +202,5 @@ Run `python3 scripts/quality-gate.py` for the complete CG-13 gate. See [the rele
 
 - [Governed memory and experience retrieval](governed-memory.md) — CG-18 lifecycle, eligibility and context bridge.
 - [Learned procedures and governed procedural learning](learned-procedures.md) — CG-21 domain contracts, lifecycle and immutable procedure versions.
+- [Experience normalization and pattern inspection](experience-patterns.md) — CG-22 bounded correlation and read-only findings.
+- [PostgreSQL Compose service](postgres-compose.md) — optional persistent database installation and operations.

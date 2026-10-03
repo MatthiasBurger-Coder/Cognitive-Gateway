@@ -9,6 +9,9 @@ python3 scripts/quality-gate.py
 ```
 
 Run from a checkout with Bash, Git, Python 3.11+ and the Rust toolchain installed.
+Start the local PostgreSQL service with `./scripts/start-postgres.sh` before a
+local full gate run. The daemon coverage step executes the CG-22 database
+integration test; CI provides an isolated PostgreSQL service automatically.
 No provider, LLM, database or runtime service is needed. Cargo may need network
 access to fetch dependencies; after provisioning, the core tests run locally.
 `--output <new-directory>` chooses the evidence location; existing directories

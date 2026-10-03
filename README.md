@@ -44,6 +44,30 @@ and add `/absolute/path/bin` to `PATH`. Rerunning the script updates both CLIs
 to the current checkout. The script can also be called from another directory
 by its absolute path.
 
+### Optional PostgreSQL service
+
+To install the CLIs and start PostgreSQL with persistent storage, use:
+
+```bash
+./scripts/install-linux.sh --with-postgres
+```
+
+For an existing CLI installation, start only the database with
+`./scripts/start-postgres.sh`. The first start creates a private
+`~/.config/cognitive-gateway/postgres.env` with a random password. Compose
+stores database files in a named Docker volume, which survives container
+recreation and `./scripts/postgres-compose.sh down`. The service
+listens on `127.0.0.1:55432` by default. See
+[`docs/postgres-compose.md`](docs/postgres-compose.md) for configuration,
+Nexus image override, checks and backup instructions.
+
+The CG-22 PostgreSQL adapters persist governed memory and verified-execution
+references; `./scripts/test-postgres.sh` exercises restart-safe revalidation
+against this service. `cg patterns --scope <project-scope> --json` inspects the
+stored experience. Verified outcomes are written through the Rust adapter.
+See the adapter boundary in
+[`docs/experience-patterns.md`](docs/experience-patterns.md).
+
 ### Run the registry CLI
 
 To install only the read-only `cg-registry` CLI manually, run from the repository root:

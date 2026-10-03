@@ -149,6 +149,7 @@ fn retrieval_gap_pauses_without_authorizing_execution() {
         run.refresh(batch(Some(true), true, true)).unwrap(),
         LoopDecision::Success
     );
+    assert!(run.verified_outcome().is_none());
     assert_eq!(
         run.apply_retrieval_assessment(&gap),
         Err(LoopError::NotReady)
@@ -1181,6 +1182,7 @@ fn missing_evidence_pauses_and_refresh_preserves_iteration_budget() {
         Ok(LoopDecision::Pause)
     );
     assert_eq!(run.audit().last().unwrap()["reason"], "MISSING_EVIDENCE");
+    assert!(run.verified_outcome().is_none());
     assert_eq!(
         execute(&mut run, &fixture, &mut runtime),
         Err(LoopError::NotReady)
@@ -1249,6 +1251,14 @@ fn hard_failures_and_blockers_override_even_satisfied_goals() {
             run.assessment().comparison.outcome(),
             ComparisonOutcome::Satisfied
         );
+        match status {
+            OutcomeStatus::HardFailure => assert_eq!(
+                run.verified_outcome().unwrap().outcome(),
+                gateway_application::experience_patterns::OutcomeClass::Failure,
+            ),
+            OutcomeStatus::Blocked => assert!(run.verified_outcome().is_none()),
+            _ => unreachable!(),
+        }
     }
     let mut run = start(3, 3);
     run.stop().unwrap();
@@ -1303,6 +1313,24 @@ fn invalid_scope_and_correlations_leave_pending_attempt_unrepeated() {
         observations: runtime.batch,
     };
     assert_eq!(run.ingest(outcome.clone()), Ok(LoopDecision::Success));
+    let receipt = run
+        .verified_outcome()
+        .expect("evidence-backed execution verdict");
+    assert_eq!(receipt.scope(), &scope());
+    assert_eq!(receipt.execution().as_str(), "run-1-execution-1");
+    assert!(
+        receipt
+            .source_snapshot()
+            .as_str()
+            .starts_with("execution-snapshot-")
+    );
+    assert_eq!(receipt.source_digest().as_str(), "a".repeat(64));
+    assert_eq!(
+        receipt.outcome(),
+        gateway_application::experience_patterns::OutcomeClass::Success
+    );
+    assert_eq!(receipt.facts(), &[FactId::new("fact").unwrap()]);
+    assert_eq!(receipt.evidence(), &[EvidenceId::new("report").unwrap()]);
     assert_eq!(run.ingest(outcome), Err(LoopError::StaleExecution));
     assert_eq!(runtime.calls, 1);
 }

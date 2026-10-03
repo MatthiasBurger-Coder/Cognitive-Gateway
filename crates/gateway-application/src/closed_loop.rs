@@ -5,11 +5,54 @@ use crate::{
     context_application::{
         CompileStepInput, CompiledStep, ContextApplication, ContextApplicationError,
     },
+    experience_patterns::OutcomeClass,
 };
 use gateway_context::ContextDisclosurePolicy;
 use gateway_domain::*;
 use gateway_policy::PolicyDecision;
 use serde::Serialize;
+use sha2::{Digest, Sha256};
+
+/// Issued only after ingesting correlated runtime observations and evaluating
+/// their evidence against the run's goal. It is historical evidence, not a grant.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct VerifiedOutcomeReceipt {
+    scope: ContextScopeId,
+    execution: ReferenceId,
+    source_snapshot: ReferenceId,
+    source_digest: ContentDigest,
+    validation: ReferenceId,
+    outcome: OutcomeClass,
+    facts: Vec<FactId>,
+    evidence: Vec<EvidenceId>,
+}
+
+impl VerifiedOutcomeReceipt {
+    pub fn scope(&self) -> &ContextScopeId {
+        &self.scope
+    }
+    pub fn execution(&self) -> &ReferenceId {
+        &self.execution
+    }
+    pub fn source_snapshot(&self) -> &ReferenceId {
+        &self.source_snapshot
+    }
+    pub fn source_digest(&self) -> &ContentDigest {
+        &self.source_digest
+    }
+    pub fn validation(&self) -> &ReferenceId {
+        &self.validation
+    }
+    pub fn outcome(&self) -> OutcomeClass {
+        self.outcome
+    }
+    pub fn facts(&self) -> &[FactId] {
+        &self.facts
+    }
+    pub fn evidence(&self) -> &[EvidenceId] {
+        &self.evidence
+    }
+}
 
 /// Immutable planning configuration captured for the lifetime of a run.
 #[derive(Debug, Clone)]
@@ -122,6 +165,7 @@ pub struct ClosedLoop {
     decision: LoopDecision,
     pending: Option<ReferenceId>,
     audit: Vec<serde_json::Value>,
+    verified_outcome: Option<VerifiedOutcomeReceipt>,
 }
 
 impl ClosedLoop {
@@ -193,6 +237,7 @@ impl ClosedLoop {
             decision: LoopDecision::Replan,
             pending: None,
             audit: vec![],
+            verified_outcome: None,
         };
         run.choose(LoopReason::InitialPlan);
         Ok(run)
@@ -203,6 +248,10 @@ impl ClosedLoop {
     }
     pub fn decision(&self) -> LoopDecision {
         self.decision
+    }
+    /// Returns the last evidence-backed execution verdict, if one was issued.
+    pub fn verified_outcome(&self) -> Option<&VerifiedOutcomeReceipt> {
+        self.verified_outcome.as_ref()
     }
     pub fn iterations(&self) -> u32 {
         self.iterations
@@ -328,6 +377,7 @@ impl ClosedLoop {
             self.revision += 1;
         }
         self.pending = None;
+        self.verified_outcome = None;
         self.audit.push(serde_json::json!({"event":"OUTCOME", "execution":outcome.execution,
             "status":outcome.status, "new_revision": self.revision,
             "source":outcome.observations.as_ref().map(|b| serde_json::json!({"source":b.snapshot().source_id(), "ingestion_key":b.ingestion_key().as_str()}))}));
@@ -336,6 +386,55 @@ impl ClosedLoop {
             OutcomeStatus::Blocked => self.record(LoopReason::ExplicitBlocker),
             _ if reason == LoopReason::MissingEvidence => self.record(reason),
             _ => self.choose(reason),
+        }
+        let verdict = match (outcome.status, self.decision) {
+            (OutcomeStatus::Completed, LoopDecision::Success) => Some(OutcomeClass::Success),
+            (OutcomeStatus::HardFailure, LoopDecision::Stopped) => Some(OutcomeClass::Failure),
+            _ => None,
+        };
+        if let (Some(verdict), Some(batch)) = (verdict, outcome.observations.as_ref()) {
+            let trace = self.assessment.comparison.trace();
+            if let (true, true, Some(source_digest)) = (
+                !trace.facts().is_empty(),
+                !trace.evidence().is_empty(),
+                batch.snapshot().digest().cloned(),
+            ) {
+                let identity = serde_json::to_vec(&(
+                    &self.scope,
+                    &outcome.execution,
+                    batch.snapshot().source_id(),
+                    batch.ingestion_key().as_str(),
+                    &source_digest,
+                ))
+                .expect("typed source identity serializes");
+                let source_snapshot =
+                    ReferenceId::new(format!("execution-snapshot-{:x}", Sha256::digest(identity)))
+                        .expect("SHA-256 source identity is valid");
+                let facts = trace.facts().to_vec();
+                let evidence = trace.evidence().to_vec();
+                let bytes = serde_json::to_vec(&(
+                    &self.scope,
+                    &outcome.execution,
+                    &source_snapshot,
+                    verdict,
+                    &facts,
+                    &evidence,
+                ))
+                .expect("typed verification identity serializes");
+                let validation =
+                    ReferenceId::new(format!("verification-{:x}", Sha256::digest(bytes)))
+                        .expect("SHA-256 verification identity is valid");
+                self.verified_outcome = Some(VerifiedOutcomeReceipt {
+                    scope: self.scope.clone(),
+                    execution: outcome.execution,
+                    source_snapshot,
+                    source_digest,
+                    validation,
+                    outcome: verdict,
+                    facts,
+                    evidence,
+                });
+            }
         }
         Ok(self.decision)
     }

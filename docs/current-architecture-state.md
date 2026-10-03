@@ -66,6 +66,7 @@ flowchart LR
 | Closed-loop execution | IMPLEMENTED | Bounded reassessment/replanning flow exists. |
 | Parallel task execution | IMPLEMENTED | CG-28A bounded parallel scheduling is present. |
 | Learned procedure domain contracts | IMPLEMENTED | CG-21 foundation added on 2026-10-03. |
+| Experience normalization and pattern inspection | IMPLEMENTED | CG-22 correlates governed, verified outcomes and supports PostgreSQL backed inspection; it creates candidates without executable authority. |
 | Learned procedure discovery/promotion/reflex runtime | PARTIAL / PLANNED | Domain contracts exist; full EPIC-03 lifecycle remains broader than CG-21 foundation. |
 | CGSL / SemanticTaskIR | PLANNED | EPIC-05 #177 defines the formal semantic layer and compiler. |
 | Natural-language-to-IR compiler | PLANNED | Rust parser/compiler work is under EPIC-05, including #186 and related items. |
