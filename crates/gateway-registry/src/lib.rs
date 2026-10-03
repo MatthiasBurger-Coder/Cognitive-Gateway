@@ -247,7 +247,6 @@ impl ResolvedSkillGraph {
     }
 
     /// Returns the stable IDs in dependency-first order.
-    #[must_use]
     pub fn ids(&self) -> impl ExactSizeIterator<Item = &SkillId> {
         self.skills.iter().map(SkillDefinitionDocument::id)
     }
@@ -453,7 +452,6 @@ impl AgentRegistry {
     }
 
     /// Returns the stable canonical IDs in registry order.
-    #[must_use]
     pub fn ids(&self) -> impl ExactSizeIterator<Item = &AgentId> {
         self.documents.iter().map(AgentDefinitionDocument::id)
     }
@@ -566,7 +564,6 @@ impl SkillRegistry {
     }
 
     /// Returns the stable canonical IDs in registry order.
-    #[must_use]
     pub fn ids(&self) -> impl ExactSizeIterator<Item = &SkillId> {
         self.documents.iter().map(SkillDefinitionDocument::id)
     }
