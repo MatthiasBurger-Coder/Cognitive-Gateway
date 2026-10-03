@@ -64,8 +64,10 @@ The deterministic Rust core follows Hexagonal Architecture. Domain and applicati
 
 The dependency rule is inward-only:
 
-```text
-Adapters -> Application Ports -> Domain/Core
+```mermaid
+flowchart LR
+    A[Adapters] --> P[Application Ports]
+    P --> C[Domain / Core]
 ```
 
 RAG implementations depend on knowledge/retrieval ports, MCP/tool implementations depend on capability ports, and execution runtimes depend on runtime ports. None of these technologies may become a dependency of `gateway-domain`.
