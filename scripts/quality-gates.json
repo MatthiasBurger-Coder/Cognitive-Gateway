@@ -113,6 +113,6 @@
   },
   {
     "name": "CG-27 local model lifecycle and adapter",
-    "command": "python3 -m venv \"$RUNNER_TEMP/local-model-python\"\n\"$RUNNER_TEMP/local-model-python/bin/python\" -m pip install -r services/local-model/requirements.txt\n\"$RUNNER_TEMP/local-model-python/bin/python\" -m unittest discover -s tests/local-model -v\ncargo test -p gateway-daemon --test local_inference --locked\ndocker compose -f compose.model.yaml config --quiet\ndocker compose -f compose.model.yaml -f compose.model.gpu.yaml config --quiet\nCG_MODEL_ACCELERATION=amd scripts/model.sh config --quiet\nCG_MODEL_ACCELERATION=vulkan CG_MODEL_VULKAN_IMAGE=ollama/ollama:0.12.11 scripts/model.sh config --quiet"
+    "command": "python3 -m venv \"$RUNNER_TEMP/local-model-python\"\n\"$RUNNER_TEMP/local-model-python/bin/python\" -m pip install -r services/local-model/requirements.txt\n\"$RUNNER_TEMP/local-model-python/bin/python\" -m unittest discover -s tests/local-model -v\ncargo test -p gateway-daemon --test local_inference --locked\ndocker compose -f compose.model.yaml config --quiet\ndocker compose -f compose.model.yaml -f compose.model.gpu.yaml config --quiet\nCG_MODEL_ACCELERATION=amd scripts/model.sh config --quiet\nCG_MODEL_ACCELERATION=vulkan CG_MODEL_VULKAN_IMAGE=ollama/ollama:0.12.11 scripts/model.sh config --quiet\n\"$RUNNER_TEMP/local-model-python/bin/python\" scripts/benchmark-local-model.py --warm-rounds 2 --output \"$EVIDENCE_DIR/cg27-fixture-benchmark.json\""
   }
 ]

@@ -62,3 +62,7 @@ The schema does not authenticate actor/policy claims or confer runtime permissio
 `model-profile.schema.json` defines the optional local model service profile v1.0.
 See [the operator guide](../docs/local-model-runtime.md) for runtime discovery,
 qualification binding and lifecycle transitions.
+
+`model-benchmark-dataset.schema.json` defines CG-27 named/versioned cognitive
+signal datasets, task input/output schemas, prompts and expected proposal labels.
+The harness additionally validates uniqueness, capabilities and pinned provenance.

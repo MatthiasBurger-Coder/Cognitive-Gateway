@@ -252,3 +252,8 @@ commands in the CLI adapter. See [procedure evaluation](../procedure-evaluation.
 The CG-27.01 reference deployment, provider-neutral port and qualification lifecycle
 are implemented; see [the operator guide](../local-model-runtime.md). Full
 SemanticTaskIR interpretation remains EPIC-05.11 work.
+
+CG-27 adds an optional four-task cognitive signal adapter and standalone benchmark
+harness. Versioned datasets and exact invocation provenance bind CPU/GPU reports;
+fixture observations are explicitly distinct from model measurements and product
+claims. Benchmarking does not promote models or mutate authoritative state.
