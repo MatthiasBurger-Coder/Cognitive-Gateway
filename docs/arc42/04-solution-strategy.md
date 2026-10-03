@@ -49,18 +49,44 @@ The control-plane concepts map onto the hexagon as follows:
 
 The dependency rule is inward-only: adapters depend on application ports and domain abstractions, while the core never imports adapter technologies.
 
-### Execution Context IR
+### Semantic interpretation and Execution Context IR
 
-Natural-language requests are transformed into the validated, provider-
-independent `ExecutionContextIR v1` before execution. It carries typed task,
-workflow, agent, skill, state, policy, knowledge, capability, constraint and
-runtime identity values. Its field contract, invariants and JSON compatibility
-rules are defined in [`../execution-context-ir.md`](../execution-context-ir.md)
-and [`../ir-serialization.md`](../ir-serialization.md).
+The implemented deterministic pipeline consumes validated structured contracts
+and produces provider-independent execution context. Natural-language input is
+**not yet** a fully implemented direct compiler path.
+
+EPIC-05 defines the target semantic frontend:
+
+```mermaid
+flowchart LR
+    NL[Natural Language] --> IC[Interpretation Context]
+    IC --> CGSL[CGSL / Semantic Resolution]
+    CGSL --> STI[SemanticTaskIR]
+    STI --> PLAN[Planning / Resolution]
+    PLAN --> EC[Execution Context IR]
+```
+
+Mandatory unresolved or ambiguous semantics must remain explicit and must not
+be guessed. Optional SLM/LLM interpretation can propose candidates, but the
+canonical result is validated deterministically.
+
+The current `ExecutionContextIR` field contract, invariants and JSON
+compatibility rules are defined in [`../execution-context-ir.md`](../execution-context-ir.md)
+and [`../ir-serialization.md`](../ir-serialization.md). The planned semantic
+frontend is documented in
+[`../semantic-language-and-interpretation.md`](../semantic-language-and-interpretation.md).
 
 ### Local cognitive services
 
-A local SLM may provide semantic classification and relevance signals. These signals are validated by deterministic registries and policies before they influence an execution plan.
+A local SLM/LxM may provide semantic classification, extraction, ranking or
+other bounded cognitive signals. It is an optional adapter/service and never an
+authority source.
+
+CG-27 and CG-27.01 define a provider-neutral local inference port, a separately
+deployable containerized model runtime, model manifests/profiles, benchmark
+qualification, explicit promotion and rollback. Qwen3-8B quantized is a
+reference candidate, not a core dependency. See
+[`../local-model-runtime.md`](../local-model-runtime.md).
 
 ### Progressive retrieval
 
@@ -72,3 +98,21 @@ The context compiler emits only required authority, workflow, skill and
 retrieved-knowledge inputs. The IR remains structured and provider-independent;
 rendering it into runtime-specific prompts or requests belongs outside the
 domain contract.
+
+### MCP connector and client boundaries
+
+MCP is infrastructure, not domain semantics. EPIC-04 defines the planned inbound
+Codex -> CG local MCP boundary, while EPIC-07 defines the planned outbound
+CG -> external MCP server/plugin runtime. Both reuse existing application,
+policy, provenance and capability contracts rather than creating new authority
+planes. See [Codex local integration](../codex-local-integration.md) and
+[MCP connector runtime](../mcp-connector-runtime.md).
+
+### Governed procedural learning
+
+CG-21 now provides the implemented model-independent domain foundation for
+eligible experience, pattern candidates, immutable learned procedure versions
+and explicit procedure lifecycle transitions. These contracts do not grant
+authority and remain subordinate to existing process/capability/policy
+identities. The broader EPIC-03 discovery, evaluation, promotion and reflex
+runtime is incremental. See [learned procedures](../learned-procedures.md).
