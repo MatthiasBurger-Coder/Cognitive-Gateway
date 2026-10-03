@@ -220,3 +220,43 @@ CG-20B keeps deterministic context selection in `gateway-context`, composes
 current authorization and estimation in `gateway-application`, and exposes
 optional tokenizer and compaction ports to outer adapters. See
 [context budgeting](../context-budgeting.md).
+
+## 5.5 Semantic interpretation plane (planned EPIC-05)
+
+CGSL/`SemanticTaskIR` is a planned semantic frontend, not a replacement for
+CG-06/07/08. A parser/compiler adapter must remain independent from model and
+network providers. Optional model interpretation produces proposals only; a
+deterministic compiler/validator owns canonical semantics. See
+[semantic language and interpretation](../semantic-language-and-interpretation.md).
+
+## 5.6 MCP connector/plugin runtime (planned EPIC-07)
+
+The MCP client/runtime is an outer infrastructure block. It owns transport,
+server lifecycle, discovery and invocation. Canonical source/capability
+mapping, scope, provenance, trust, sensitivity, authorization and retry
+decisions remain Gateway responsibilities. GitHub is a reference connector,
+not a core dependency. See [MCP connector runtime](../mcp-connector-runtime.md).
+
+## 5.7 Codex local adapter (planned EPIC-04)
+
+The Codex-facing local MCP adapter is a driving adapter into a shared
+application facade. It must not reproduce connector runtime logic and must not
+bring Codex/OpenAI types into authoritative contracts. See
+[Codex local integration](../codex-local-integration.md).
+
+## 5.8 Local inference runtime (planned CG-27)
+
+Local inference is a separately replaceable driven service behind a stable
+port. Model/runtime profile, artifact digest, quantization, capability and
+qualification metadata are explicit. The deterministic core must continue to
+operate when the runtime is unavailable. See
+[local model runtime](../local-model-runtime.md).
+
+## 5.9 Learned procedure domain (CG-21 foundation implemented)
+
+`gateway-domain::learning` defines situation fingerprints, eligible
+experience bases, pattern candidates, immutable/digest-bound learned
+procedures, procedure steps referencing existing process/capability/policy
+identities, verification requirements and append-only lifecycle transitions.
+These types support EPIC-03 without allowing historical experience to become
+authorization. See [learned procedures](../learned-procedures.md).
