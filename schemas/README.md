@@ -66,3 +66,9 @@ qualification binding and lifecycle transitions.
 `model-benchmark-dataset.schema.json` defines CG-27 named/versioned cognitive
 signal datasets, task input/output schemas, prompts and expected proposal labels.
 The harness additionally validates uniqueness, capabilities and pinned provenance.
+
+[`learning-signal.schema.json`](learning-signal.schema.json) and
+[`offline-learning.schema.json`](offline-learning.schema.json) define CG-28
+reference-only signals, datasets, recipes, run/release metadata and upgrade impact.
+Admission, exact evidence validation and independent authority are enforced by
+the application; JSON never grants training or rollout permission.

@@ -23,6 +23,7 @@ pub mod learning;
 pub mod memory;
 pub mod normalization;
 pub mod observation;
+pub mod offline_learning;
 pub mod operating_mode;
 mod plan_graph;
 pub mod planner;

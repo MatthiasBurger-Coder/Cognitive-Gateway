@@ -23,4 +23,6 @@ Current decisions:
 - [ADR-017 — Replaceable and Qualified Local Model Runtime](../adr/ADR-017-replaceable-qualified-local-model-runtime.md)
 - [ADR-018 — Governed, Immutable Learned Procedures](../adr/ADR-018-governed-learned-procedures.md)
 
+- [ADR-019 — Governed Offline Model Learning](../adr/ADR-019-governed-offline-model-learning.md)
+
 ADRs are append-only records of architectural intent. If a decision changes, a new ADR supersedes the old one rather than silently rewriting history.

@@ -1,0 +1,6 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cognitive-gateway.local/schemas/learning-signal.schema.json",
+  "title": "CG-28 learning signal v1",
+  "$ref": "offline-learning.schema.json#/$defs/signal"
+}

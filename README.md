@@ -139,6 +139,7 @@ Canonical entry points:
 - [`docs/codex-local-integration.md`](docs/codex-local-integration.md) — planned Codex -> CG local no-key MCP integration
 - [`docs/mcp-connector-runtime.md`](docs/mcp-connector-runtime.md) — planned CG -> external MCP connector/plugin runtime
 - [`docs/local-model-runtime.md`](docs/local-model-runtime.md) — optional containerized local model service, CPU qualification and model lifecycle
+- [`docs/offline-learning.md`](docs/offline-learning.md) — CG-28 governed signals, offline dataset/training interfaces and model release/rollback.
 - [`docs/learned-procedures.md`](docs/learned-procedures.md) — implemented CG-21 learning-domain foundation
 - [`docs/procedure-evaluation.md`](docs/procedure-evaluation.md) — CG-23 validation, replay, simulation and evaluation evidence
 - [`docs/procedure-promotion.md`](docs/procedure-promotion.md) — CG-24 registry, promotion, bounded canary, supersession and rollback

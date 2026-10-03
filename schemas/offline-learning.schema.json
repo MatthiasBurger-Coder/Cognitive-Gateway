@@ -1,0 +1,779 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cognitive-gateway.local/schemas/offline-learning.schema.json",
+  "title": "CG-28 governed offline learning v1",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/signal"
+    },
+    {
+      "$ref": "#/$defs/dataset"
+    },
+    {
+      "$ref": "#/$defs/recipe"
+    },
+    {
+      "$ref": "#/$defs/run"
+    },
+    {
+      "$ref": "#/$defs/release"
+    },
+    {
+      "$ref": "#/$defs/event"
+    },
+    {
+      "$ref": "#/$defs/artifact"
+    },
+    {
+      "$ref": "#/$defs/impact"
+    }
+  ],
+  "$defs": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9](?:[A-Za-z0-9._-]*[A-Za-z0-9])?$"
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{64}$"
+    },
+    "memory": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": 1
+        },
+        "scope": {
+          "$ref": "#/$defs/id"
+        },
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 18446744073709551615
+        },
+        "eligibility_version": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 18446744073709551615
+        },
+        "source_snapshot": {
+          "$ref": "#/$defs/id"
+        },
+        "source_digest": {
+          "$ref": "#/$defs/digest"
+        }
+      },
+      "required": [
+        "schema_version",
+        "scope",
+        "id",
+        "revision",
+        "eligibility_version",
+        "source_snapshot",
+        "source_digest"
+      ],
+      "additionalProperties": false
+    },
+    "model": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4294967295
+        },
+        "artifact_digest": {
+          "$ref": "#/$defs/digest"
+        }
+      },
+      "required": [
+        "id",
+        "version",
+        "artifact_digest"
+      ],
+      "additionalProperties": false
+    },
+    "signal": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": 1
+        },
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "memory": {
+          "$ref": "#/$defs/memory"
+        },
+        "provenance": {
+          "$ref": "#/$defs/id"
+        },
+        "validation": {
+          "$ref": "#/$defs/id"
+        },
+        "label_basis": {
+          "$ref": "#/$defs/id"
+        },
+        "evaluation": {
+          "$ref": "#/$defs/id"
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "uniqueItems": true,
+          "minItems": 1,
+          "maxItems": 64
+        },
+        "observed_at": {
+          "type": "integer",
+          "minimum": -9223372036854775808,
+          "maximum": 9223372036854775807
+        },
+        "producer_model": {
+          "$ref": "#/$defs/model"
+        },
+        "example_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "leakage_group": {
+          "$ref": "#/$defs/id"
+        },
+        "measurements": {
+          "type": "object",
+          "properties": {
+            "SUCCESS": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "FAILURE": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "QUALITY_GATE": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "RETRIES": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 18446744073709551615
+            },
+            "REPAIRS": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 18446744073709551615
+            },
+            "LATENCY_MS": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 18446744073709551615
+            },
+            "COST_UNITS": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 18446744073709551615
+            },
+            "HUMAN_CORRECTION": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "POLICY_DENIAL": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "ROLLBACK": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "RECURRENCE": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 18446744073709551615
+            }
+          },
+          "additionalProperties": false,
+          "oneOf": [
+            {
+              "required": [
+                "SUCCESS"
+              ],
+              "properties": {
+                "SUCCESS": {
+                  "const": 1
+                },
+                "FAILURE": {
+                  "const": 0
+                }
+              }
+            },
+            {
+              "required": [
+                "FAILURE"
+              ],
+              "properties": {
+                "FAILURE": {
+                  "const": 1
+                },
+                "SUCCESS": {
+                  "const": 0
+                }
+              }
+            }
+          ]
+        }
+      },
+      "required": [
+        "schema_version",
+        "id",
+        "memory",
+        "provenance",
+        "validation",
+        "label_basis",
+        "evaluation",
+        "evidence",
+        "observed_at",
+        "producer_model",
+        "example_digest",
+        "leakage_group",
+        "measurements"
+      ],
+      "additionalProperties": false
+    },
+    "row": {
+      "type": "object",
+      "properties": {
+        "signal": {
+          "$ref": "#/$defs/signal"
+        },
+        "split": {
+          "enum": [
+            "TRAIN",
+            "VALIDATION",
+            "TEST"
+          ]
+        }
+      },
+      "required": [
+        "signal",
+        "split"
+      ],
+      "additionalProperties": false
+    },
+    "dataset": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": 1
+        },
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4294967295
+        },
+        "scope": {
+          "$ref": "#/$defs/id"
+        },
+        "source_revision": {
+          "$ref": "#/$defs/id"
+        },
+        "assembled_at": {
+          "type": "integer",
+          "minimum": -9223372036854775808,
+          "maximum": 9223372036854775807
+        },
+        "builder_version": {
+          "$ref": "#/$defs/id"
+        },
+        "excluded_examples": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/digest"
+          },
+          "uniqueItems": true
+        },
+        "rows": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/row"
+          },
+          "minItems": 3
+        },
+        "duplicates": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/row"
+          }
+        },
+        "digest": {
+          "$ref": "#/$defs/digest"
+        }
+      },
+      "required": [
+        "schema_version",
+        "id",
+        "version",
+        "scope",
+        "source_revision",
+        "assembled_at",
+        "builder_version",
+        "excluded_examples",
+        "rows",
+        "duplicates",
+        "digest"
+      ],
+      "additionalProperties": false
+    },
+    "recipe": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": 1
+        },
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4294967295
+        },
+        "base_model": {
+          "$ref": "#/$defs/model"
+        },
+        "trainer_version": {
+          "$ref": "#/$defs/id"
+        },
+        "evaluator_version": {
+          "$ref": "#/$defs/id"
+        },
+        "environment_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "seed": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 18446744073709551615
+        },
+        "parameters": {
+          "type": "object",
+          "propertyNames": {
+            "minLength": 1
+          },
+          "additionalProperties": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "required": [
+        "schema_version",
+        "id",
+        "version",
+        "base_model",
+        "trainer_version",
+        "evaluator_version",
+        "environment_digest",
+        "seed",
+        "parameters"
+      ],
+      "additionalProperties": false
+    },
+    "run": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": 1
+        },
+        "job": {
+          "$ref": "#/$defs/id"
+        },
+        "scope": {
+          "$ref": "#/$defs/id"
+        },
+        "dataset_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "recipe_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "candidate": {
+          "$ref": "#/$defs/model"
+        },
+        "evidence": {
+          "$ref": "#/$defs/id"
+        },
+        "completed_at": {
+          "type": "integer",
+          "minimum": -9223372036854775808,
+          "maximum": 9223372036854775807
+        }
+      },
+      "required": [
+        "schema_version",
+        "job",
+        "scope",
+        "dataset_digest",
+        "recipe_digest",
+        "candidate",
+        "evidence",
+        "completed_at"
+      ],
+      "additionalProperties": false
+    },
+    "evaluation": {
+      "type": "object",
+      "properties": {
+        "dataset_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "evaluator_version": {
+          "$ref": "#/$defs/id"
+        },
+        "evidence": {
+          "$ref": "#/$defs/id"
+        },
+        "evaluated_at": {
+          "type": "integer",
+          "minimum": -9223372036854775808,
+          "maximum": 9223372036854775807
+        },
+        "baseline": {
+          "$ref": "#/$defs/id"
+        },
+        "policy_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "scores_millionths": {
+          "type": "object",
+          "required": [
+            "precision",
+            "recall",
+            "sufficiency",
+            "provenance",
+            "freshness",
+            "contamination",
+            "budget",
+            "token_efficiency"
+          ],
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1000000
+          }
+        },
+        "cases": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 18446744073709551615
+        },
+        "latency_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 18446744073709551615
+        },
+        "cost_units": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 18446744073709551615
+        }
+      },
+      "required": [
+        "dataset_digest",
+        "evaluator_version",
+        "evidence",
+        "evaluated_at",
+        "baseline",
+        "policy_digest",
+        "scores_millionths",
+        "cases",
+        "latency_ms",
+        "cost_units"
+      ],
+      "additionalProperties": false
+    },
+    "canary": {
+      "type": "object",
+      "properties": {
+        "cohorts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "uniqueItems": true,
+          "minItems": 1
+        },
+        "starts_at": {
+          "type": "integer",
+          "minimum": -9223372036854775808,
+          "maximum": 9223372036854775807
+        },
+        "ends_at": {
+          "type": "integer",
+          "minimum": -9223372036854775808,
+          "maximum": 9223372036854775807
+        },
+        "max_requests": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 18446744073709551615
+        },
+        "max_failures": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 18446744073709551615
+        },
+        "required_successes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 18446744073709551615
+        }
+      },
+      "required": [
+        "cohorts",
+        "starts_at",
+        "ends_at",
+        "max_requests",
+        "max_failures",
+        "required_successes"
+      ],
+      "additionalProperties": false
+    },
+    "release": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": 1
+        },
+        "scope": {
+          "$ref": "#/$defs/id"
+        },
+        "training": {
+          "$ref": "#/$defs/run"
+        },
+        "recipe": {
+          "$ref": "#/$defs/recipe"
+        },
+        "evaluation": {
+          "$ref": "#/$defs/evaluation"
+        },
+        "canary": {
+          "$ref": "#/$defs/canary"
+        },
+        "predecessor": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/model"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "digest": {
+          "$ref": "#/$defs/digest"
+        }
+      },
+      "required": [
+        "schema_version",
+        "scope",
+        "training",
+        "recipe",
+        "evaluation",
+        "canary",
+        "predecessor",
+        "digest"
+      ],
+      "additionalProperties": false
+    },
+    "observation": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "cohort": {
+          "$ref": "#/$defs/id"
+        },
+        "observed_at": {
+          "type": "integer",
+          "minimum": -9223372036854775808,
+          "maximum": 9223372036854775807
+        },
+        "successes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 18446744073709551615
+        },
+        "failures": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 18446744073709551615
+        },
+        "evidence": {
+          "$ref": "#/$defs/id"
+        }
+      },
+      "required": [
+        "id",
+        "cohort",
+        "observed_at",
+        "successes",
+        "failures",
+        "evidence"
+      ],
+      "additionalProperties": false
+    },
+    "decision": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "actor": {
+          "$ref": "#/$defs/id"
+        },
+        "policy_decision": {
+          "$ref": "#/$defs/id"
+        },
+        "at": {
+          "type": "integer",
+          "minimum": -9223372036854775808,
+          "maximum": 9223372036854775807
+        }
+      },
+      "required": [
+        "id",
+        "actor",
+        "policy_decision",
+        "at"
+      ],
+      "additionalProperties": false
+    },
+    "event": {
+      "type": "object",
+      "properties": {
+        "decision": {
+          "$ref": "#/$defs/decision"
+        },
+        "action": {
+          "enum": [
+            "REGISTER",
+            "START_CANARY",
+            "OBSERVE_CANARY",
+            "ACTIVATE",
+            "ROLLBACK"
+          ]
+        },
+        "release_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "restored": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/model"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "observation": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/observation"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "decision",
+        "action",
+        "release_digest",
+        "restored",
+        "observation"
+      ],
+      "additionalProperties": false
+    },
+    "artifact": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "scope": {
+          "$ref": "#/$defs/id"
+        },
+        "kind": {
+          "enum": [
+            "EMBEDDING",
+            "VECTOR_INDEX",
+            "LEARNED_PROCEDURE",
+            "SEMANTIC_MAPPING",
+            "PROMPT_CACHE",
+            "EVALUATION_BASELINE"
+          ]
+        },
+        "models": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/model"
+          },
+          "uniqueItems": true
+        },
+        "digest": {
+          "$ref": "#/$defs/digest"
+        }
+      },
+      "required": [
+        "id",
+        "scope",
+        "kind",
+        "models",
+        "digest"
+      ],
+      "additionalProperties": false
+    },
+    "impact": {
+      "type": "object",
+      "properties": {
+        "artifact": {
+          "$ref": "#/$defs/artifact"
+        },
+        "action": {
+          "enum": [
+            "REEMBED",
+            "RECERTIFY",
+            "REEVALUATE"
+          ]
+        }
+      },
+      "required": [
+        "artifact",
+        "action"
+      ],
+      "additionalProperties": false
+    }
+  }
+}
