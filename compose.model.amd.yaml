@@ -1,0 +1,9 @@
+services:
+  runtime:
+    image: ${CG_MODEL_RUNTIME_IMAGE:-ollama/ollama:0.11.10-rocm}
+    devices:
+      - /dev/kfd:/dev/kfd
+      - /dev/dri:/dev/dri
+  model-service:
+    environment:
+      CG_MODEL_ACCELERATION: amd

@@ -9,3 +9,5 @@ pub mod postgres_memory;
 pub mod procedure_promotion_store;
 pub mod registry_cli;
 pub mod retrieval;
+
+pub mod local_inference;

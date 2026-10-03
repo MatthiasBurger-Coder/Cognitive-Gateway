@@ -110,5 +110,9 @@
   {
     "name": "CG-25 deterministic reflex evidence",
     "command": "set -euo pipefail\nCG25_REFLEX_OUTPUT=\"$EVIDENCE_DIR/cg25-reflex.json\" cargo test -p gateway-application --test context_application reflex_cases\ntest -s \"$EVIDENCE_DIR/cg25-reflex.json\"\n"
+  },
+  {
+    "name": "CG-27 local model lifecycle and adapter",
+    "command": "python3 -m venv \"$RUNNER_TEMP/local-model-python\"\n\"$RUNNER_TEMP/local-model-python/bin/python\" -m pip install -r services/local-model/requirements.txt\n\"$RUNNER_TEMP/local-model-python/bin/python\" -m unittest discover -s tests/local-model -v\ncargo test -p gateway-daemon --test local_inference --locked\ndocker compose -f compose.model.yaml config --quiet\ndocker compose -f compose.model.yaml -f compose.model.gpu.yaml config --quiet\nCG_MODEL_ACCELERATION=amd scripts/model.sh config --quiet\nCG_MODEL_ACCELERATION=vulkan CG_MODEL_VULKAN_IMAGE=ollama/ollama:0.12.11 scripts/model.sh config --quiet"
   }
 ]

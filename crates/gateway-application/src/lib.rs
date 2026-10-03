@@ -51,3 +51,5 @@ pub use situation_application::{
     DeclarativeSituationApplication, ProcessSituationReference, ProcessSnapshotInput,
     SituationApplicationError, SituationExplainability, SituationInspection,
 };
+
+pub mod local_inference;

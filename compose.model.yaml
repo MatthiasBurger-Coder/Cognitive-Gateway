@@ -1,0 +1,50 @@
+name: ${CG_MODEL_PROJECT_NAME:-cg-local-model}
+services:
+  gateway:
+    profiles: [gateway]
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      CG_LOCAL_INFERENCE_ENDPOINT: http://model-service:8091
+    # No depends_on: deterministic Gateway commands work without model readiness.
+  runtime:
+    image: ${CG_MODEL_RUNTIME_IMAGE:-ollama/ollama:0.11.10@sha256:a5409cb903d30f9cd67e9f430dd336ddc9274e16fd78f75b675c42065991b4fd}
+    restart: unless-stopped
+    environment:
+      OLLAMA_HOST: 0.0.0.0:11434
+      OLLAMA_MAX_LOADED_MODELS: 1
+      OLLAMA_NUM_PARALLEL: 1
+    volumes:
+      - model_artifacts:/root/.ollama
+    healthcheck:
+      test: [CMD, ollama, list]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 10s
+  model-service:
+    build:
+      context: .
+      dockerfile: services/local-model/Dockerfile
+    restart: unless-stopped
+    environment:
+      CG_MODEL_RUNTIME_ENDPOINT: http://runtime:11434
+      CG_MODEL_TIMEOUT: ${CG_MODEL_TIMEOUT:-180}
+      CG_MODEL_ACCELERATION: ${CG_MODEL_ACCELERATION:-cpu}
+    ports:
+      - "127.0.0.1:${CG_MODEL_SERVICE_PORT:-8091}:8091"
+    volumes:
+      - model_state:/state
+      - ./models:/models:ro
+    depends_on:
+      runtime:
+        condition: service_healthy
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://localhost:8091/health', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+volumes:
+  model_artifacts:
+  model_state:

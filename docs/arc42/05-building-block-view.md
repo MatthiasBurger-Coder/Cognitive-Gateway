@@ -228,7 +228,7 @@ application facade. It must not reproduce connector runtime logic and must not
 bring Codex/OpenAI types into authoritative contracts. See
 [Codex local integration](../codex-local-integration.md).
 
-## 5.8 Local inference runtime (planned CG-27)
+## 5.8 Local inference runtime (CG-27.01 reference service)
 
 Local inference is a separately replaceable driven service behind a stable
 port. Model/runtime profile, artifact digest, quantization, capability and
@@ -248,3 +248,7 @@ authorization. See [learned procedures](../learned-procedures.md).
 CG-23 adds pure versioned replay/evidence contracts in `gateway-domain`, real
 Process/Policy simulation capture in `gateway-application`, and evaluate/simulate/replay
 commands in the CLI adapter. See [procedure evaluation](../procedure-evaluation.md).
+
+The CG-27.01 reference deployment, provider-neutral port and qualification lifecycle
+are implemented; see [the operator guide](../local-model-runtime.md). Full
+SemanticTaskIR interpretation remains EPIC-05.11 work.
