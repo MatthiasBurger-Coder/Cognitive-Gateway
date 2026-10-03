@@ -8,6 +8,8 @@ See [current architecture state](current-architecture-state.md) for the dated im
 
 ## Architecture
 
+See [diagram conventions](diagram-conventions.md) for the normative Mermaid-first documentation rule.
+
 See [`arc42/`](arc42/) for the living architecture documentation.
 
 ## Architecture Decisions
