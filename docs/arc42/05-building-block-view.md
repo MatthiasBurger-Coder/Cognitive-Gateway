@@ -20,30 +20,14 @@ Repository, Git, quality gates, runtime inspection, GitHub and MCP/tool integrat
 
 ## 5.2 Rust workspace and hexagonal mapping
 
-```text
-        Driving Adapters
-       CLI / API / IDE / CI
-                |
-                v
-        Inbound Application Ports
-                |
-                v
-  +------------------------------------+
-  | Application + Domain/Core          |
-  |                                    |
-  | gateway-application (use cases,   |
-  | ports)                             |
-  | gateway-domain (stable model)     |
-  | registry/workflow/policy/context   |
-  +------------------------------------+
-                |
-                v
-        Outbound Application Ports
-          /          |           \
-         v           v            v
-   Knowledge      Capability   Runtime/Evidence
-   Driven        Driven       Driven Adapters
-   Adapters      Adapters
+```mermaid
+flowchart TB
+    DA[Driving Adapters<br/>CLI / API / IDE / CI] --> IN[Inbound Application Ports]
+    IN --> CORE[Application + Domain/Core<br/>gateway-application<br/>gateway-domain<br/>registry / workflow / policy / context]
+    CORE --> OUT[Outbound Application Ports]
+    OUT --> K[Knowledge Driven Adapters]
+    OUT --> C[Capability Driven Adapters]
+    OUT --> R[Runtime / Evidence Driven Adapters]
 ```
 
 Initial crates:
