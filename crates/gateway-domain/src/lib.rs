@@ -4,6 +4,7 @@ pub mod agent;
 pub mod capability;
 pub mod capability_requirements;
 mod cg06_serialization;
+pub mod cognitive_routing;
 pub mod comparison;
 pub mod constraint;
 pub mod declarative_context;

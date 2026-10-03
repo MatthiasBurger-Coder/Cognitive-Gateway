@@ -1868,3 +1868,5 @@ mod tests {
         }
     }
 }
+
+pub mod model_capabilities;

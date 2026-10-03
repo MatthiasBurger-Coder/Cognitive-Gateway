@@ -2440,3 +2440,241 @@ mod parallel_execution_tests {
 
 #[path = "support/reflex_cases.rs"]
 mod reflex_cases;
+
+#[path = "../../../tests/fixtures/cognitive-routing.rs"]
+mod routing_fixtures;
+
+mod cognitive_router_execution {
+    use super::routing_fixtures as fixtures;
+    use super::*;
+    use gateway_application::cognitive_routing::*;
+    use gateway_domain::cognitive_routing::*;
+    use std::cell::Cell;
+
+    struct Registry(ModelCapabilitySnapshot);
+    impl ModelCapabilityPort for Registry {
+        fn snapshot(&self) -> Result<ModelCapabilitySnapshot, RoutingError> {
+            Ok(self.0.clone())
+        }
+    }
+    struct Runtime {
+        fixture: Fixture,
+        calls: Cell<usize>,
+        prepares: Cell<usize>,
+        deny_on: Option<usize>,
+        invalid_model: bool,
+        invalid_unit: bool,
+        invalid_output: bool,
+        over_budget: bool,
+        succeed_on: usize,
+    }
+    impl CognitiveRouteRuntime for Runtime {
+        fn prepare(
+            &self,
+            _: &CognitiveRouteRequest,
+            _: &RouteCandidate,
+        ) -> Result<CompiledStep, ContextApplicationError> {
+            let n = self.prepares.get();
+            self.prepares.set(n + 1);
+            if self.deny_on == Some(n) {
+                return Err(ContextApplicationError::UnknownStep);
+            }
+            self.fixture.compile()
+        }
+        fn attempt(&self, h: RouteHandoff<'_>) -> RouteAttemptReport {
+            let n = self.calls.get();
+            self.calls.set(n + 1);
+            assert_eq!(h.step.output_contract(), &h.request.output_contract);
+            let success = n == self.succeed_on;
+            RouteAttemptReport {
+                model: if self.invalid_model {
+                    None
+                } else {
+                    h.candidate.model.clone()
+                },
+                outcome: if success {
+                    RouteAttemptOutcome::Success
+                } else {
+                    RouteAttemptOutcome::ModelFailure
+                },
+                output_reference: (success && !self.invalid_output)
+                    .then(|| ReferenceId::new("proposal-1").unwrap()),
+                cost_unit: if self.invalid_unit {
+                    "other".into()
+                } else {
+                    h.request.cost_unit.clone()
+                },
+                cost: if self.over_budget {
+                    h.candidate.cost + 1
+                } else {
+                    0
+                },
+                latency_ms: 0,
+            }
+        }
+    }
+    fn setup() -> (CognitiveRouteRequest, Registry, Runtime) {
+        let fixture = Fixture::new();
+        let output = fixture.compile().unwrap().output_contract().clone();
+        let mut request = fixtures::request();
+        request.output_contract = output.clone();
+        request.deterministic_sufficient = false;
+        request.reflex_applicable = false;
+        let mut candidates = [
+            CognitiveRoute::LocalSlm,
+            CognitiveRoute::SpecializedLocal,
+            CognitiveRoute::StrongLlm,
+        ]
+        .into_iter()
+        .enumerate()
+        .map(|(i, k)| fixtures::candidate(&format!("route-{i}"), k))
+        .collect::<Vec<_>>();
+        for c in &mut candidates {
+            c.output_contracts = vec![output.clone()];
+        }
+        (
+            request,
+            Registry(fixtures::snapshot(candidates)),
+            Runtime {
+                fixture,
+                calls: Cell::new(0),
+                prepares: Cell::new(0),
+                deny_on: None,
+                invalid_model: false,
+                invalid_unit: false,
+                invalid_output: false,
+                over_budget: false,
+                succeed_on: 1,
+            },
+        )
+    }
+    #[test]
+    fn model_failure_falls_back_with_pinned_versions_and_accounting() {
+        let (request, registry, runtime) = setup();
+        let trace = route_and_execute(&request, &registry, &runtime).unwrap();
+        assert_eq!(trace.disposition, RoutingDisposition::Success);
+        assert_eq!(trace.attempts.len(), 2);
+        assert_eq!(trace.consumed_cost, 2);
+        assert_eq!(trace.consumed_latency_ms, 20);
+        assert_eq!(runtime.prepares.get(), 2);
+        assert!(
+            trace.decisions[1].alternatives[0]
+                .reasons
+                .contains(&RouteRejection::PreviouslyAttempted)
+        );
+        assert_eq!(trace.attempts[1].model, registry.0.candidates[1].model);
+        let wire: serde_json::Value = serde_json::from_str(&trace.to_json().unwrap()).unwrap();
+        assert_eq!(wire["attempts"][0]["model"]["digest"], "sha256:model");
+    }
+    #[test]
+    fn fallback_is_bounded_and_preserves_privacy_and_remaining_budgets() {
+        for (mode, expected) in [
+            (0, RoutingDisposition::AttemptsExhausted),
+            (1, RoutingDisposition::NoCompatibleRoute),
+            (2, RoutingDisposition::NoCompatibleRoute),
+            (3, RoutingDisposition::BudgetExceeded),
+        ] {
+            let (mut request, mut registry, runtime) = setup();
+            match mode {
+                0 => request.max_attempts = 1,
+                1 => request.max_cost = 1,
+                2 => {
+                    request.max_privacy = PrivacyBoundary::OnDevice;
+                    registry.0.candidates[1].available = false;
+                }
+                _ => request.max_latency_ms = 10,
+            }
+            let trace = route_and_execute(&request, &registry, &runtime).unwrap();
+            assert_eq!(trace.disposition, expected);
+            assert_eq!(runtime.calls.get(), 1);
+        }
+    }
+    #[test]
+    fn fresh_process_policy_checks_block_initial_and_fallback_dispatch() {
+        for n in [0, 1] {
+            let (request, registry, mut runtime) = setup();
+            runtime.deny_on = Some(n);
+            let trace = route_and_execute(&request, &registry, &runtime).unwrap();
+            assert_eq!(trace.disposition, RoutingDisposition::ProcessOrPolicyDenied);
+            assert_eq!(runtime.calls.get(), n);
+        }
+        let (request, registry, mut runtime) = setup();
+        runtime.fixture.policy.steps.clear();
+        assert_eq!(
+            route_and_execute(&request, &registry, &runtime)
+                .unwrap()
+                .disposition,
+            RoutingDisposition::ProcessOrPolicyDenied
+        );
+        assert_eq!(runtime.calls.get(), 0);
+    }
+    #[test]
+    fn mismatched_contract_identity_measurements_and_reports_stop_fallback() {
+        for mode in 0..5 {
+            let (mut request, mut registry, mut runtime) = setup();
+            runtime.succeed_on = 0;
+            match mode {
+                0 => runtime.invalid_model = true,
+                1 => runtime.invalid_unit = true,
+                2 => runtime.invalid_output = true,
+                3 => runtime.over_budget = true,
+                _ => {
+                    request.output_contract = serde_json::json!("changed");
+                    for c in &mut registry.0.candidates {
+                        c.output_contracts = vec![request.output_contract.clone()];
+                    }
+                }
+            }
+            let trace = route_and_execute(&request, &registry, &runtime).unwrap();
+            assert_eq!(
+                trace.disposition,
+                match mode {
+                    3 => RoutingDisposition::BudgetExceeded,
+                    4 => RoutingDisposition::OutputContractMismatch,
+                    _ => RoutingDisposition::InvalidReport,
+                }
+            );
+            assert_eq!(runtime.calls.get(), usize::from(mode != 4));
+        }
+    }
+    #[test]
+    fn registry_errors_and_empty_selection_never_dispatch() {
+        struct Offline;
+        impl ModelCapabilityPort for Offline {
+            fn snapshot(&self) -> Result<ModelCapabilitySnapshot, RoutingError> {
+                Err(RoutingError::RegistryUnavailable)
+            }
+        }
+        let (mut request, mut registry, runtime) = setup();
+        assert_eq!(
+            route_and_execute(&request, &Offline, &runtime),
+            Err(RoutingError::RegistryUnavailable)
+        );
+        registry.0.candidates.clear();
+        assert_eq!(
+            route_and_execute(&request, &registry, &runtime)
+                .unwrap()
+                .disposition,
+            RoutingDisposition::NoCompatibleRoute
+        );
+        request.max_attempts = 0;
+        assert_eq!(
+            route_and_execute(&request, &registry, &runtime),
+            Err(RoutingError::InvalidRequest)
+        );
+        assert_eq!(runtime.calls.get(), 0);
+    }
+
+    #[test]
+    fn deterministic_route_executes_without_a_model() {
+        let (mut request, mut registry, mut runtime) = setup();
+        request.deterministic_sufficient = true;
+        runtime.succeed_on = 0;
+        let mut c = fixtures::candidate("resolver", CognitiveRoute::Deterministic);
+        c.output_contracts = vec![request.output_contract.clone()];
+        registry.0.candidates = vec![c];
+        let trace = route_and_execute(&request, &registry, &runtime).unwrap();
+        assert_eq!(trace.disposition, RoutingDisposition::Success);
+        assert!(trace.attempts[0].model.is_none());
+    }
+}
