@@ -6,9 +6,12 @@ The deterministic Rust core must use **Hexagonal Architecture (Ports & Adapters)
 
 Dependencies must point inward toward stable domain and application abstractions:
 
-```text
-Driving Adapters -> Inbound/Application Ports -> Application + Domain/Core
-Application + Domain/Core -> Outbound Ports -> Driven Adapters
+```mermaid
+flowchart LR
+    DA[Driving Adapters] --> IP[Inbound / Application Ports]
+    IP --> CORE[Application + Domain/Core]
+    CORE --> OP[Outbound Ports]
+    OP --> DR[Driven Adapters]
 ```
 
 The core must not depend on an adapter or on its technology. In particular, the core must not depend on OpenAI or another model provider, Codex, PraisonAI, concrete MCP implementations, vector or graph databases, GitHub APIs, filesystem/Git infrastructure details, or UI/transport frameworks. Such technologies may only appear in adapters that implement core-defined ports.
