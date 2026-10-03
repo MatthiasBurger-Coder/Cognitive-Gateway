@@ -1,6 +1,7 @@
 //! CG-11 driving adapter. Semantic decisions remain in the application APIs.
 mod inputs;
 mod json_input;
+mod patterns_cli;
 mod pipeline;
 
 use serde::{Serialize, de::DeserializeOwned};
@@ -19,12 +20,15 @@ Usage:
   cg explain --context <file-or-json> [--intent <file-or-json>] [--rules <file-or-json>] [--catalog <directory>] [--json]
   cg explain --plan <file-or-json> [--catalog <directory>] [--rules <file-or-json>] [--process <file-or-json>] [--policy <file>] [--json]
   cg compile --plan <file-or-json> --policy <file> --projection <file> [--catalog <directory>] [--rules <file-or-json>] [--process <file-or-json>] [--json]
+  cg patterns --report <file-or-json> [--json]
+  cg patterns --scope <project-scope> [--at <unix-seconds>] [--json]
 
 JSON inputs use schema_version 1. A single '-' reads stdin.
 Policy and projection files are explicit operator authority, separate from project context.
 No command executes a runtime or persists process transitions.
 Exit codes: 0 success; 2 usage; 3 input/I/O; 4 assessment; 5 planning;
-            6 catalog/resolution; 7 process; 8 policy; 9 compilation.
+            6 catalog/resolution; 7 process; 8 policy; 9 compilation;
+            10 pattern inspection/database.
 See docs/declarative-cli.md for the input contracts and examples.";
 
 #[derive(Debug)]
@@ -117,6 +121,7 @@ fn parse(arguments: &[String]) -> Result<Options, CliError> {
         .clone();
     let allowed = match command.as_str() {
         "assess" => &["context"][..],
+        "patterns" => &["report", "scope", "at"],
         "plan" => &["intent", "context", "rules", "catalog"],
         "resolve" | "compile" => &[
             "plan",
@@ -179,6 +184,18 @@ fn parse(arguments: &[String]) -> Result<Options, CliError> {
     match options.command.as_str() {
         "assess" => {
             options.required("context")?;
+        }
+        "patterns" => {
+            if options.get("report").is_some() == options.get("scope").is_some() {
+                return Err(CliError::new(
+                    2,
+                    "USAGE",
+                    "provide either --report or --scope",
+                ));
+            }
+            if options.get("at").is_some() && options.get("scope").is_none() {
+                return Err(CliError::new(2, "USAGE", "--at requires --scope"));
+            }
         }
         "plan" => {
             options.required("context")?;

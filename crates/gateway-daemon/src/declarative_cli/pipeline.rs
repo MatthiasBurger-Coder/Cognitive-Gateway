@@ -20,6 +20,14 @@ use std::str::FromStr;
 
 pub(super) fn execute(options: &Options) -> Result<(Value, i32), CliError> {
     match options.command.as_str() {
+        "patterns" => {
+            let report = if options.get("report").is_some() {
+                decode(options.input("report")?)?
+            } else {
+                super::patterns_cli::inspect_database(options)?
+            };
+            Ok((value(&report)?, 0))
+        }
         "assess" => Ok((value(&assess(options.input("context")?)?)?, 0)),
         "plan" => planning(options),
         "explain" if options.get("plan").is_none() => {

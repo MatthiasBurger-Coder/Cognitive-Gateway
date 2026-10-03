@@ -14,6 +14,13 @@ cg --help
 option. `--catalog` selects a reusable Agent/Skill/Process catalog directory;
 it defaults to `catalog` relative to the current working directory.
 
+For CG-22, `cg patterns --scope <project-scope> --json` reads the local
+PostgreSQL experience and memory stores and rechecks eligibility before
+reporting patterns. Use `--at <unix-seconds>` for a fixed inspection time.
+`cg patterns --report <file-or-json> --json` displays an existing report.
+Both forms are read-only. Start the database with `./scripts/start-postgres.sh`
+and see [the PostgreSQL setup](postgres-compose.md) for credential handling.
+
 ## Runnable walkthrough
 
 The [fixture directory](../tests/fixtures/declarative-cli) contains a synthetic

@@ -7,9 +7,10 @@ use gateway_domain::{
         MemoryEntry, MemoryPayload, MemoryReason,
     },
 };
+use serde::{Deserialize, Serialize};
 use std::collections::BTreeSet;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum MemoryAction {
     Admit,
     Validate,
@@ -20,7 +21,7 @@ pub enum MemoryAction {
     Forget,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct CurationDecision {
     pub scope: ContextScopeId,
     pub id: ReferenceId,
