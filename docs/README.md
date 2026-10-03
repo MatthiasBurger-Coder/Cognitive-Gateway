@@ -180,5 +180,6 @@ Run `python3 scripts/quality-gate.py` for the complete CG-13 gate. See [the rele
 ## Closed-loop execution
 
 - [CG-14 execution outcomes, evidence-backed goals, replanning, budgets and audit](closed-loop-execution.md)
+- [CG-28A bounded parallel task execution and deterministic joins](parallel-execution.md)
 
 - [Governed memory and experience retrieval](governed-memory.md) — CG-18 lifecycle, eligibility and context bridge.

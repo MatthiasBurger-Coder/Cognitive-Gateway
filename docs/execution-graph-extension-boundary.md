@@ -71,3 +71,11 @@ Adding scheduling later requires a new typed extension contract and its own
 validation/evaluation boundary. It does not require changing the source
 language's lifecycle vocabulary, the definition identity/digest, instance
 revision rules or atomic lifecycle mutation port.
+
+## CG-28A application extension
+
+The application-layer scheduler is documented in
+[`parallel-execution.md`](parallel-execution.md). It operates on independently
+compiled, authorized task contexts. The Process IR v1 compiler still emits
+`supported = false` for its catalog extension seam; CG-28A does not interpret
+DAG/lock fields in Process definitions or grant new lifecycle transitions.

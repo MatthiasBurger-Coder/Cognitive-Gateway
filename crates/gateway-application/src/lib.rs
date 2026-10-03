@@ -11,6 +11,7 @@ pub mod evaluation;
 pub mod external_context;
 pub mod graph_retrieval;
 pub mod memory;
+pub mod parallel_execution;
 pub mod planning_application;
 pub mod policy_application;
 pub mod ports;
