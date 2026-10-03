@@ -765,3 +765,6 @@ fn reflex_honors_stop_after_dispatch_and_explicit_stale_quality() {
         Err(ReflexFailure::StaleEvidence)
     );
 }
+
+#[path = "cg30.rs"]
+mod cg30;

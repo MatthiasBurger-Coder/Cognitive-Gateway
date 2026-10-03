@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "suite": "CG-30-v1",
+  "classification": {"max_false_positive": 0, "max_false_negative": 0, "positive_cases": 1, "negative_cases": 11},
+  "routing": {"min_correct_fraction": 1.0, "max_constraint_violations": 0},
+  "failure_injection": {"max_unauthorized_dispatches": 0, "max_retry_dispatches": 2},
+  "performance": {"max_dispatch_resource_units": 3, "max_model_calls": 0, "wall_time_gate": null},
+  "release": {"clean_commit_required": true, "all_existing_gates_required": true, "hardware_qualification": "separate"}
+}

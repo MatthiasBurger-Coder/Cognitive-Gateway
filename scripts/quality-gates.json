@@ -118,5 +118,9 @@
   {
     "name": "CG-28 governed offline learning and rollback evidence",
     "command": "set -euo pipefail\nCG28_LEARNING_OUTPUT=\"$EVIDENCE_DIR/cg28-learning.json\" cargo test -p gateway-daemon --test offline_learning --locked\ntest -s \"$EVIDENCE_DIR/cg28-learning.json\"\npython3 scripts/check-cg28-coverage.py --self-test\npython3 scripts/check-cg28-coverage.py \"$EVIDENCE_DIR/cg16-coverage.json\""
+  },
+  {
+    "name": "CG-30 cognitive runtime qualification evidence",
+    "command": "CG30_QUALIFICATION_OUTPUT=\"$EVIDENCE_DIR/cg30-qualification.json\" cargo test -p gateway-application --test context_application --locked reflex_cases::cg30::cognitive_runtime_release_qualification -- --exact\npython3 scripts/qualify-cg30.py --metrics \"$EVIDENCE_DIR/cg30-qualification.json\"\ncargo test -p gateway-application --test cognitive_routing --locked\ncargo test -p gateway-application --test context_application --locked cognitive_router_execution\n"
   }
 ]
