@@ -2,28 +2,16 @@
 
 Cognitive Gateway uses a layered control-plane architecture.
 
-```text
-Authority / Policy
-        |
-        v
-State
-        |
-        v
-Cognitive Routing
-        |
-   +----+----+
-   |         |
-Knowledge  Capabilities
-   |         |
-   +----+----+
-        v
-Context Compiler
-        |
-        v
-Execution Context IR
-        |
-        v
-Execution Runtime
+```mermaid
+flowchart TB
+    A[Authority / Policy] --> S[State]
+    S --> R[Cognitive Routing]
+    R --> K[Knowledge]
+    R --> C[Capabilities]
+    K --> CC[Context Compiler]
+    C --> CC
+    CC --> IR[Execution Context IR]
+    IR --> ER[Execution Runtime]
 ```
 
 ## Key strategies
