@@ -3,14 +3,16 @@
 CG-07.08 is the fail-closed boundary between declarative planning and the
 later CG-08 resolution layer. It validates the complete semantic chain:
 
-```text
-DesiredState condition/expression
-        ↓
-comparison result → Delta item → RequiredOutcome
-        ↓                  ↓
-CapabilityRequirement → PlanStep → graph/completion/verification
-        ↓
-deterministic rule and version trace
+```mermaid
+flowchart TB
+    DS[DesiredState Condition / Expression] --> CMP[Comparison Result]
+    CMP --> D[Delta Item]
+    D --> O[RequiredOutcome]
+    CMP --> C[CapabilityRequirement]
+    O --> P[PlanStep]
+    C --> P
+    P --> G[Graph / Completion / Verification]
+    C --> T[Deterministic Rule + Version Trace]
 ```
 
 ## Validation contract
