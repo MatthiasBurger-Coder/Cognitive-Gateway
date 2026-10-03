@@ -81,6 +81,9 @@ impl CompiledStep {
     pub fn policy(&self) -> &StepPolicyReport {
         &self.policy
     }
+    pub fn output_contract(&self) -> &serde_json::Value {
+        &self.output_contract
+    }
     pub fn to_json(&self) -> Result<String, serde_json::Error> {
         self.serialize(None)
     }
