@@ -19,3 +19,18 @@ This directory is the canonical technical architecture documentation for Cogniti
 ## Documentation rule
 
 The repository documentation specifies the architecture. The GitHub Wiki may explain the architecture for end users, but it is not the technical source of truth.
+
+## Current status companion
+
+Arc42 describes both implemented architecture and explicitly identified target
+boundaries. Use [the current architecture state](../current-architecture-state.md)
+to distinguish IMPLEMENTED, PARTIAL and PLANNED capabilities as of the documented
+reference date.
+
+Companion boundary documents:
+
+- [CGSL / SemanticTaskIR](../semantic-language-and-interpretation.md)
+- [Codex local integration](../codex-local-integration.md)
+- [MCP connector/plugin runtime](../mcp-connector-runtime.md)
+- [Local model runtime](../local-model-runtime.md)
+- [Learned procedures](../learned-procedures.md)
