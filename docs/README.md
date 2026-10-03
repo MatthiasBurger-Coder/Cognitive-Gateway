@@ -2,6 +2,10 @@
 
 This repository contains the canonical technical documentation for Cognitive Gateway.
 
+## Current architecture and implementation status
+
+See [current architecture state](current-architecture-state.md) for the dated implementation-versus-plan matrix. This distinction is normative: an Epic or target architecture does not by itself mean the runtime capability is implemented.
+
 ## Architecture
 
 See [`arc42/`](arc42/) for the living architecture documentation.
@@ -160,6 +164,18 @@ The approved CG-02 v2 handoff extension is documented in
 7. Versioned Execution Context IR as the core runtime integration contract.
 8. Hexagonal Architecture with inward dependencies and replaceable ports/adapters.
 9. Git is authoritative for declarative Agent/Skill/Workflow/Policy definitions; runtime databases own mutable execution state, while SQL/graph/vector stores used for definition lookup are derived and rebuildable read models.
+10. CGSL/SemanticTaskIR is the planned semantic boundary between natural language and deterministic planning; unresolved mandatory semantics must not be guessed.
+11. MCP is an adapter protocol, never an authority source: inbound Codex integration (EPIC-04) and outbound connector integration (EPIC-07) are separate responsibilities.
+12. Local models are optional replaceable cognitive services behind stable ports; model identity/version/digest/quantization and qualification are explicit, and model output is non-authoritative.
+13. Learned procedures are versioned governed artifacts derived from eligible experience; history does not grant process or policy authority.
+
+## Semantic interpretation and runtime boundaries
+
+- [CGSL, SemanticTaskIR and natural-language interpretation](semantic-language-and-interpretation.md) — EPIC-05 target boundary; natural-language compilation is not yet a completed runtime path.
+- [Codex local integration](codex-local-integration.md) — EPIC-04 planned Codex -> CG local no-key MCP boundary.
+- [MCP connector/plugin runtime](mcp-connector-runtime.md) — EPIC-07 planned CG -> external systems boundary.
+- [Local model runtime / SLM-LxM boundary](local-model-runtime.md) — CG-27/CG-27.01 planned replaceable local inference service; Qwen3-8B is a reference candidate only.
+- [Learned procedures](learned-procedures.md) — CG-21 domain foundation implemented on 2026-10-03; the broader EPIC-03 learning/reflex runtime remains incremental.
 
 ## Policy authorization
 
@@ -183,3 +199,4 @@ Run `python3 scripts/quality-gate.py` for the complete CG-13 gate. See [the rele
 - [CG-28A bounded parallel task execution and deterministic joins](parallel-execution.md)
 
 - [Governed memory and experience retrieval](governed-memory.md) — CG-18 lifecycle, eligibility and context bridge.
+- [Learned procedures and governed procedural learning](learned-procedures.md) — CG-21 domain contracts, lifecycle and immutable procedure versions.
