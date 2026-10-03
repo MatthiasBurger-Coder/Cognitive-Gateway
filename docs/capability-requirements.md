@@ -4,11 +4,12 @@
 `CapabilityRequirement` values from a validated `Delta`. The derivation is a
 small, deterministic binding layer:
 
-```text
-DeltaItem.required_outcome
-        + explicit CapabilityRequirementRules
-        + canonical CapabilityDefinition snapshot
-        -> CapabilityRequirement[] + diagnostics
+```mermaid
+flowchart LR
+    D[DeltaItem.required_outcome] --> R[Capability Requirement Derivation]
+    E[Explicit CapabilityRequirementRules] --> R
+    C[Canonical CapabilityDefinition Snapshot] --> R
+    R --> O[CapabilityRequirement[] + Diagnostics]
 ```
 
 The rules bind each supported outcome kind (`DomainChange`,
