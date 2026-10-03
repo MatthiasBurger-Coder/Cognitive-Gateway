@@ -111,7 +111,6 @@ impl PlanningCapabilitySnapshot {
     }
 
     /// Returns abstract capability IDs available in the snapshot.
-    #[must_use]
     pub fn capability_ids(&self) -> impl ExactSizeIterator<Item = &gateway_domain::CapabilityId> {
         self.index.ids()
     }

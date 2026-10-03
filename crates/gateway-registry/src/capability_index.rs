@@ -540,13 +540,11 @@ impl CapabilityIndex {
     }
 
     /// Returns all indexed entries in canonical capability-ID order.
-    #[must_use]
     pub fn entries(&self) -> impl ExactSizeIterator<Item = &CapabilityIndexEntry> {
         self.entries.values()
     }
 
     /// Returns all indexed capability IDs in canonical order.
-    #[must_use]
     pub fn ids(&self) -> impl ExactSizeIterator<Item = &CapabilityId> {
         self.entries.keys()
     }
@@ -801,7 +799,6 @@ impl CapabilityRejection {
     }
 
     /// Alias for [`Self::reasons`].
-    #[must_use]
     pub fn failed_selectors(&self) -> impl ExactSizeIterator<Item = &CapabilitySelector> {
         self.reasons.iter().map(CapabilityRejectionReason::selector)
     }
