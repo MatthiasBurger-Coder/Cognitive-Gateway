@@ -73,6 +73,7 @@ flowchart LR
 | Optional SLM semantic interpreter | PLANNED | EPIC-05.11 consumes model adapters; model output is never authoritative. |
 | Local SLM/LxM runtime | IMPLEMENTED (reference service) | CG-27.01: separate CPU-first Ollama/Python containers, Rust port/adapter, immutable profiles, qualification, promotion and rollback. Full SemanticTaskIR interpretation remains separate EPIC-05.11 work. |
 | Local cognitive signal benchmarks | IMPLEMENTED | CG-27: replaceable four-task proposal adapter, versioned synthetic dataset, fixture and Ollama CPU/GPU harness, per-sample provenance and explicit failure/fallback evidence. |
+| Governed offline learning pipeline | IMPLEMENTED (contracts and reference coordinator) | CG-28 validates signals, assembles scoped/versioned datasets, gates offline jobs/evaluation and journals canary/rollback. Concrete training workers and durable deployment integration remain host adapters. |
 | Qwen3-8B reference profile | PLANNED | Reference candidate only; not a mandatory product dependency. |
 | General provider-independent model invocation | PLANNED | EPIC-06 #178 owns the general model invocation boundary. |
 | MCP connector/plugin runtime | PLANNED | EPIC-07 #223 owns external MCP server integration. |
@@ -96,6 +97,7 @@ flowchart LR
 - EPIC-06 #178 — provider-independent model invocation.
 - EPIC-07 #223 — MCP connector/plugin runtime.
 - EPIC-03 #114 — adaptive cognitive runtime and learned procedures.
+- CG-28 #219 — governed learning signals and offline training pipeline.
 - CG-27 #218 — local SLM/LxM adapter and benchmark framework.
 - CG-27.01 #249 — upgradable containerized local model service.
 

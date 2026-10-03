@@ -210,3 +210,5 @@ Run `python3 scripts/quality-gate.py` for the complete CG-13 gate. See [the rele
 - [Deterministic reflex engine](reflex-engine.md) — CG-25 ACTIVE matching, evidence gates, governed execution, verification and fallback.
 
 - [Explainable cognitive model router](cognitive-model-router.md) — CG-26 typed capability snapshots, deterministic precedence, hard constraints, bounded fallback and execution provenance.
+
+- [CG-28 governed learning signals and offline training](offline-learning.md) — evidence admission, reproducible scoped datasets, offline interfaces and model rollout/rollback.

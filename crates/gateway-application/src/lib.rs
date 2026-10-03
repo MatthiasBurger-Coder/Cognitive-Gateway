@@ -13,6 +13,8 @@ pub mod experience_patterns;
 pub mod external_context;
 pub mod graph_retrieval;
 pub mod memory;
+pub mod model_releases;
+pub mod offline_learning;
 pub mod parallel_execution;
 pub mod planning_application;
 pub mod policy_application;

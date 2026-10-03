@@ -40,6 +40,11 @@ for both new evaluation production modules from the workspace report. See
 [EPIC-02 evaluation](epic-02-evaluation.md). The synthetic dataset report and
 the external-project fake-port replay are separate evidence types.
 
+The CG-28 gate retains a reference-only synthetic dataset, immutable model
+releases and canary/rollback decisions in `cg28-learning.json`. It enforces 95%
+line coverage for signal/dataset/offline-job coordination and model release
+coordination. See [governed offline learning](offline-learning.md).
+
 For focused diagnosis, use `./scripts/check-architecture.sh`,
 `python3 -m unittest discover -s tests/architecture`, or the exact command
 recorded for a failed step. Focused checks do not substitute for a complete run.

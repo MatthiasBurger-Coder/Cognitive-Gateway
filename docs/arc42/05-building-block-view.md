@@ -257,3 +257,15 @@ CG-27 adds an optional four-task cognitive signal adapter and standalone benchma
 harness. Versioned datasets and exact invocation provenance bind CPU/GPU reports;
 fixture observations are explicitly distinct from model measurements and product
 claims. Benchmarking does not promote models or mutate authoritative state.
+
+## Governed offline learning (CG-28)
+
+`gateway-domain::offline_learning` contains reference-only signal, dataset, recipe,
+model release and upgrade-impact contracts. `gateway-application::offline_learning`
+validates memory and exact evidence, builds deterministic scoped datasets and
+coordinates explicitly authorized isolated training/evaluation ports.
+`gateway-application::model_releases` gates immutable release registration, canary
+observations, activation and exact predecessor rollback with independent authority.
+The daemon inference path does not call training. Concrete offline workers and
+atomic durable release/routing stores remain outer adapters. See
+[the CG-28 contract and operator procedure](../offline-learning.md).
