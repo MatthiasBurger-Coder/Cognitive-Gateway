@@ -4,24 +4,16 @@
 
 The representative request flow makes the runtime boundary explicit:
 
-```text
-Driving Adapter (CLI / API / IDE / CI)
-                |
-                v
-Inbound Application Port (submit task)
-                |
-                v
-Application + Domain/Core
-  validate -> resolve -> authorize -> build IR
-                |
-                v
-Outbound Port (knowledge / runtime / evidence)
-                |
-                v
-Driven Adapter (Git/RAG, runtime or evidence implementation)
-                |
-                v
-Result + provenance/audit evidence
+```mermaid
+flowchart TB
+    DA[Driving Adapter<br/>CLI / API / IDE / CI] --> IN[Inbound Application Port<br/>submit task]
+    IN --> V[Validate]
+    V --> R[Resolve]
+    R --> A[Authorize]
+    A --> IR[Build IR]
+    IR --> OUT[Outbound Port<br/>knowledge / runtime / evidence]
+    OUT --> AD[Driven Adapter<br/>Git/RAG / runtime / evidence]
+    AD --> RESULT[Result + provenance / audit evidence]
 ```
 
 The driving adapter translates the transport request into the inbound port contract. The core performs deterministic validation, resolution and policy evaluation. The selected outbound port is implemented by a replaceable driven adapter, and the result returns through the application boundary with provenance or audit evidence where applicable.
@@ -30,26 +22,14 @@ Knowledge retrieval is not executable capability use: a knowledge adapter return
 
 ## 6.2 Deterministic request flow
 
-```text
-Task
-  |
-  v
-Catalog Loader
-  |
-  v
-Registry Validation
-  |
-  v
-Workflow / Agent / Skill Resolver
-  |
-  v
-Policy Engine
-  |
-  v
-Context Compiler / Execution Context IR
-  |
-  v
-CLI / Runtime Adapter
+```mermaid
+flowchart TB
+    T[Task] --> CL[Catalog Loader]
+    CL --> RV[Registry Validation]
+    RV --> RES[Workflow / Agent / Skill Resolver]
+    RES --> P[Policy Engine]
+    P --> C[Context Compiler / Execution Context IR]
+    C --> RA[CLI / Runtime Adapter]
 ```
 
 This path must work without an LLM or external network access in v0.1.
@@ -81,41 +61,30 @@ must use existing structured inputs for deterministic execution.
 
 ## 6.4 Retrieval flow
 
-```text
-Validated task + selected skills
-        |
-        v
-Retrieval Planner
-        |
-        +--> repository search
-        +--> vector retrieval
-        +--> graph retrieval
-        +--> evidence history
-        |
-        v
-Retrieved knowledge with typed provenance
-        |
-        v
-Context Compiler
+```mermaid
+flowchart TB
+    T[Validated Task + Selected Skills] --> RP[Retrieval Planner]
+    RP --> RS[Repository Search]
+    RP --> VR[Vector Retrieval]
+    RP --> GR[Graph Retrieval]
+    RP --> EH[Evidence History]
+    RS --> K[Retrieved Knowledge<br/>with typed provenance]
+    VR --> K
+    GR --> K
+    EH --> K
+    K --> CC[Context Compiler]
 ```
 
 Retrieval never grants capabilities or overrides policy.
 
 ## 6.5 Tool execution flow
 
-```text
-Execution Runtime
-       |
-       v
-Capability request
-       |
-       v
-Policy Engine
-       |
-   allow / deny
-       |
-       v
-MCP / Tool Adapter
+```mermaid
+flowchart TB
+    ER[Execution Runtime] --> CR[Capability Request]
+    CR --> P[Policy Engine]
+    P -->|allow| MCP[MCP / Tool Adapter]
+    P -->|deny| D[Denied]
 ```
 
 Mutation requests may require explicit authorization while inspection requests can remain available. The MCP/tool adapter is a driven capability adapter and cannot change the policy decision made by the core.
