@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cognitive-gateway.local/schemas/experience.schema.json",
+  "title": "Governed ExperienceRecord v1",
+  "type": "object",
+  "required": ["schema_version", "id", "scope", "provenance", "source_snapshot", "source_version", "source_digest", "created_at", "observed_at", "valid_from", "expires_at", "max_age_seconds", "quality", "validation", "outcome", "label_basis", "payload"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "id": { "$ref": "#/$defs/id" },
+    "scope": { "$ref": "#/$defs/id" },
+    "provenance": { "$ref": "#/$defs/id" },
+    "source_snapshot": { "$ref": "#/$defs/id" },
+    "source_version": { "type": "string", "minLength": 1, "maxLength": 16384 },
+    "source_digest": { "type": "string", "pattern": "^[0-9a-fA-F]{64}$" },
+    "created_at": { "type": "integer" },
+    "observed_at": { "type": "integer" },
+    "valid_from": { "type": "integer" },
+    "expires_at": { "type": "integer" },
+    "max_age_seconds": { "type": "integer", "minimum": 0 },
+    "quality": { "$ref": "#/$defs/quality" },
+    "validation": { "oneOf": [{ "$ref": "#/$defs/id" }, { "type": "null" }] },
+    "outcome": { "oneOf": [{ "type": "string", "minLength": 1, "maxLength": 16384 }, { "type": "null" }] },
+    "label_basis": { "oneOf": [{ "$ref": "#/$defs/id" }, { "type": "null" }] },
+    "payload": { "oneOf": [{ "$ref": "#/$defs/payload" }, { "type": "null" }] }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "id": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[A-Za-z0-9](?:[A-Za-z0-9._-]*[A-Za-z0-9])?$" },
+    "confidence": { "oneOf": [
+      { "type": "object", "required": ["kind"], "properties": { "kind": { "enum": ["UNKNOWN", "NOT_APPLICABLE"] } }, "additionalProperties": false },
+      { "type": "object", "required": ["kind", "value"], "properties": { "kind": { "const": "SCORE" }, "value": { "type": "number", "minimum": 0, "maximum": 1 } }, "additionalProperties": false }
+    ] },
+    "quality": { "type": "object", "required": ["trust", "sensitivity", "confidence", "freshness", "uncertainty", "conflict"], "properties": {
+      "trust": { "const": "DERIVED_ASSESSMENT" },
+      "sensitivity": { "enum": ["PUBLIC", "NORMAL", "INTERNAL", "CONFIDENTIAL", "SECRET"] },
+      "confidence": { "$ref": "#/$defs/confidence" },
+      "freshness": { "enum": ["FRESH", "STALE", "UNKNOWN"] },
+      "uncertainty": { "enum": ["NONE", "INCOMPLETE", "PROBABILISTIC", "UNKNOWN"] },
+      "conflict": { "enum": ["NONE", "UNRESOLVED"] }
+    }, "additionalProperties": false },
+    "payload": { "oneOf": [
+      { "type": "object", "required": ["kind", "value"], "properties": { "kind": { "const": "INLINE" }, "value": { "type": "string", "minLength": 1, "maxLength": 16384 } }, "additionalProperties": false },
+      { "type": "object", "required": ["kind", "value"], "properties": { "kind": { "const": "REFERENCE" }, "value": { "$ref": "#/$defs/id" } }, "additionalProperties": false }
+    ] }
+  }
+}
