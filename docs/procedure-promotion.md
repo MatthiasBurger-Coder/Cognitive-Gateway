@@ -99,8 +99,8 @@ within tolerance. Completed successful canaries can activate after the sampling
 window ends; new canary executions cannot. At most one version per procedure ID
 is active. Runtime eligibility is distinct from permission: current process, policy,
 capability, observation, evidence and verification checks remain mandatory. CG-24
-records controls/outcomes but does not dispatch capabilities or implement the CG-25
-reflex runtime.
+records controls/outcomes. The [CG-25 reflex engine](reflex-engine.md) dispatches
+ACTIVE procedures through the existing compiled Process/Policy execution boundary.
 
 ## Supersession, rollback and storage
 
