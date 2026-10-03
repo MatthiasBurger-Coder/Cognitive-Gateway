@@ -296,10 +296,9 @@ CG-04 definition/instance revision used. They are read-only projections. A
 later CG-09 policy/authorization extension and the CG-10 projection remain
 outside this slice:
 
-```text
-Situation + authorized Plan Step + Resolution + Policy
-        ↓ CG-10
-minimal CompiledContext / ExecutionContextIR projection
+```mermaid
+flowchart TB
+    IN[Situation + Authorized Plan Step + Resolution + Policy] -->|CG-10| OUT[Minimal CompiledContext / ExecutionContextIR Projection]
 ```
 
 ## End-to-end reference slice (CG-06.10)
@@ -309,15 +308,15 @@ The neutral integration fixture in
 CG-06 path for an external project without introducing a provider or a real
 secret:
 
-```text
-scoped source snapshot
-  → intent + repository/tool/synthetic provenance
-  → observations, facts and evidence
-  → normalized state (coverage = 92.00, sensitivity = SECRET)
-  → deterministic assessment + qualitative risk
-  → Situation
-  → read-only CG-02 execution context and CG-04 process reference
-  → explainability + canonical JSON
+```mermaid
+flowchart TB
+    S[Scoped Source Snapshot] --> I[Intent + Repository / Tool / Synthetic Provenance]
+    I --> O[Observations, Facts and Evidence]
+    O --> N[Normalized State<br/>coverage = 92.00, sensitivity = SECRET]
+    N --> A[Deterministic Assessment + Qualitative Risk]
+    A --> SIT[Situation]
+    SIT --> R[Read-only CG-02 Execution Context<br/>and CG-04 Process Reference]
+    R --> E[Explainability + Canonical JSON]
 ```
 
 The fixture records the architecture dependency observation
