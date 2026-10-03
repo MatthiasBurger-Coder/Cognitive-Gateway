@@ -9,16 +9,14 @@ project-global planning state and no implicit catalog lookup.
 
 The facade exposes the complete provider-neutral sequence:
 
-```text
-compare_desired_to_situation
-        ↓
-derive_delta
-        ↓
-derive_capability_requirements
-        ↓
-build_plan
-        ↓
-validate_plan → explain_plan → serialize_plan
+```mermaid
+flowchart TB
+    C[compare_desired_to_situation] --> D[derive_delta]
+    D --> R[derive_capability_requirements]
+    R --> B[build_plan]
+    B --> V[validate_plan]
+    V --> E[explain_plan]
+    E --> S[serialize_plan]
 ```
 
 The comparison and Delta methods consume the CG-06 `DesiredState`, normalized
