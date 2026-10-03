@@ -72,31 +72,22 @@ Examples include:
 
 The same database technology may physically host multiple categories of data, but the architectural authority remains different:
 
-```text
-Git / repository
-  │
-  │ canonical, versioned definitions
-  ▼
-Schema Validation + Registry Loading
-  │
-  ├──► In-memory Registry
-  ├──► SQL Read Model
-  ├──► Graph Index
-  └──► Vector / Search Index
+```mermaid
+flowchart TB
+    GIT[Git / Repository] -->|canonical versioned definitions| LOAD[Schema Validation + Registry Loading]
+    LOAD --> REG[In-memory Registry]
+    LOAD --> SQL[SQL Read Model]
+    LOAD --> GRAPH[Graph Index]
+    LOAD --> VECTOR[Vector / Search Index]
 
-Process / Execution Runtime
-  │
-  ▼
-Runtime Persistence Port
-  │
-  ▼
-Operational Database
-  ├── workflow instances
-  ├── execution history
-  ├── evidence
-  ├── blockers
-  ├── checkpoints
-  └── audit events
+    RUN[Process / Execution Runtime] --> PORT[Runtime Persistence Port]
+    PORT --> DB[Operational Database]
+    DB --> WI[Workflow Instances]
+    DB --> EH[Execution History]
+    DB --> EV[Evidence]
+    DB --> BL[Blockers]
+    DB --> CP[Checkpoints]
+    DB --> AU[Audit Events]
 ```
 
 ## Critical Rules
