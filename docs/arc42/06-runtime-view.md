@@ -142,13 +142,16 @@ port calls a separately deployable runtime. Candidate model upgrades are
 benchmarked and qualified before explicit promotion; rollback restores the
 previous qualified profile without rebuilding the Gateway.
 
-## 6.10 Learned procedure lifecycle (CG-21 foundation implemented)
+## 6.10 Learned procedure lifecycle (CG-21, CG-23, CG-24 implemented)
 
-Eligible governed experience may be represented as a `PatternCandidate` and
-compiled into a digest-bound `LearnedProcedure`. Lifecycle changes are explicit
-events (draft/evaluated/approved/active/suspended/retired/rejected). Reuse still
-passes through existing process, capability and policy authority; the broader
-automatic promotion/reflex path remains EPIC-03 work. CG-22 implements governed
-pattern inspection. [CG-23](../procedure-evaluation.md) evaluates immutable historical
-snapshots and counterfactuals, retains reproducible bundles and requires passing
-evidence before a draft advances to evaluated. Simulation commits no transitions.
+Eligible governed experience becomes a `PatternCandidate` and a digest-bound
+`LearnedProcedure`. [CG-23](../procedure-evaluation.md) evaluates historical
+snapshots and counterfactuals, retaining reproducible passing evidence.
+[CG-24](../procedure-promotion.md) implements discovered/candidate/validated/
+evaluated/approved/canary/active admission through authenticated application
+commands and an append-only version registry. Canary execution is bounded by
+scope, cohort, time and outcome budgets. Supersession and rollback atomically
+change active versions while preserving evidence and historical outcomes.
+The read-only `cg procedures` command inspects the complete journal without a model.
+Reuse still requires current process, capability and policy authorization;
+automatic discovery and reflex dispatch remain incremental EPIC-03 work.

@@ -22,6 +22,10 @@ The v1 wire uses canonical enum strings, numeric versions, typed identifier stri
 
 ## Lifecycle
 
+The following CG-21 lifecycle is a compatibility contract. The authoritative CG-24
+registry uses the stricter [promotion lifecycle](procedure-promotion.md), including
+required canary admission; legacy events do not authorize that registry.
+
 Lifecycle is a separate append-only decision projection for a fixed procedure ID and version. Every transition records source and target state, decision reference, actor provenance and explicit Unix time. `ProcedureLifecycle::apply` rejects a wrong identity or source state, repeated decision ID, reversed time or illegal edge. The legal edges are:
 
 ```mermaid

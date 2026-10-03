@@ -102,5 +102,9 @@
   {
     "name": "CG-23 learned procedure evaluation evidence",
     "command": "set -euo pipefail\nCG23_EVALUATION_OUTPUT=\"$EVIDENCE_DIR/cg23-evaluation.json\" cargo test -p gateway-domain --test procedure_evaluation golden_replay_and_counterfactuals_prove_every_required_outcome -- --exact\ntest -s \"$EVIDENCE_DIR/cg23-evaluation.json\"\ncargo test -p gateway-application --test procedure_evaluation\ncargo test -p gateway-daemon --test procedure_evaluation_cli\n"
+  },
+  {
+    "name": "CG-24 procedure promotion evidence and coverage",
+    "command": "set -euo pipefail\nCG24_PROMOTION_OUTPUT=\"$EVIDENCE_DIR/cg24-promotion.json\" cargo test -p gateway-registry --test procedure_promotion versioned_supersession_and_rollback_preserve_all_evidence -- --exact\ntest -s \"$EVIDENCE_DIR/cg24-promotion.json\"\n\"$RUNNER_TEMP/cg/bin/cg\" procedures --registry \"$EVIDENCE_DIR/cg24-promotion.json\" --json > \"$EVIDENCE_DIR/cg24-inspection.json\"\ncargo test -p gateway-domain -p gateway-application --test procedure_promotion\ncargo test -p gateway-daemon --test procedure_promotion_cli\npython3 scripts/check-cg24-coverage.py --self-test\npython3 scripts/check-cg24-coverage.py \"$EVIDENCE_DIR/cg16-coverage.json\"\n"
   }
 ]

@@ -30,7 +30,8 @@ The CLI accepts operator-supplied snapshots for offline simulation. Fixture or m
 claims of `PRESENT`/allowed do not authenticate live evidence or grant permission.
 Hashes detect altered content; they are not signatures. Successful simulation is
 an evaluation prerequisite, never approval or runtime authorization. Promotion
-approval and active reflex execution remain separate EPIC-03 work.
+approval is implemented separately in [CG-24](procedure-promotion.md); active reflex
+execution remains separate EPIC-03 work.
 
 ## Evaluation behavior
 

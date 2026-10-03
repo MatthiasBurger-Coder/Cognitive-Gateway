@@ -53,3 +53,8 @@ technologies.
 datasets, replay snapshots, results and reproducible evidence bundles. Rust validation
 additionally verifies canonical procedure content, snapshot/bundle digests, exact
 expected outcomes, coverage and evidence-bound lifecycle admission.
+
+[`procedure-promotion.schema.json`](procedure-promotion.schema.json) describes the
+CG-24 promotion journal and commands. Rust replay additionally enforces immutable
+versions, evidence binding, lifecycle edges, canary bounds and exact safe rollback.
+The schema does not authenticate actor/policy claims or confer runtime permission.

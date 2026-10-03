@@ -4,6 +4,7 @@ mod json_input;
 mod patterns_cli;
 mod pipeline;
 mod procedure_cli;
+mod promotion_cli;
 
 use serde::{Serialize, de::DeserializeOwned};
 use serde_json::{Value, json};
@@ -24,6 +25,7 @@ Usage:
   cg evaluate --procedure <file> --dataset <file> --runtime-version <id> [--json]
   cg simulate --procedure <file> --dataset <file> --runtime-version <id> [--json]
   cg replay --bundle <file> [--json]
+  cg procedures --registry <journal-file> [--json]
   cg patterns --report <file-or-json> [--json]
   cg patterns --scope <project-scope> [--at <unix-seconds>] [--json]
 
@@ -128,6 +130,7 @@ fn parse(arguments: &[String]) -> Result<Options, CliError> {
         "patterns" => &["report", "scope", "at"],
         "evaluate" | "simulate" => &["procedure", "dataset", "runtime-version"],
         "replay" => &["bundle"],
+        "procedures" => &["registry"],
         "plan" => &["intent", "context", "rules", "catalog"],
         "resolve" | "compile" => &[
             "plan",
@@ -195,6 +198,9 @@ fn parse(arguments: &[String]) -> Result<Options, CliError> {
         }
         "replay" => {
             options.required("bundle")?;
+        }
+        "procedures" => {
+            options.required("registry")?;
         }
         "assess" => {
             options.required("context")?;

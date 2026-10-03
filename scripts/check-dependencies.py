@@ -12,7 +12,7 @@ ALLOWED = {
     "gateway-context": {"gateway-domain", "serde", "serde_json"},
     "gateway-process": {"gateway-domain", "serde", "serde_json", "sha2"},
     "gateway-policy": {"gateway-domain", "serde", "serde_json"},
-    "gateway-registry": {"gateway-domain"},
+    "gateway-registry": {"gateway-domain", "serde_json"},
     "gateway-workflow": {"gateway-domain"},
     "gateway-daemon": {"gateway-domain", "gateway-application", "gateway-context",
                        "gateway-process", "gateway-policy", "gateway-registry",
