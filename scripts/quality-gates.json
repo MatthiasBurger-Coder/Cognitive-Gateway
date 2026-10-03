@@ -98,5 +98,9 @@
   {
     "name": "CG-28A parallel scheduler coverage gate",
     "command": "python3 scripts/check-cg28a-coverage.py --self-test\npython3 scripts/check-cg28a-coverage.py \"$EVIDENCE_DIR/cg16-coverage.json\"\n"
+  },
+  {
+    "name": "CG-23 learned procedure evaluation evidence",
+    "command": "set -euo pipefail\nCG23_EVALUATION_OUTPUT=\"$EVIDENCE_DIR/cg23-evaluation.json\" cargo test -p gateway-domain --test procedure_evaluation golden_replay_and_counterfactuals_prove_every_required_outcome -- --exact\ntest -s \"$EVIDENCE_DIR/cg23-evaluation.json\"\ncargo test -p gateway-application --test procedure_evaluation\ncargo test -p gateway-daemon --test procedure_evaluation_cli\n"
   }
 ]

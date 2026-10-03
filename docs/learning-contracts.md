@@ -6,7 +6,7 @@ Issue: [#212](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/issues/2
 
 An `Observation` reports a source assertion. `Evidence` supports or challenges an assertion. A governed `ExperienceRecord` is a derived historical record with source snapshot, provenance, validation, outcome and label basis. A knowledge record is retrieved context. None grants permission. `PatternCandidate` is an inspectable hypothesis over validated experience; it contains no steps. `LearnedProcedure` declares possible steps and preconditions, but its status is not an execution token. Execution still requires current process registry resolution, policy evaluation, capability availability, current observations and evidence, and the existing process gates. Model output can propose a candidate; it cannot promote or execute a procedure.
 
-`ExperienceBasis` pins the existing `MemoryEligibilityReference` plus provenance and an evaluation reference. The source memory reference must have schema version 1 and positive revision and eligibility version. A consumer must revalidate it at use time through the memory application; the domain contract cannot attest to current freshness or revocation. The fingerprint and every basis must use the same project scope. `SituationFingerprint` uses canonical typed `OperatingMode`, `CapabilityId` and `FactId` signals. It requires at least one fact or capability signal and cannot consist solely of free text or similarity scores.
+`ExperienceBasis` pins the existing `MemoryEligibilityReference` plus provenance and an evaluation reference. The source memory reference must have schema version 1 and positive revision and eligibility version. A consumer must revalidate it at use time through the memory application; the domain contract cannot attest to current freshness or revocation. The fingerprint and every basis must use the same project scope. `SituationFingerprint` uses canonical typed `OperatingMode`, `CapabilityId` and `FactId` signals. It requires at least one fact or capability signal and cannot consist solely of free text or similarity scores. Conflicting operating modes are rejected.
 
 `ExperienceRecord::to_json/from_json` uses a strict v1 wire with explicit optional fields and tagged inline/reference payload. It validates the existing time, trust and payload invariants on both directions. Curation and eligibility remain separate application decisions; a JSON round trip does not validate the source or authorize learning.
 
@@ -38,6 +38,8 @@ stateDiagram-v2
     Suspended --> Active
     Suspended --> Retired
 ```
+
+`DRAFT -> EVALUATED` requires `apply_evaluated` with a passing, reproducible bundle for the exact procedure digest; its decision reference is the bundle digest. A plain `apply` call cannot advance a draft. See [CG-23 evaluation](procedure-evaluation.md).
 
 `REJECTED` and `RETIRED` are terminal. A promotion decision is auditable history, not a substitute for runtime authorization. Changes to procedure content create a new immutable version and a new draft lifecycle.
 

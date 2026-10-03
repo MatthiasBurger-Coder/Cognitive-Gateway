@@ -34,3 +34,4 @@ Companion boundary documents:
 - [MCP connector/plugin runtime](../mcp-connector-runtime.md)
 - [Local model runtime](../local-model-runtime.md)
 - [Learned procedures](../learned-procedures.md)
+- [Learned procedure evaluation](../procedure-evaluation.md)

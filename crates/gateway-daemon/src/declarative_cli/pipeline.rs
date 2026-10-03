@@ -20,6 +20,7 @@ use std::str::FromStr;
 
 pub(super) fn execute(options: &Options) -> Result<(Value, i32), CliError> {
     match options.command.as_str() {
+        "evaluate" | "simulate" | "replay" => super::procedure_cli::execute(options),
         "patterns" => {
             let report = if options.get("report").is_some() {
                 decode(options.input("report")?)?

@@ -81,6 +81,6 @@ A learned procedure version has canonical serialized content and a SHA-256-deriv
 
 ## Relationship to EPIC-03
 
-EPIC-03 #114 is broader. It additionally covers pattern detection, evaluation/replay/simulation, promotion governance, deterministic reflex fast paths, fallback, routing and continuous feedback.
+EPIC-03 #114 is broader. CG-22 adds governed pattern inspection and [CG-23](procedure-evaluation.md) adds validation/replay/simulation. Further work covers promotion governance, deterministic reflex fast paths, fallback, routing and continuous feedback.
 
 CG-21 provides the domain foundation for that future runtime behavior; it should not be described as a completed self-learning system.

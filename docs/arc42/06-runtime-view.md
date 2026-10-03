@@ -148,4 +148,7 @@ Eligible governed experience may be represented as a `PatternCandidate` and
 compiled into a digest-bound `LearnedProcedure`. Lifecycle changes are explicit
 events (draft/evaluated/approved/active/suspended/retired/rejected). Reuse still
 passes through existing process, capability and policy authority; the broader
-automatic discovery/evaluation/reflex path remains EPIC-03 work.
+automatic promotion/reflex path remains EPIC-03 work. CG-22 implements governed
+pattern inspection. [CG-23](../procedure-evaluation.md) evaluates immutable historical
+snapshots and counterfactuals, retains reproducible bundles and requires passing
+evidence before a draft advances to evaluated. Simulation commits no transitions.

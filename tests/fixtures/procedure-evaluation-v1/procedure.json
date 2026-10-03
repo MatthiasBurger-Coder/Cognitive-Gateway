@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "id": "procedure-1",
+  "version": 1,
+  "source_candidate": "candidate-1",
+  "fingerprint": {
+    "scope": "project-1",
+    "signals": [
+      {
+        "kind": "OPERATING_MODE",
+        "value": "DEVELOPMENT"
+      },
+      {
+        "kind": "FACT",
+        "value": "fact-1"
+      }
+    ]
+  },
+  "experience": [
+    {
+      "memory": {
+        "schema_version": 1,
+        "scope": "project-1",
+        "id": "memory-1",
+        "revision": 2,
+        "eligibility_version": 2,
+        "source_snapshot": "snapshot-1",
+        "source_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "provenance": "source-1",
+      "evaluation": "evaluation-1"
+    }
+  ],
+  "steps": [
+    {
+      "process": {
+        "id": "process-1",
+        "version": 1,
+        "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "capability": "inspect",
+      "policy": "policy-1"
+    }
+  ],
+  "required_observations": [
+    "observation-1"
+  ],
+  "required_evidence": [
+    "evidence-1"
+  ],
+  "verification_evidence": [
+    "verification-1"
+  ],
+  "fallback": "STOP",
+  "digest": "be224c036a0a0addfc7e04d8ea13a142447e95a104494aad786a165169798423"
+}

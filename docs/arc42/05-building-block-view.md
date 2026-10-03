@@ -244,3 +244,7 @@ procedures, procedure steps referencing existing process/capability/policy
 identities, verification requirements and append-only lifecycle transitions.
 These types support EPIC-03 without allowing historical experience to become
 authorization. See [learned procedures](../learned-procedures.md).
+
+CG-23 adds pure versioned replay/evidence contracts in `gateway-domain`, real
+Process/Policy simulation capture in `gateway-application`, and evaluate/simulate/replay
+commands in the CLI adapter. See [procedure evaluation](../procedure-evaluation.md).

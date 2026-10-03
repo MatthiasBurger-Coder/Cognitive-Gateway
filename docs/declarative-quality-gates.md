@@ -134,3 +134,8 @@ fixture assertion deliberately prevents export; inspect the assertion and
 review the contract before updating expected data. Tests never regenerate
 fixtures automatically. Synthetic expected outputs under `tests/fixtures/`
 are test evidence, not project configuration or canonical catalog membership.
+
+The CG-23 gate retains `cg23-evaluation.json`, a self-contained procedure, historical
+and counterfactual dataset, manifest and deterministic result bundle. It also
+checks real Process/Policy simulation capture and CLI replay/tamper behavior. See
+[learned procedure evaluation](procedure-evaluation.md).

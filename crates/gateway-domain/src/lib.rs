@@ -30,6 +30,7 @@ pub mod planning_input;
 pub mod planning_serialization;
 pub mod planning_validation;
 pub mod policy;
+pub mod procedure_evaluation;
 pub mod quality;
 pub mod reasoning_strategy;
 pub mod relationships;
