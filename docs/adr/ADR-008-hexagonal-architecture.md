@@ -22,9 +22,12 @@ The domain and application core owns stable concepts, use cases, policies and po
 
 The dependency rule is:
 
-```text
-Driving Adapters -> Inbound Ports -> Application + Domain/Core
-Application + Domain/Core -> Outbound Ports -> Driven Adapters
+```mermaid
+flowchart LR
+    DA[Driving Adapters] --> IP[Inbound Ports]
+    IP --> CORE[Application + Domain/Core]
+    CORE --> OP[Outbound Ports]
+    OP --> DR[Driven Adapters]
 ```
 
 Pure serialization libraries (`serde` and `serde_json`) are the explicitly
