@@ -4,17 +4,12 @@
 
 Cognitive Gateway mediates between task-producing clients and task-executing AI/agent runtimes.
 
-```text
-IDE / CLI / CI / API
-        |
-        v
-Cognitive Gateway
-        |
-        +--> Knowledge sources
-        +--> Capability/tool providers
-        |
-        v
-Codex / PraisonAI / Local LLM / Cloud LLM
+```mermaid
+flowchart TB
+    CLIENT[IDE / CLI / CI / API] --> CG[Cognitive Gateway]
+    CG --> K[Knowledge Sources]
+    CG --> CAP[Capability / Tool Providers]
+    CG --> RUN[Codex / PraisonAI / Local LLM / Cloud LLM]
 ```
 
 ## 3.2 Inputs
