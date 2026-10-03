@@ -24,12 +24,19 @@ The v1 wire uses canonical enum strings, numeric versions, typed identifier stri
 
 Lifecycle is a separate append-only decision projection for a fixed procedure ID and version. Every transition records source and target state, decision reference, actor provenance and explicit Unix time. `ProcedureLifecycle::apply` rejects a wrong identity or source state, repeated decision ID, reversed time or illegal edge. The legal edges are:
 
-```text
-DRAFT -> EVALUATED | REJECTED
-EVALUATED -> APPROVED | REJECTED
-APPROVED -> ACTIVE | RETIRED
-ACTIVE -> SUSPENDED | RETIRED
-SUSPENDED -> ACTIVE | RETIRED
+```mermaid
+stateDiagram-v2
+    [*] --> Draft
+    Draft --> Evaluated
+    Draft --> Rejected
+    Evaluated --> Approved
+    Evaluated --> Rejected
+    Approved --> Active
+    Approved --> Retired
+    Active --> Suspended
+    Active --> Retired
+    Suspended --> Active
+    Suspended --> Retired
 ```
 
 `REJECTED` and `RETIRED` are terminal. A promotion decision is auditable history, not a substitute for runtime authorization. Changes to procedure content create a new immutable version and a new draft lifecycle.
