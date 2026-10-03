@@ -61,14 +61,15 @@ Qwen3-8B quantized is the planned first reference candidate for structured seman
 
 ## Upgrade lifecycle
 
-```text
-discover/pull
-  -> register candidate
-  -> conformance + benchmark
-  -> qualify
-  -> promote active
-  -> monitor
-  -> rollback if required
+```mermaid
+flowchart LR
+    D[Discover / Pull] --> C[Register Candidate]
+    C --> B[Conformance + Benchmark]
+    B --> Q[Qualify]
+    Q --> P[Promote Active]
+    P --> M[Monitor]
+    M -->|if required| R[Rollback]
+    R --> P
 ```
 
 A future model generation should be introduced by model artifact/profile/configuration plus qualification, not by changing Cognitive Gateway domain contracts.
