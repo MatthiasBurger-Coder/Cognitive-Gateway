@@ -60,24 +60,24 @@ override an Agent or Skill definition. In the application contract this input
 is an opaque `ProjectContext` carried by `ExecutionRequest`; it is not part of
 the registry or `ExecutionContextIR`.
 
-## 6.3 Semantic classification flow
+## 6.3 Semantic interpretation flow (planned EPIC-05)
 
-Later releases may add:
+The target natural-language frontend is:
 
-```text
-Task
-  |
-  v
-Local SLM
-  |
-  v
-Semantic signals + confidence
-  |
-  v
-Deterministic Resolver
+```mermaid
+flowchart LR
+    NL[Natural Language] --> IC[Interpretation Context]
+    IC --> RES[Entity / Reference Resolution]
+    RES --> SEM[CGSL / Semantic Compiler]
+    SLM[Optional SLM proposal] -. candidate signals .-> SEM
+    SEM --> STI[Validated SemanticTaskIR]
+    STI --> PLAN[CG-07 Planning]
 ```
 
-The SLM proposes semantic interpretation. The resolver validates registered workflows, agents, skills and capabilities.
+The SLM is optional. It proposes interpretation candidates; it does not define
+canonical semantics. Mandatory ambiguity or knowledge gaps remain explicit and
+may require retrieval or clarification. Until EPIC-05 is implemented, callers
+must use existing structured inputs for deterministic execution.
 
 ## 6.4 Retrieval flow
 
@@ -130,3 +130,53 @@ CG-07 comparison determine success, continuation, replanning, pause or stop.
 Iteration and retry limits bound execution across replans. Every revision and
 execution remains linked in the audit. Process lifecycle mutation remains with
 CG-04. See [the application contract](../closed-loop-execution.md).
+
+## 6.7 Codex local invocation (planned EPIC-04)
+
+```mermaid
+sequenceDiagram
+    participant C as Codex
+    participant A as Local MCP Adapter
+    participant F as Application Facade
+    participant P as Policy
+    participant G as Gateway Services
+    C->>A: scoped versioned request
+    A->>F: validated request
+    F->>P: authorize
+    P-->>F: allow / deny / consent
+    F->>G: existing use case
+    G-->>F: canonical result + evidence
+    F-->>C: deterministic response
+```
+
+CG stores no OpenAI API key for this path and Codex remains a client rather
+than an authority source.
+
+## 6.8 External connector invocation (planned EPIC-07)
+
+```mermaid
+flowchart LR
+    PLAN[Authorized request] --> MAP[Canonical capability/source mapping]
+    MAP --> MCP[MCP Runtime]
+    MCP --> EXT[External MCP Server]
+    EXT --> NORM[Normalized result + provenance]
+    NORM --> EVID[Evidence / Context]
+```
+
+Discovery is not authorization. Mutation retry safety, credentials, trust,
+sensitivity and scope are explicit Gateway-managed concerns.
+
+## 6.9 Local model invocation and upgrade (planned CG-27)
+
+A logical model role resolves to a qualified model profile. The local inference
+port calls a separately deployable runtime. Candidate model upgrades are
+benchmarked and qualified before explicit promotion; rollback restores the
+previous qualified profile without rebuilding the Gateway.
+
+## 6.10 Learned procedure lifecycle (CG-21 foundation implemented)
+
+Eligible governed experience may be represented as a `PatternCandidate` and
+compiled into a digest-bound `LearnedProcedure`. Lifecycle changes are explicit
+events (draft/evaluated/approved/active/suspended/retired/rejected). Reuse still
+passes through existing process, capability and policy authority; the broader
+automatic discovery/evaluation/reflex path remains EPIC-03 work.
