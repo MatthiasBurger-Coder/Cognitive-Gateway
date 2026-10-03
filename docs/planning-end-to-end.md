@@ -4,15 +4,15 @@ The public integration fixture
 [`crates/gateway-application/tests/cg07_end_to_end.rs`](../crates/gateway-application/tests/cg07_end_to_end.rs)
 proves the complete deterministic planning handoff:
 
-```text
-CG-06 DesiredState + normalized CurrentState/Situation
-        -> comparison result
-        -> Delta with typed outcome and evidence lineage
-        -> abstract CG-03 capability requirements
-        -> declarative PlanStep DAG
-        -> validation
-        -> explainability and canonical serialization
-        -> CG-08-ready Plan
+```mermaid
+flowchart LR
+    S[CG-06 DesiredState + Normalized CurrentState / Situation] --> C[Comparison Result]
+    C --> D[Delta with Typed Outcome<br/>and Evidence Lineage]
+    D --> R[Abstract CG-03 Capability Requirements]
+    R --> P[Declarative PlanStep DAG]
+    P --> V[Validation]
+    V --> E[Explainability + Canonical Serialization]
+    E --> O[CG-08-ready Plan]
 ```
 
 ## Reference external-project scenario
