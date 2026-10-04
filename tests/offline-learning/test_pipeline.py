@@ -6,6 +6,7 @@ from pathlib import Path
 import subprocess
 import sys
 import io
+import hashlib
 import runpy
 from unittest.mock import patch
 import unittest
@@ -175,7 +176,9 @@ class PipelineTests(unittest.TestCase):
 
     def test_in_process_cli_covers_the_artifact_transport_and_failures(self):
         trained = pipeline.train(request())
-        for operation, value in [('train', request()), ('evaluate', {**trained, 'artifact_json': json.dumps(trained), 'rows': rows('TEST', 72), 'profile': profile()}), ('predict', {'artifact_json': json.dumps(trained), 'row': rows('TEST', 72)[0]}), ('execute', {'kind': 'MODEL', 'artifact_json': json.dumps(trained), 'row': rows('TEST', 72)[0]}), ('execute', {'kind': 'EVALUATION', 'artifact_json': json.dumps(trained), 'rows': rows('TEST', 72), 'profile': profile()})]:
+        prior_json = json.dumps(trained) + '\n'
+        with_prior = {**request(), 'prior_json': prior_json, 'prior_artifact_digest': hashlib.sha256(prior_json.encode()).hexdigest()}
+        for operation, value in [('train', request()), ('train', with_prior), ('evaluate', {**trained, 'artifact_json': json.dumps(trained), 'rows': rows('TEST', 72), 'profile': profile()}), ('predict', {'artifact_json': json.dumps(trained), 'row': rows('TEST', 72)[0]}), ('execute', {'kind': 'MODEL', 'artifact_json': json.dumps(trained), 'row': rows('TEST', 72)[0]}), ('execute', {'kind': 'EVALUATION', 'artifact_json': json.dumps(trained), 'rows': rows('TEST', 72), 'profile': profile()})]:
             with patch.object(sys, 'argv', ['pipeline.py', operation]), patch.object(sys, 'stdin', io.StringIO(json.dumps(value))), patch.object(sys, 'stdout', io.StringIO()) as output:
                 runpy.run_path(str(ROOT / 'services/offline-learning/pipeline.py'), run_name='__main__')
                 self.assertTrue(json.loads(output.getvalue()))

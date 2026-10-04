@@ -91,8 +91,10 @@ impl<F: LearningFeaturePort> OfflineTrainingPort for CpuOfflineAdapter<F> {
         if let Some(prior) = recipe.parameters.get("prior_model") {
             let model: ModelVersion =
                 serde_json::from_str(prior).map_err(|_| LearningError::InvalidManifest)?;
-            let (value, _) = self.artifact(&model)?;
-            request["prior"] = value["artifact"].clone();
+            let (_, original) = self.artifact(&model)?;
+            request["prior_json"] =
+                json!(String::from_utf8(original).map_err(|_| LearningError::InvalidRun)?);
+            request["prior_artifact_digest"] = json!(model.artifact_digest);
         }
         let bytes = self.invoke("train", &request)?;
         let value: Value = serde_json::from_slice(&bytes).map_err(|_| LearningError::InvalidRun)?;

@@ -213,7 +213,7 @@ def train(request):
               'training_range': [min(r['time'] for r in rows), max(r['time'] for r in rows)],
               'runtime': {'python': platform.python_version(), 'implementation': platform.python_implementation(),
                           'code_digest': hashlib.sha256(Path(__file__).read_bytes()).hexdigest()},
-              'test_used_for_selection': False}
+              'prior_artifact_digest': request.get('prior_artifact_digest'), 'test_used_for_selection': False}
     return {'artifact': result, 'artifact_digest': digest(result)}
 
 
@@ -276,6 +276,12 @@ def main():
     parser.add_argument('operation', choices=['train', 'evaluate', 'predict', 'execute'])
     args = parser.parse_args()
     request = json.load(sys.stdin)
+    if 'prior_json' in request:
+        original = request.pop('prior_json')
+        require(hashlib.sha256(original.encode()).hexdigest() == request['prior_artifact_digest'], 'changed prior artifact')
+        prior = json.loads(original)
+        require(digest(prior['artifact']) == prior['artifact_digest'], 'invalid prior envelope')
+        request['prior'] = prior['artifact']
     if 'artifact_json' in request:
         envelope = json.loads(request.pop('artifact_json'))
         require(set(envelope) == {'artifact', 'artifact_digest'}, 'invalid artifact envelope')
