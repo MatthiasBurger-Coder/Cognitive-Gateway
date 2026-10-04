@@ -3,7 +3,7 @@ use crate::ports::outbound::{CognitiveSchedulerPort, CognitiveWorkerPort};
 use gateway_domain::{ContextScopeId, worker_fabric::*};
 use std::collections::BTreeMap;
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct FabricLimits {
     /// Includes terminal records: deduplication history cannot grow unbounded.
     pub retained_items: usize,

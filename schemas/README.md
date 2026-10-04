@@ -72,3 +72,8 @@ The harness additionally validates uniqueness, capabilities and pinned provenanc
 reference-only signals, datasets, recipes, run/release metadata and upgrade impact.
 Admission, exact evidence validation and independent authority are enforced by
 the application; JSON never grants training or rollout permission.
+
+The [CPU ML experiment plan](ml-experiment.schema.json) pins feature schema,
+selection/search space, group or chronological CV, seed, trial budget, objective
+and stop condition. Runtime validation additionally enforces source eligibility,
+leakage prevention and fitting/evaluation separation.

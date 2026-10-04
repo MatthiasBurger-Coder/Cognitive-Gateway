@@ -1130,3 +1130,6 @@ fn canary_rollback_retains_incumbent_and_upgrade_inventory_rejects_ambiguity() {
         Err(LearningError::DuplicateIdentity)
     );
 }
+
+#[path = "support/epic03_learning.rs"]
+mod complete;

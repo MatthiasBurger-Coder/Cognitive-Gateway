@@ -177,7 +177,7 @@ The approved CG-02 v2 handoff extension is documented in
 - [Codex local integration](codex-local-integration.md) — EPIC-04 planned Codex -> CG local no-key MCP boundary.
 - [MCP connector/plugin runtime](mcp-connector-runtime.md) — EPIC-07 planned CG -> external systems boundary.
 - [Local model runtime / SLM-LxM boundary](local-model-runtime.md) — CG-27 signal adapters and standalone CPU/GPU benchmark framework; CG-27.01 optional service and qualification lifecycle; Qwen3-8B is a reference candidate only.
-- [Learned procedures](learned-procedures.md) — CG-21 domain foundation implemented on 2026-10-03; the broader EPIC-03 learning/reflex runtime remains incremental.
+- [Learned procedures](learned-procedures.md) — CG-21 through CG-30 govern the complete reference learning/reflex lifecycle; see complete EPIC-03 acceptance.
 - [Learned procedure evaluation](procedure-evaluation.md) — CG-23 validation, replay, simulation and evaluation evidence.
 - [Learned procedure promotion](procedure-promotion.md) — CG-24 authoritative version registry, canary, supersession, rollback and audit inspection.
 
@@ -216,3 +216,5 @@ Run `python3 scripts/quality-gate.py` for the complete CG-13 gate. See [the rele
 - [v0.3 cognitive runtime release qualification](epic-03-release-qualification.md) — CG-30 integrated acceptance, classification/routing benchmarks, injected failures and clean-candidate evidence admission.
 
 - [CG-29 distributed cognitive worker fabric](worker-fabric.md) — immutable snapshots, scoped scheduling, fencing, bounded retries, local adapter and orchestrator boundary.
+
+- [Complete EPIC-03 acceptance](epic-03-complete-acceptance.md) — original criteria plus ML lifecycle, concrete CPU training/inference, PostgreSQL restart/rollback and isolated workers.

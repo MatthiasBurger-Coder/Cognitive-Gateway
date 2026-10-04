@@ -86,9 +86,10 @@ case counts, latency, cost and explicit times. A passing evaluation yields an
 opaque `QualifiedModel`; deserialized reports cannot construct this value.
 
 There is no training route in the daemon's production inference adapter or the
-CG-27 model service. This slice supplies provider-independent interfaces and a
-synthetic integration worker, rather than a concrete model optimizer or a
-production isolation/deployment adapter.
+CG-27 model service. The concrete `CpuOfflineAdapter` adds train-only feature fitting, bounded Grid/Random search,
+group/chronological CV, validation calibration and separate held-out evaluation. Its
+CPU classifier and isolated container are qualified through the [complete EPIC-03
+acceptance](epic-03-complete-acceptance.md). Training remains explicitly authorized.
 
 ## Immutable release, canary and rollback
 
@@ -119,10 +120,11 @@ Operator rollback procedure:
    deployment store before changing production routing. Retain both manifests
    and all evaluation and canary evidence.
 
-The reference registry has no durable recovery adapter or actual inference-router
-integration. Deployments must implement atomic durable persistence and trusted
-journal recovery before using it for production. These APIs do not modify the
-separate CG-24 procedure lifecycle or policy/process state.
+`DurableModelReleases` now persists this registry in PostgreSQL and reconstructs it
+through the same governed commands and `ModelRecoveryAuthority`. `CpuReleaseInference`
+selects the exact active durable release on every call; actual database restart and
+version 2 → 3 → 2 inference rollback are tested. Hosts authenticate recovery evidence
+and project scope. These APIs do not modify CG-24 or Process/Policy state.
 
 ## Upgrade impact
 

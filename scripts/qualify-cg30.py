@@ -84,6 +84,62 @@ def validate_metrics(bundle):
     return evidence
 
 
+def validate_extended(directory):
+    ml = json.loads((directory / "epic03-ml-experiment.json").read_text())
+    live = json.loads((directory / "epic03-live-release.json").read_text())
+    workers = json.loads((directory / "epic03-durable-workers.json").read_text())
+    container = json.loads((directory / "epic03-worker-container.json").read_text())
+    require(all(r["status"] == "PASS" for r in (ml, live, workers, container)), "Extended runtime acceptance failed")
+    require(ml["suite"] == "EPIC03-ML-v1" and ml["reproduced"] is True, "ML experiment is not reproducible")
+    artifact = ml["model"]["artifact"]
+    encoded = json.dumps(artifact, sort_keys=True, separators=(",", ":"), allow_nan=False).encode()
+    require(hashlib.sha256(encoded).hexdigest() == ml["model"]["artifact_digest"], "ML artifact digest mismatch")
+    require(artifact["test_used_for_selection"] is False and ml["evaluation"]["test_used_for_selection"] is False
+            and live["test_used_for_selection"] is False, "Final test data was used for tuning")
+    require(ml["evaluation"]["status"] == "PASS" and ml["evaluation"]["checks"]
+            and all(value is True for value in ml["evaluation"]["checks"].values()), "ML quality profile failed")
+    require(ml["grid_trials"] > 0 and ml["random_trials"] > 0 and artifact["trials"], "Missing bounded search evidence")
+    for trial in artifact["trials"]:
+        require(trial["folds"] and all(f["fit"] and f["score"] and not set(f["fit"]) & set(f["score"])
+                                     for f in trial["folds"]), "Cross-validation leakage")
+    require(artifact["calibration"]["fit_ids"] and artifact["calibration"]["after"]["brier"] <= artifact["calibration"]["before"]["brier"], "Missing calibration evidence")
+    require(ml["drift"]["action"] == "REEVALUATE_RETRAIN_OR_ROLLBACK" and ml["drift"]["authority_changed"] is False, "Missing governed drift proof")
+    require(ml["performance"]["cpu_ns"] > 0 and ml["performance"]["peak_process_rss_bytes"] > 0
+            and ml["performance"]["external_provider_calls"] == 0, "Missing real CPU/resource measurements")
+    require(live["real_cpu_training"] is True and live["postgres_restart"] is True
+            and live["inference_versions"] == [2, 3, 2] and live["revoked_qualification_refused"] is True
+            and live["prior_comparison"] is True, "Missing durable model/inference rollback proof")
+    require(live["metrics"]["cases"] == 24 and live["metrics"]["tp"] == 12 and live["metrics"]["tn"] == 12
+            and live["metrics"]["fp"] == 0 and live["metrics"]["fn"] == 0, "Live classifier regression")
+    for manifest in live["journal"]["manifests"]:
+        candidate = manifest["training"]["candidate"]
+        version = candidate["version"]
+        require(version in (2, 3) and sha256(directory / f"epic03-cpu-model-v{version}.json") == candidate["artifact_digest"], "Retained trained model mismatch")
+        require("sha256-" + sha256(directory / f"epic03-cpu-evaluation-v{version}.json") == manifest["evaluation"]["evidence"], "Retained CPU evaluation mismatch")
+    first_digest = next(m["training"]["candidate"]["artifact_digest"] for m in live["journal"]["manifests"] if m["training"]["candidate"]["version"] == 2)
+    successor = json.loads((directory / "epic03-cpu-model-v3.json").read_text())
+    successor_evaluation = json.loads((directory / "epic03-cpu-evaluation-v3.json").read_text())
+    require(successor["artifact"]["prior_artifact_digest"] == first_digest
+            and successor_evaluation["prior"] is not None and successor_evaluation["checks"]["prior"] is True,
+            "Missing exact predecessor comparison")
+    require(len(live["journal"]["events"]) == 9 and len(live["journal"]["manifests"]) == 2
+            and live["journal"]["events"][-1]["action"] == "ROLLBACK", "Incomplete model journal")
+    require(workers["coordinator_restart"] is True and workers["late_results_fenced"] is True
+            and workers["competing_coordinators_single_claim"] is True and workers["duplicate_commits"] == 0,
+            "Missing durable worker consistency proof")
+    require(container["authority_credentials"] is False and container["production_mounts"] is False
+            and container["worker_uid"] == "10001:10001" and container["limits"]["NetworkMode"] == "none"
+            and container["limits"]["ReadonlyRootfs"] is True and container["limits"]["Memory"] == 268435456
+            and container["limits"]["NanoCpus"] == 1000000000 and container["limits"]["PidsLimit"] == 32
+            and container["limits"]["CapDrop"] == ["ALL"], "Worker container isolation changed")
+    coverage = json.loads((directory / "epic03-python-coverage.json").read_text())
+    require(coverage["totals"]["num_statements"] > 0 and coverage["totals"]["percent_covered"] >= 95, "Python coverage below 95%")
+    return {"ml_suite": ml["suite"], "live_classification": live["metrics"], "baseline": live["baseline"],
+            "cpu_measurements": ml["performance"], "inference_versions": live["inference_versions"],
+            "postgres_restart": True, "worker_consistency": "PASS", "container_image": container["image_digest"],
+            "container_limits": container["limits"], "python_coverage": coverage["totals"]["percent_covered"]}
+
+
 def qualify(directory):
     summary = json.loads((directory / "summary.json").read_text())
     require(summary["status"] == "PASS" and not summary["worktree_status"], "Release needs a passing clean-commit bundle")
@@ -95,15 +151,15 @@ def qualify(directory):
     sources = summary["source_sha256"]
     require(sources and all((ROOT / p).is_file() and sha256(ROOT / p) == h for p, h in sources.items()), "Source digest changed")
     artifacts = summary["artifact_sha256"]
-    required = {"cg30-qualification.json", "cg16-coverage.json", "cg23-evaluation.json", "cg24-promotion.json", "cg25-reflex.json", "cg27-fixture-benchmark.json", "cg28-learning.json"}
+    required = {"cg30-qualification.json", "cg16-coverage.json", "cg23-evaluation.json", "cg24-promotion.json", "cg25-reflex.json", "cg27-fixture-benchmark.json", "cg28-learning.json", "cg29-fabric.json", "cg03-host.json", "epic03-ml-experiment.json", "epic03-live-release.json", "epic03-durable-workers.json", "epic03-worker-container.json", "epic03-python-coverage.json", "epic03-cpu-model-v2.json", "epic03-cpu-model-v3.json", "epic03-cpu-evaluation-v2.json", "epic03-cpu-evaluation-v3.json"}
     require(required <= artifacts.keys(), "Release evidence artifact missing")
     require(all((directory / p).is_file() and sha256(directory / p) == h for p, h in artifacts.items()), "Artifact digest mismatch")
     evidence = validate_metrics(json.loads((directory / "cg30-qualification.json").read_text()))
-    return {"schema_version": 1, "release": "v0.3", "status": "QUALIFIED_FIXTURE_SCOPE", "revision": summary["revision"],
+    return {"schema_version": 1, "release": "v0.3", "status": "QUALIFIED_REFERENCE_RUNTIME_SCOPE", "revision": summary["revision"],
             "summary_sha256": sha256(directory / "summary.json"), "suite": evidence["suite"], "classification": {k: v for k, v in evidence["classification"].items() if k != "cases"},
             "routing": {k: v for k, v in evidence["routing"].items() if k != "cases"},
-            "performance": evidence["performance"], "toolchain": summary["toolchain"],
-            "limitations": ["Provider-free fixture acceptance; hardware latency, memory and monetary cost require separate deployment measurements.", "Qualification does not publish a release."],
+            "performance": evidence["performance"], "extended_runtime": validate_extended(directory), "toolchain": summary["toolchain"],
+            "limitations": ["Qualified deterministic/reflex fixture lifecycle plus real CPU classification, PostgreSQL journals and isolated container inference on this host. Production workloads, GPUs and external model providers require their own deployment measurements.", "Qualification does not publish a release."],
             "artifacts": artifacts}
 
 

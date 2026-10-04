@@ -92,7 +92,8 @@ revision and source digests match, every current gate command passed, required
 artifacts exist, every retained artifact hash matches and CG-30 measurements meet
 policy. Missing, malformed, altered, partial, dirty or failed bundles exit nonzero.
 The report is written with exclusive creation and never overwrites prior evidence.
-A successful report says `QUALIFIED_FIXTURE_SCOPE`. The generic gate summary retains
+A successful report now says `QUALIFIED_REFERENCE_RUNTIME_SCOPE` and additionally
+admits the [complete ML/durable-runtime acceptance](epic-03-complete-acceptance.md). The generic gate summary retains
 its historical `declarative-v0.1` scope label; the v0.3 report explicitly binds the
 expanded full manifest and its CG-30 artifact. Hashes establish integrity and
 reproduction bindings, not authentication of an untrusted evidence producer.
@@ -105,7 +106,9 @@ monetary expenditure. Host wall time includes governance replay and test dispatc
 no hardware SLA is inferred or silently gated. Memory utilization is explicitly
 unmeasured (`null`). The CG-27 fixture benchmark and previously recorded CPU model
 reference must remain distinct from measurements on the v0.3 deployment candidate.
-Hardware/model artifact qualification requires a separate live run on that host.
+The supplementary CPU acceptance now measures real CPU training/inference and
+container execution on the candidate host. Other model artifacts, GPUs and production
+workloads require their own live qualification.
 
 The implementation and local fixture checks do not constitute a clean candidate
 release decision. The reviewable release evidence is the complete gate directory
