@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0",
+  "scope": null,
+  "operation": null,
+  "correlation": null,
+  "status": "error",
+  "result": null,
+  "explainability": [],
+  "evidence": [],
+  "provenance": [],
+  "diagnostics": [
+    {
+      "code": "CG_INVALID_REQUEST",
+      "message": "Invalid request.",
+      "retry": "never"
+    }
+  ]
+}

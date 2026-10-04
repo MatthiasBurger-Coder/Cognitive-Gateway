@@ -4,6 +4,7 @@
 
 **Boundary defined — EPIC-04.01 #236; runtime planned — EPIC-04 #126.**
 The accepted decision is [ADR-020](adr/ADR-020-codex-local-trust-no-key-contract.md).
+The [versioned wire contract](codex-facing-contracts.md) is defined by EPIC-04.02 #237.
 This is the normative trust and ownership contract. The MCP server, client
 admission and application facade are not implemented by this slice.
 

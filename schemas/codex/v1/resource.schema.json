@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cognitive-gateway.local/schemas/codex/v1/resource.schema.json",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "scope": {
+      "$ref": "common.schema.json#/$defs/scope"
+    },
+    "reference": {
+      "$ref": "common.schema.json#/$defs/reference"
+    },
+    "document": {
+      "type": "object"
+    },
+    "provenance": {
+      "type": "array",
+      "items": {
+        "$ref": "common.schema.json#/$defs/provenance"
+      },
+      "uniqueItems": true,
+      "maxItems": 1024
+    }
+  },
+  "required": [
+    "schema_version",
+    "scope",
+    "reference",
+    "document",
+    "provenance"
+  ],
+  "additionalProperties": false
+}

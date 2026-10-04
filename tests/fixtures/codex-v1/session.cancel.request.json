@@ -1,0 +1,21 @@
+{
+  "schema_version": "1.0",
+  "scope": {
+    "workspace_id": "workspace-example",
+    "project_id": "project-example",
+    "binding_id": "binding-example"
+  },
+  "operation": "session.cancel",
+  "input": {
+    "session_id": "session-example",
+    "command_id": "command-example",
+    "expected_revision": 1
+  },
+  "execution": {
+    "operating_mode": "DEVELOPMENT",
+    "execution_profile": "FULL_PATH"
+  },
+  "correlation": {
+    "request_id": "request-example"
+  }
+}

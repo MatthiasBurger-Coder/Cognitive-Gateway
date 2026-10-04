@@ -1,0 +1,865 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cognitive-gateway.local/schemas/codex/v1/common.schema.json",
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+    },
+    "scope": {
+      "type": "object",
+      "properties": {
+        "workspace_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+        },
+        "project_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+        },
+        "binding_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+        }
+      },
+      "required": [
+        "workspace_id",
+        "project_id",
+        "binding_id"
+      ],
+      "additionalProperties": false
+    },
+    "correlation": {
+      "type": "object",
+      "properties": {
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+        },
+        "trace_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+        }
+      },
+      "required": [
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "reference": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+        },
+        "contract": {
+          "enum": [
+            "cg.situation",
+            "cg.assessment",
+            "cg.resolution",
+            "cg.resolution-trace",
+            "cg.plan",
+            "cg.composition-rules",
+            "cg.context-projection",
+            "cg.context-fragment",
+            "cg.execution-context",
+            "cg.registry",
+            "cg.evidence",
+            "cg.intent",
+            "cg.clarification",
+            "cg.consent-record",
+            "cg.process-snapshot",
+            "cg.situation-assembly"
+          ]
+        },
+        "revision": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+        },
+        "digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "contract_version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 32
+        }
+      },
+      "required": [
+        "id",
+        "contract",
+        "revision",
+        "digest",
+        "contract_version"
+      ],
+      "additionalProperties": false
+    },
+    "source": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "reference"
+            },
+            "reference": {
+              "$ref": "common.schema.json#/$defs/reference"
+            }
+          },
+          "required": [
+            "kind",
+            "reference"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "document"
+            },
+            "contract": {
+              "enum": [
+                "cg.situation",
+                "cg.assessment",
+                "cg.resolution",
+                "cg.resolution-trace",
+                "cg.plan",
+                "cg.composition-rules",
+                "cg.context-projection",
+                "cg.context-fragment",
+                "cg.execution-context",
+                "cg.registry",
+                "cg.evidence",
+                "cg.intent",
+                "cg.clarification",
+                "cg.consent-record",
+                "cg.process-snapshot",
+                "cg.situation-assembly"
+              ]
+            },
+            "document": {
+              "type": "object"
+            },
+            "contract_version": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 32
+            }
+          },
+          "required": [
+            "kind",
+            "contract",
+            "document",
+            "contract_version"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "diagnostic": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "code": {
+              "const": "CG_INVALID_REQUEST"
+            },
+            "message": {
+              "const": "Invalid request."
+            },
+            "retry": {
+              "const": "never"
+            }
+          },
+          "required": [
+            "code",
+            "message",
+            "retry"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "code": {
+              "const": "CG_UNSUPPORTED_VERSION"
+            },
+            "message": {
+              "const": "Unsupported contract version."
+            },
+            "retry": {
+              "const": "never"
+            }
+          },
+          "required": [
+            "code",
+            "message",
+            "retry"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "code": {
+              "const": "CG_UNKNOWN_OPERATION"
+            },
+            "message": {
+              "const": "Unknown operation."
+            },
+            "retry": {
+              "const": "never"
+            }
+          },
+          "required": [
+            "code",
+            "message",
+            "retry"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "code": {
+              "const": "CG_UNSUPPORTED_CAPABILITY"
+            },
+            "message": {
+              "const": "Capability is unavailable."
+            },
+            "retry": {
+              "const": "never"
+            }
+          },
+          "required": [
+            "code",
+            "message",
+            "retry"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "code": {
+              "const": "CG_SCOPE_DENIED"
+            },
+            "message": {
+              "const": "Scope is unavailable or not authorized."
+            },
+            "retry": {
+              "const": "never"
+            }
+          },
+          "required": [
+            "code",
+            "message",
+            "retry"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "code": {
+              "const": "CG_INVALID_INPUT"
+            },
+            "message": {
+              "const": "Canonical input is invalid."
+            },
+            "retry": {
+              "const": "never"
+            }
+          },
+          "required": [
+            "code",
+            "message",
+            "retry"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "code": {
+              "const": "CG_REFERENCE_UNAVAILABLE"
+            },
+            "message": {
+              "const": "Reference is unavailable."
+            },
+            "retry": {
+              "const": "after_change"
+            }
+          },
+          "required": [
+            "code",
+            "message",
+            "retry"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "code": {
+              "const": "CG_STALE_REVISION"
+            },
+            "message": {
+              "const": "Revision precondition failed."
+            },
+            "retry": {
+              "const": "after_change"
+            }
+          },
+          "required": [
+            "code",
+            "message",
+            "retry"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "code": {
+              "const": "CG_POLICY_DENIED"
+            },
+            "message": {
+              "const": "Operation is not authorized."
+            },
+            "retry": {
+              "const": "never"
+            }
+          },
+          "required": [
+            "code",
+            "message",
+            "retry"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "code": {
+              "const": "CG_CONSENT_REQUIRED"
+            },
+            "message": {
+              "const": "Trusted consent is required."
+            },
+            "retry": {
+              "const": "after_change"
+            }
+          },
+          "required": [
+            "code",
+            "message",
+            "retry"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "code": {
+              "const": "CG_EVIDENCE_REQUIRED"
+            },
+            "message": {
+              "const": "Verified evidence is required."
+            },
+            "retry": {
+              "const": "after_change"
+            }
+          },
+          "required": [
+            "code",
+            "message",
+            "retry"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "code": {
+              "const": "CG_PROCESS_BLOCKED"
+            },
+            "message": {
+              "const": "Process prerequisites are not satisfied."
+            },
+            "retry": {
+              "const": "after_change"
+            }
+          },
+          "required": [
+            "code",
+            "message",
+            "retry"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "code": {
+              "const": "CG_SENSITIVITY_DENIED"
+            },
+            "message": {
+              "const": "Disclosure is not authorized."
+            },
+            "retry": {
+              "const": "never"
+            }
+          },
+          "required": [
+            "code",
+            "message",
+            "retry"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "code": {
+              "const": "CG_DUPLICATE_COMMAND"
+            },
+            "message": {
+              "const": "Command has already been handled."
+            },
+            "retry": {
+              "const": "never"
+            }
+          },
+          "required": [
+            "code",
+            "message",
+            "retry"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "code": {
+              "const": "CG_INVALID_SESSION_STATE"
+            },
+            "message": {
+              "const": "Session command is invalid in the current state."
+            },
+            "retry": {
+              "const": "after_change"
+            }
+          },
+          "required": [
+            "code",
+            "message",
+            "retry"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "code": {
+              "const": "CG_CANCELLED"
+            },
+            "message": {
+              "const": "Call was cancelled."
+            },
+            "retry": {
+              "const": "never"
+            }
+          },
+          "required": [
+            "code",
+            "message",
+            "retry"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "code": {
+              "const": "CG_TIMEOUT"
+            },
+            "message": {
+              "const": "Call exceeded its time limit."
+            },
+            "retry": {
+              "const": "after_change"
+            }
+          },
+          "required": [
+            "code",
+            "message",
+            "retry"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "code": {
+              "const": "CG_LIMIT_EXCEEDED"
+            },
+            "message": {
+              "const": "Call exceeded a configured limit."
+            },
+            "retry": {
+              "const": "after_change"
+            }
+          },
+          "required": [
+            "code",
+            "message",
+            "retry"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "code": {
+              "const": "CG_OUTCOME_UNKNOWN"
+            },
+            "message": {
+              "const": "Command outcome requires inspection."
+            },
+            "retry": {
+              "const": "inspect"
+            }
+          },
+          "required": [
+            "code",
+            "message",
+            "retry"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "code": {
+              "const": "CG_INTERNAL_ERROR"
+            },
+            "message": {
+              "const": "Operation could not be completed."
+            },
+            "retry": {
+              "const": "never"
+            }
+          },
+          "required": [
+            "code",
+            "message",
+            "retry"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "execution": {
+      "type": "object",
+      "properties": {
+        "operating_mode": {
+          "enum": [
+            "DEVELOPMENT",
+            "HARDENING",
+            "RELEASE_QUALIFICATION"
+          ]
+        },
+        "execution_profile": {
+          "enum": [
+            "FAST_PATH",
+            "NORMAL_PATH",
+            "FULL_PATH"
+          ]
+        }
+      },
+      "required": [
+        "operating_mode",
+        "execution_profile"
+      ],
+      "additionalProperties": false
+    },
+    "provenance": {
+      "type": "object",
+      "properties": {
+        "reference": {
+          "$ref": "common.schema.json#/$defs/reference"
+        },
+        "source_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+        },
+        "source_revision": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+        },
+        "freshness": {
+          "enum": [
+            "current",
+            "stale",
+            "unknown"
+          ]
+        },
+        "sensitivity": {
+          "enum": [
+            "PUBLIC",
+            "NORMAL",
+            "INTERNAL",
+            "CONFIDENTIAL",
+            "SECRET"
+          ]
+        },
+        "lineage": {
+          "type": "array",
+          "items": {
+            "$ref": "common.schema.json#/$defs/reference"
+          },
+          "uniqueItems": true,
+          "maxItems": 1024
+        }
+      },
+      "required": [
+        "reference",
+        "source_id",
+        "source_revision",
+        "freshness",
+        "sensitivity",
+        "lineage"
+      ],
+      "additionalProperties": false
+    },
+    "query_result": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "query"
+        },
+        "canonical_result": {
+          "$ref": "common.schema.json#/$defs/source"
+        }
+      },
+      "required": [
+        "kind",
+        "canonical_result"
+      ],
+      "additionalProperties": false
+    },
+    "session_result": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "session"
+        },
+        "session_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "status": {
+          "enum": [
+            "running",
+            "pending_clarification",
+            "pending_consent",
+            "completed",
+            "cancelled",
+            "failed"
+          ]
+        },
+        "pending": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+              },
+              "kind": {
+                "enum": [
+                  "clarification",
+                  "consent"
+                ]
+              },
+              "reference": {
+                "$ref": "common.schema.json#/$defs/reference"
+              }
+            },
+            "required": [
+              "id",
+              "kind",
+              "reference"
+            ],
+            "additionalProperties": false
+          },
+          "uniqueItems": true,
+          "maxItems": 1024
+        },
+        "verified_final_result": {
+          "oneOf": [
+            {
+              "allOf": [
+                {
+                  "$ref": "common.schema.json#/$defs/reference"
+                },
+                {
+                  "properties": {
+                    "contract": {
+                      "const": "cg.evidence"
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "kind",
+        "session_id",
+        "revision",
+        "status",
+        "pending",
+        "verified_final_result"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "completed"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "verified_final_result": {
+                "allOf": [
+                  {
+                    "$ref": "common.schema.json#/$defs/reference"
+                  },
+                  {
+                    "properties": {
+                      "contract": {
+                        "const": "cg.evidence"
+                      }
+                    }
+                  }
+                ]
+              },
+              "pending": {
+                "maxItems": 0
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "verified_final_result": {
+                "type": "null"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "enum": [
+                  "pending_clarification",
+                  "pending_consent"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "pending": {
+                "minItems": 1
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "pending": {
+                "maxItems": 0
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "pending_clarification"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "pending": {
+                "items": {
+                  "properties": {
+                    "kind": {
+                      "const": "clarification"
+                    },
+                    "reference": {
+                      "properties": {
+                        "contract": {
+                          "const": "cg.clarification"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "pending_consent"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "pending": {
+                "items": {
+                  "properties": {
+                    "kind": {
+                      "const": "consent"
+                    },
+                    "reference": {
+                      "properties": {
+                        "contract": {
+                          "const": "cg.consent-record"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

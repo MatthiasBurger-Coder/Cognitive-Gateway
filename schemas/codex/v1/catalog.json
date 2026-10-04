@@ -1,0 +1,301 @@
+{
+  "schema_version": "1.0",
+  "mcp_protocol_versions": [
+    "2025-11-25"
+  ],
+  "tools": [
+    {
+      "name": "cg_capabilities_resolve_v1",
+      "operation": "capabilities.resolve",
+      "classification": "inspect",
+      "availability": "defined",
+      "owner": "gateway_application::resolution_application::DeclarativeResolutionApplication::resolve_plan",
+      "input_schema": "request.schema.json",
+      "output_schema": "response.schema.json",
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "side_effects": [
+        "bounded_audit"
+      ],
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "cg_context_compile_v1",
+      "operation": "context.compile",
+      "classification": "inspect",
+      "availability": "defined",
+      "owner": "gateway_application::context_application::ContextApplication::compile_step",
+      "input_schema": "request.schema.json",
+      "output_schema": "response.schema.json",
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "side_effects": [
+        "bounded_audit"
+      ],
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "cg_evidence_inspect_v1",
+      "operation": "evidence.inspect",
+      "classification": "inspect",
+      "availability": "defined",
+      "owner": "Existing evidence/provenance references from situation, resolution and compiled context; no new evidence store",
+      "input_schema": "request.schema.json",
+      "output_schema": "response.schema.json",
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "side_effects": [
+        "bounded_audit"
+      ],
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "cg_registry_inspect_v1",
+      "operation": "registry.inspect",
+      "classification": "inspect",
+      "availability": "defined",
+      "owner": "gateway_registry::Registry; gateway_registry::capability_index::CapabilityIndex; gateway_process::ProcessRegistry",
+      "input_schema": "request.schema.json",
+      "output_schema": "response.schema.json",
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "side_effects": [
+        "bounded_audit"
+      ],
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "cg_session_approve_v1",
+      "operation": "session.approve",
+      "classification": "mutate",
+      "availability": "unsupported",
+      "owner": "Shared session application API #272 (planned; no transport-owned state machine)",
+      "input_schema": "request.schema.json",
+      "output_schema": "response.schema.json",
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "side_effects": [
+        "session_command"
+      ],
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "cg_session_cancel_v1",
+      "operation": "session.cancel",
+      "classification": "mutate",
+      "availability": "unsupported",
+      "owner": "Shared session application API #272 (planned; no transport-owned state machine)",
+      "input_schema": "request.schema.json",
+      "output_schema": "response.schema.json",
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "side_effects": [
+        "session_command"
+      ],
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "cg_session_clarify_v1",
+      "operation": "session.clarify",
+      "classification": "mutate",
+      "availability": "unsupported",
+      "owner": "Shared session application API #272 (planned; no transport-owned state machine)",
+      "input_schema": "request.schema.json",
+      "output_schema": "response.schema.json",
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "side_effects": [
+        "session_command"
+      ],
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "cg_session_continue_v1",
+      "operation": "session.continue",
+      "classification": "mutate",
+      "availability": "unsupported",
+      "owner": "Shared session application API #272 (planned; no transport-owned state machine)",
+      "input_schema": "request.schema.json",
+      "output_schema": "response.schema.json",
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "side_effects": [
+        "session_command"
+      ],
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "cg_session_inspect_v1",
+      "operation": "session.inspect",
+      "classification": "inspect",
+      "availability": "unsupported",
+      "owner": "Shared session application API #272 (planned; no transport-owned state machine)",
+      "input_schema": "request.schema.json",
+      "output_schema": "response.schema.json",
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "side_effects": [
+        "bounded_audit"
+      ],
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "cg_session_start_v1",
+      "operation": "session.start",
+      "classification": "mutate",
+      "availability": "unsupported",
+      "owner": "Shared session application API #272 (planned; no transport-owned state machine)",
+      "input_schema": "request.schema.json",
+      "output_schema": "response.schema.json",
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "side_effects": [
+        "session_command"
+      ],
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "cg_situation_assess_v1",
+      "operation": "situation.assess",
+      "classification": "inspect",
+      "availability": "defined",
+      "owner": "gateway_application::DeclarativeSituationApplication::assess_situation",
+      "input_schema": "request.schema.json",
+      "output_schema": "response.schema.json",
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "side_effects": [
+        "bounded_audit"
+      ],
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "cg_situation_inspect_v1",
+      "operation": "situation.inspect",
+      "classification": "inspect",
+      "availability": "defined",
+      "owner": "gateway_application::DeclarativeSituationApplication::inspect_situation",
+      "input_schema": "request.schema.json",
+      "output_schema": "response.schema.json",
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "side_effects": [
+        "bounded_audit"
+      ],
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "cg_state_explain_v1",
+      "operation": "state.explain",
+      "classification": "inspect",
+      "availability": "defined",
+      "owner": "gateway_application::resolution_application::DeclarativeResolutionApplication::explain_resolution",
+      "input_schema": "request.schema.json",
+      "output_schema": "response.schema.json",
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "side_effects": [
+        "bounded_audit"
+      ],
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    }
+  ],
+  "resources": [
+    {
+      "uri": "cg://contracts/1.0/catalog",
+      "kind": "static",
+      "schema": "catalog.schema.json",
+      "classification": "inspect"
+    },
+    {
+      "uri": "cg://contracts/1.0/{schema}",
+      "kind": "template",
+      "schema": "https://json-schema.org/draft/2020-12/schema",
+      "classification": "inspect"
+    },
+    {
+      "uri": "cg://workspaces/{workspace_id}/projects/{project_id}/bindings/{binding_id}/references/{id}/{revision}/{digest}",
+      "kind": "template",
+      "schema": "resource.schema.json",
+      "classification": "inspect"
+    }
+  ]
+}

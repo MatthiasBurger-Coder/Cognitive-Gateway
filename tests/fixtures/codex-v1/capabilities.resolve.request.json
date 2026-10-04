@@ -1,0 +1,39 @@
+{
+  "schema_version": "1.0",
+  "scope": {
+    "workspace_id": "workspace-example",
+    "project_id": "project-example",
+    "binding_id": "binding-example"
+  },
+  "operation": "capabilities.resolve",
+  "input": {
+    "plan": {
+      "id": "example",
+      "contract": "cg.plan",
+      "revision": "1",
+      "digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+      "contract_version": "1.0"
+    },
+    "rules": {
+      "id": "example",
+      "contract": "cg.composition-rules",
+      "revision": "1",
+      "digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+      "contract_version": "1.0"
+    },
+    "process": {
+      "id": "example",
+      "contract": "cg.process-snapshot",
+      "revision": "1",
+      "digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+      "contract_version": "1.0"
+    }
+  },
+  "execution": {
+    "operating_mode": "DEVELOPMENT",
+    "execution_profile": "FULL_PATH"
+  },
+  "correlation": {
+    "request_id": "request-example"
+  }
+}

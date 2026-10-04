@@ -34,6 +34,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+      - name: Install contract validation dependencies
+        run: python3 -m pip install -r tests/contracts/requirements.txt
       - uses: taiki-e/install-action@cargo-llvm-cov
       - name: Configure PostgreSQL integration test
         run: |

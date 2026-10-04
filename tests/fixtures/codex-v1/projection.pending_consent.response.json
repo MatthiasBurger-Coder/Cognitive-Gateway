@@ -1,0 +1,37 @@
+{
+  "schema_version": "1.0",
+  "scope": {
+    "workspace_id": "workspace-example",
+    "project_id": "project-example",
+    "binding_id": "binding-example"
+  },
+  "operation": "session.inspect",
+  "correlation": {
+    "request_id": "request-example"
+  },
+  "status": "ok",
+  "result": {
+    "kind": "session",
+    "session_id": "session-example",
+    "revision": 2,
+    "status": "pending_consent",
+    "pending": [
+      {
+        "id": "pending-example",
+        "kind": "consent",
+        "reference": {
+          "id": "example",
+          "contract": "cg.consent-record",
+          "revision": "1",
+          "digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+          "contract_version": "1.0"
+        }
+      }
+    ],
+    "verified_final_result": null
+  },
+  "explainability": [],
+  "evidence": [],
+  "provenance": [],
+  "diagnostics": []
+}

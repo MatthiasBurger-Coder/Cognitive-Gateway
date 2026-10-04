@@ -226,7 +226,9 @@ not a core dependency. See [MCP connector runtime](../mcp-connector-runtime.md).
 The Codex-facing local MCP adapter is a driving adapter into a shared
 application facade. It must not reproduce connector runtime logic and must not
 bring Codex/OpenAI types into authoritative contracts. See
-[Codex local integration](../codex-local-integration.md).
+[Codex local integration](../codex-local-integration.md) and the defined
+[versioned wire contracts](../codex-facing-contracts.md). Server/facade and
+shared session runtime implementation remain planned.
 
 ## 5.8 Local inference runtime (CG-27.01 reference service)
 
