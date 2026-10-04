@@ -1,7 +1,8 @@
 # Versioned Codex-facing contracts
 
 **Defined — EPIC-04.02 #237.** This is a provider-independent wire contract for
-an outer driving adapter. Server implementation (#238), application facade
+an outer driving adapter. [Server lifecycle/discovery](local-mcp-server.md)
+(#238) is implemented; application facade
 (#239), admission/policy enforcement and runtime qualification remain planned.
 The [local trust contract](codex-local-integration.md), ADR-020 and ADR-016 apply.
 Rust domain/application types remain authoritative. JSON Schema validation is

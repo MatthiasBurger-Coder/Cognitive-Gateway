@@ -19,3 +19,5 @@ pub mod cognitive_store;
 pub mod cpu_learning;
 pub mod durable_models;
 pub mod durable_workers;
+
+pub mod local_mcp;

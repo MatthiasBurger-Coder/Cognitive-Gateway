@@ -175,7 +175,8 @@ The approved CG-02 v2 handoff extension is documented in
 
 - [CGSL, SemanticTaskIR and natural-language interpretation](semantic-language-and-interpretation.md) — EPIC-05 target boundary; natural-language compilation is not yet a completed runtime path.
 - [Versioned Codex-facing contracts](codex-facing-contracts.md) — EPIC-04.02 schemas, catalog, diagnostics, compatibility and frozen session projections.
-- [Codex local integration](codex-local-integration.md) — EPIC-04 planned Codex -> CG local no-key MCP boundary.
+- [Codex local integration](codex-local-integration.md) — EPIC-04 Codex -> CG local no-key MCP boundary.
+- [Local MCP server](local-mcp-server.md) — #238 stdio lifecycle, discovery and transport; facade pending.
 - [MCP connector/plugin runtime](mcp-connector-runtime.md) — EPIC-07 planned CG -> external systems boundary.
 - [Local model runtime / SLM-LxM boundary](local-model-runtime.md) — CG-27 signal adapters and standalone CPU/GPU benchmark framework; CG-27.01 optional service and qualification lifecycle; Qwen3-8B is a reference candidate only.
 - [Learned procedures](learned-procedures.md) — CG-21 through CG-30 govern the complete reference learning/reflex lifecycle; see complete EPIC-03 acceptance.
