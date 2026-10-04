@@ -55,6 +55,10 @@ impl CodexHost for Host {
         }
         Ok(ReferenceRecord {
             scope: call.scope.clone(),
+            provenance: vec![
+                json!({"reference":actual,"source_id":"source","source_revision":"1","freshness":"current","sensitivity":"NORMAL","lineage":[pinned("cg.evidence", &json!({}))]}),
+            ],
+            session: call.binding.session.clone(),
             reference: actual,
             document: document.to_string(),
         })
@@ -130,9 +134,17 @@ impl CodexHost for Host {
     }
 }
 fn facade(corrupt: bool, secret: bool) -> CodexFacade<Host> {
-    CodexFacade::new(
-        fixture("situation.inspect.request")["scope"].clone(),
-        ContextScopeId::new("project-a").unwrap(),
+    CodexFacade::with_binding(
+        ScopeBinding {
+            scope: fixture("situation.inspect.request")["scope"].clone(),
+            canonical_scope: ContextScopeId::new("project-a").unwrap(),
+            mapping_revision: "1".into(),
+            session: SessionContext {
+                principal: "operator".into(),
+                session_id: "test-session".into(),
+                connection_id: "binding-example".into(),
+            },
+        },
         Host {
             reads: Cell::new(0),
             corrupt,
@@ -155,7 +167,7 @@ fn canonical_situation_validation_and_lineage_projection() {
         request["input"]["situation"]["document"]
     );
     assert_eq!(response["evidence"].as_array().unwrap().len(), 1);
-    assert_eq!(response["explainability"].as_array().unwrap().len(), 1);
+    assert_eq!(response["explainability"].as_array().unwrap().len(), 2);
     assert_eq!(response["provenance"][0]["lineage"], response["evidence"]);
     let mut invalid = request.clone();
     invalid["input"]["situation"]["document"]["situation"]["observed_state_id"] =
@@ -402,5 +414,158 @@ fn frozen_responses_and_sanitized_failures_match_complete_schema() {
     assert_eq!(
         code(&facade(false, false).execute("situation.inspect", &request)),
         "CG_LIMIT_EXCEEDED"
+    );
+}
+
+#[test]
+fn shared_task_sessions_require_the_exact_immutable_client_owner() {
+    struct SessionHost {
+        foreign: bool,
+        dispatches: std::rc::Rc<Cell<usize>>,
+    }
+    impl CodexHost for SessionHost {
+        fn authorize(&self, _: &Call) -> Result<(), FacadeError> {
+            Ok(())
+        }
+        fn session_owner(&self, call: &Call, _: &str) -> Result<ScopeBinding, FacadeError> {
+            let mut owner = call.binding.clone();
+            if self.foreign {
+                owner.session.session_id = "another-codex-session".into();
+            }
+            Ok(owner)
+        }
+        fn session(&self, call: &Call) -> Result<Value, FacadeError> {
+            self.dispatches.set(self.dispatches.get() + 1);
+            Ok(
+                json!({"kind":"session","session_id":call.input["session_id"].as_str().unwrap_or("new-task"),
+                "revision":0,"status":"running","pending":[],"verified_final_result":null}),
+            )
+        }
+    }
+    let binding = ScopeBinding {
+        scope: fixture("session.inspect.request")["scope"].clone(),
+        canonical_scope: ContextScopeId::new("canonical-project").unwrap(),
+        mapping_revision: "1".into(),
+        session: SessionContext {
+            principal: "operator".into(),
+            session_id: "client-session".into(),
+            connection_id: "binding-example".into(),
+        },
+    };
+    for operation in ["session.inspect", "session.start"] {
+        let request = fixture(&format!("{operation}.request"));
+        let dispatches = std::rc::Rc::new(Cell::new(0));
+        let app = CodexFacade::with_binding(
+            binding.clone(),
+            SessionHost {
+                foreign: true,
+                dispatches: dispatches.clone(),
+            },
+        )
+        .unwrap();
+        let response = app.execute(operation, &request);
+        assert_eq!(code(&response), "CG_SCOPE_DENIED");
+        assert!(response["result"].is_null());
+        assert_eq!(
+            dispatches.get(),
+            if operation == "session.start" { 1 } else { 0 }
+        );
+        let app = CodexFacade::with_binding(
+            binding.clone(),
+            SessionHost {
+                foreign: false,
+                dispatches: std::rc::Rc::new(Cell::new(0)),
+            },
+        )
+        .unwrap();
+        assert_eq!(app.execute(operation, &request)["status"], "ok");
+    }
+}
+
+#[test]
+fn reference_records_from_another_client_session_fail_before_projection() {
+    struct ForeignHost;
+    impl CodexHost for ForeignHost {
+        fn authorize(&self, _: &Call) -> Result<(), FacadeError> {
+            Ok(())
+        }
+        fn reference(
+            &self,
+            call: &Call,
+            reference: &Value,
+        ) -> Result<ReferenceRecord, FacadeError> {
+            let mut session = call.binding.session.clone();
+            session.session_id = "foreign-session".into();
+            Ok(ReferenceRecord {
+                scope: call.scope.clone(),
+                session,
+                reference: reference.clone(),
+                document: "PRIVATE_OTHER_SESSION".into(),
+                provenance: vec![],
+            })
+        }
+    }
+    let request = fixture("situation.inspect.request");
+    let app = CodexFacade::with_binding(
+        ScopeBinding {
+            scope: request["scope"].clone(),
+            canonical_scope: ContextScopeId::new("canonical-project").unwrap(),
+            mapping_revision: "1".into(),
+            session: SessionContext {
+                principal: "operator".into(),
+                session_id: "test-session".into(),
+                connection_id: "binding-example".into(),
+            },
+        },
+        ForeignHost,
+    )
+    .unwrap();
+    let response = app.execute("situation.inspect", &request);
+    assert_eq!(code(&response), "CG_SCOPE_DENIED");
+    assert!(!response.to_string().contains("PRIVATE_OTHER_SESSION"));
+}
+
+#[test]
+fn resource_adapter_cannot_substitute_a_different_pinned_identity() {
+    struct SubstitutionHost;
+    impl CodexHost for SubstitutionHost {
+        fn authorize(&self, _: &Call) -> Result<(), FacadeError> {
+            Ok(())
+        }
+        fn resource_reference(
+            &self,
+            _: &Call,
+            _: &str,
+            _: &str,
+            _: &str,
+        ) -> Result<Value, FacadeError> {
+            Ok(pinned("cg.situation", &json!({})))
+        }
+        fn reference(&self, _: &Call, _: &Value) -> Result<ReferenceRecord, FacadeError> {
+            panic!("substituted resource identity must fail before reading content")
+        }
+    }
+    let scope = fixture("situation.inspect.request")["scope"].clone();
+    let binding = ScopeBinding {
+        scope: scope.clone(),
+        canonical_scope: ContextScopeId::new("project-a").unwrap(),
+        mapping_revision: "1".into(),
+        session: SessionContext {
+            principal: "operator".into(),
+            session_id: "test-session".into(),
+            connection_id: "binding-example".into(),
+        },
+    };
+    let app = CodexFacade::with_binding(binding, SubstitutionHost).unwrap();
+    assert_eq!(
+        app.read_resource(
+            &scope,
+            "requested",
+            "1",
+            pinned("cg.situation", &json!({}))["digest"]
+                .as_str()
+                .unwrap()
+        ),
+        Err(FacadeError::StaleRevision)
     );
 }

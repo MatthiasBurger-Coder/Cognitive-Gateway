@@ -1,6 +1,7 @@
 //! EPIC-04.04 provider-independent application facade. Protocol framing stays outside.
 pub mod assessment;
 pub mod contracts;
+pub mod isolation;
 pub mod ports;
 use crate::{
     DeclarativeSituationApplication,
@@ -11,9 +12,11 @@ use crate::{
 use gateway_domain::{
     ContextScopeId, DeclarativeContextSituationDocument, ExecutionProfile, OperatingMode,
 };
+pub use isolation::*;
 pub use ports::*;
 use serde_json::{Value, json};
 use sha2::{Digest, Sha256};
+use std::cell::RefCell;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum FacadeError {
@@ -115,26 +118,23 @@ pub struct Call {
     pub execution_profile: ExecutionProfile,
     pub input: Value,
     pub correlation: Value,
+    pub binding: ScopeBinding,
+    source_provenance: RefCell<Vec<Value>>,
 }
 pub struct CodexFacade<H> {
     scope: Value,
     canonical_scope: ContextScopeId,
     host: H,
+    binding: ScopeBinding,
 }
 impl<H: CodexHost> CodexFacade<H> {
-    pub fn new(
-        scope: Value,
-        canonical_scope: ContextScopeId,
-        host: H,
-    ) -> Result<Self, FacadeError> {
-        let common = contracts::artifact("common.schema.json").unwrap();
-        if !contracts::valid(&scope, &common["$defs"]["scope"], &common) {
-            return Err(FacadeError::ScopeDenied);
-        }
+    pub fn with_binding(binding: ScopeBinding, host: H) -> Result<Self, FacadeError> {
+        binding.validate()?;
         Ok(Self {
-            scope,
-            canonical_scope,
+            scope: binding.scope.clone(),
+            canonical_scope: binding.canonical_scope.clone(),
             host,
+            binding,
         })
     }
     fn source(&self, call: &Call, source: &Value) -> Result<Value, FacadeError> {
@@ -152,7 +152,7 @@ impl<H: CodexHost> CodexFacade<H> {
         }
         // Host checks scope and disclosure before returning existence or content.
         let record = self.host.reference(call, reference)?;
-        if record.scope != call.scope {
+        if record.scope != call.scope || record.session != call.binding.session {
             return Err(FacadeError::ScopeDenied);
         }
         if record.document.len() > 1_048_576 {
@@ -165,7 +165,34 @@ impl<H: CodexHost> CodexFacade<H> {
         if reference["digest"] != digest {
             return Err(FacadeError::StaleRevision);
         }
-        serde_json::from_str(&record.document).map_err(|_| FacadeError::InvalidInput)
+        let common = contracts::artifact("common.schema.json").unwrap();
+        if record.provenance.is_empty()
+            || record
+                .provenance
+                .iter()
+                .any(|p| !contracts::valid(p, &common["$defs"]["provenance"], &common))
+            || !record
+                .provenance
+                .iter()
+                .any(|p| p["reference"] == *reference)
+        {
+            return Err(FacadeError::InvalidInput);
+        }
+        if record
+            .provenance
+            .iter()
+            .any(|p| p["sensitivity"] == "SECRET")
+        {
+            return Err(FacadeError::SensitivityDenied);
+        }
+        let document =
+            serde_json::from_str(&record.document).map_err(|_| FacadeError::InvalidInput)?;
+        for entry in record.provenance {
+            if !call.source_provenance.borrow().contains(&entry) {
+                call.source_provenance.borrow_mut().push(entry);
+            }
+        }
+        Ok(document)
     }
     fn dispatch(&self, call: &Call) -> Result<(&'static str, Value), FacadeError> {
         let app = DeclarativeSituationApplication::new();
@@ -334,6 +361,18 @@ impl<H: CodexHost> CodexFacade<H> {
             _ => Err(FacadeError::UnsupportedCapability),
         }
     }
+    fn check_session_owner(&self, call: &Call, task_id: &str) -> Result<(), FacadeError> {
+        let owner = self.host.session_owner(call, task_id)?;
+        owner.validate()?;
+        if owner.scope != call.scope
+            || owner.canonical_scope != call.canonical_scope
+            || owner.session != call.binding.session
+            || owner.mapping_revision != call.binding.mapping_revision
+        {
+            return Err(FacadeError::ScopeDenied);
+        }
+        Ok(())
+    }
     fn run(&self, operation: &str, request: &Value) -> Result<Value, &'static str> {
         if !bounded(request) {
             return Err("CG_LIMIT_EXCEEDED");
@@ -372,45 +411,65 @@ impl<H: CodexHost> CodexFacade<H> {
                 .map_err(|_| "CG_INVALID_REQUEST")?,
             input: request["input"].clone(),
             correlation: request["correlation"].clone(),
+            binding: self.binding.clone(),
+            source_provenance: RefCell::new(vec![]),
         };
         self.host.authorize(&call).map_err(FacadeError::code)?;
-        let (result, explainability, evidence, provenance) = if operation.starts_with("session.") {
-            (
-                self.host.session(&call).map_err(FacadeError::code)?,
-                vec![],
-                vec![],
-                vec![],
-            )
-        } else {
-            let (contract, document) = self.dispatch(&call).map_err(FacadeError::code)?;
-            let projection = self
-                .host
-                .project(&call, contract, document)
-                .map_err(FacadeError::code)?;
-            // The host must keep secrets reference-only. Invalid projection fails closed.
-            if projection.source["kind"] == "document"
-                && projection
-                    .provenance
-                    .iter()
-                    .any(|p| p["sensitivity"] == "SECRET")
-            {
-                return Err("CG_SENSITIVITY_DENIED");
-            }
-            let actual_contract = if projection.source["kind"] == "document" {
-                &projection.source["contract"]
+        let (result, mut explainability, evidence, mut provenance) =
+            if operation.starts_with("session.") {
+                if let Some(task_id) = call.input["session_id"].as_str() {
+                    self.check_session_owner(&call, task_id)
+                        .map_err(FacadeError::code)?;
+                }
+                let session = self.host.session(&call).map_err(FacadeError::code)?;
+                if !contracts::valid(&session, &common["$defs"]["session_result"], &common) {
+                    return Err("CG_INTERNAL_ERROR");
+                }
+                self.check_session_owner(&call, session["session_id"].as_str().unwrap())
+                    .map_err(FacadeError::code)?;
+                (session, vec![], vec![], vec![])
             } else {
-                &projection.source["reference"]["contract"]
+                let (contract, document) = self.dispatch(&call).map_err(FacadeError::code)?;
+                let projection = self
+                    .host
+                    .project(&call, contract, document)
+                    .map_err(FacadeError::code)?;
+                // The host must keep secrets reference-only. Invalid projection fails closed.
+                if projection.source["kind"] == "document"
+                    && projection
+                        .provenance
+                        .iter()
+                        .any(|p| p["sensitivity"] == "SECRET")
+                {
+                    return Err("CG_SENSITIVITY_DENIED");
+                }
+                let actual_contract = if projection.source["kind"] == "document" {
+                    &projection.source["contract"]
+                } else {
+                    &projection.source["reference"]["contract"]
+                };
+                if actual_contract != contract {
+                    return Err("CG_INTERNAL_ERROR");
+                }
+                (
+                    json!({"kind":"query", "canonical_result":projection.source}),
+                    projection.explainability,
+                    projection.evidence,
+                    projection.provenance,
+                )
             };
-            if actual_contract != contract {
+        for entry in call.source_provenance.borrow().iter() {
+            if provenance
+                .iter()
+                .any(|p| p["reference"] == entry["reference"] && p != entry)
+            {
                 return Err("CG_INTERNAL_ERROR");
             }
-            (
-                json!({"kind":"query", "canonical_result":projection.source}),
-                projection.explainability,
-                projection.evidence,
-                projection.provenance,
-            )
-        };
+            if !provenance.contains(entry) {
+                provenance.push(entry.clone());
+            }
+        }
+        explainability.push(self.binding.explanation());
         let response = json!({"schema_version":"1.0", "scope":self.scope, "operation":operation, "correlation":call.correlation,
             "status":"ok", "result":result, "explainability":explainability, "evidence":evidence, "provenance":provenance, "diagnostics":[]});
         if !contracts::valid(
@@ -424,9 +483,79 @@ impl<H: CodexHost> CodexFacade<H> {
     }
 }
 impl<H: CodexHost> CodexApplicationPort for CodexFacade<H> {
+    fn read_resource(
+        &self,
+        scope: &Value,
+        id: &str,
+        revision: &str,
+        digest: &str,
+    ) -> Result<Value, FacadeError> {
+        if *scope != self.scope {
+            return Err(FacadeError::ScopeDenied);
+        }
+        let call = Call {
+            operation: "resource.read".into(),
+            scope: self.scope.clone(),
+            canonical_scope: self.canonical_scope.clone(),
+            operating_mode: OperatingMode::Development,
+            execution_profile: ExecutionProfile::FullPath,
+            input: json!({}),
+            correlation: json!({"request_id":"resource-read"}),
+            binding: self.binding.clone(),
+            source_provenance: RefCell::new(vec![]),
+        };
+        self.host.authorize(&call)?;
+        let trace = self.binding.explanation();
+        if trace["id"] == id && trace["revision"] == revision && trace["digest"] == digest {
+            return Ok(
+                json!({"schema_version":"1.0","scope":scope,"reference":trace,"document":self.binding.trace_document(),
+                "provenance":[{"reference":trace,"source_id":self.binding.session.connection_id,
+                    "source_revision":self.binding.mapping_revision,"freshness":"current","sensitivity":"INTERNAL","lineage":[]}]}),
+            );
+        }
+        let reference = self.host.resource_reference(&call, id, revision, digest)?;
+        let common = contracts::artifact("common.schema.json").unwrap();
+        if !contracts::valid(&reference, &common["$defs"]["reference"], &common) {
+            return Err(FacadeError::InvalidInput);
+        }
+        if reference["id"] != id
+            || reference["revision"] != revision
+            || reference["digest"] != digest
+        {
+            return Err(FacadeError::StaleRevision);
+        }
+        let document = self.reference(&call, &reference)?;
+        let resource = json!({"schema_version":"1.0","scope":scope,"reference":reference,"document":document,
+            "provenance":call.source_provenance.into_inner()});
+        if !contracts::valid(
+            &resource,
+            &contracts::artifact("resource.schema.json").unwrap(),
+            &common,
+        ) {
+            return Err(FacadeError::InvalidInput);
+        }
+        Ok(resource)
+    }
+
     fn execute(&self, operation: &str, request: &Value) -> Value {
-        self.run(operation, request)
-            .unwrap_or_else(contracts::failure)
+        self.run(operation, request).unwrap_or_else(|code| {
+            let mut response = contracts::failure(code);
+            let common = contracts::artifact("common.schema.json").unwrap();
+            if bounded(request)
+                && request["scope"] == self.scope
+                && request["operation"] == operation
+                && contracts::valid(
+                    request,
+                    &contracts::artifact("request.schema.json").unwrap(),
+                    &common,
+                )
+            {
+                response["scope"] = self.scope.clone();
+                response["operation"] = request["operation"].clone();
+                response["correlation"] = request["correlation"].clone();
+            }
+            response
+        })
     }
 }
 fn parse(text: String) -> Result<Value, FacadeError> {
@@ -453,7 +582,24 @@ impl CodexFacade<UnavailableHost> {
         let canonical_scope =
             ContextScopeId::new(scope["project_id"].as_str().expect("trusted scope"))
                 .expect("trusted scope ID");
-        Self::new(scope, canonical_scope, UnavailableHost).expect("trusted scope")
+        let connection_id = scope["binding_id"]
+            .as_str()
+            .expect("trusted scope")
+            .to_owned();
+        Self::with_binding(
+            ScopeBinding {
+                scope,
+                canonical_scope,
+                mapping_revision: "unavailable".into(),
+                session: SessionContext {
+                    principal: "unavailable".into(),
+                    session_id: connection_id.clone(),
+                    connection_id,
+                },
+            },
+            UnavailableHost,
+        )
+        .expect("trusted scope")
     }
 }
 

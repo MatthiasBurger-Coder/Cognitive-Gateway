@@ -28,6 +28,8 @@ pub struct ReferenceRecord {
     pub scope: Value,
     pub reference: Value,
     pub document: String,
+    pub session: SessionContext,
+    pub provenance: Vec<Value>,
 }
 
 /// Projection is performed by the host disclosure owner after canonical validation.
@@ -44,6 +46,15 @@ pub struct Projection {
 pub trait CodexHost {
     fn authorize(&self, _call: &Call) -> Result<(), FacadeError> {
         Err(FacadeError::UnsupportedCapability)
+    }
+    fn resource_reference(
+        &self,
+        _call: &Call,
+        _id: &str,
+        _revision: &str,
+        _digest: &str,
+    ) -> Result<Value, FacadeError> {
+        Err(FacadeError::ReferenceUnavailable)
     }
     fn reference(&self, _call: &Call, _reference: &Value) -> Result<ReferenceRecord, FacadeError> {
         Err(FacadeError::ReferenceUnavailable)
@@ -82,6 +93,11 @@ pub trait CodexHost {
     ) -> Result<Projection, FacadeError> {
         Err(FacadeError::SensitivityDenied)
     }
+    /// Shared session services must return the immutable client owner for a task.
+    /// The facade checks it independently before dispatch and after mapping.
+    fn session_owner(&self, _call: &Call, _task_id: &str) -> Result<ScopeBinding, FacadeError> {
+        Err(FacadeError::UnsupportedCapability)
+    }
     /// Reserved for the shared session application API (#272/#273/#275).
     /// No coordinator, consent decision or state machine exists in this facade.
     fn session(&self, _call: &Call) -> Result<Value, FacadeError> {
@@ -96,4 +112,13 @@ impl CodexHost for UnavailableHost {}
 /// Driving port used by adapters; no domain crate access is required.
 pub trait CodexApplicationPort {
     fn execute(&self, operation: &str, request: &Value) -> Value;
+    fn read_resource(
+        &self,
+        _scope: &Value,
+        _id: &str,
+        _revision: &str,
+        _digest: &str,
+    ) -> Result<Value, FacadeError> {
+        Err(FacadeError::ScopeDenied)
+    }
 }

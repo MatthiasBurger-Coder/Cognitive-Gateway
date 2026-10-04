@@ -16,8 +16,7 @@ workspace/project/binding IDs. All six arguments are mandatory, unique and
 bounded ASCII tokens. There is no ambient cwd, environment, filesystem or account
 credential fallback. Claims in `initialize` must match the configured client.
 Private pipe ownership and executable integrity are operator responsibilities;
-a client name is not proof of vendor identity. Full CG-owned scope records and
-filesystem admission remain #240.
+a client name is not proof of vendor identity. CG-owned scope records, client session binding and filesystem admission are implemented by [#240 workspace admission](codex-scope-isolation.md).
 
 For a provider-free protocol smoke test from the repository root:
 
@@ -50,11 +49,8 @@ its immutable `defined`/`unsupported` contract markers; tool descriptions and
 initialization instructions state current application availability.
 
 The [shared application facade](codex-application-facade.md) (#239) is implemented
-and injectable through `Server::with_application`. The default standalone
-launcher uses its unavailable host until #240 supplies admitted runtime wiring;
-valid calls still return `CG_UNSUPPORTED_CAPABILITY`. Session commands delegate
-only to shared application services when installed. Scoped resources remain
-closed pending #240. No canonical use case is bypassed or reimplemented.
+and injectable through `Server::with_application`. The standalone launcher accepts an explicit #240 admission file, cwd, repository and client session; its local host admits situation queries and scoped resource reads. A discovery-only launch uses the unavailable host and returns `CG_UNSUPPORTED_CAPABILITY`. Session commands delegate
+only to shared application services when installed. Scoped resources require the admitted workspace host. No canonical use case is bypassed or reimplemented.
 
 Recognized tool calls validate envelope version, operation/name agreement,
 strict frozen request shape and exact launch scope in that order. Results carry
@@ -98,7 +94,7 @@ python3 scripts/check-local-mcp-protocol.py
 bash scripts/check-architecture.sh
 python3 -m unittest discover -s tests/architecture
 cargo llvm-cov -p gateway-application -p gateway-daemon --lib --bin cg-mcp \
-  --test local_mcp --test codex_facade \
+  --test local_mcp --test codex_facade --test codex_isolation \
   --json --output-path target/local-mcp-coverage.json
 python3 scripts/check-local-mcp-coverage.py target/local-mcp-coverage.json
 ```

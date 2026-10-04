@@ -1,5 +1,5 @@
 //! Provider-neutral contracts are owned by the application boundary.
-pub use gateway_application::codex::contracts::{artifact, bundled, failure, token};
+pub use gateway_application::codex::contracts::{artifact, bundled, failure, token, valid};
 use serde_json::{Value, json};
 
 pub fn tools() -> Value {
@@ -11,6 +11,3 @@ pub fn tools() -> Value {
         "annotations": tool["annotations"], "execution": tool["execution"]
     })).collect())
 }
-
-#[cfg(test)]
-pub use gateway_application::codex::contracts::valid;

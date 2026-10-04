@@ -588,9 +588,17 @@ fn admitted_facade_runs_through_deterministic_transport() {
         }
     }
     let binding = binding();
-    let facade = CodexFacade::new(
-        binding.scope.clone(),
-        gateway_domain::ContextScopeId::new("project-example").unwrap(),
+    let facade = CodexFacade::with_binding(
+        gateway_application::codex::ScopeBinding {
+            scope: binding.scope.clone(),
+            canonical_scope: gateway_domain::ContextScopeId::new("project-example").unwrap(),
+            mapping_revision: "1".into(),
+            session: gateway_application::codex::SessionContext {
+                principal: binding.principal.clone(),
+                session_id: "test-session".into(),
+                connection_id: "binding-example".into(),
+            },
+        },
         Host,
     )
     .unwrap();
