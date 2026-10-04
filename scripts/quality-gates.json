@@ -24,6 +24,10 @@
     "command": "cargo test --workspace --locked"
   },
   {
+    "name": "EPIC-04.03 local MCP adapter conformance and coverage",
+    "command": "python3 scripts/check-local-mcp-protocol.py\ncargo llvm-cov -p gateway-daemon --lib --bin cg-mcp --test local_mcp --locked --json --output-path \"$EVIDENCE_DIR/local-mcp-coverage.json\" -- local_mcp\npython3 scripts/check-local-mcp-coverage.py --self-test\npython3 scripts/check-local-mcp-coverage.py \"$EVIDENCE_DIR/local-mcp-coverage.json\""
+  },
+  {
     "name": "Install registry CLI",
     "command": "cargo install --path crates/gateway-daemon --bin cg-registry --locked --force --root \"$RUNNER_TEMP/cg-registry\""
   },

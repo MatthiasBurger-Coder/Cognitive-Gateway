@@ -1,0 +1,8 @@
+{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-11-25","capabilities":{},"clientInfo":{"name":"codex","version":"1.0"}}}
+{"jsonrpc":"2.0","method":"notifications/initialized"}
+{"jsonrpc":"2.0","id":"discovery","method":"resources/list"}
+{"jsonrpc":"2.0","id":2,"method":"resources/read","params":{"uri":"cg://contracts/1.0/catalog"}}
+{"jsonrpc":"2.0","id":3,"method":"tools/list"}
+{"jsonrpc":"2.0","id":4,"method":"tools/call","params":{"name":"cg_registry_inspect_v1","arguments":{"schema_version":"1.0","scope":{"workspace_id":"workspace-example","project_id":"project-example","binding_id":"binding-example"},"operation":"registry.inspect","input":{"kind":"agent","ids":[]},"execution":{"operating_mode":"DEVELOPMENT","execution_profile":"FULL_PATH"},"correlation":{"request_id":"request-example"}}}}
+{"jsonrpc":"2.0","method":"notifications/cancelled","params":{"requestId":4,"reason":"No longer needed"}}
+{"jsonrpc":"2.0","id":5,"method":"ping"}

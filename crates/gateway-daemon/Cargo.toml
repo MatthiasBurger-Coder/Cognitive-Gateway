@@ -26,5 +26,9 @@ path = "src/bin/cg.rs"
 name = "cg-registry"
 path = "src/bin/cg-registry.rs"
 
+[[bin]]
+name = "cg-mcp"
+path = "src/bin/cg-mcp.rs"
+
 [lints]
 workspace = true

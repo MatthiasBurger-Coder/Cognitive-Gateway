@@ -1,0 +1,305 @@
+//! EPIC-04.03 inbound local MCP infrastructure. No provider SDK or domain mutation.
+mod contracts;
+mod decode;
+pub mod transport;
+
+use serde_json::{Value, json};
+use std::collections::BTreeSet;
+use std::time::Duration;
+use transport::{Transport, TransportError};
+
+pub const PROTOCOL_VERSION: &str = "2025-11-25";
+pub const MAX_FRAME_BYTES: usize = 1_048_576;
+const MAX_REQUESTS: usize = 10_000;
+
+/// Trusted launcher input, never constructed from MCP request claims.
+#[derive(Debug, Clone)]
+pub struct LaunchBinding {
+    client_name: String,
+    client_version: String,
+    principal: String,
+    scope: Value,
+}
+impl LaunchBinding {
+    pub fn new(
+        client_name: &str,
+        client_version: &str,
+        principal: &str,
+        workspace: &str,
+        project: &str,
+        binding: &str,
+    ) -> Option<Self> {
+        if ![
+            client_name,
+            client_version,
+            principal,
+            workspace,
+            project,
+            binding,
+        ]
+        .iter()
+        .all(|text| contracts::token(text))
+        {
+            return None;
+        }
+        Some(Self {
+            client_name: client_name.into(),
+            client_version: client_version.into(),
+            principal: principal.into(),
+            scope: json!({"workspace_id":workspace,"project_id":project,"binding_id":binding}),
+        })
+    }
+}
+
+#[derive(Debug, PartialEq, Eq)]
+enum Phase {
+    New,
+    Initializing,
+    Ready,
+    Closed,
+}
+
+pub struct Server {
+    binding: LaunchBinding,
+    phase: Phase,
+    seen: BTreeSet<String>,
+}
+
+fn rpc_error(id: Value, code: i32, message: &str) -> Value {
+    json!({"jsonrpc":"2.0","id":id,"error":{"code":code,"message":message}})
+}
+fn result(id: Value, result: Value) -> Value {
+    json!({"jsonrpc":"2.0","id":id,"result":result})
+}
+fn params_object(params: &Value, allowed: &[&str], required: &[&str]) -> bool {
+    params.as_object().is_some_and(|object| {
+        object.keys().all(|key| allowed.contains(&key.as_str()))
+            && required.iter().all(|key| object.contains_key(*key))
+    })
+}
+fn request_id(value: &Value) -> bool {
+    value.as_str().is_some_and(|id| id.len() <= 128)
+        || value
+            .as_i64()
+            .is_some_and(|id| id.unsigned_abs() <= 9_007_199_254_740_991)
+        || value.as_u64().is_some_and(|id| id <= 9_007_199_254_740_991)
+}
+
+impl Server {
+    pub fn new(binding: LaunchBinding) -> Self {
+        Self {
+            binding,
+            phase: Phase::New,
+            seen: BTreeSet::new(),
+        }
+    }
+
+    /// All supported operations finish inline; cancellation of completed/unknown
+    /// IDs is ignored. No task session is cancelled and no mutation is retried.
+    pub fn handle(&mut self, frame: &[u8]) -> Option<Value> {
+        let value = match decode::decode(frame) {
+            Ok(value) => value,
+            Err(_) => return Some(rpc_error(Value::Null, -32700, "Parse error")),
+        };
+        let id = value.get("id").cloned();
+        if !params_object(
+            &value,
+            &["jsonrpc", "id", "method", "params"],
+            &["jsonrpc", "method"],
+        ) || value["jsonrpc"] != "2.0"
+            || !value["method"].is_string()
+            || id.as_ref().is_some_and(|id| !request_id(id))
+            || value
+                .get("params")
+                .is_some_and(|params| !params.is_object())
+        {
+            return Some(rpc_error(Value::Null, -32600, "Invalid Request"));
+        }
+        let method = value["method"].as_str().unwrap();
+        let params = value.get("params").cloned().unwrap_or_else(|| json!({}));
+        let Some(id) = id else {
+            if method == "notifications/initialized"
+                && self.phase == Phase::Initializing
+                && params_object(&params, &[], &[])
+            {
+                self.phase = Phase::Ready;
+            }
+            // Cancellation reasons are never retained. Inline requests are already
+            // complete by the time a cancellation notification is consumed.
+            return None;
+        };
+        if self.phase == Phase::Closed {
+            return None;
+        }
+        if self.seen.len() >= MAX_REQUESTS {
+            self.phase = Phase::Closed;
+            return Some(rpc_error(id, -32000, "Request limit exceeded"));
+        }
+        if !self.seen.insert(id.to_string()) {
+            return Some(rpc_error(id, -32600, "Invalid Request"));
+        }
+        if method == "initialize" {
+            return Some(self.initialize(id, &params));
+        }
+        if method == "ping" {
+            return Some(if params_object(&params, &[], &[]) {
+                result(id, json!({}))
+            } else {
+                rpc_error(id, -32602, "Invalid params")
+            });
+        }
+        if self.phase != Phase::Ready {
+            return Some(rpc_error(id, -32000, "Session not initialized"));
+        }
+        let response = match method {
+            "tools/list"
+                if params_object(&params, &["cursor"], &[]) && params.get("cursor").is_none() =>
+            {
+                result(id, json!({"tools":contracts::tools()}))
+            }
+            "resources/list"
+                if params_object(&params, &["cursor"], &[]) && params.get("cursor").is_none() =>
+            {
+                let resources: Vec<Value> = ["catalog", "common.schema.json", "request.schema.json", "response.schema.json", "resource.schema.json", "catalog.schema.json"].iter()
+                    .map(|name| json!({"uri":format!("cg://contracts/1.0/{name}"),"name":name,"mimeType":"application/json"})).collect();
+                result(id, json!({"resources":resources}))
+            }
+            "resources/templates/list" if params_object(&params, &[], &[]) => result(
+                id,
+                json!({"resourceTemplates":contracts::artifact("catalog").unwrap()["resources"].as_array().unwrap().iter()
+                .filter(|resource| resource["kind"] == "template").map(|resource| json!({"uriTemplate":resource["uri"],"name":resource["uri"],"mimeType":"application/json"})).collect::<Vec<_>>() }),
+            ),
+            "tools/call" => self.call(id, &params),
+            "resources/read" => self.read(id, &params),
+            "tools/list" | "resources/list" | "resources/templates/list" => {
+                rpc_error(id, -32602, "Invalid params")
+            }
+            _ => rpc_error(id, -32601, "Method not found"),
+        };
+        Some(response)
+    }
+
+    fn initialize(&mut self, id: Value, params: &Value) -> Value {
+        if self.phase != Phase::New {
+            return rpc_error(id, -32600, "Invalid Request");
+        }
+        if !params_object(
+            params,
+            &["protocolVersion", "capabilities", "clientInfo", "_meta"],
+            &["protocolVersion", "capabilities", "clientInfo"],
+        ) || !params["capabilities"].is_object()
+            || !params["clientInfo"].is_object()
+        {
+            self.phase = Phase::Closed;
+            return rpc_error(id, -32602, "Invalid params");
+        }
+        if params["protocolVersion"] != PROTOCOL_VERSION {
+            self.phase = Phase::Closed;
+            return rpc_error(id, -32602, "Unsupported protocol version");
+        }
+        if params["clientInfo"]["name"] != self.binding.client_name
+            || params["clientInfo"]["version"] != self.binding.client_version
+            || self.binding.principal.is_empty()
+        {
+            self.phase = Phase::Closed;
+            return rpc_error(id, -32000, "Client admission denied");
+        }
+        self.phase = Phase::Initializing;
+        result(
+            id,
+            json!({"protocolVersion":PROTOCOL_VERSION,"capabilities":{"tools":{},"resources":{}},
+            "serverInfo":{"name":"cognitive-gateway","version":env!("CARGO_PKG_VERSION")},
+            "instructions":"Contract discovery is available. Application tools and scoped resources await the shared CG facade; session mutation is disabled."}),
+        )
+    }
+
+    fn call(&self, id: Value, params: &Value) -> Value {
+        if !params_object(
+            params,
+            &["name", "arguments", "_meta"],
+            &["name", "arguments"],
+        ) || !params["name"].is_string()
+            || !params["arguments"].is_object()
+        {
+            return rpc_error(id, -32602, "Invalid params");
+        }
+        let catalog = contracts::artifact("catalog").unwrap();
+        let Some(tool) = catalog["tools"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|tool| tool["name"] == params["name"])
+        else {
+            return rpc_error(id, -32602, "Invalid params");
+        };
+        let request = &params["arguments"];
+        let code = if request["schema_version"] != "1.0" {
+            "CG_UNSUPPORTED_VERSION"
+        } else if request["operation"] != tool["operation"]
+            || !contracts::valid(
+                request,
+                &contracts::artifact("request.schema.json").unwrap(),
+                &contracts::artifact("common.schema.json").unwrap(),
+            )
+        {
+            "CG_INVALID_REQUEST"
+        } else if request["scope"] != self.binding.scope {
+            "CG_SCOPE_DENIED"
+        } else {
+            "CG_UNSUPPORTED_CAPABILITY"
+        };
+        let envelope = contracts::failure(code);
+        result(
+            id,
+            json!({"structuredContent":envelope,"content":[{"type":"text","text":envelope.to_string()}],"isError":true}),
+        )
+    }
+
+    fn read(&self, id: Value, params: &Value) -> Value {
+        if !params_object(params, &["uri", "_meta"], &["uri"]) || !params["uri"].is_string() {
+            return rpc_error(id, -32602, "Invalid params");
+        }
+        let uri = params["uri"].as_str().unwrap();
+        if let Some(artifact) = uri
+            .strip_prefix("cg://contracts/1.0/")
+            .and_then(contracts::artifact)
+        {
+            return result(
+                id,
+                json!({"contents":[{"uri":uri,"mimeType":"application/json","text":artifact.to_string()}]}),
+            );
+        }
+        // Until #239/#240 provide admitted reference resolution, every dynamic
+        // URI fails closed without decoding paths, fetching or revealing existence.
+        let mut error = rpc_error(id, -32001, "Resource unavailable");
+        error["error"]["data"] = contracts::failure("CG_SCOPE_DENIED")["diagnostics"][0].clone();
+        error
+    }
+
+    pub fn serve(
+        &mut self,
+        transport: &mut impl Transport,
+        read_timeout: Duration,
+        write_timeout: Duration,
+    ) -> Result<(), TransportError> {
+        let outcome = (|| {
+            while self.phase != Phase::Closed {
+                let Some(frame) = transport.receive(read_timeout)? else {
+                    break;
+                };
+                if frame.len() >= MAX_FRAME_BYTES {
+                    return Err(TransportError::Limit);
+                }
+                if let Some(response) = self.handle(&frame) {
+                    transport.send(response.to_string().into_bytes(), write_timeout)?;
+                }
+            }
+            Ok(())
+        })();
+        self.phase = Phase::Closed;
+        outcome
+    }
+}
+
+#[cfg(test)]
+mod tests;

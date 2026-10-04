@@ -2,11 +2,13 @@
 
 ## Status and decision
 
-**Boundary defined — EPIC-04.01 #236; runtime planned — EPIC-04 #126.**
+**Boundary defined — EPIC-04.01 #236; local adapter implemented — #238.**
 The accepted decision is [ADR-020](adr/ADR-020-codex-local-trust-no-key-contract.md).
 The [versioned wire contract](codex-facing-contracts.md) is defined by EPIC-04.02 #237.
-This is the normative trust and ownership contract. The MCP server, client
-admission and application facade are not implemented by this slice.
+This is the normative trust and ownership contract. The
+[local MCP server](local-mcp-server.md) implements private stdio lifecycle and
+discovery. The shared
+application facade and full client/scope admission remain #239/#240.
 
 ## Direction and ownership
 
@@ -188,7 +190,7 @@ sensitive data, provider credentials and deterministic execution results.
 - `gateway-policy`, `gateway-process`, `gateway-registry`, `gateway-context` and
   `gateway-workflow` keep existing inner dependencies. No imports from the local
   adapter, daemon, provider SDK or MCP implementation are allowed.
-- The future inbound adapter lives in outer infrastructure (initially
+- The inbound adapter lives in outer infrastructure (initially
   `gateway-daemon` modules, or a separately reviewed adapter crate). It translates
   DTOs and depends inward on application contracts. The core never depends back.
   Naming a facade after a client does not permit provider-specific contracts.
@@ -206,7 +208,8 @@ secret isolation. Module/type review and runtime qualification remain required.
 
 ## Non-goals and extension points
 
-This slice does not implement a server, wire DTOs, setup, secret scanner, network
+The boundary-definition slice does not implement a server, wire DTOs, setup,
+secret scanner, network
 transport, model invocation, connector runtime or new authorization model. It
 does not duplicate CG services. Later slices can add versioned clients/transports
 or governed operations under this authority contract; remote access needs a new
