@@ -196,3 +196,55 @@ pub trait ContextCompactionPort {
         target: &gateway_domain::NonEmptyText,
     ) -> Result<Vec<gateway_context::budgeted::CompactedCandidate>, gateway_domain::RetrievalError>;
 }
+
+/// CG-29 transport boundary. Workers receive snapshots and return proposals only.
+/// Host adapters authenticate advertisements and scope; discovery grants no authority.
+pub trait CognitiveWorkerPort {
+    fn advertisement(&self) -> gateway_domain::worker_fabric::WorkerAdvertisement;
+    fn execute(
+        &mut self,
+        lease: &gateway_domain::worker_fabric::WorkLease,
+    ) -> Result<
+        gateway_domain::worker_fabric::WorkResult,
+        gateway_domain::worker_fabric::FailureReason,
+    >;
+}
+
+/// Replaceable local/Swarm/Kubernetes scheduler boundary. Scope arguments must
+/// come from authenticated coordinator context, never from untrusted messages.
+pub trait CognitiveSchedulerPort {
+    fn submit(
+        &mut self,
+        item: gateway_domain::worker_fabric::WorkItem,
+        now_ms: u64,
+    ) -> Result<bool, gateway_domain::worker_fabric::FabricError>;
+    fn claim(
+        &mut self,
+        worker: &gateway_domain::worker_fabric::WorkerAdvertisement,
+        now_ms: u64,
+    ) -> Result<
+        Option<gateway_domain::worker_fabric::WorkLease>,
+        gateway_domain::worker_fabric::FabricError,
+    >;
+    fn complete(
+        &mut self,
+        scope: &gateway_domain::ContextScopeId,
+        result: gateway_domain::worker_fabric::WorkResult,
+        now_ms: u64,
+    ) -> Result<bool, gateway_domain::worker_fabric::FabricError>;
+    fn fail(
+        &mut self,
+        scope: &gateway_domain::ContextScopeId,
+        work_id: &str,
+        token: u64,
+        reason: gateway_domain::worker_fabric::FailureReason,
+        now_ms: u64,
+    ) -> Result<(), gateway_domain::worker_fabric::FabricError>;
+    fn inspect(
+        &self,
+        scope: &gateway_domain::ContextScopeId,
+        work_id: &str,
+    ) -> Result<gateway_domain::worker_fabric::WorkStatus, gateway_domain::worker_fabric::FabricError>;
+    fn recover(&mut self, now_ms: u64)
+    -> Result<usize, gateway_domain::worker_fabric::FabricError>;
+}

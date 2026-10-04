@@ -155,3 +155,5 @@ pub use state::{
 pub use task::{TaskClassification, TaskConfidence, TaskDescriptor};
 pub use validation::{NonEmptyText, ValidationError};
 pub use version::SchemaVersion;
+
+pub mod worker_fabric;

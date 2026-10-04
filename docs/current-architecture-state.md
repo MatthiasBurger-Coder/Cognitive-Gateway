@@ -1,6 +1,6 @@
 # Current Architecture State
 
-**Reference date:** 2026-10-03
+**Reference date:** 2026-10-04
 
 This document is the compact status map for the current Cognitive Gateway architecture. It distinguishes implemented contracts from planned architecture so that issue descriptions, arc42 and code are not accidentally treated as equivalent maturity.
 
@@ -74,6 +74,7 @@ flowchart LR
 | Local SLM/LxM runtime | IMPLEMENTED (reference service) | CG-27.01: separate CPU-first Ollama/Python containers, Rust port/adapter, immutable profiles, qualification, promotion and rollback. Full SemanticTaskIR interpretation remains separate EPIC-05.11 work. |
 | Local cognitive signal benchmarks | IMPLEMENTED | CG-27: replaceable four-task proposal adapter, versioned synthetic dataset, fixture and Ollama CPU/GPU harness, per-sample provenance and explicit failure/fallback evidence. |
 | Governed offline learning pipeline | IMPLEMENTED (contracts and reference coordinator) | CG-28 validates signals, assembles scoped/versioned datasets, gates offline jobs/evaluation and journals canary/rollback. Concrete training workers and durable deployment integration remain host adapters. |
+| Distributed cognitive worker fabric | IMPLEMENTED (contracts and local reference) | CG-29: immutable scoped snapshots, bounded queue/retries, fenced leases, provenance and a local worker adapter. Durable multi-node transport and container resource enforcement remain host adapters. |
 | Qwen3-8B reference profile | PLANNED | Reference candidate only; not a mandatory product dependency. |
 | General provider-independent model invocation | PLANNED | EPIC-06 #178 owns the general model invocation boundary. |
 | MCP connector/plugin runtime | PLANNED | EPIC-07 #223 owns external MCP server integration. |
@@ -100,5 +101,6 @@ flowchart LR
 - CG-28 #219 — governed learning signals and offline training pipeline.
 - CG-27 #218 — local SLM/LxM adapter and benchmark framework.
 - CG-27.01 #249 — upgradable containerized local model service.
+- CG-29 #220 — distributed cognitive worker fabric.
 
 This file should be updated whenever a planned boundary becomes implemented or a new authoritative architectural boundary is introduced.

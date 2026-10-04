@@ -11,3 +11,5 @@ pub mod registry_cli;
 pub mod retrieval;
 
 pub mod local_inference;
+
+pub mod worker_fabric;
