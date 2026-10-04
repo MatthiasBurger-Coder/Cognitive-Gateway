@@ -40,6 +40,25 @@ class DependencyTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 guard.check(invalid)
 
+    def test_codex_provider_and_mcp_dependencies_stay_outside_inner_crates(self):
+        # EPIC-04.01: aliases and conditional/test/build edges must not hide SDKs.
+        for package in self.metadata["packages"]:
+            if package["name"] == "gateway-daemon":
+                continue
+            for provider in ["codex", "codex-sdk", "async-openai", "openai", "rmcp", "mcp"]:
+                for kind in [None, "dev", "build"]:
+                    for target in [None, "cfg(windows)"]:
+                        with self.subTest(crate=package["name"], provider=provider,
+                                          kind=kind, target=target):
+                            invalid = copy.deepcopy(self.metadata)
+                            owner = next(p for p in invalid["packages"]
+                                         if p["name"] == package["name"])
+                            owner["dependencies"].append({
+                                "name": provider, "rename": "serde", "kind": kind,
+                                "target": target, "source": "registry+crates.io"})
+                            with self.assertRaisesRegex(ValueError, "Forbidden dependency"):
+                                guard.check(invalid)
+
     def test_unknown_member_and_substituted_core(self):
         self.metadata["packages"].pop()
         with self.assertRaises(ValueError):
