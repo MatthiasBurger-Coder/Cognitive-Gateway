@@ -79,7 +79,7 @@ flowchart LR
 | General provider-independent model invocation | PLANNED | EPIC-06 #178 owns the general model invocation boundary. |
 | MCP connector/plugin runtime | PLANNED | EPIC-07 #223 owns external MCP server integration. |
 | GitHub MCP connector | PLANNED | Reference connector under EPIC-07. |
-| Codex -> CG local no-key MCP | PARTIAL | #238 implements [private stdio lifecycle/discovery](local-mcp-server.md); #236 / ADR-020 define trust. Application dispatch and full admission remain #239/#240; tool calls currently return unsupported. |
+| Codex -> CG local no-key MCP | PARTIAL | #238 implements [private stdio lifecycle/discovery](local-mcp-server.md); #236 / ADR-020 define trust. [Application facade](codex-application-facade.md) #239 is implemented and injectable. Standalone admitted host wiring remains #240; default tool calls return unsupported. |
 
 ## Normative boundaries
 

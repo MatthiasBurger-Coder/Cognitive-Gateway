@@ -16,7 +16,6 @@ use gateway_policy::{PolicyAuthority, PolicyDecision};
 use gateway_process::ProcessRegistry;
 use gateway_registry::Registry;
 use std::path::Path;
-use std::str::FromStr;
 
 pub(super) fn execute(options: &Options) -> Result<(Value, i32), CliError> {
     match options.command.as_str() {
@@ -50,51 +49,9 @@ fn assess(input: Value) -> Result<Assessment, CliError> {
     }
     let input: AssessmentInput = decode(input)?;
     version(input.schema_version)?;
-    let app = DeclarativeSituationApplication::new();
-    let normalization = checked(
-        NormalizationInput::new(input.records.clone()).with_unknown_subjects(checked(
-            input
-                .unknown_subjects
-                .iter()
-                .map(|s| SubjectPath::from_str(s))
-                .collect::<Result<Vec<_>, _>>(),
-            4,
-            "ASSESSMENT_FAILED",
-        )?),
-        4,
-        "ASSESSMENT_FAILED",
-    )?;
-    let current = checked(
-        app.normalize_current_state(input.observed_state_id, normalization),
-        4,
-        "ASSESSMENT_FAILED",
-    )?;
-    let situation = checked(
-        app.assess_situation(
-            SituationAssemblyInput::new(current.clone()).with_records(input.records.clone()),
-            input.situation_id,
-        ),
-        4,
-        "ASSESSMENT_FAILED",
-    )?;
-    let document = checked(
-        app.validate_declarative_context(
-            input.context,
-            input.intent,
-            Some(input.records),
-            current,
-            situation,
-        ),
-        4,
-        "ASSESSMENT_FAILED",
-    )?;
-    Ok(Assessment {
-        schema_version: 1,
-        scope: input.scope,
-        operating_mode: input.operating_mode,
-        execution_profile: input.execution_profile,
-        document,
-    })
+    input
+        .assess()
+        .map_err(|error| CliError::new(4, "ASSESSMENT_FAILED", error.code()))
 }
 fn registry(options: &Options) -> Result<Registry, CliError> {
     checked(

@@ -17,30 +17,7 @@ use gateway_registry::CapabilityProvider;
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeSet;
 
-#[derive(Deserialize)]
-#[serde(deny_unknown_fields)]
-pub(super) struct AssessmentInput {
-    pub schema_version: u32,
-    pub scope: ContextScopeId,
-    pub operating_mode: OperatingMode,
-    pub execution_profile: ExecutionProfile,
-    pub context: DeclarativeContext,
-    pub observed_state_id: ObservedStateId,
-    pub situation_id: SituationId,
-    pub records: ObservationEvidenceSet,
-    #[serde(default)]
-    pub unknown_subjects: Vec<String>,
-    pub intent: Option<Intent>,
-}
-#[derive(Serialize, Deserialize)]
-#[serde(deny_unknown_fields)]
-pub(super) struct Assessment {
-    pub schema_version: u32,
-    pub scope: ContextScopeId,
-    pub operating_mode: OperatingMode,
-    pub execution_profile: ExecutionProfile,
-    pub document: DeclarativeContextSituationDocument,
-}
+pub(super) use gateway_application::codex::assessment::{Assessment, AssessmentInput};
 #[derive(Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct PlanDocument {

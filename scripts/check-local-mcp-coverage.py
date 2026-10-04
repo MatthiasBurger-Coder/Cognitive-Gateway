@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Require >=95% measured line coverage for every EPIC-04.03 production file."""
+"""Require >=95% measured line coverage for every EPIC-04.03 adapter file and its relocated contract validator."""
 import json
 import sys
 
 EXPECTED = (
+    "crates/gateway-application/src/codex/contracts.rs",
     "crates/gateway-daemon/src/bin/cg-mcp.rs",
     "crates/gateway-daemon/src/local_mcp/mod.rs",
     "crates/gateway-daemon/src/local_mcp/contracts.rs",

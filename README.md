@@ -137,7 +137,7 @@ Canonical entry points:
 - [`docs/current-architecture-state.md`](docs/current-architecture-state.md) — current implementation/plan status matrix
 - [`docs/semantic-language-and-interpretation.md`](docs/semantic-language-and-interpretation.md) — planned CGSL / SemanticTaskIR boundary
 - [`docs/codex-local-integration.md`](docs/codex-local-integration.md) — Codex -> CG local no-key MCP trust contract
-- [`docs/local-mcp-server.md`](docs/local-mcp-server.md) — implemented stdio MCP lifecycle/discovery; application dispatch pending
+- [`docs/local-mcp-server.md`](docs/local-mcp-server.md) — implemented stdio MCP lifecycle/discovery and injectable application facade
 - [`docs/mcp-connector-runtime.md`](docs/mcp-connector-runtime.md) — planned CG -> external MCP connector/plugin runtime
 - [`docs/local-model-runtime.md`](docs/local-model-runtime.md) — optional containerized local model service, CPU qualification and model lifecycle
 - [`docs/offline-learning.md`](docs/offline-learning.md) — CG-28 governed signals, offline dataset/training interfaces and model release/rollback.

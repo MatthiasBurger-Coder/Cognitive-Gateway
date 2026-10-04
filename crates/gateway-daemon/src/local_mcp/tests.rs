@@ -554,3 +554,77 @@ fn frozen_schema_validator_rejects_invalid_boundary_inputs() {
     ));
     assert!(contracts::artifact("../../secret").is_none());
 }
+
+#[test]
+fn admitted_facade_runs_through_deterministic_transport() {
+    use gateway_application::codex::{Call, CodexFacade, CodexHost, FacadeError, Projection};
+    struct Host;
+    impl CodexHost for Host {
+        fn authorize(&self, _: &Call) -> Result<(), FacadeError> {
+            Ok(())
+        }
+        fn project(&self, _: &Call, contract: &str, _: Value) -> Result<Projection, FacadeError> {
+            Ok(Projection {
+                source: json!({"kind":"reference","reference":{
+                "id":"validated-situation","contract":contract,"contract_version":"1.0","revision":"1",
+                "digest":format!("sha256:{}", "0".repeat(64))}}),
+                explainability: vec![],
+                evidence: vec![],
+                provenance: vec![],
+            })
+        }
+    }
+    struct FakeTransport {
+        incoming: std::collections::VecDeque<Vec<u8>>,
+        outgoing: Vec<Value>,
+    }
+    impl Transport for FakeTransport {
+        fn receive(&mut self, _: Duration) -> Result<Option<Vec<u8>>, TransportError> {
+            Ok(self.incoming.pop_front())
+        }
+        fn send(&mut self, frame: Vec<u8>, _: Duration) -> Result<(), TransportError> {
+            self.outgoing.push(serde_json::from_slice(&frame).unwrap());
+            Ok(())
+        }
+    }
+    let binding = binding();
+    let facade = CodexFacade::new(
+        binding.scope.clone(),
+        gateway_domain::ContextScopeId::new("project-example").unwrap(),
+        Host,
+    )
+    .unwrap();
+    let arguments: Value = serde_json::from_str(include_str!(
+        "../../../../tests/fixtures/codex-v1/inline.situation.inspect.request.json"
+    ))
+    .unwrap();
+    let mut transport = FakeTransport {
+        incoming: [
+            initialize(),
+            json!({"jsonrpc":"2.0","method":"notifications/initialized"}),
+            request(
+                2,
+                "tools/call",
+                json!({"name":"cg_situation_inspect_v1","arguments":arguments}),
+            ),
+        ]
+        .into_iter()
+        .map(|v| v.to_string().into_bytes())
+        .collect(),
+        outgoing: vec![],
+    };
+    Server::with_application(binding, Box::new(facade))
+        .serve(
+            &mut transport,
+            Duration::from_secs(1),
+            Duration::from_secs(1),
+        )
+        .unwrap();
+    let result = &transport.outgoing[1]["result"];
+    assert_eq!(result["structuredContent"]["status"], "ok");
+    assert_eq!(result["isError"], false);
+    assert_eq!(
+        serde_json::from_str::<Value>(result["content"][0]["text"].as_str().unwrap()).unwrap(),
+        result["structuredContent"]
+    );
+}

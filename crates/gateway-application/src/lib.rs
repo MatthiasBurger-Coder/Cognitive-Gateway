@@ -4,6 +4,7 @@
 extern crate self as gateway_application;
 
 pub mod closed_loop;
+pub mod codex;
 pub mod cognitive_routing;
 pub mod context;
 pub mod context_application;
