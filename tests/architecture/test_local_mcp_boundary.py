@@ -30,7 +30,7 @@ class LocalMcpBoundaryTests(unittest.TestCase):
         report = {"data": [{"files": [
             {"filename": str(ROOT / path), "summary": {"lines": {"count": 100, "covered": 95}}}
             for path in coverage.EXPECTED]}]}
-        self.assertEqual(len(coverage.check(report)), 5)
+        self.assertEqual(len(coverage.check(report)), len(coverage.EXPECTED))
         report["data"][0]["files"][0]["summary"]["lines"]["covered"] = 94
         with self.assertRaises(ValueError):
             coverage.check(report)

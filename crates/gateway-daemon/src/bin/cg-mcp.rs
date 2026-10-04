@@ -8,7 +8,7 @@ fn main() {
     let args: Vec<String> = std::env::args().skip(1).collect();
     if args == ["--help"] {
         eprintln!(
-            "cg-mcp --client-name NAME --client-version VERSION --principal ID --workspace ID --project ID --binding ID\nPrivate stdio MCP; trusted launcher arguments required. No provider credentials. Application facade pending."
+            "cg-mcp --client-name NAME --client-version VERSION --principal ID --workspace ID --project ID --binding ID\nPrivate stdio MCP; trusted launcher arguments required. No provider credentials. Admitted application host wiring pending."
         );
         return;
     }

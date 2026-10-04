@@ -3,6 +3,7 @@ mod contracts;
 mod decode;
 pub mod transport;
 
+use gateway_application::codex::{CodexApplicationPort, CodexFacade};
 use serde_json::{Value, json};
 use std::collections::BTreeSet;
 use std::time::Duration;
@@ -63,6 +64,7 @@ pub struct Server {
     binding: LaunchBinding,
     phase: Phase,
     seen: BTreeSet<String>,
+    application: Box<dyn CodexApplicationPort>,
 }
 
 fn rpc_error(id: Value, code: i32, message: &str) -> Value {
@@ -87,10 +89,20 @@ fn request_id(value: &Value) -> bool {
 
 impl Server {
     pub fn new(binding: LaunchBinding) -> Self {
+        let application = CodexFacade::unavailable(binding.scope.clone());
+        Self::with_application(binding, Box::new(application))
+    }
+
+    /// Inject the shared application facade. Launch admission still owns identity.
+    pub fn with_application(
+        binding: LaunchBinding,
+        application: Box<dyn CodexApplicationPort>,
+    ) -> Self {
         Self {
             binding,
             phase: Phase::New,
             seen: BTreeSet::new(),
+            application,
         }
     }
 
@@ -209,7 +221,7 @@ impl Server {
             id,
             json!({"protocolVersion":PROTOCOL_VERSION,"capabilities":{"tools":{},"resources":{}},
             "serverInfo":{"name":"cognitive-gateway","version":env!("CARGO_PKG_VERSION")},
-            "instructions":"Contract discovery is available. Application tools and scoped resources await the shared CG facade; session mutation is disabled."}),
+            "instructions":"Contract discovery is available. Application tools delegate to the shared CG facade and require admitted host services; scoped resource admission is pending."}),
         )
     }
 
@@ -233,25 +245,12 @@ impl Server {
             return rpc_error(id, -32602, "Invalid params");
         };
         let request = &params["arguments"];
-        let code = if request["schema_version"] != "1.0" {
-            "CG_UNSUPPORTED_VERSION"
-        } else if request["operation"] != tool["operation"]
-            || !contracts::valid(
-                request,
-                &contracts::artifact("request.schema.json").unwrap(),
-                &contracts::artifact("common.schema.json").unwrap(),
-            )
-        {
-            "CG_INVALID_REQUEST"
-        } else if request["scope"] != self.binding.scope {
-            "CG_SCOPE_DENIED"
-        } else {
-            "CG_UNSUPPORTED_CAPABILITY"
-        };
-        let envelope = contracts::failure(code);
+        let envelope = self
+            .application
+            .execute(tool["operation"].as_str().unwrap(), request);
         result(
             id,
-            json!({"structuredContent":envelope,"content":[{"type":"text","text":envelope.to_string()}],"isError":true}),
+            json!({"structuredContent":envelope,"content":[{"type":"text","text":envelope.to_string()}],"isError":envelope["status"] != "ok"}),
         )
     }
 
