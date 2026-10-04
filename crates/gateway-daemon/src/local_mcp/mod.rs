@@ -1,6 +1,6 @@
 //! EPIC-04.03 inbound local MCP infrastructure. No provider SDK or domain mutation.
 mod contracts;
-mod decode;
+pub(crate) mod decode;
 pub mod transport;
 
 use gateway_application::codex::{CodexApplicationPort, CodexFacade};
@@ -221,7 +221,7 @@ impl Server {
             id,
             json!({"protocolVersion":PROTOCOL_VERSION,"capabilities":{"tools":{},"resources":{}},
             "serverInfo":{"name":"cognitive-gateway","version":env!("CARGO_PKG_VERSION")},
-            "instructions":"Contract discovery is available. Application tools delegate to the shared CG facade and require admitted host services; scoped resource admission is pending."}),
+            "instructions":"Contract discovery is available. Application tools delegate to the shared CG facade and require admitted host services; scoped resources require an admitted workspace host."}),
         )
     }
 
@@ -245,9 +245,21 @@ impl Server {
             return rpc_error(id, -32602, "Invalid params");
         };
         let request = &params["arguments"];
-        let envelope = self
-            .application
-            .execute(tool["operation"].as_str().unwrap(), request);
+        let common = contracts::artifact("common.schema.json").unwrap();
+        let envelope = if request["schema_version"] == "1.0"
+            && request["operation"] == tool["operation"]
+            && contracts::valid(
+                request,
+                &contracts::artifact("request.schema.json").unwrap(),
+                &common,
+            )
+            && request["scope"] != self.binding.scope
+        {
+            contracts::failure("CG_SCOPE_DENIED")
+        } else {
+            self.application
+                .execute(tool["operation"].as_str().unwrap(), request)
+        };
         result(
             id,
             json!({"structuredContent":envelope,"content":[{"type":"text","text":envelope.to_string()}],"isError":envelope["status"] != "ok"}),
@@ -268,8 +280,31 @@ impl Server {
                 json!({"contents":[{"uri":uri,"mimeType":"application/json","text":artifact.to_string()}]}),
             );
         }
-        // Until #239/#240 provide admitted reference resolution, every dynamic
-        // URI fails closed without decoding paths, fetching or revealing existence.
+        let parts: Vec<_> = uri.split('/').collect();
+        if parts.len() == 12
+            && parts[..3] == ["cg:", "", "workspaces"]
+            && parts[4] == "projects"
+            && parts[6] == "bindings"
+            && parts[8] == "references"
+            && [parts[3], parts[5], parts[7], parts[9], parts[10]]
+                .iter()
+                .all(|p| contracts::token(p))
+        {
+            let scope =
+                json!({"workspace_id":parts[3],"project_id":parts[5],"binding_id":parts[7]});
+            if scope == self.binding.scope {
+                if let Ok(resource) = self
+                    .application
+                    .read_resource(&scope, parts[9], parts[10], parts[11])
+                {
+                    return result(
+                        id,
+                        json!({"contents":[{"uri":uri,"mimeType":"application/json","text":resource.to_string()}]}),
+                    );
+                }
+            }
+        }
+        // All rejections hide source existence and rejected URI content.
         let mut error = rpc_error(id, -32001, "Resource unavailable");
         error["error"]["data"] = contracts::failure("CG_SCOPE_DENIED")["diagnostics"][0].clone();
         error

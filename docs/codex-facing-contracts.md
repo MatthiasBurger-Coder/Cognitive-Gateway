@@ -3,7 +3,7 @@
 **Defined — EPIC-04.02 #237.** This is a provider-independent wire contract for
 an outer driving adapter. [Server lifecycle/discovery](local-mcp-server.md)
 (#238) and the [application facade](codex-application-facade.md) (#239) are
-implemented; admitted host wiring (#240) and runtime qualification remain planned.
+implemented. [Workspace/session admission](codex-scope-isolation.md) (#240) provides admitted situation queries and scoped resources; live runtime qualification remains #245.
 The [local trust contract](codex-local-integration.md), ADR-020 and ADR-016 apply.
 Rust domain/application types remain authoritative. JSON Schema validation is
 necessary but does not prove domain validity, scope admission or authorization.

@@ -21,3 +21,5 @@ pub mod durable_models;
 pub mod durable_workers;
 
 pub mod local_mcp;
+
+pub mod codex_workspace;

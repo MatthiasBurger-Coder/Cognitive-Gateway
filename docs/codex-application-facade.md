@@ -6,7 +6,7 @@ recognized tool call; its transport contains no normalization, planning,
 resolution, policy evaluation or session coordinator.
 
 The facade validates the frozen v1 envelope, exact tool/operation pairing and
-explicit workspace/project/binding scope before dispatch. Requests are bounded
+explicit workspace/project/binding scope and trusted client session before dispatch. Requests are bounded
 by size, node count and depth. OperatingMode and ExecutionProfile use the CG-02
 Rust parsers and remain requested execution depth, never authority. The trusted
 host explicitly maps the admitted scope to a canonical ContextScopeId.
@@ -40,7 +40,7 @@ Canonical results pass through the host's disclosure projection. Projection
 returns a canonical document or immutable reference with admitted explanation,
 evidence and provenance links; the facade retains those arrays unchanged and
 validates the complete response against the frozen schema. A document with
-SECRET provenance is refused. Unclassified content must be refused by the host;
+SECRET provenance is refused. Reference ingress also verifies the trusted client session and carries complete admitted source provenance through projection. Unclassified content must be refused by the host;
 the facade supplies no permissive disclosure fallback. Diagnostics are fixed
 code/message/retry triples; rejected data and exception text are never echoed.
 
@@ -53,10 +53,7 @@ A trusted runtime installs the facade with `Server::with_application` after
 constructing it with the launch scope, canonical scope and admitted host. Tests
 exercise this path with a deterministic transport and real canonical services.
 
-The standalone `cg-mcp` launcher installs `CodexFacade<UnavailableHost>` until
-#240 provides admitted runtime wiring. It still returns unsupported for valid
-application calls; this slice does not claim live Codex qualification. Dynamic
-resource admission remains in #240 and live qualification in #245. Shared
+The standalone `cg-mcp` launcher supports the [explicit workspace admission](codex-scope-isolation.md) from #240. Its immutable local host admits situation queries and scoped resource reads. A discovery-only launch retains `UnavailableHost`. Live Codex qualification remains #245. Shared
 session services are absent in this checkout, so all six session operations
 remain unsupported rather than creating an adapter-owned task lifecycle.
 
