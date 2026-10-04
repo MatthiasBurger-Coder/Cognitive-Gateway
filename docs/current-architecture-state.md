@@ -79,7 +79,7 @@ flowchart LR
 | General provider-independent model invocation | PLANNED | EPIC-06 #178 owns the general model invocation boundary. |
 | MCP connector/plugin runtime | PLANNED | EPIC-07 #223 owns external MCP server integration. |
 | GitHub MCP connector | PLANNED | Reference connector under EPIC-07. |
-| Codex -> CG local no-key MCP | PLANNED | EPIC-04 #126 owns the inbound Codex integration. |
+| Codex -> CG local no-key MCP | PLANNED (boundary defined) | EPIC-04.01 #236 / ADR-020 define trust, ownership and the no-key contract; EPIC-04 #126 runtime remains planned. |
 
 ## Normative boundaries
 

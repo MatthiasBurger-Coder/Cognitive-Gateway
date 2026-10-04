@@ -24,5 +24,6 @@ Current decisions:
 - [ADR-018 — Governed, Immutable Learned Procedures](../adr/ADR-018-governed-learned-procedures.md)
 
 - [ADR-019 — Governed Offline Model Learning](../adr/ADR-019-governed-offline-model-learning.md)
+- [ADR-020 — Codex Local Trust Boundary and No-Key Contract](../adr/ADR-020-codex-local-trust-no-key-contract.md)
 
 ADRs are append-only records of architectural intent. If a decision changes, a new ADR supersedes the old one rather than silently rewriting history.

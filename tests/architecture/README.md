@@ -8,6 +8,10 @@ and project-storage boundary checks. The exact reviewed dependency graph is
 in [arc42 §5](../../docs/arc42/05-building-block-view.md). Mutation tests reject
 outward and cross-component edges, aliases hiding forbidden packages,
 target/dev/build dependencies, new workspace members and substituted sources.
+EPIC-04.01 regressions explicitly reject Codex/OpenAI SDK and MCP packages in
+every inner crate, including renamed and conditional dependencies. These guard
+crate edges; provider-neutral DTO review and runtime no-key qualification remain
+separate obligations under [the local integration contract](../../docs/codex-local-integration.md).
 Evidence-runner tests verify failure propagation, skipped later gates, log
 retention, complete success and refusal to overwrite an existing bundle.
 
