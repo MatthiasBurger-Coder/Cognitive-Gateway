@@ -27,8 +27,8 @@ class CompleteAdmissionTests(unittest.TestCase):
         for version in (2, 3):
             model_path = root / f'epic03-cpu-model-v{version}.json'
             evaluation_path = root / f'epic03-cpu-evaluation-v{version}.json'
-            model_path.write_text(json.dumps({'version': version}))
-            evaluation_path.write_text(json.dumps({'status': 'PASS', 'version': version}))
+            model_path.write_text(json.dumps({'version': version, 'artifact': {'prior_artifact_digest': manifests[0]['training']['candidate']['artifact_digest'] if manifests else None}}))
+            evaluation_path.write_text(json.dumps({'status': 'PASS', 'version': version, 'prior': {'f1': 1} if version == 3 else None, 'checks': {'prior': True}}))
             manifests.append({'training': {'candidate': {'version': version, 'artifact_digest': cg30.sha256(model_path)}},
                               'evaluation': {'evidence': 'sha256-' + cg30.sha256(evaluation_path)}})
         files = {'epic03-live-release.json': {'status': 'PASS', 'real_cpu_training': True, 'postgres_restart': True,

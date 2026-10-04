@@ -116,6 +116,12 @@ def validate_extended(directory):
         version = candidate["version"]
         require(version in (2, 3) and sha256(directory / f"epic03-cpu-model-v{version}.json") == candidate["artifact_digest"], "Retained trained model mismatch")
         require("sha256-" + sha256(directory / f"epic03-cpu-evaluation-v{version}.json") == manifest["evaluation"]["evidence"], "Retained CPU evaluation mismatch")
+    first_digest = next(m["training"]["candidate"]["artifact_digest"] for m in live["journal"]["manifests"] if m["training"]["candidate"]["version"] == 2)
+    successor = json.loads((directory / "epic03-cpu-model-v3.json").read_text())
+    successor_evaluation = json.loads((directory / "epic03-cpu-evaluation-v3.json").read_text())
+    require(successor["artifact"]["prior_artifact_digest"] == first_digest
+            and successor_evaluation["prior"] is not None and successor_evaluation["checks"]["prior"] is True,
+            "Missing exact predecessor comparison")
     require(len(live["journal"]["events"]) == 9 and len(live["journal"]["manifests"]) == 2
             and live["journal"]["events"][-1]["action"] == "ROLLBACK", "Incomplete model journal")
     require(workers["coordinator_restart"] is True and workers["late_results_fenced"] is True

@@ -500,6 +500,12 @@ fn durable_cpu_release_restart_inference_supersession_and_rollback() {
         at(202),
     )
     .unwrap();
+    let (second_artifact, _) = adapter.artifact(&second_run.candidate).unwrap();
+    assert_eq!(
+        second_artifact["artifact"]["prior_artifact_digest"],
+        run.candidate.artifact_digest.as_str()
+    );
+    assert!(second_artifact["artifact"]["prior"].is_object());
     let second_q = evaluate_offline(
         &memory,
         &evidence,
