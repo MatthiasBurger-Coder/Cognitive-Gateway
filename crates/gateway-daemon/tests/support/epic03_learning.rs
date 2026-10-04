@@ -650,7 +650,15 @@ fn durable_cpu_release_restart_inference_supersession_and_rollback() {
         let mut ready = false;
         for _ in 0..60 {
             if std::process::Command::new("docker")
-                .args(["exec", &container, "pg_isready", "-U", "cg", "-d", "cg"])
+                .args([
+                    "exec",
+                    &container,
+                    "pg_isready",
+                    "-U",
+                    "cognitive_gateway",
+                    "-d",
+                    "cognitive_gateway",
+                ])
                 .stdout(std::process::Stdio::null())
                 .stderr(std::process::Stdio::null())
                 .status()
