@@ -102,5 +102,5 @@ CG-21 now provides the implemented model-independent domain foundation for
 eligible experience, pattern candidates, immutable learned procedure versions
 and explicit procedure lifecycle transitions. These contracts do not grant
 authority and remain subordinate to existing process/capability/policy
-identities. The broader EPIC-03 discovery, evaluation, promotion and reflex
-runtime is incremental. See [learned procedures](../learned-procedures.md).
+identities. The EPIC-03 experience/pattern, evaluation, promotion and reflex
+reference runtime is implemented and covered by [complete acceptance](../epic-03-complete-acceptance.md). See [learned procedures](../learned-procedures.md).

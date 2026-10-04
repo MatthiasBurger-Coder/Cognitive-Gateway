@@ -67,14 +67,14 @@ flowchart LR
 | Parallel task execution | IMPLEMENTED | CG-28A bounded parallel scheduling is present. |
 | Learned procedure domain contracts | IMPLEMENTED | CG-21 foundation added on 2026-10-03. |
 | Experience normalization and pattern inspection | IMPLEMENTED | CG-22 correlates governed, verified outcomes and supports PostgreSQL backed inspection; it creates candidates without executable authority. |
-| Learned procedure discovery/promotion/reflex runtime | PARTIAL / PLANNED | CG-21 contracts, CG-23 evaluation, CG-24 promotion/registry/canary/rollback and CG-25 deterministic reflex coordination are implemented; automated discovery and host adapter integration remain incremental. |
+| Learned procedure discovery/promotion/reflex runtime | IMPLEMENTED (governed reference runtime) | CG-21 through CG-25 and CG-30 demonstrate experience → detected pattern → evaluated procedure → governed promotion → reflex, fallback and rollback. |
 | CGSL / SemanticTaskIR | PLANNED | EPIC-05 #177 defines the formal semantic layer and compiler. |
 | Natural-language-to-IR compiler | PLANNED | Rust parser/compiler work is under EPIC-05, including #186 and related items. |
 | Optional SLM semantic interpreter | PLANNED | EPIC-05.11 consumes model adapters; model output is never authoritative. |
 | Local SLM/LxM runtime | IMPLEMENTED (reference service) | CG-27.01: separate CPU-first Ollama/Python containers, Rust port/adapter, immutable profiles, qualification, promotion and rollback. Full SemanticTaskIR interpretation remains separate EPIC-05.11 work. |
 | Local cognitive signal benchmarks | IMPLEMENTED | CG-27: replaceable four-task proposal adapter, versioned synthetic dataset, fixture and Ollama CPU/GPU harness, per-sample provenance and explicit failure/fallback evidence. |
-| Governed offline learning pipeline | IMPLEMENTED (contracts and reference coordinator) | CG-28 validates signals, assembles scoped/versioned datasets, gates offline jobs/evaluation and journals canary/rollback. Concrete training workers and durable deployment integration remain host adapters. |
-| Distributed cognitive worker fabric | IMPLEMENTED (contracts and local reference) | CG-29: immutable scoped snapshots, bounded queue/retries, fenced leases, provenance and a local worker adapter. Durable multi-node transport and container resource enforcement remain host adapters. |
+| Governed offline learning pipeline | IMPLEMENTED (contracts and reference coordinator) | CG-28 validates signals, assembles scoped/versioned datasets, gates offline jobs/evaluation and journals canary/rollback. Concrete CPU feature/training/CV/calibration worker, PostgreSQL release journals and current-version inference/rollback are implemented; see complete EPIC-03 acceptance. |
+| Distributed cognitive worker fabric | IMPLEMENTED (contracts and local reference) | CG-29: immutable scoped snapshots, bounded queue/retries, fenced leases, provenance and a local worker adapter. PostgreSQL coordination preserves leases/fencing/idempotency across restart; Linux process and isolated container resource enforcement are implemented. Swarm/Kubernetes transport remains optional. |
 | Qwen3-8B reference profile | PLANNED | Reference candidate only; not a mandatory product dependency. |
 | General provider-independent model invocation | PLANNED | EPIC-06 #178 owns the general model invocation boundary. |
 | MCP connector/plugin runtime | PLANNED | EPIC-07 #223 owns external MCP server integration. |

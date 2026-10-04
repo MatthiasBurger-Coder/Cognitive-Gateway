@@ -81,7 +81,7 @@
   },
   {
     "name": "CG-16 retrieval pipeline coverage gate",
-    "command": "cargo llvm-cov clean --workspace\nCARGO_BUILD_JOBS=1 cargo llvm-cov --workspace --tests --json --output-path \"$EVIDENCE_DIR/cg16-coverage.json\"\npython3 scripts/check-cg16-coverage.py --self-test\npython3 scripts/check-cg16-coverage.py \"$EVIDENCE_DIR/cg16-coverage.json\"\n"
+    "command": "cargo llvm-cov clean --workspace\nCARGO_BUILD_JOBS=1 cargo llvm-cov --workspace --tests --json --output-path \"$EVIDENCE_DIR/cg16-coverage.json\" -- --include-ignored\npython3 scripts/check-cg16-coverage.py --self-test\npython3 scripts/check-cg16-coverage.py \"$EVIDENCE_DIR/cg16-coverage.json\"\n"
   },
   {
     "name": "CG-18 governed memory coverage gate",
@@ -122,6 +122,10 @@
   {
     "name": "CG-29 distributed worker fabric evidence and coverage",
     "command": "set -euo pipefail\nCG29_FABRIC_OUTPUT=\"$EVIDENCE_DIR/cg29-fabric.json\" cargo test -p gateway-daemon --test worker_fabric --locked\ntest -s \"$EVIDENCE_DIR/cg29-fabric.json\"\npython3 scripts/check-cg29-coverage.py --self-test\npython3 scripts/check-cg29-coverage.py \"$EVIDENCE_DIR/cg16-coverage.json\""
+  },
+  {
+    "name": "EPIC-03 complete ML and durable runtime acceptance",
+    "command": "set -euo pipefail\npython3 -m venv \"$RUNNER_TEMP/offline-learning-python\"\n\"$RUNNER_TEMP/offline-learning-python/bin/python\" -m pip install -r services/offline-learning/requirements-test.txt\nCOVERAGE_FILE=\"$EVIDENCE_DIR/epic03-python-coverage\" \"$RUNNER_TEMP/offline-learning-python/bin/python\" -m coverage run --source=services/offline-learning -m unittest discover -s tests/offline-learning -v\nCOVERAGE_FILE=\"$EVIDENCE_DIR/epic03-python-coverage\" \"$RUNNER_TEMP/offline-learning-python/bin/python\" -m coverage json --fail-under=95 -o \"$EVIDENCE_DIR/epic03-python-coverage.json\"\npython3 scripts/benchmark-offline-learning.py \"$EVIDENCE_DIR/epic03-ml-experiment.json\"\nCG03_LIVE_OUTPUT=\"$EVIDENCE_DIR/epic03-live-release.json\" cargo test -p gateway-daemon --test offline_learning --locked complete::durable_cpu_release_restart_inference_supersession_and_rollback -- --exact --ignored\nCG03_DURABLE_WORKER_OUTPUT=\"$EVIDENCE_DIR/epic03-durable-workers.json\" cargo test -p gateway-daemon --test worker_fabric --locked complete::durable_worker_restart_fencing_duplicate_commit_and_competing_coordinators -- --exact --ignored\ncargo test -p gateway-daemon --test worker_fabric --locked complete::bounded_process_limits_hung_cpu_memory_output_and_runtime_identity -- --exact\npython3 scripts/check-epic03-coverage.py \"$EVIDENCE_DIR/cg16-coverage.json\"\ntest -s \"$EVIDENCE_DIR/epic03-live-release.json\"\ntest -s \"$EVIDENCE_DIR/epic03-durable-workers.json\"\npython3 scripts/qualify-worker-container.py \"$EVIDENCE_DIR/epic03-worker-container.json\""
   },
   {
     "name": "CG-30 cognitive runtime qualification evidence",

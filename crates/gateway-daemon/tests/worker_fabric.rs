@@ -555,3 +555,6 @@ fn transport_dispatch_cannot_complete_a_different_assignment() {
     assert_eq!(status.last_failure, Some(FailureReason::InvalidResult));
     assert_eq!(status.state, WorkState::Queued { ready_ms: 3 });
 }
+
+#[path = "support/epic03_workers.rs"]
+mod complete;

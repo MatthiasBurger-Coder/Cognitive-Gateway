@@ -2,9 +2,12 @@
 
 ## Status
 
-**Foundation implemented — CG-21 domain contracts landed on 2026-10-03.**
+**Implemented governed reference runtime — CG-21 through CG-30.**
 
-The current implementation establishes model-independent contracts for learning candidates and learned procedures. It does **not** mean that the complete autonomous discovery/promotion/reflex vertical slice of EPIC-03 is finished.
+The model-independent contracts now participate in the complete governed
+experience → pattern → evaluation → promotion → reflex lifecycle. See
+[complete EPIC-03 acceptance](epic-03-complete-acceptance.md) for the CPU model,
+durable runtime and revision-bound qualification scope.
 
 ## Purpose
 
@@ -81,6 +84,7 @@ A learned procedure version has canonical serialized content and a SHA-256-deriv
 
 ## Relationship to EPIC-03
 
-EPIC-03 #114 is broader. CG-22 adds governed pattern inspection and [CG-23](procedure-evaluation.md) adds validation/replay/simulation. [CG-24](procedure-promotion.md) adds promotion governance, registry, canary, supersession and rollback. [CG-25](reflex-engine.md) adds deterministic ACTIVE reflex matching, governed execution, verification and fallback. Further work covers host routing integration and continuous feedback.
+EPIC-03 #114 is broader. CG-22 adds governed pattern inspection and [CG-23](procedure-evaluation.md) adds validation/replay/simulation. [CG-24](procedure-promotion.md) adds promotion governance, registry, canary, supersession and rollback. [CG-25](reflex-engine.md) adds deterministic ACTIVE reflex matching, governed execution, verification and fallback. CG-26 through CG-30 add explainable routing, governed offline learning, distributed work contracts and end-to-end acceptance.
 
-CG-21 provides the domain foundation for that future runtime behavior; it should not be described as a completed self-learning system.
+CG-21 is the domain foundation. The complete reference runtime retains explicit
+evaluation and promotion authority; it does not self-approve learned behavior.

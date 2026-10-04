@@ -118,5 +118,15 @@ python3 scripts/check-cg29-coverage.py target/cg29-coverage.json
 
 The existing full quality gate includes CG-29 correlated recovery/deduplication
 evidence and a 95% line coverage gate for all three production modules using the
-workspace coverage artifact. Evidence describes the reference lifetime; durable
-restart recovery and orchestrator deployment remain host adapter responsibilities.
+workspace coverage artifact. The new durable and isolated adapters below additionally prove restart recovery
+and resource enforcement; orchestrator-specific transport remains replaceable.
+
+## Durable and isolated adapters
+
+`DurableScheduler` now supplies scoped PostgreSQL transactions and journal replay,
+including fencing and idempotency history across coordinator restart. Separate
+coordinators contend under row locks. `ProcessCognitiveWorker` terminates attempts
+under Linux wall/CPU/address-space/output limits. The container reference adds
+unprivileged execution, no network/credentials/mounts and hard resource bounds.
+See [complete EPIC-03 acceptance](epic-03-complete-acceptance.md) for APIs, tests,
+bounded retention and the qualified deployment scope.

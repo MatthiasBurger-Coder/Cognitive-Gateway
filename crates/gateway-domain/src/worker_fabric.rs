@@ -55,7 +55,7 @@ pub struct WorkItem {
     spec: WorkSpec,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum FabricError {
     InvalidContract,
     Backpressure,
@@ -66,6 +66,7 @@ pub enum FabricError {
     InvalidResult,
     ClockRegression,
     CounterExhausted,
+    Storage,
 }
 
 pub fn digest(bytes: &[u8]) -> String {

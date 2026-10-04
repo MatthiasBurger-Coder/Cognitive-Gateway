@@ -13,3 +13,9 @@ pub mod retrieval;
 pub mod local_inference;
 
 pub mod worker_fabric;
+
+pub mod bounded_process;
+pub mod cognitive_store;
+pub mod cpu_learning;
+pub mod durable_models;
+pub mod durable_workers;

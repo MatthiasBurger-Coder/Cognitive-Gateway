@@ -2,7 +2,22 @@
 //! append-only journal atomically before making a routing change visible.
 use crate::offline_learning::{LearningError, QualifiedModel, digest, zero_digest};
 use gateway_domain::{ContentDigest, ContextScopeId, UnixTimestamp, offline_learning::*};
+use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
+
+/// Recovery revalidates qualification against trusted retained training/evaluation
+/// evidence. A serialized manifest or checksum alone is never an approval.
+pub trait ModelRecoveryAuthority: ModelReleaseAuthority {
+    fn verify_qualification(&self, manifest: &ModelReleaseManifest) -> Result<bool, LearningError>;
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct ModelReleaseJournal {
+    pub scope: ContextScopeId,
+    pub manifests: Vec<ModelReleaseManifest>,
+    pub events: Vec<ModelReleaseEvent>,
+}
 
 /// Independent governance authority. Verify the actor and policy against the
 /// exact scope, action, release digest, restoration and observation. JSON and
@@ -44,6 +59,86 @@ pub struct ModelReleaseRegistry {
     events: Vec<ModelReleaseEvent>,
 }
 impl ModelReleaseRegistry {
+    pub fn journal(&self) -> ModelReleaseJournal {
+        ModelReleaseJournal {
+            scope: self.scope.clone(),
+            manifests: self.releases.values().map(|r| r.manifest.clone()).collect(),
+            events: self.events.clone(),
+        }
+    }
+
+    /// Rebuild through the same lifecycle commands; never trust stored projections.
+    pub fn recover<A: ModelRecoveryAuthority>(
+        journal: &ModelReleaseJournal,
+        authority: &A,
+    ) -> Result<Self, LearningError> {
+        if journal.events.len() > 4096 || journal.manifests.len() > 256 {
+            return Err(LearningError::InvalidManifest);
+        }
+        let mut registry = Self::new(journal.scope.clone());
+        let mut admitted = std::collections::BTreeSet::new();
+        for event in &journal.events {
+            let matches: Vec<_> = journal
+                .manifests
+                .iter()
+                .filter(|m| m.digest == event.release_digest)
+                .collect();
+            if matches.len() != 1 {
+                return Err(LearningError::InvalidManifest);
+            }
+            let manifest = matches[0];
+            let model = &manifest.training.candidate;
+            if event.action == ModelReleaseAction::Register {
+                if manifest.scope != journal.scope
+                    || release_digest(manifest) != manifest.digest
+                    || manifest.predecessor != registry.active
+                    || !authority.verify_qualification(manifest)?
+                {
+                    return Err(LearningError::Unverified);
+                }
+                registry.register(
+                    authority,
+                    QualifiedModel {
+                        run: manifest.training.clone(),
+                        recipe: manifest.recipe.clone(),
+                        evaluation: manifest.evaluation.clone(),
+                    },
+                    manifest.canary.clone(),
+                    event.decision.clone(),
+                )?;
+                admitted.insert(manifest.digest.clone());
+            } else {
+                match event.action {
+                    ModelReleaseAction::StartCanary => {
+                        registry.start_canary(authority, model, event.decision.clone())?
+                    }
+                    ModelReleaseAction::ObserveCanary => registry.observe_canary(
+                        authority,
+                        model,
+                        event
+                            .observation
+                            .clone()
+                            .ok_or(LearningError::InvalidManifest)?,
+                        event.decision.clone(),
+                    )?,
+                    ModelReleaseAction::Activate => {
+                        registry.activate(authority, model, event.decision.clone())?
+                    }
+                    ModelReleaseAction::Rollback => {
+                        registry.rollback(authority, model, event.decision.clone())?
+                    }
+                    ModelReleaseAction::Register => unreachable!(),
+                }
+            }
+            if registry.events.last() != Some(event) {
+                return Err(LearningError::InvalidManifest);
+            }
+        }
+        if admitted.len() != journal.manifests.len() {
+            return Err(LearningError::InvalidManifest);
+        }
+        Ok(registry)
+    }
     pub fn new(scope: ContextScopeId) -> Self {
         Self {
             scope,
@@ -72,6 +167,9 @@ impl ModelReleaseRegistry {
         canary: ModelCanary,
         decision: ModelReleaseDecision,
     ) -> Result<ModelVersion, LearningError> {
+        if self.releases.len() >= 256 {
+            return Err(LearningError::InvalidRelease);
+        }
         if qualified.run.scope != self.scope {
             return Err(LearningError::ScopeMismatch);
         }
@@ -285,6 +383,9 @@ impl ModelReleaseRegistry {
         authority: &A,
         event: &ModelReleaseEvent,
     ) -> Result<(), LearningError> {
+        if self.events.len() >= 4096 {
+            return Err(LearningError::InvalidRelease);
+        }
         if self
             .events
             .iter()

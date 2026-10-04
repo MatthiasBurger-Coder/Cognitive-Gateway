@@ -9,6 +9,11 @@ from pathlib import Path
 import shutil
 import subprocess
 import tempfile
+import importlib.util
+
+_HOST_SPEC = importlib.util.spec_from_file_location("cognitive_test_host", Path(__file__).with_name("cognitive-test-host.py"))
+_HOST = importlib.util.module_from_spec(_HOST_SPEC)
+_HOST_SPEC.loader.exec_module(_HOST)
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -29,6 +34,11 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, help="New evidence directory (must not exist)")
     args = parser.parse_args()
+    with _HOST.CognitiveTestHost() as host:
+        return run(args, host)
+
+
+def run(args, host):
     if args.output:
         output = args.output.resolve()
         output.mkdir(parents=True, exist_ok=False)
@@ -54,8 +64,12 @@ def main():
     # Include untracked source in the fingerprint as well as tracked source.
     report["source_sha256"] = source_fingerprint(output)
     env = os.environ.copy()
+    env.update(host.environment)
+    (output / "cg03-host.json").write_text(json.dumps(host.report, indent=2) + "\n")
     # Only the dedicated proof gate may export; workspace/coverage tests also run CG-12.
     env.pop("CG12_EXPORT_DIR", None)
+    for name in ("CG03_LIVE_OUTPUT", "CG03_DURABLE_WORKER_OUTPUT"):
+        env.pop(name, None)
     report["build_environment"] = {name: env[name] for name in
                                    ("CARGO_BUILD_JOBS", "CARGO_TARGET_DIR", "RUST_TEST_THREADS")
                                    if name in env}

@@ -155,8 +155,8 @@ change active versions while preserving evidence and historical outcomes.
 The read-only `cg procedures` command inspects the complete journal without a model.
 Reuse still requires current process, capability and policy authorization;
 [CG-25](../reflex-engine.md) adds exact ACTIVE matching, evidence gates, compiled
-Process/Policy dispatch, budgets and post-execution verification. Automated
-discovery and host routing integration remain incremental EPIC-03 work.
+Process/Policy dispatch, budgets and post-execution verification. The complete EPIC-03 reference lifecycle and durable CPU inference integration
+are covered by [complete acceptance](../epic-03-complete-acceptance.md).
 
 The CG-27.01 reference deployment, provider-neutral port and qualification lifecycle
 are implemented; see [the operator guide](../local-model-runtime.md). Full

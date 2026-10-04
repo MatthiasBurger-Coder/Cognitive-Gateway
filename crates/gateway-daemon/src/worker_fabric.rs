@@ -85,3 +85,54 @@ pub fn snapshot_probe(item: &WorkItem) -> Result<WorkerProposal, FailureReason> 
         compute_units: 1,
     })
 }
+
+/// Separate OS process per attempt. Wall/CPU/address-space/output limits are
+/// enforced outside Rust handlers; a hung worker is terminated before retry.
+/// The trusted host binds the script digest to the advertised runtime revision.
+pub struct ProcessCognitiveWorker {
+    pub advertisement: WorkerAdvertisement,
+    pub process: crate::bounded_process::BoundedProcess,
+    pub clock: fn() -> u64,
+}
+impl CognitiveWorkerPort for ProcessCognitiveWorker {
+    fn advertisement(&self) -> WorkerAdvertisement {
+        self.advertisement.clone()
+    }
+    fn execute(&mut self, lease: &WorkLease) -> Result<WorkResult, FailureReason> {
+        let budget = &lease.item.spec().budget;
+        let remaining = lease
+            .expires_ms
+            .checked_sub((self.clock)())
+            .filter(|value| *value > 0)
+            .ok_or(FailureReason::Timeout)?;
+        let process = &self.process;
+        let runtime = std::fs::read(&process.script).map_err(|_| FailureReason::Execution)?;
+        if self.advertisement.runtimes
+            != std::collections::BTreeSet::from([gateway_domain::ReferenceId::new(format!(
+                "sha256-{}",
+                digest(&runtime)
+            ))
+            .map_err(|_| FailureReason::InvalidResult)?])
+        {
+            return Err(FailureReason::InvalidResult);
+        }
+        let mut worker =
+            LocalCognitiveWorker::new(self.advertisement.clone(), |item: &WorkItem| {
+                let bytes = process
+                    .run(
+                        "execute",
+                        &item.spec().snapshot,
+                        remaining.min(budget.lease_ms),
+                        budget.memory_bytes,
+                        budget.compute_units,
+                        budget.max_result_bytes,
+                    )
+                    .map_err(|_| FailureReason::Execution)?;
+                Ok(WorkerProposal {
+                    bytes,
+                    compute_units: budget.compute_units,
+                })
+            });
+        worker.execute(lease)
+    }
+}

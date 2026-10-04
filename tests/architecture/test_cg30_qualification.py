@@ -26,7 +26,7 @@ class QualificationTests(unittest.TestCase):
     def fixture(self, root):
         manifest = json.loads((ROOT / "scripts/quality-gates.json").read_text())
         files = {name: "{}" for name in ("cg30-qualification.json", "cg16-coverage.json", "cg23-evaluation.json",
-                                       "cg24-promotion.json", "cg25-reflex.json", "cg27-fixture-benchmark.json", "cg28-learning.json")}
+                                       "cg24-promotion.json", "cg25-reflex.json", "cg27-fixture-benchmark.json", "cg28-learning.json", "cg29-fabric.json", "cg03-host.json", "epic03-ml-experiment.json", "epic03-live-release.json", "epic03-durable-workers.json", "epic03-worker-container.json", "epic03-python-coverage.json", "epic03-cpu-model-v2.json", "epic03-cpu-model-v3.json", "epic03-cpu-evaluation-v2.json", "epic03-cpu-evaluation-v3.json")}
         for name, content in files.items():
             (root / name).write_text(content)
         return {"status": "PASS", "worktree_status": "", "revision": "candidate",
@@ -41,9 +41,9 @@ class QualificationTests(unittest.TestCase):
             good = self.fixture(root)
             evidence = {"suite": "CG-30-v1", "classification": {}, "routing": {}, "performance": {}}
             with patch.object(cg30.subprocess, "check_output", side_effect=lambda args, **kw: "candidate\n" if args[1] == "rev-parse" else ""), \
-                 patch.object(cg30, "validate_metrics", return_value=evidence):
+                 patch.object(cg30, "validate_metrics", return_value=evidence), patch.object(cg30, "validate_extended", return_value={"status": "PASS"}):
                 (root / "summary.json").write_text(json.dumps(good))
-                self.assertEqual(cg30.qualify(root)["status"], "QUALIFIED_FIXTURE_SCOPE")
+                self.assertEqual(cg30.qualify(root)["status"], "QUALIFIED_REFERENCE_RUNTIME_SCOPE")
                 for mutate in (
                     lambda s: s.update(status="FAIL"),
                     lambda s: s.update(worktree_status=" M Cargo.lock"),

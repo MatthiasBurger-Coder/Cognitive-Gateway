@@ -13,6 +13,13 @@ spec.loader.exec_module(runner)
 
 
 class EvidenceTests(unittest.TestCase):
+    def setUp(self):
+        self.host = patch.object(runner._HOST, "CognitiveTestHost")
+        host = self.host.start().return_value.__enter__.return_value
+        host.environment = {}
+        host.report = {"host": "mock-postgres"}
+        self.addCleanup(self.host.stop)
+
     def test_empty_or_invalid_manifest_cannot_pass(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

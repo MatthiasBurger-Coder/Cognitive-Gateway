@@ -1,0 +1,1780 @@
+{
+  "schema_version": 1,
+  "dataset": "synthetic-health-v1",
+  "training": {
+    "scope": "project-a",
+    "job": "job",
+    "dataset_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "recipe_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "rows": [
+      {
+        "id": "signal-0",
+        "scope": "project-a",
+        "split": "TRAIN",
+        "time": 0,
+        "label": 0,
+        "label_basis": "verified-outcome-v1",
+        "evidence": [
+          "evidence-0"
+        ],
+        "group": "episode-0",
+        "source": "snapshot-0",
+        "example": "example-0",
+        "features": {
+          "health": -1.0,
+          "noise": 0.0
+        }
+      },
+      {
+        "id": "signal-1",
+        "scope": "project-a",
+        "split": "TRAIN",
+        "time": 1,
+        "label": 1,
+        "label_basis": "verified-outcome-v1",
+        "evidence": [
+          "evidence-1"
+        ],
+        "group": "episode-0",
+        "source": "snapshot-1",
+        "example": "example-1",
+        "features": {
+          "health": 1.001,
+          "noise": 0.001
+        }
+      },
+      {
+        "id": "signal-2",
+        "scope": "project-a",
+        "split": "TRAIN",
+        "time": 2,
+        "label": 0,
+        "label_basis": "verified-outcome-v1",
+        "evidence": [
+          "evidence-2"
+        ],
+        "group": "episode-1",
+        "source": "snapshot-2",
+        "example": "example-2",
+        "features": {
+          "health": -1.002,
+          "noise": 0.002
+        }
+      },
+      {
+        "id": "signal-3",
+        "scope": "project-a",
+        "split": "TRAIN",
+        "time": 3,
+        "label": 1,
+        "label_basis": "verified-outcome-v1",
+        "evidence": [
+          "evidence-3"
+        ],
+        "group": "episode-1",
+        "source": "snapshot-3",
+        "example": "example-3",
+        "features": {
+          "health": 1.003,
+          "noise": 0.0
+        }
+      },
+      {
+        "id": "signal-4",
+        "scope": "project-a",
+        "split": "TRAIN",
+        "time": 4,
+        "label": 0,
+        "label_basis": "verified-outcome-v1",
+        "evidence": [
+          "evidence-4"
+        ],
+        "group": "episode-2",
+        "source": "snapshot-4",
+        "example": "example-4",
+        "features": {
+          "health": -1.004,
+          "noise": 0.001
+        }
+      },
+      {
+        "id": "signal-5",
+        "scope": "project-a",
+        "split": "TRAIN",
+        "time": 5,
+        "label": 1,
+        "label_basis": "verified-outcome-v1",
+        "evidence": [
+          "evidence-5"
+        ],
+        "group": "episode-2",
+        "source": "snapshot-5",
+        "example": "example-5",
+        "features": {
+          "health": 1.005,
+          "noise": 0.002
+        }
+      },
+      {
+        "id": "signal-6",
+        "scope": "project-a",
+        "split": "TRAIN",
+        "time": 6,
+        "label": 0,
+        "label_basis": "verified-outcome-v1",
+        "evidence": [
+          "evidence-6"
+        ],
+        "group": "episode-3",
+        "source": "snapshot-6",
+        "example": "example-6",
+        "features": {
+          "health": -1.006,
+          "noise": 0.0
+        }
+      },
+      {
+        "id": "signal-7",
+        "scope": "project-a",
+        "split": "TRAIN",
+        "time": 7,
+        "label": 1,
+        "label_basis": "verified-outcome-v1",
+        "evidence": [
+          "evidence-7"
+        ],
+        "group": "episode-3",
+        "source": "snapshot-7",
+        "example": "example-7",
+        "features": {
+          "health": 1.007,
+          "noise": 0.001
+        }
+      },
+      {
+        "id": "signal-8",
+        "scope": "project-a",
+        "split": "TRAIN",
+        "time": 8,
+        "label": 0,
+        "label_basis": "verified-outcome-v1",
+        "evidence": [
+          "evidence-8"
+        ],
+        "group": "episode-4",
+        "source": "snapshot-8",
+        "example": "example-8",
+        "features": {
+          "health": -1.008,
+          "noise": 0.002
+        }
+      },
+      {
+        "id": "signal-9",
+        "scope": "project-a",
+        "split": "TRAIN",
+        "time": 9,
+        "label": 1,
+        "label_basis": "verified-outcome-v1",
+        "evidence": [
+          "evidence-9"
+        ],
+        "group": "episode-4",
+        "source": "snapshot-9",
+        "example": "example-9",
+        "features": {
+          "health": 1.009,
+          "noise": 0.0
+        }
+      },
+      {
+        "id": "signal-10",
+        "scope": "project-a",
+        "split": "TRAIN",
+        "time": 10,
+        "label": 0,
+        "label_basis": "verified-outcome-v1",
+        "evidence": [
+          "evidence-10"
+        ],
+        "group": "episode-5",
+        "source": "snapshot-10",
+        "example": "example-10",
+        "features": {
+          "health": -1.01,
+          "noise": 0.001
+        }
+      },
+      {
+        "id": "signal-11",
+        "scope": "project-a",
+        "split": "TRAIN",
+        "time": 11,
+        "label": 1,
+        "label_basis": "verified-outcome-v1",
+        "evidence": [
+          "evidence-11"
+        ],
+        "group": "episode-5",
+        "source": "snapshot-11",
+        "example": "example-11",
+        "features": {
+          "health": 1.011,
+          "noise": 0.002
+        }
+      },
+      {
+        "id": "signal-12",
+        "scope": "project-a",
+        "split": "TRAIN",
+        "time": 12,
+        "label": 0,
+        "label_basis": "verified-outcome-v1",
+        "evidence": [
+          "evidence-12"
+        ],
+        "group": "episode-6",
+        "source": "snapshot-12",
+        "example": "example-12",
+        "features": {
+          "health": -1.012,
+          "noise": 0.0
+        }
+      },
+      {
+        "id": "signal-13",
+        "scope": "project-a",
+        "split": "TRAIN",
+        "time": 13,
+        "label": 1,
+        "label_basis": "verified-outcome-v1",
+        "evidence": [
+          "evidence-13"
+        ],
+        "group": "episode-6",
+        "source": "snapshot-13",
+        "example": "example-13",
+        "features": {
+          "health": 1.013,
+          "noise": 0.001
+        }
+      },
+      {
+        "id": "signal-14",
+        "scope": "project-a",
+        "split": "TRAIN",
+        "time": 14,
+        "label": 0,
+        "label_basis": "verified-outcome-v1",
+        "evidence": [
+          "evidence-14"
+        ],
+        "group": "episode-7",
+        "source": "snapshot-14",
+        "example": "example-14",
+        "features": {
+          "health": -1.014,
+          "noise": 0.002
+        }
+      },
+      {
+        "id": "signal-15",
+        "scope": "project-a",
+        "split": "TRAIN",
+        "time": 15,
+        "label": 1,
+        "label_basis": "verified-outcome-v1",
+        "evidence": [
+          "evidence-15"
+        ],
+        "group": "episode-7",
+        "source": "snapshot-15",
+        "example": "example-15",
+        "features": {
+          "health": 1.015,
+          "noise": 0.0
+        }
+      },
+      {
+        "id": "signal-16",
+        "scope": "project-a",
+        "split": "TRAIN",
+        "time": 16,
+        "label": 0,
+        "label_basis": "verified-outcome-v1",
+        "evidence": [
+          "evidence-16"
+        ],
+        "group": "episode-8",
+        "source": "snapshot-16",
+        "example": "example-16",
+        "features": {
+          "health": -1.016,
+          "noise": 0.001
+        }
+      },
+      {
+        "id": "signal-17",
+        "scope": "project-a",
+        "split": "TRAIN",
+        "time": 17,
+        "label": 1,
+        "label_basis": "verified-outcome-v1",
+        "evidence": [
+          "evidence-17"
+        ],
+        "group": "episode-8",
+        "source": "snapshot-17",
+        "example": "example-17",
+        "features": {
+          "health": 1.017,
+          "noise": 0.002
+        }
+      },
+      {
+        "id": "signal-18",
+        "scope": "project-a",
+        "split": "TRAIN",
+        "time": 18,
+        "label": 0,
+        "label_basis": "verified-outcome-v1",
+        "evidence": [
+          "evidence-18"
+        ],
+        "group": "episode-9",
+        "source": "snapshot-18",
+        "example": "example-18",
+        "features": {
+          "health": -1.018,
+          "noise": 0.0
+        }
+      },
+      {
+        "id": "signal-19",
+        "scope": "project-a",
+        "split": "TRAIN",
+        "time": 19,
+        "label": 1,
+        "label_basis": "verified-outcome-v1",
+        "evidence": [
+          "evidence-19"
+        ],
+        "group": "episode-9",
+        "source": "snapshot-19",
+        "example": "example-19",
+        "features": {
+          "health": 1.019,
+          "noise": 0.001
+        }
+      },
+      {
+        "id": "signal-20",
+        "scope": "project-a",
+        "split": "TRAIN",
+        "time": 20,
+        "label": 0,
+        "label_basis": "verified-outcome-v1",
+        "evidence": [
+          "evidence-20"
+        ],
+        "group": "episode-10",
+        "source": "snapshot-20",
+        "example": "example-20",
+        "features": {
+          "health": -1.02,
+          "noise": 0.002
+        }
+      },
+      {
+        "id": "signal-21",
+        "scope": "project-a",
+        "split": "TRAIN",
+        "time": 21,
+        "label": 1,
+        "label_basis": "verified-outcome-v1",
+        "evidence": [
+          "evidence-21"
+        ],
+        "group": "episode-10",
+        "source": "snapshot-21",
+        "example": "example-21",
+        "features": {
+          "health": 1.021,
+          "noise": 0.0
+        }
+      },
+      {
+        "id": "signal-22",
+        "scope": "project-a",
+        "split": "TRAIN",
+        "time": 22,
+        "label": 0,
+        "label_basis": "verified-outcome-v1",
+        "evidence": [
+          "evidence-22"
+        ],
+        "group": "episode-11",
+        "source": "snapshot-22",
+        "example": "example-22",
+        "features": {
+          "health": -1.022,
+          "noise": 0.001
+        }
+      },
+      {
+        "id": "signal-23",
+        "scope": "project-a",
+        "split": "TRAIN",
+        "time": 23,
+        "label": 1,
+        "label_basis": "verified-outcome-v1",
+        "evidence": [
+          "evidence-23"
+        ],
+        "group": "episode-11",
+        "source": "snapshot-23",
+        "example": "example-23",
+        "features": {
+          "health": 1.023,
+          "noise": 0.002
+        }
+      },
+      {
+        "id": "signal-24",
+        "scope": "project-a",
+        "split": "TRAIN",
+        "time": 24,
+        "label": 0,
+        "label_basis": "verified-outcome-v1",
+        "evidence": [
+          "evidence-24"
+        ],
+        "group": "episode-12",
+        "source": "snapshot-24",
+        "example": "example-24",
+        "features": {
+          "health": -1.024,
+          "noise": 0.0
+        }
+      },
+      {
+        "id": "signal-25",
+        "scope": "project-a",
+        "split": "TRAIN",
+        "time": 25,
+        "label": 1,
+        "label_basis": "verified-outcome-v1",
+        "evidence": [
+          "evidence-25"
+        ],
+        "group": "episode-12",
+        "source": "snapshot-25",
+        "example": "example-25",
+        "features": {
+          "health": 1.025,
+          "noise": 0.001
+        }
+      },
+      {
+        "id": "signal-26",
+        "scope": "project-a",
+        "split": "TRAIN",
+        "time": 26,
+        "label": 0,
+        "label_basis": "verified-outcome-v1",
+        "evidence": [
+          "evidence-26"
+        ],
+        "group": "episode-13",
+        "source": "snapshot-26",
+        "example": "example-26",
+        "features": {
+          "health": -1.026,
+          "noise": 0.002
+        }
+      },
+      {
+        "id": "signal-27",
+        "scope": "project-a",
+        "split": "TRAIN",
+        "time": 27,
+        "label": 1,
+        "label_basis": "verified-outcome-v1",
+        "evidence": [
+          "evidence-27"
+        ],
+        "group": "episode-13",
+        "source": "snapshot-27",
+        "example": "example-27",
+        "features": {
+          "health": 1.027,
+          "noise": 0.0
+        }
+      },
+      {
+        "id": "signal-28",
+        "scope": "project-a",
+        "split": "TRAIN",
+        "time": 28,
+        "label": 0,
+        "label_basis": "verified-outcome-v1",
+        "evidence": [
+          "evidence-28"
+        ],
+        "group": "episode-14",
+        "source": "snapshot-28",
+        "example": "example-28",
+        "features": {
+          "health": -1.028,
+          "noise": 0.001
+        }
+      },
+      {
+        "id": "signal-29",
+        "scope": "project-a",
+        "split": "TRAIN",
+        "time": 29,
+        "label": 1,
+        "label_basis": "verified-outcome-v1",
+        "evidence": [
+          "evidence-29"
+        ],
+        "group": "episode-14",
+        "source": "snapshot-29",
+        "example": "example-29",
+        "features": {
+          "health": 1.029,
+          "noise": 0.002
+        }
+      },
+      {
+        "id": "signal-30",
+        "scope": "project-a",
+        "split": "TRAIN",
+        "time": 30,
+        "label": 0,
+        "label_basis": "verified-outcome-v1",
+        "evidence": [
+          "evidence-30"
+        ],
+        "group": "episode-15",
+        "source": "snapshot-30",
+        "example": "example-30",
+        "features": {
+          "health": -1.03,
+          "noise": 0.0
+        }
+      },
+      {
+        "id": "signal-31",
+        "scope": "project-a",
+        "split": "TRAIN",
+        "time": 31,
+        "label": 1,
+        "label_basis": "verified-outcome-v1",
+        "evidence": [
+          "evidence-31"
+        ],
+        "group": "episode-15",
+        "source": "snapshot-31",
+        "example": "example-31",
+        "features": {
+          "health": 1.031,
+          "noise": 0.001
+        }
+      },
+      {
+        "id": "signal-32",
+        "scope": "project-a",
+        "split": "TRAIN",
+        "time": 32,
+        "label": 0,
+        "label_basis": "verified-outcome-v1",
+        "evidence": [
+          "evidence-32"
+        ],
+        "group": "episode-16",
+        "source": "snapshot-32",
+        "example": "example-32",
+        "features": {
+          "health": -1.032,
+          "noise": 0.002
+        }
+      },
+      {
+        "id": "signal-33",
+        "scope": "project-a",
+        "split": "TRAIN",
+        "time": 33,
+        "label": 1,
+        "label_basis": "verified-outcome-v1",
+        "evidence": [
+          "evidence-33"
+        ],
+        "group": "episode-16",
+        "source": "snapshot-33",
+        "example": "example-33",
+        "features": {
+          "health": 1.033,
+          "noise": 0.0
+        }
+      },
+      {
+        "id": "signal-34",
+        "scope": "project-a",
+        "split": "TRAIN",
+        "time": 34,
+        "label": 0,
+        "label_basis": "verified-outcome-v1",
+        "evidence": [
+          "evidence-34"
+        ],
+        "group": "episode-17",
+        "source": "snapshot-34",
+        "example": "example-34",
+        "features": {
+          "health": -1.034,
+          "noise": 0.001
+        }
+      },
+      {
+        "id": "signal-35",
+        "scope": "project-a",
+        "split": "TRAIN",
+        "time": 35,
+        "label": 1,
+        "label_basis": "verified-outcome-v1",
+        "evidence": [
+          "evidence-35"
+        ],
+        "group": "episode-17",
+        "source": "snapshot-35",
+        "example": "example-35",
+        "features": {
+          "health": 1.035,
+          "noise": 0.002
+        }
+      },
+      {
+        "id": "signal-36",
+        "scope": "project-a",
+        "split": "TRAIN",
+        "time": 36,
+        "label": 0,
+        "label_basis": "verified-outcome-v1",
+        "evidence": [
+          "evidence-36"
+        ],
+        "group": "episode-18",
+        "source": "snapshot-36",
+        "example": "example-36",
+        "features": {
+          "health": -1.036,
+          "noise": 0.0
+        }
+      },
+      {
+        "id": "signal-37",
+        "scope": "project-a",
+        "split": "TRAIN",
+        "time": 37,
+        "label": 1,
+        "label_basis": "verified-outcome-v1",
+        "evidence": [
+          "evidence-37"
+        ],
+        "group": "episode-18",
+        "source": "snapshot-37",
+        "example": "example-37",
+        "features": {
+          "health": 1.037,
+          "noise": 0.001
+        }
+      },
+      {
+        "id": "signal-38",
+        "scope": "project-a",
+        "split": "TRAIN",
+        "time": 38,
+        "label": 0,
+        "label_basis": "verified-outcome-v1",
+        "evidence": [
+          "evidence-38"
+        ],
+        "group": "episode-19",
+        "source": "snapshot-38",
+        "example": "example-38",
+        "features": {
+          "health": -1.038,
+          "noise": 0.002
+        }
+      },
+      {
+        "id": "signal-39",
+        "scope": "project-a",
+        "split": "TRAIN",
+        "time": 39,
+        "label": 1,
+        "label_basis": "verified-outcome-v1",
+        "evidence": [
+          "evidence-39"
+        ],
+        "group": "episode-19",
+        "source": "snapshot-39",
+        "example": "example-39",
+        "features": {
+          "health": 1.039,
+          "noise": 0.0
+        }
+      },
+      {
+        "id": "signal-40",
+        "scope": "project-a",
+        "split": "TRAIN",
+        "time": 40,
+        "label": 0,
+        "label_basis": "verified-outcome-v1",
+        "evidence": [
+          "evidence-40"
+        ],
+        "group": "episode-20",
+        "source": "snapshot-40",
+        "example": "example-40",
+        "features": {
+          "health": -1.04,
+          "noise": 0.001
+        }
+      },
+      {
+        "id": "signal-41",
+        "scope": "project-a",
+        "split": "TRAIN",
+        "time": 41,
+        "label": 1,
+        "label_basis": "verified-outcome-v1",
+        "evidence": [
+          "evidence-41"
+        ],
+        "group": "episode-20",
+        "source": "snapshot-41",
+        "example": "example-41",
+        "features": {
+          "health": 1.041,
+          "noise": 0.002
+        }
+      },
+      {
+        "id": "signal-42",
+        "scope": "project-a",
+        "split": "TRAIN",
+        "time": 42,
+        "label": 0,
+        "label_basis": "verified-outcome-v1",
+        "evidence": [
+          "evidence-42"
+        ],
+        "group": "episode-21",
+        "source": "snapshot-42",
+        "example": "example-42",
+        "features": {
+          "health": -1.042,
+          "noise": 0.0
+        }
+      },
+      {
+        "id": "signal-43",
+        "scope": "project-a",
+        "split": "TRAIN",
+        "time": 43,
+        "label": 1,
+        "label_basis": "verified-outcome-v1",
+        "evidence": [
+          "evidence-43"
+        ],
+        "group": "episode-21",
+        "source": "snapshot-43",
+        "example": "example-43",
+        "features": {
+          "health": 1.043,
+          "noise": 0.001
+        }
+      },
+      {
+        "id": "signal-44",
+        "scope": "project-a",
+        "split": "TRAIN",
+        "time": 44,
+        "label": 0,
+        "label_basis": "verified-outcome-v1",
+        "evidence": [
+          "evidence-44"
+        ],
+        "group": "episode-22",
+        "source": "snapshot-44",
+        "example": "example-44",
+        "features": {
+          "health": -1.044,
+          "noise": 0.002
+        }
+      },
+      {
+        "id": "signal-45",
+        "scope": "project-a",
+        "split": "TRAIN",
+        "time": 45,
+        "label": 1,
+        "label_basis": "verified-outcome-v1",
+        "evidence": [
+          "evidence-45"
+        ],
+        "group": "episode-22",
+        "source": "snapshot-45",
+        "example": "example-45",
+        "features": {
+          "health": 1.045,
+          "noise": 0.0
+        }
+      },
+      {
+        "id": "signal-46",
+        "scope": "project-a",
+        "split": "TRAIN",
+        "time": 46,
+        "label": 0,
+        "label_basis": "verified-outcome-v1",
+        "evidence": [
+          "evidence-46"
+        ],
+        "group": "episode-23",
+        "source": "snapshot-46",
+        "example": "example-46",
+        "features": {
+          "health": -1.046,
+          "noise": 0.001
+        }
+      },
+      {
+        "id": "signal-47",
+        "scope": "project-a",
+        "split": "TRAIN",
+        "time": 47,
+        "label": 1,
+        "label_basis": "verified-outcome-v1",
+        "evidence": [
+          "evidence-47"
+        ],
+        "group": "episode-23",
+        "source": "snapshot-47",
+        "example": "example-47",
+        "features": {
+          "health": 1.047,
+          "noise": 0.002
+        }
+      },
+      {
+        "id": "signal-48",
+        "scope": "project-a",
+        "split": "VALIDATION",
+        "time": 48,
+        "label": 0,
+        "label_basis": "verified-outcome-v1",
+        "evidence": [
+          "evidence-48"
+        ],
+        "group": "episode-24",
+        "source": "snapshot-48",
+        "example": "example-48",
+        "features": {
+          "health": -1.048,
+          "noise": 0.0
+        }
+      },
+      {
+        "id": "signal-49",
+        "scope": "project-a",
+        "split": "VALIDATION",
+        "time": 49,
+        "label": 1,
+        "label_basis": "verified-outcome-v1",
+        "evidence": [
+          "evidence-49"
+        ],
+        "group": "episode-24",
+        "source": "snapshot-49",
+        "example": "example-49",
+        "features": {
+          "health": 1.049,
+          "noise": 0.001
+        }
+      },
+      {
+        "id": "signal-50",
+        "scope": "project-a",
+        "split": "VALIDATION",
+        "time": 50,
+        "label": 0,
+        "label_basis": "verified-outcome-v1",
+        "evidence": [
+          "evidence-50"
+        ],
+        "group": "episode-25",
+        "source": "snapshot-50",
+        "example": "example-50",
+        "features": {
+          "health": -1.05,
+          "noise": 0.002
+        }
+      },
+      {
+        "id": "signal-51",
+        "scope": "project-a",
+        "split": "VALIDATION",
+        "time": 51,
+        "label": 1,
+        "label_basis": "verified-outcome-v1",
+        "evidence": [
+          "evidence-51"
+        ],
+        "group": "episode-25",
+        "source": "snapshot-51",
+        "example": "example-51",
+        "features": {
+          "health": 1.051,
+          "noise": 0.0
+        }
+      },
+      {
+        "id": "signal-52",
+        "scope": "project-a",
+        "split": "VALIDATION",
+        "time": 52,
+        "label": 0,
+        "label_basis": "verified-outcome-v1",
+        "evidence": [
+          "evidence-52"
+        ],
+        "group": "episode-26",
+        "source": "snapshot-52",
+        "example": "example-52",
+        "features": {
+          "health": -1.052,
+          "noise": 0.001
+        }
+      },
+      {
+        "id": "signal-53",
+        "scope": "project-a",
+        "split": "VALIDATION",
+        "time": 53,
+        "label": 1,
+        "label_basis": "verified-outcome-v1",
+        "evidence": [
+          "evidence-53"
+        ],
+        "group": "episode-26",
+        "source": "snapshot-53",
+        "example": "example-53",
+        "features": {
+          "health": 1.053,
+          "noise": 0.002
+        }
+      },
+      {
+        "id": "signal-54",
+        "scope": "project-a",
+        "split": "VALIDATION",
+        "time": 54,
+        "label": 0,
+        "label_basis": "verified-outcome-v1",
+        "evidence": [
+          "evidence-54"
+        ],
+        "group": "episode-27",
+        "source": "snapshot-54",
+        "example": "example-54",
+        "features": {
+          "health": -1.054,
+          "noise": 0.0
+        }
+      },
+      {
+        "id": "signal-55",
+        "scope": "project-a",
+        "split": "VALIDATION",
+        "time": 55,
+        "label": 1,
+        "label_basis": "verified-outcome-v1",
+        "evidence": [
+          "evidence-55"
+        ],
+        "group": "episode-27",
+        "source": "snapshot-55",
+        "example": "example-55",
+        "features": {
+          "health": 1.055,
+          "noise": 0.001
+        }
+      },
+      {
+        "id": "signal-56",
+        "scope": "project-a",
+        "split": "VALIDATION",
+        "time": 56,
+        "label": 0,
+        "label_basis": "verified-outcome-v1",
+        "evidence": [
+          "evidence-56"
+        ],
+        "group": "episode-28",
+        "source": "snapshot-56",
+        "example": "example-56",
+        "features": {
+          "health": -1.056,
+          "noise": 0.002
+        }
+      },
+      {
+        "id": "signal-57",
+        "scope": "project-a",
+        "split": "VALIDATION",
+        "time": 57,
+        "label": 1,
+        "label_basis": "verified-outcome-v1",
+        "evidence": [
+          "evidence-57"
+        ],
+        "group": "episode-28",
+        "source": "snapshot-57",
+        "example": "example-57",
+        "features": {
+          "health": 1.057,
+          "noise": 0.0
+        }
+      },
+      {
+        "id": "signal-58",
+        "scope": "project-a",
+        "split": "VALIDATION",
+        "time": 58,
+        "label": 0,
+        "label_basis": "verified-outcome-v1",
+        "evidence": [
+          "evidence-58"
+        ],
+        "group": "episode-29",
+        "source": "snapshot-58",
+        "example": "example-58",
+        "features": {
+          "health": -1.058,
+          "noise": 0.001
+        }
+      },
+      {
+        "id": "signal-59",
+        "scope": "project-a",
+        "split": "VALIDATION",
+        "time": 59,
+        "label": 1,
+        "label_basis": "verified-outcome-v1",
+        "evidence": [
+          "evidence-59"
+        ],
+        "group": "episode-29",
+        "source": "snapshot-59",
+        "example": "example-59",
+        "features": {
+          "health": 1.059,
+          "noise": 0.002
+        }
+      },
+      {
+        "id": "signal-60",
+        "scope": "project-a",
+        "split": "VALIDATION",
+        "time": 60,
+        "label": 0,
+        "label_basis": "verified-outcome-v1",
+        "evidence": [
+          "evidence-60"
+        ],
+        "group": "episode-30",
+        "source": "snapshot-60",
+        "example": "example-60",
+        "features": {
+          "health": -1.06,
+          "noise": 0.0
+        }
+      },
+      {
+        "id": "signal-61",
+        "scope": "project-a",
+        "split": "VALIDATION",
+        "time": 61,
+        "label": 1,
+        "label_basis": "verified-outcome-v1",
+        "evidence": [
+          "evidence-61"
+        ],
+        "group": "episode-30",
+        "source": "snapshot-61",
+        "example": "example-61",
+        "features": {
+          "health": 1.061,
+          "noise": 0.001
+        }
+      },
+      {
+        "id": "signal-62",
+        "scope": "project-a",
+        "split": "VALIDATION",
+        "time": 62,
+        "label": 0,
+        "label_basis": "verified-outcome-v1",
+        "evidence": [
+          "evidence-62"
+        ],
+        "group": "episode-31",
+        "source": "snapshot-62",
+        "example": "example-62",
+        "features": {
+          "health": -1.062,
+          "noise": 0.002
+        }
+      },
+      {
+        "id": "signal-63",
+        "scope": "project-a",
+        "split": "VALIDATION",
+        "time": 63,
+        "label": 1,
+        "label_basis": "verified-outcome-v1",
+        "evidence": [
+          "evidence-63"
+        ],
+        "group": "episode-31",
+        "source": "snapshot-63",
+        "example": "example-63",
+        "features": {
+          "health": 1.063,
+          "noise": 0.0
+        }
+      },
+      {
+        "id": "signal-64",
+        "scope": "project-a",
+        "split": "VALIDATION",
+        "time": 64,
+        "label": 0,
+        "label_basis": "verified-outcome-v1",
+        "evidence": [
+          "evidence-64"
+        ],
+        "group": "episode-32",
+        "source": "snapshot-64",
+        "example": "example-64",
+        "features": {
+          "health": -1.064,
+          "noise": 0.001
+        }
+      },
+      {
+        "id": "signal-65",
+        "scope": "project-a",
+        "split": "VALIDATION",
+        "time": 65,
+        "label": 1,
+        "label_basis": "verified-outcome-v1",
+        "evidence": [
+          "evidence-65"
+        ],
+        "group": "episode-32",
+        "source": "snapshot-65",
+        "example": "example-65",
+        "features": {
+          "health": 1.065,
+          "noise": 0.002
+        }
+      },
+      {
+        "id": "signal-66",
+        "scope": "project-a",
+        "split": "VALIDATION",
+        "time": 66,
+        "label": 0,
+        "label_basis": "verified-outcome-v1",
+        "evidence": [
+          "evidence-66"
+        ],
+        "group": "episode-33",
+        "source": "snapshot-66",
+        "example": "example-66",
+        "features": {
+          "health": -1.066,
+          "noise": 0.0
+        }
+      },
+      {
+        "id": "signal-67",
+        "scope": "project-a",
+        "split": "VALIDATION",
+        "time": 67,
+        "label": 1,
+        "label_basis": "verified-outcome-v1",
+        "evidence": [
+          "evidence-67"
+        ],
+        "group": "episode-33",
+        "source": "snapshot-67",
+        "example": "example-67",
+        "features": {
+          "health": 1.067,
+          "noise": 0.001
+        }
+      },
+      {
+        "id": "signal-68",
+        "scope": "project-a",
+        "split": "VALIDATION",
+        "time": 68,
+        "label": 0,
+        "label_basis": "verified-outcome-v1",
+        "evidence": [
+          "evidence-68"
+        ],
+        "group": "episode-34",
+        "source": "snapshot-68",
+        "example": "example-68",
+        "features": {
+          "health": -1.068,
+          "noise": 0.002
+        }
+      },
+      {
+        "id": "signal-69",
+        "scope": "project-a",
+        "split": "VALIDATION",
+        "time": 69,
+        "label": 1,
+        "label_basis": "verified-outcome-v1",
+        "evidence": [
+          "evidence-69"
+        ],
+        "group": "episode-34",
+        "source": "snapshot-69",
+        "example": "example-69",
+        "features": {
+          "health": 1.069,
+          "noise": 0.0
+        }
+      },
+      {
+        "id": "signal-70",
+        "scope": "project-a",
+        "split": "VALIDATION",
+        "time": 70,
+        "label": 0,
+        "label_basis": "verified-outcome-v1",
+        "evidence": [
+          "evidence-70"
+        ],
+        "group": "episode-35",
+        "source": "snapshot-70",
+        "example": "example-70",
+        "features": {
+          "health": -1.07,
+          "noise": 0.001
+        }
+      },
+      {
+        "id": "signal-71",
+        "scope": "project-a",
+        "split": "VALIDATION",
+        "time": 71,
+        "label": 1,
+        "label_basis": "verified-outcome-v1",
+        "evidence": [
+          "evidence-71"
+        ],
+        "group": "episode-35",
+        "source": "snapshot-71",
+        "example": "example-71",
+        "features": {
+          "health": 1.071,
+          "noise": 0.002
+        }
+      }
+    ],
+    "plan": {
+      "feature_schema_version": "health-v1",
+      "features": [
+        "health",
+        "noise"
+      ],
+      "top_k": [
+        1,
+        2
+      ],
+      "temperatures": [
+        0.5,
+        1,
+        2
+      ],
+      "cv": "chronological",
+      "folds": 3,
+      "search": "grid",
+      "seed": 42,
+      "budget": 6,
+      "objective": "f1",
+      "stop_f1": null
+    }
+  },
+  "test": [
+    {
+      "id": "signal-72",
+      "scope": "project-a",
+      "split": "TEST",
+      "time": 72,
+      "label": 0,
+      "label_basis": "verified-outcome-v1",
+      "evidence": [
+        "evidence-72"
+      ],
+      "group": "episode-36",
+      "source": "snapshot-72",
+      "example": "example-72",
+      "features": {
+        "health": -1.072,
+        "noise": 0.0
+      }
+    },
+    {
+      "id": "signal-73",
+      "scope": "project-a",
+      "split": "TEST",
+      "time": 73,
+      "label": 1,
+      "label_basis": "verified-outcome-v1",
+      "evidence": [
+        "evidence-73"
+      ],
+      "group": "episode-36",
+      "source": "snapshot-73",
+      "example": "example-73",
+      "features": {
+        "health": 1.073,
+        "noise": 0.001
+      }
+    },
+    {
+      "id": "signal-74",
+      "scope": "project-a",
+      "split": "TEST",
+      "time": 74,
+      "label": 0,
+      "label_basis": "verified-outcome-v1",
+      "evidence": [
+        "evidence-74"
+      ],
+      "group": "episode-37",
+      "source": "snapshot-74",
+      "example": "example-74",
+      "features": {
+        "health": -1.074,
+        "noise": 0.002
+      }
+    },
+    {
+      "id": "signal-75",
+      "scope": "project-a",
+      "split": "TEST",
+      "time": 75,
+      "label": 1,
+      "label_basis": "verified-outcome-v1",
+      "evidence": [
+        "evidence-75"
+      ],
+      "group": "episode-37",
+      "source": "snapshot-75",
+      "example": "example-75",
+      "features": {
+        "health": 1.075,
+        "noise": 0.0
+      }
+    },
+    {
+      "id": "signal-76",
+      "scope": "project-a",
+      "split": "TEST",
+      "time": 76,
+      "label": 0,
+      "label_basis": "verified-outcome-v1",
+      "evidence": [
+        "evidence-76"
+      ],
+      "group": "episode-38",
+      "source": "snapshot-76",
+      "example": "example-76",
+      "features": {
+        "health": -1.076,
+        "noise": 0.001
+      }
+    },
+    {
+      "id": "signal-77",
+      "scope": "project-a",
+      "split": "TEST",
+      "time": 77,
+      "label": 1,
+      "label_basis": "verified-outcome-v1",
+      "evidence": [
+        "evidence-77"
+      ],
+      "group": "episode-38",
+      "source": "snapshot-77",
+      "example": "example-77",
+      "features": {
+        "health": 1.077,
+        "noise": 0.002
+      }
+    },
+    {
+      "id": "signal-78",
+      "scope": "project-a",
+      "split": "TEST",
+      "time": 78,
+      "label": 0,
+      "label_basis": "verified-outcome-v1",
+      "evidence": [
+        "evidence-78"
+      ],
+      "group": "episode-39",
+      "source": "snapshot-78",
+      "example": "example-78",
+      "features": {
+        "health": -1.078,
+        "noise": 0.0
+      }
+    },
+    {
+      "id": "signal-79",
+      "scope": "project-a",
+      "split": "TEST",
+      "time": 79,
+      "label": 1,
+      "label_basis": "verified-outcome-v1",
+      "evidence": [
+        "evidence-79"
+      ],
+      "group": "episode-39",
+      "source": "snapshot-79",
+      "example": "example-79",
+      "features": {
+        "health": 1.079,
+        "noise": 0.001
+      }
+    },
+    {
+      "id": "signal-80",
+      "scope": "project-a",
+      "split": "TEST",
+      "time": 80,
+      "label": 0,
+      "label_basis": "verified-outcome-v1",
+      "evidence": [
+        "evidence-80"
+      ],
+      "group": "episode-40",
+      "source": "snapshot-80",
+      "example": "example-80",
+      "features": {
+        "health": -1.08,
+        "noise": 0.002
+      }
+    },
+    {
+      "id": "signal-81",
+      "scope": "project-a",
+      "split": "TEST",
+      "time": 81,
+      "label": 1,
+      "label_basis": "verified-outcome-v1",
+      "evidence": [
+        "evidence-81"
+      ],
+      "group": "episode-40",
+      "source": "snapshot-81",
+      "example": "example-81",
+      "features": {
+        "health": 1.081,
+        "noise": 0.0
+      }
+    },
+    {
+      "id": "signal-82",
+      "scope": "project-a",
+      "split": "TEST",
+      "time": 82,
+      "label": 0,
+      "label_basis": "verified-outcome-v1",
+      "evidence": [
+        "evidence-82"
+      ],
+      "group": "episode-41",
+      "source": "snapshot-82",
+      "example": "example-82",
+      "features": {
+        "health": -1.082,
+        "noise": 0.001
+      }
+    },
+    {
+      "id": "signal-83",
+      "scope": "project-a",
+      "split": "TEST",
+      "time": 83,
+      "label": 1,
+      "label_basis": "verified-outcome-v1",
+      "evidence": [
+        "evidence-83"
+      ],
+      "group": "episode-41",
+      "source": "snapshot-83",
+      "example": "example-83",
+      "features": {
+        "health": 1.083,
+        "noise": 0.002
+      }
+    },
+    {
+      "id": "signal-84",
+      "scope": "project-a",
+      "split": "TEST",
+      "time": 84,
+      "label": 0,
+      "label_basis": "verified-outcome-v1",
+      "evidence": [
+        "evidence-84"
+      ],
+      "group": "episode-42",
+      "source": "snapshot-84",
+      "example": "example-84",
+      "features": {
+        "health": -1.084,
+        "noise": 0.0
+      }
+    },
+    {
+      "id": "signal-85",
+      "scope": "project-a",
+      "split": "TEST",
+      "time": 85,
+      "label": 1,
+      "label_basis": "verified-outcome-v1",
+      "evidence": [
+        "evidence-85"
+      ],
+      "group": "episode-42",
+      "source": "snapshot-85",
+      "example": "example-85",
+      "features": {
+        "health": 1.085,
+        "noise": 0.001
+      }
+    },
+    {
+      "id": "signal-86",
+      "scope": "project-a",
+      "split": "TEST",
+      "time": 86,
+      "label": 0,
+      "label_basis": "verified-outcome-v1",
+      "evidence": [
+        "evidence-86"
+      ],
+      "group": "episode-43",
+      "source": "snapshot-86",
+      "example": "example-86",
+      "features": {
+        "health": -1.086,
+        "noise": 0.002
+      }
+    },
+    {
+      "id": "signal-87",
+      "scope": "project-a",
+      "split": "TEST",
+      "time": 87,
+      "label": 1,
+      "label_basis": "verified-outcome-v1",
+      "evidence": [
+        "evidence-87"
+      ],
+      "group": "episode-43",
+      "source": "snapshot-87",
+      "example": "example-87",
+      "features": {
+        "health": 1.087,
+        "noise": 0.0
+      }
+    },
+    {
+      "id": "signal-88",
+      "scope": "project-a",
+      "split": "TEST",
+      "time": 88,
+      "label": 0,
+      "label_basis": "verified-outcome-v1",
+      "evidence": [
+        "evidence-88"
+      ],
+      "group": "episode-44",
+      "source": "snapshot-88",
+      "example": "example-88",
+      "features": {
+        "health": -1.088,
+        "noise": 0.001
+      }
+    },
+    {
+      "id": "signal-89",
+      "scope": "project-a",
+      "split": "TEST",
+      "time": 89,
+      "label": 1,
+      "label_basis": "verified-outcome-v1",
+      "evidence": [
+        "evidence-89"
+      ],
+      "group": "episode-44",
+      "source": "snapshot-89",
+      "example": "example-89",
+      "features": {
+        "health": 1.089,
+        "noise": 0.002
+      }
+    },
+    {
+      "id": "signal-90",
+      "scope": "project-a",
+      "split": "TEST",
+      "time": 90,
+      "label": 0,
+      "label_basis": "verified-outcome-v1",
+      "evidence": [
+        "evidence-90"
+      ],
+      "group": "episode-45",
+      "source": "snapshot-90",
+      "example": "example-90",
+      "features": {
+        "health": -1.09,
+        "noise": 0.0
+      }
+    },
+    {
+      "id": "signal-91",
+      "scope": "project-a",
+      "split": "TEST",
+      "time": 91,
+      "label": 1,
+      "label_basis": "verified-outcome-v1",
+      "evidence": [
+        "evidence-91"
+      ],
+      "group": "episode-45",
+      "source": "snapshot-91",
+      "example": "example-91",
+      "features": {
+        "health": 1.091,
+        "noise": 0.001
+      }
+    },
+    {
+      "id": "signal-92",
+      "scope": "project-a",
+      "split": "TEST",
+      "time": 92,
+      "label": 0,
+      "label_basis": "verified-outcome-v1",
+      "evidence": [
+        "evidence-92"
+      ],
+      "group": "episode-46",
+      "source": "snapshot-92",
+      "example": "example-92",
+      "features": {
+        "health": -1.092,
+        "noise": 0.002
+      }
+    },
+    {
+      "id": "signal-93",
+      "scope": "project-a",
+      "split": "TEST",
+      "time": 93,
+      "label": 1,
+      "label_basis": "verified-outcome-v1",
+      "evidence": [
+        "evidence-93"
+      ],
+      "group": "episode-46",
+      "source": "snapshot-93",
+      "example": "example-93",
+      "features": {
+        "health": 1.093,
+        "noise": 0.0
+      }
+    },
+    {
+      "id": "signal-94",
+      "scope": "project-a",
+      "split": "TEST",
+      "time": 94,
+      "label": 0,
+      "label_basis": "verified-outcome-v1",
+      "evidence": [
+        "evidence-94"
+      ],
+      "group": "episode-47",
+      "source": "snapshot-94",
+      "example": "example-94",
+      "features": {
+        "health": -1.094,
+        "noise": 0.001
+      }
+    },
+    {
+      "id": "signal-95",
+      "scope": "project-a",
+      "split": "TEST",
+      "time": 95,
+      "label": 1,
+      "label_basis": "verified-outcome-v1",
+      "evidence": [
+        "evidence-95"
+      ],
+      "group": "episode-47",
+      "source": "snapshot-95",
+      "example": "example-95",
+      "features": {
+        "health": 1.095,
+        "noise": 0.002
+      }
+    }
+  ],
+  "profile": {
+    "task": "binary-classification",
+    "version": 1,
+    "floors": {
+      "precision": 1,
+      "recall": 1,
+      "f1": 1
+    },
+    "ceilings": {
+      "false_positive_rate": 0,
+      "brier": 0.01,
+      "ece": 0.1
+    },
+    "max_regression": 0
+  }
+}
