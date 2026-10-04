@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0",
+  "scope": null,
+  "operation": null,
+  "correlation": null,
+  "status": "denied",
+  "result": null,
+  "explainability": [],
+  "evidence": [],
+  "provenance": [],
+  "diagnostics": [
+    {
+      "code": "CG_SCOPE_DENIED",
+      "message": "Scope is unavailable or not authorized.",
+      "retry": "never"
+    }
+  ]
+}

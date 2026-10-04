@@ -1,0 +1,34 @@
+{
+  "schema_version": "1.0",
+  "scope": {
+    "workspace_id": "workspace-example",
+    "project_id": "project-example",
+    "binding_id": "binding-example"
+  },
+  "operation": "context.compile",
+  "input": {
+    "resolution": {
+      "id": "example",
+      "contract": "cg.resolution",
+      "revision": "1",
+      "digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+      "contract_version": "1.0"
+    },
+    "projection": {
+      "id": "example",
+      "contract": "cg.context-projection",
+      "revision": "1",
+      "digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+      "contract_version": "1.0"
+    },
+    "step_id": "step-condition.0.0",
+    "candidates": []
+  },
+  "execution": {
+    "operating_mode": "DEVELOPMENT",
+    "execution_profile": "FULL_PATH"
+  },
+  "correlation": {
+    "request_id": "request-example"
+  }
+}

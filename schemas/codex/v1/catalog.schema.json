@@ -1,0 +1,173 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cognitive-gateway.local/schemas/codex/v1/catalog.schema.json",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "mcp_protocol_versions": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "2025-11-25"
+        ]
+      },
+      "uniqueItems": true,
+      "maxItems": 1024
+    },
+    "tools": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^cg_[a-z_]+_v1$"
+          },
+          "operation": {
+            "enum": [
+              "capabilities.resolve",
+              "context.compile",
+              "evidence.inspect",
+              "registry.inspect",
+              "session.approve",
+              "session.cancel",
+              "session.clarify",
+              "session.continue",
+              "session.inspect",
+              "session.start",
+              "situation.assess",
+              "situation.inspect",
+              "state.explain"
+            ]
+          },
+          "classification": {
+            "enum": [
+              "inspect",
+              "mutate"
+            ]
+          },
+          "availability": {
+            "enum": [
+              "defined",
+              "unsupported"
+            ]
+          },
+          "owner": {
+            "type": "string",
+            "minLength": 1
+          },
+          "input_schema": {
+            "const": "request.schema.json"
+          },
+          "output_schema": {
+            "const": "response.schema.json"
+          },
+          "annotations": {
+            "type": "object",
+            "properties": {
+              "readOnlyHint": {
+                "type": "boolean"
+              },
+              "destructiveHint": {
+                "type": "boolean"
+              },
+              "idempotentHint": {
+                "type": "boolean"
+              },
+              "openWorldHint": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "readOnlyHint",
+              "destructiveHint",
+              "idempotentHint",
+              "openWorldHint"
+            ],
+            "additionalProperties": false
+          },
+          "side_effects": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "bounded_audit",
+                "session_command"
+              ]
+            },
+            "uniqueItems": true,
+            "maxItems": 1024
+          },
+          "execution": {
+            "type": "object",
+            "properties": {
+              "taskSupport": {
+                "const": "forbidden"
+              }
+            },
+            "required": [
+              "taskSupport"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "name",
+          "operation",
+          "classification",
+          "availability",
+          "owner",
+          "input_schema",
+          "output_schema",
+          "annotations",
+          "side_effects",
+          "execution"
+        ],
+        "additionalProperties": false
+      },
+      "uniqueItems": true,
+      "maxItems": 1024
+    },
+    "resources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "uri": {
+            "type": "string",
+            "pattern": "^cg://"
+          },
+          "kind": {
+            "enum": [
+              "static",
+              "template"
+            ]
+          },
+          "schema": {
+            "type": "string"
+          },
+          "classification": {
+            "const": "inspect"
+          }
+        },
+        "required": [
+          "uri",
+          "kind",
+          "schema",
+          "classification"
+        ],
+        "additionalProperties": false
+      },
+      "uniqueItems": true,
+      "maxItems": 1024
+    }
+  },
+  "required": [
+    "schema_version",
+    "mcp_protocol_versions",
+    "tools",
+    "resources"
+  ],
+  "additionalProperties": false
+}

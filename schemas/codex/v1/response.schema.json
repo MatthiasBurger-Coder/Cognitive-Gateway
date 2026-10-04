@@ -1,0 +1,1229 @@
+{
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "scope": {
+      "oneOf": [
+        {
+          "$ref": "common.schema.json#/$defs/scope"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "operation": {
+      "oneOf": [
+        {
+          "enum": [
+            "capabilities.resolve",
+            "context.compile",
+            "evidence.inspect",
+            "registry.inspect",
+            "session.approve",
+            "session.cancel",
+            "session.clarify",
+            "session.continue",
+            "session.inspect",
+            "session.start",
+            "situation.assess",
+            "situation.inspect",
+            "state.explain"
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "correlation": {
+      "oneOf": [
+        {
+          "$ref": "common.schema.json#/$defs/correlation"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "status": {
+      "enum": [
+        "ok",
+        "error",
+        "denied",
+        "blocked",
+        "unsupported"
+      ]
+    },
+    "result": {
+      "oneOf": [
+        {
+          "$ref": "common.schema.json#/$defs/query_result"
+        },
+        {
+          "$ref": "common.schema.json#/$defs/session_result"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "explainability": {
+      "type": "array",
+      "items": {
+        "$ref": "common.schema.json#/$defs/reference"
+      },
+      "uniqueItems": true,
+      "maxItems": 1024
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "$ref": "common.schema.json#/$defs/reference"
+      },
+      "uniqueItems": true,
+      "maxItems": 1024
+    },
+    "provenance": {
+      "type": "array",
+      "items": {
+        "$ref": "common.schema.json#/$defs/provenance"
+      },
+      "uniqueItems": true,
+      "maxItems": 1024
+    },
+    "diagnostics": {
+      "type": "array",
+      "items": {
+        "$ref": "common.schema.json#/$defs/diagnostic"
+      },
+      "uniqueItems": true,
+      "maxItems": 1024
+    }
+  },
+  "required": [
+    "schema_version",
+    "scope",
+    "operation",
+    "correlation",
+    "status",
+    "result",
+    "explainability",
+    "evidence",
+    "provenance",
+    "diagnostics"
+  ],
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "ok"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "scope": {
+            "$ref": "common.schema.json#/$defs/scope"
+          },
+          "operation": {
+            "enum": [
+              "capabilities.resolve",
+              "context.compile",
+              "evidence.inspect",
+              "registry.inspect",
+              "session.approve",
+              "session.cancel",
+              "session.clarify",
+              "session.continue",
+              "session.inspect",
+              "session.start",
+              "situation.assess",
+              "situation.inspect",
+              "state.explain"
+            ]
+          },
+          "correlation": {
+            "$ref": "common.schema.json#/$defs/correlation"
+          },
+          "result": {
+            "oneOf": [
+              {
+                "$ref": "common.schema.json#/$defs/query_result"
+              },
+              {
+                "$ref": "common.schema.json#/$defs/session_result"
+              }
+            ]
+          },
+          "diagnostics": {
+            "maxItems": 0
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "result": {
+            "type": "null"
+          },
+          "diagnostics": {
+            "minItems": 1,
+            "maxItems": 1
+          },
+          "explainability": {
+            "maxItems": 0
+          },
+          "evidence": {
+            "maxItems": 0
+          },
+          "provenance": {
+            "maxItems": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "diagnostics": {
+            "contains": {
+              "properties": {
+                "code": {
+                  "const": "CG_INVALID_REQUEST"
+                }
+              },
+              "required": [
+                "code"
+              ]
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "status": {
+            "const": "error"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "diagnostics": {
+            "contains": {
+              "properties": {
+                "code": {
+                  "const": "CG_UNSUPPORTED_VERSION"
+                }
+              },
+              "required": [
+                "code"
+              ]
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "status": {
+            "const": "unsupported"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "diagnostics": {
+            "contains": {
+              "properties": {
+                "code": {
+                  "const": "CG_UNKNOWN_OPERATION"
+                }
+              },
+              "required": [
+                "code"
+              ]
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "status": {
+            "const": "error"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "diagnostics": {
+            "contains": {
+              "properties": {
+                "code": {
+                  "const": "CG_UNSUPPORTED_CAPABILITY"
+                }
+              },
+              "required": [
+                "code"
+              ]
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "status": {
+            "const": "unsupported"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "diagnostics": {
+            "contains": {
+              "properties": {
+                "code": {
+                  "const": "CG_SCOPE_DENIED"
+                }
+              },
+              "required": [
+                "code"
+              ]
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "status": {
+            "const": "denied"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "diagnostics": {
+            "contains": {
+              "properties": {
+                "code": {
+                  "const": "CG_INVALID_INPUT"
+                }
+              },
+              "required": [
+                "code"
+              ]
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "status": {
+            "const": "error"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "diagnostics": {
+            "contains": {
+              "properties": {
+                "code": {
+                  "const": "CG_REFERENCE_UNAVAILABLE"
+                }
+              },
+              "required": [
+                "code"
+              ]
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "status": {
+            "const": "error"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "diagnostics": {
+            "contains": {
+              "properties": {
+                "code": {
+                  "const": "CG_STALE_REVISION"
+                }
+              },
+              "required": [
+                "code"
+              ]
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "status": {
+            "const": "error"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "diagnostics": {
+            "contains": {
+              "properties": {
+                "code": {
+                  "const": "CG_POLICY_DENIED"
+                }
+              },
+              "required": [
+                "code"
+              ]
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "status": {
+            "const": "denied"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "diagnostics": {
+            "contains": {
+              "properties": {
+                "code": {
+                  "const": "CG_CONSENT_REQUIRED"
+                }
+              },
+              "required": [
+                "code"
+              ]
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "status": {
+            "const": "blocked"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "diagnostics": {
+            "contains": {
+              "properties": {
+                "code": {
+                  "const": "CG_EVIDENCE_REQUIRED"
+                }
+              },
+              "required": [
+                "code"
+              ]
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "status": {
+            "const": "blocked"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "diagnostics": {
+            "contains": {
+              "properties": {
+                "code": {
+                  "const": "CG_PROCESS_BLOCKED"
+                }
+              },
+              "required": [
+                "code"
+              ]
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "status": {
+            "const": "blocked"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "diagnostics": {
+            "contains": {
+              "properties": {
+                "code": {
+                  "const": "CG_SENSITIVITY_DENIED"
+                }
+              },
+              "required": [
+                "code"
+              ]
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "status": {
+            "const": "denied"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "diagnostics": {
+            "contains": {
+              "properties": {
+                "code": {
+                  "const": "CG_DUPLICATE_COMMAND"
+                }
+              },
+              "required": [
+                "code"
+              ]
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "status": {
+            "const": "error"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "diagnostics": {
+            "contains": {
+              "properties": {
+                "code": {
+                  "const": "CG_INVALID_SESSION_STATE"
+                }
+              },
+              "required": [
+                "code"
+              ]
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "status": {
+            "const": "error"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "diagnostics": {
+            "contains": {
+              "properties": {
+                "code": {
+                  "const": "CG_CANCELLED"
+                }
+              },
+              "required": [
+                "code"
+              ]
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "status": {
+            "const": "error"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "diagnostics": {
+            "contains": {
+              "properties": {
+                "code": {
+                  "const": "CG_TIMEOUT"
+                }
+              },
+              "required": [
+                "code"
+              ]
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "status": {
+            "const": "error"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "diagnostics": {
+            "contains": {
+              "properties": {
+                "code": {
+                  "const": "CG_LIMIT_EXCEEDED"
+                }
+              },
+              "required": [
+                "code"
+              ]
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "status": {
+            "const": "error"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "diagnostics": {
+            "contains": {
+              "properties": {
+                "code": {
+                  "const": "CG_OUTCOME_UNKNOWN"
+                }
+              },
+              "required": [
+                "code"
+              ]
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "status": {
+            "const": "error"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "diagnostics": {
+            "contains": {
+              "properties": {
+                "code": {
+                  "const": "CG_INTERNAL_ERROR"
+                }
+              },
+              "required": [
+                "code"
+              ]
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "status": {
+            "const": "error"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "ok"
+          },
+          "operation": {
+            "const": "capabilities.resolve"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "result": {
+            "properties": {
+              "kind": {
+                "const": "query"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "ok"
+          },
+          "operation": {
+            "const": "context.compile"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "result": {
+            "properties": {
+              "kind": {
+                "const": "query"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "ok"
+          },
+          "operation": {
+            "const": "evidence.inspect"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "result": {
+            "properties": {
+              "kind": {
+                "const": "query"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "ok"
+          },
+          "operation": {
+            "const": "registry.inspect"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "result": {
+            "properties": {
+              "kind": {
+                "const": "query"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "ok"
+          },
+          "operation": {
+            "const": "session.approve"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "result": {
+            "properties": {
+              "kind": {
+                "const": "session"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "ok"
+          },
+          "operation": {
+            "const": "session.cancel"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "result": {
+            "properties": {
+              "kind": {
+                "const": "session"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "ok"
+          },
+          "operation": {
+            "const": "session.clarify"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "result": {
+            "properties": {
+              "kind": {
+                "const": "session"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "ok"
+          },
+          "operation": {
+            "const": "session.continue"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "result": {
+            "properties": {
+              "kind": {
+                "const": "session"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "ok"
+          },
+          "operation": {
+            "const": "session.inspect"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "result": {
+            "properties": {
+              "kind": {
+                "const": "session"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "ok"
+          },
+          "operation": {
+            "const": "session.start"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "result": {
+            "properties": {
+              "kind": {
+                "const": "session"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "ok"
+          },
+          "operation": {
+            "const": "situation.assess"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "result": {
+            "properties": {
+              "kind": {
+                "const": "query"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "ok"
+          },
+          "operation": {
+            "const": "situation.inspect"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "result": {
+            "properties": {
+              "kind": {
+                "const": "query"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "ok"
+          },
+          "operation": {
+            "const": "state.explain"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "result": {
+            "properties": {
+              "kind": {
+                "const": "query"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "ok"
+          },
+          "operation": {
+            "const": "situation.inspect"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "result": {
+            "properties": {
+              "canonical_result": {
+                "properties": {
+                  "contract": {
+                    "const": "cg.situation"
+                  },
+                  "reference": {
+                    "properties": {
+                      "contract": {
+                        "const": "cg.situation"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "ok"
+          },
+          "operation": {
+            "const": "situation.assess"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "result": {
+            "properties": {
+              "canonical_result": {
+                "properties": {
+                  "contract": {
+                    "const": "cg.assessment"
+                  },
+                  "reference": {
+                    "properties": {
+                      "contract": {
+                        "const": "cg.assessment"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "ok"
+          },
+          "operation": {
+            "const": "state.explain"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "result": {
+            "properties": {
+              "canonical_result": {
+                "properties": {
+                  "contract": {
+                    "const": "cg.resolution-trace"
+                  },
+                  "reference": {
+                    "properties": {
+                      "contract": {
+                        "const": "cg.resolution-trace"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "ok"
+          },
+          "operation": {
+            "const": "capabilities.resolve"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "result": {
+            "properties": {
+              "canonical_result": {
+                "properties": {
+                  "contract": {
+                    "const": "cg.resolution"
+                  },
+                  "reference": {
+                    "properties": {
+                      "contract": {
+                        "const": "cg.resolution"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "ok"
+          },
+          "operation": {
+            "const": "context.compile"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "result": {
+            "properties": {
+              "canonical_result": {
+                "properties": {
+                  "contract": {
+                    "const": "cg.execution-context"
+                  },
+                  "reference": {
+                    "properties": {
+                      "contract": {
+                        "const": "cg.execution-context"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "ok"
+          },
+          "operation": {
+            "const": "registry.inspect"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "result": {
+            "properties": {
+              "canonical_result": {
+                "properties": {
+                  "contract": {
+                    "const": "cg.registry"
+                  },
+                  "reference": {
+                    "properties": {
+                      "contract": {
+                        "const": "cg.registry"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "ok"
+          },
+          "operation": {
+            "const": "evidence.inspect"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "result": {
+            "properties": {
+              "canonical_result": {
+                "properties": {
+                  "contract": {
+                    "const": "cg.evidence"
+                  },
+                  "reference": {
+                    "properties": {
+                      "contract": {
+                        "const": "cg.evidence"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cognitive-gateway.local/schemas/codex/v1/response.schema.json"
+}

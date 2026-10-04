@@ -1,0 +1,931 @@
+{
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "scope": {
+      "$ref": "common.schema.json#/$defs/scope"
+    },
+    "operation": {
+      "enum": [
+        "capabilities.resolve",
+        "context.compile",
+        "evidence.inspect",
+        "registry.inspect",
+        "session.approve",
+        "session.cancel",
+        "session.clarify",
+        "session.continue",
+        "session.inspect",
+        "session.start",
+        "situation.assess",
+        "situation.inspect",
+        "state.explain"
+      ]
+    },
+    "input": {
+      "type": "object"
+    },
+    "execution": {
+      "$ref": "common.schema.json#/$defs/execution"
+    },
+    "correlation": {
+      "$ref": "common.schema.json#/$defs/correlation"
+    }
+  },
+  "required": [
+    "schema_version",
+    "scope",
+    "operation",
+    "input",
+    "execution",
+    "correlation"
+  ],
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "operation": {
+            "const": "capabilities.resolve"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "input": {
+            "type": "object",
+            "properties": {
+              "plan": {
+                "allOf": [
+                  {
+                    "$ref": "common.schema.json#/$defs/reference"
+                  },
+                  {
+                    "properties": {
+                      "contract": {
+                        "const": "cg.plan"
+                      }
+                    }
+                  }
+                ]
+              },
+              "rules": {
+                "allOf": [
+                  {
+                    "$ref": "common.schema.json#/$defs/reference"
+                  },
+                  {
+                    "properties": {
+                      "contract": {
+                        "const": "cg.composition-rules"
+                      }
+                    }
+                  }
+                ]
+              },
+              "process": {
+                "allOf": [
+                  {
+                    "$ref": "common.schema.json#/$defs/reference"
+                  },
+                  {
+                    "properties": {
+                      "contract": {
+                        "const": "cg.process-snapshot"
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            "required": [
+              "plan",
+              "rules",
+              "process"
+            ],
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "operation": {
+            "const": "context.compile"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "input": {
+            "type": "object",
+            "properties": {
+              "resolution": {
+                "allOf": [
+                  {
+                    "$ref": "common.schema.json#/$defs/reference"
+                  },
+                  {
+                    "properties": {
+                      "contract": {
+                        "const": "cg.resolution"
+                      }
+                    }
+                  }
+                ]
+              },
+              "projection": {
+                "allOf": [
+                  {
+                    "$ref": "common.schema.json#/$defs/reference"
+                  },
+                  {
+                    "properties": {
+                      "contract": {
+                        "const": "cg.context-projection"
+                      }
+                    }
+                  }
+                ]
+              },
+              "step_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+              },
+              "candidates": {
+                "type": "array",
+                "items": {
+                  "allOf": [
+                    {
+                      "$ref": "common.schema.json#/$defs/reference"
+                    },
+                    {
+                      "properties": {
+                        "contract": {
+                          "const": "cg.context-fragment"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "uniqueItems": true,
+                "maxItems": 1024
+              }
+            },
+            "required": [
+              "resolution",
+              "projection",
+              "step_id",
+              "candidates"
+            ],
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "operation": {
+            "const": "evidence.inspect"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "input": {
+            "type": "object",
+            "properties": {
+              "references": {
+                "type": "array",
+                "items": {
+                  "allOf": [
+                    {
+                      "$ref": "common.schema.json#/$defs/reference"
+                    },
+                    {
+                      "properties": {
+                        "contract": {
+                          "const": "cg.evidence"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "uniqueItems": true,
+                "maxItems": 1024
+              }
+            },
+            "required": [
+              "references"
+            ],
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "operation": {
+            "const": "registry.inspect"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "input": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "enum": [
+                  "process",
+                  "capability",
+                  "agent",
+                  "skill"
+                ]
+              },
+              "ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+                },
+                "uniqueItems": true,
+                "maxItems": 1024
+              }
+            },
+            "required": [
+              "kind",
+              "ids"
+            ],
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "operation": {
+            "const": "session.approve"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "input": {
+            "type": "object",
+            "properties": {
+              "session_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+              },
+              "command_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+              },
+              "expected_revision": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "pending_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+              },
+              "consent_record": {
+                "allOf": [
+                  {
+                    "$ref": "common.schema.json#/$defs/reference"
+                  },
+                  {
+                    "properties": {
+                      "contract": {
+                        "const": "cg.consent-record"
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            "required": [
+              "session_id",
+              "command_id",
+              "expected_revision",
+              "pending_id",
+              "consent_record"
+            ],
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "operation": {
+            "const": "session.cancel"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "input": {
+            "type": "object",
+            "properties": {
+              "session_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+              },
+              "command_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+              },
+              "expected_revision": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": [
+              "session_id",
+              "command_id",
+              "expected_revision"
+            ],
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "operation": {
+            "const": "session.clarify"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "input": {
+            "type": "object",
+            "properties": {
+              "session_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+              },
+              "command_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+              },
+              "expected_revision": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "pending_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+              },
+              "answer": {
+                "oneOf": [
+                  {
+                    "allOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "kind": {
+                            "const": "document"
+                          },
+                          "contract": {
+                            "enum": [
+                              "cg.situation",
+                              "cg.assessment",
+                              "cg.resolution",
+                              "cg.resolution-trace",
+                              "cg.plan",
+                              "cg.composition-rules",
+                              "cg.context-projection",
+                              "cg.context-fragment",
+                              "cg.execution-context",
+                              "cg.registry",
+                              "cg.evidence",
+                              "cg.intent",
+                              "cg.clarification",
+                              "cg.consent-record",
+                              "cg.process-snapshot"
+                            ]
+                          },
+                          "document": {
+                            "type": "object"
+                          },
+                          "contract_version": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 32
+                          }
+                        },
+                        "required": [
+                          "kind",
+                          "contract",
+                          "document",
+                          "contract_version"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "properties": {
+                          "contract": {
+                            "const": "cg.clarification"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "const": "reference"
+                      },
+                      "reference": {
+                        "allOf": [
+                          {
+                            "$ref": "common.schema.json#/$defs/reference"
+                          },
+                          {
+                            "properties": {
+                              "contract": {
+                                "const": "cg.clarification"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "reference"
+                    ],
+                    "additionalProperties": false
+                  }
+                ]
+              }
+            },
+            "required": [
+              "session_id",
+              "command_id",
+              "expected_revision",
+              "pending_id",
+              "answer"
+            ],
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "operation": {
+            "const": "session.continue"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "input": {
+            "type": "object",
+            "properties": {
+              "session_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+              },
+              "command_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+              },
+              "expected_revision": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": [
+              "session_id",
+              "command_id",
+              "expected_revision"
+            ],
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "operation": {
+            "const": "session.inspect"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "input": {
+            "type": "object",
+            "properties": {
+              "session_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+              }
+            },
+            "required": [
+              "session_id"
+            ],
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "operation": {
+            "const": "session.start"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "input": {
+            "type": "object",
+            "properties": {
+              "command_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+              },
+              "intent": {
+                "oneOf": [
+                  {
+                    "allOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "kind": {
+                            "const": "document"
+                          },
+                          "contract": {
+                            "enum": [
+                              "cg.situation",
+                              "cg.assessment",
+                              "cg.resolution",
+                              "cg.resolution-trace",
+                              "cg.plan",
+                              "cg.composition-rules",
+                              "cg.context-projection",
+                              "cg.context-fragment",
+                              "cg.execution-context",
+                              "cg.registry",
+                              "cg.evidence",
+                              "cg.intent",
+                              "cg.clarification",
+                              "cg.consent-record",
+                              "cg.process-snapshot"
+                            ]
+                          },
+                          "document": {
+                            "type": "object"
+                          },
+                          "contract_version": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 32
+                          }
+                        },
+                        "required": [
+                          "kind",
+                          "contract",
+                          "document",
+                          "contract_version"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "properties": {
+                          "contract": {
+                            "const": "cg.intent"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "const": "reference"
+                      },
+                      "reference": {
+                        "allOf": [
+                          {
+                            "$ref": "common.schema.json#/$defs/reference"
+                          },
+                          {
+                            "properties": {
+                              "contract": {
+                                "const": "cg.intent"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "reference"
+                    ],
+                    "additionalProperties": false
+                  }
+                ]
+              }
+            },
+            "required": [
+              "command_id",
+              "intent"
+            ],
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "operation": {
+            "const": "situation.assess"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "input": {
+            "type": "object",
+            "properties": {
+              "situation": {
+                "oneOf": [
+                  {
+                    "allOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "kind": {
+                            "const": "document"
+                          },
+                          "contract": {
+                            "enum": [
+                              "cg.situation",
+                              "cg.assessment",
+                              "cg.resolution",
+                              "cg.resolution-trace",
+                              "cg.plan",
+                              "cg.composition-rules",
+                              "cg.context-projection",
+                              "cg.context-fragment",
+                              "cg.execution-context",
+                              "cg.registry",
+                              "cg.evidence",
+                              "cg.intent",
+                              "cg.clarification",
+                              "cg.consent-record",
+                              "cg.process-snapshot",
+                              "cg.situation-assembly"
+                            ]
+                          },
+                          "document": {
+                            "type": "object"
+                          },
+                          "contract_version": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 32
+                          }
+                        },
+                        "required": [
+                          "kind",
+                          "contract",
+                          "document",
+                          "contract_version"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "properties": {
+                          "contract": {
+                            "const": "cg.situation-assembly"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "const": "reference"
+                      },
+                      "reference": {
+                        "allOf": [
+                          {
+                            "$ref": "common.schema.json#/$defs/reference"
+                          },
+                          {
+                            "properties": {
+                              "contract": {
+                                "const": "cg.situation-assembly"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "reference"
+                    ],
+                    "additionalProperties": false
+                  }
+                ]
+              }
+            },
+            "required": [
+              "situation"
+            ],
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "operation": {
+            "const": "situation.inspect"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "input": {
+            "type": "object",
+            "properties": {
+              "situation": {
+                "oneOf": [
+                  {
+                    "allOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "kind": {
+                            "const": "document"
+                          },
+                          "contract": {
+                            "enum": [
+                              "cg.situation",
+                              "cg.assessment",
+                              "cg.resolution",
+                              "cg.resolution-trace",
+                              "cg.plan",
+                              "cg.composition-rules",
+                              "cg.context-projection",
+                              "cg.context-fragment",
+                              "cg.execution-context",
+                              "cg.registry",
+                              "cg.evidence",
+                              "cg.intent",
+                              "cg.clarification",
+                              "cg.consent-record",
+                              "cg.process-snapshot"
+                            ]
+                          },
+                          "document": {
+                            "type": "object"
+                          },
+                          "contract_version": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 32
+                          }
+                        },
+                        "required": [
+                          "kind",
+                          "contract",
+                          "document",
+                          "contract_version"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "properties": {
+                          "contract": {
+                            "const": "cg.situation"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "const": "reference"
+                      },
+                      "reference": {
+                        "allOf": [
+                          {
+                            "$ref": "common.schema.json#/$defs/reference"
+                          },
+                          {
+                            "properties": {
+                              "contract": {
+                                "const": "cg.situation"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "reference"
+                    ],
+                    "additionalProperties": false
+                  }
+                ]
+              },
+              "process": {
+                "allOf": [
+                  {
+                    "$ref": "common.schema.json#/$defs/reference"
+                  },
+                  {
+                    "properties": {
+                      "contract": {
+                        "const": "cg.process-snapshot"
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            "required": [
+              "situation"
+            ],
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "operation": {
+            "const": "state.explain"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "input": {
+            "type": "object",
+            "properties": {
+              "resolution": {
+                "allOf": [
+                  {
+                    "$ref": "common.schema.json#/$defs/reference"
+                  },
+                  {
+                    "properties": {
+                      "contract": {
+                        "const": "cg.resolution"
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            "required": [
+              "resolution"
+            ],
+            "additionalProperties": false
+          }
+        }
+      }
+    }
+  ],
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cognitive-gateway.local/schemas/codex/v1/request.schema.json"
+}

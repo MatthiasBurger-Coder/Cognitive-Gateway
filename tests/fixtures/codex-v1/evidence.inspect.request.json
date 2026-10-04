@@ -1,0 +1,27 @@
+{
+  "schema_version": "1.0",
+  "scope": {
+    "workspace_id": "workspace-example",
+    "project_id": "project-example",
+    "binding_id": "binding-example"
+  },
+  "operation": "evidence.inspect",
+  "input": {
+    "references": [
+      {
+        "id": "example",
+        "contract": "cg.evidence",
+        "revision": "1",
+        "digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+        "contract_version": "1.0"
+      }
+    ]
+  },
+  "execution": {
+    "operating_mode": "DEVELOPMENT",
+    "execution_profile": "FULL_PATH"
+  },
+  "correlation": {
+    "request_id": "request-example"
+  }
+}

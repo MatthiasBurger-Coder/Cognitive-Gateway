@@ -77,3 +77,8 @@ The [CPU ML experiment plan](ml-experiment.schema.json) pins feature schema,
 selection/search space, group or chronological CV, seed, trial budget, objective
 and stop condition. Runtime validation additionally enforces source eligibility,
 leakage prevention and fitting/evaluation separation.
+
+The [Codex-facing v1 schemas](codex/v1/) define EPIC-04.02 request, response,
+resource and diagnostic envelopes plus the tool/resource catalog. Existing Rust
+payload parsers remain authoritative; session commands are explicitly unsupported
+until the shared session API exists. See [the versioned contract](../docs/codex-facing-contracts.md).

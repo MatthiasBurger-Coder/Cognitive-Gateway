@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0",
+  "scope": null,
+  "operation": null,
+  "correlation": null,
+  "status": "blocked",
+  "result": null,
+  "explainability": [],
+  "evidence": [],
+  "provenance": [],
+  "diagnostics": [
+    {
+      "code": "CG_PROCESS_BLOCKED",
+      "message": "Process prerequisites are not satisfied.",
+      "retry": "after_change"
+    }
+  ]
+}

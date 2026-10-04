@@ -4,6 +4,10 @@
     "command": "python3 -m unittest discover -s tests/architecture -p \"test_*.py\""
   },
   {
+    "name": "EPIC-04.02 versioned contract fixtures",
+    "command": "python3 -m unittest discover -s tests/contracts -p \"test_*.py\""
+  },
+  {
     "name": "Architecture guard",
     "command": "./scripts/check-architecture.sh"
   },

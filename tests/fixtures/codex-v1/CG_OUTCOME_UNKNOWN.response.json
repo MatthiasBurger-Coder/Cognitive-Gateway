@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0",
+  "scope": null,
+  "operation": null,
+  "correlation": null,
+  "status": "error",
+  "result": null,
+  "explainability": [],
+  "evidence": [],
+  "provenance": [],
+  "diagnostics": [
+    {
+      "code": "CG_OUTCOME_UNKNOWN",
+      "message": "Command outcome requires inspection.",
+      "retry": "inspect"
+    }
+  ]
+}

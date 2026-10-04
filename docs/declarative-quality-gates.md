@@ -9,6 +9,8 @@ python3 scripts/quality-gate.py
 ```
 
 Run from a checkout with Bash, Git, Python 3.11+ and the Rust toolchain installed.
+Install offline contract-validation dependencies with
+`python3 -m pip install -r tests/contracts/requirements.txt` before running the gate.
 Start the local PostgreSQL service with `./scripts/start-postgres.sh` before a
 local full gate run. The daemon coverage step executes the CG-22 database
 integration test; CI provides an isolated PostgreSQL service automatically.
@@ -20,7 +22,8 @@ the ordered commands in [quality-gates.json](../scripts/quality-gates.json).
 The [Rust Quality workflow](../.github/workflows/rust.yml) executes this same
 entry point on pull requests, main pushes and manual dispatch.
 
-The gate runs architecture and gate-failure regression tests, formatting,
+The gate runs architecture and gate-failure regression tests, EPIC-04.02 offline
+versioned schema/fixture validation, formatting,
 workspace build/tests, both installed CLI smoke checks, the CG-12 external
 project export and independent replay, clippy and every established coverage
 gate. Workspace tests include unit, component, contract and integration tests.
