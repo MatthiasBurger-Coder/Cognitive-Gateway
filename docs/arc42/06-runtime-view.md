@@ -175,7 +175,9 @@ See [canonical host](../codex-canonical-host.md).
 The actual installed Codex client has exercised these paths with neutral admitted
 fixture snapshots and full CLI envelope parity, separately from synthetic
 protocol/component tests. See [installed-client qualification](../codex-installed-client-qualification.md).
-Session service delivery remains pending. [Proposed ADR-021](../adr/ADR-021-shared-structured-session-ownership.md)
-preserves one application-owned coordinator and defines the prerequisite task,
-interaction, persistence and verification boundaries; no session lifecycle is
-claimed by the standalone host or this runtime diagram.
+Session service delivery remains pending. [Accepted contract ADR-021](../adr/ADR-021-shared-structured-session-ownership.md)
+specifies one application-owned coordinator, a verified context artifact as the
+explicit goal, exact trusted interactions and a separate v2 session boundary.
+See the [typed specification and prerequisite matrix](../shared-session-contract.md).
+The artifact verifier and #272/#273/#275/#276/#277 services remain delivery work;
+no session lifecycle is claimed by the standalone host or this runtime diagram.

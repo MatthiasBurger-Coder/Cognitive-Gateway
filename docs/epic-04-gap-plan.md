@@ -40,19 +40,21 @@ No workflow engine or Python-specific product architecture is imposed on CG.
   and foundation gates. Run file-mutating slices sequentially. #279 system proof
   remains separate. Scope/policy/consent cannot come from client/model content.
 
-Decision for the complete session implementation: **REQUIRES_REFINEMENT** until
-#293 establishes the shared contracts with #272 and the executable #273/#275
-foundation is delivered. This is authorized prerequisite work, not a request
-for repeated implementation permission. #292, #293, baseline #295 investigation
+Current gate: #293 contract definition is **READY_FOR_WORKFLOW** with the
+user-selected artifact goal. #294 runtime binding is **BLOCKED** until #272
+typed contracts and executable #273/#275/#276/#277 foundations qualify.
+This is authorized prerequisite work, not a request for repeated implementation
+permission. #292, #293, baseline #295 investigation
 and #297 are ready for their own bounded scopes. #294 and final #296 cannot
 claim readiness/completion from placeholder host projections.
 
 ## Accepted scope and progress
 
 The user explicitly accepted structured tasks using the existing Rust services,
-with Semantic/model/connector paths unsupported. The concrete first task's
-success condition remains under clarification: a verified context artifact or
-an executed domain desired state. See [shared contract refinement](shared-session-contract.md).
+with Semantic/model/connector paths unsupported. On 2026-10-10 the user selected
+a verified context artifact as the explicit first task goal. ADR-021 and the
+normative shared specification now fix typed ownership, exact interactions, recovery requirements and a separate v2 boundary.
+See [shared session specification](shared-session-contract.md).
 No shared coordinator, pending-interaction runtime or durable recovery is
 claimed by the completed canonical and client work.
 
@@ -65,8 +67,10 @@ claimed by the completed canonical and client work.
   remains pending; the report retains NOT_COMPLETE.
 - #297: adapted skill created and structurally validated. [Scenario review](three-amigos-skill-validation.md)
   records decisions on real failures without inventing independent reviewers.
-- #293/#294: [shared contracts](shared-session-contract.md) refined; actual shared
-  lifecycle implementation remains open. No adapter-owned coordinator was added.
+- #293: [shared contracts](shared-session-contract.md) specified with accepted
+  ADR-021, explicit artifact verification and the seven-row requirement matrix.
+  This completes contract definition only; #272 types and #273/#275/#276/#277
+  runtime gates remain required before #294 can expose versioned session operations.
 
 ## Requirement and evidence matrix
 
@@ -95,8 +99,8 @@ their component evidence is retained, not upgraded to product evidence.
 Estimates are provisional engineer-days including implementation, meaningful
 negative tests, documentation and applicable qualification/coverage. They are
 not elapsed calendar time, measured productivity or a delivery commitment.
-Confidence is medium for mapping/client work and low for sessions until #293
-refines the contracts and persistence/interaction decisions.
+Confidence is medium for mapping/client work and low for sessions until the
+specified #272/#273/#275/#276/#277 foundations qualify. #293 fixes the contract and product boundary; it supplies no runtime execution evidence.
 
 - [292 — EPIC-04.11: Wire canonical resolve, explain and context compilation into the shipped local host](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/issues/292): 4–7 engineer-days.
 - [293 — EPIC-04.12: Define the Codex binding to shared session contracts and trusted interaction authority](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/issues/293): 2–4 engineer-days.
