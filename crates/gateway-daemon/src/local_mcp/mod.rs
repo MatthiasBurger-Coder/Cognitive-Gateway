@@ -16,6 +16,15 @@ pub const PROTOCOL_VERSION: &str = "2025-11-25";
 pub const MAX_FRAME_BYTES: usize = 1_048_576;
 const MAX_REQUESTS: usize = 10_000;
 
+/// Shared bounded decoder for the headless operator path; no credential retention.
+pub fn decode_request(bytes: &[u8]) -> Option<Value> {
+    if bytes.len() >= MAX_FRAME_BYTES {
+        return None;
+    }
+    let value = decode::decode(bytes).ok()?;
+    security::credential_free(&value).then_some(value)
+}
+
 /// Inspect names only; no provider values or client authentication files are read.
 pub fn environment_allowed(names: impl IntoIterator<Item = std::ffi::OsString>) -> bool {
     names.into_iter().all(|name| {

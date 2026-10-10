@@ -4,6 +4,7 @@ use gateway_domain::ContextScopeId;
 use serde::Deserialize;
 use serde_json::{Value, json};
 use sha2::{Digest, Sha256};
+use std::io::Read;
 use std::path::{Path, PathBuf};
 
 #[derive(Deserialize)]
@@ -318,4 +319,34 @@ impl CodexHost for LocalCodexHost {
             provenance,
         })
     }
+}
+
+/// Shared admission path for MCP and the operator CLI. Claims never select authority.
+pub fn admit_local(
+    admission: &str,
+    cwd: &str,
+    repository: &str,
+    session: &str,
+    principal: &str,
+    scope: &Value,
+) -> Result<(ScopeBinding, CodexFacade<LocalCodexHost>), FacadeError> {
+    let file = std::fs::File::open(admission).map_err(|_| FacadeError::InvalidInput)?;
+    let mut text = String::new();
+    file.take(crate::local_mcp::MAX_FRAME_BYTES as u64)
+        .read_to_string(&mut text)
+        .map_err(|_| FacadeError::InvalidInput)?;
+    let resolver = LocalWorkspaceResolver::from_json(&text)?;
+    let binding = resolver.resolve(&WorkspaceReference {
+        working_directory: cwd.into(),
+        repository: repository.into(),
+    })?;
+    if binding.scope != *scope
+        || binding.session.principal != principal
+        || binding.session.session_id != session
+    {
+        return Err(FacadeError::ScopeDenied);
+    }
+    let host = resolver.host(&binding)?;
+    let facade = CodexFacade::with_binding(binding.clone(), host)?;
+    Ok((binding, facade))
 }

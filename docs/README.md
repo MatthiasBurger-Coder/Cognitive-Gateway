@@ -181,6 +181,7 @@ The approved CG-02 v2 handoff extension is documented in
 - [EPIC-04.07 Codex operation policy and consent gates](codex-policy-gates.md)
 - [Codex bounded runtime](codex-runtime.md) — invocation deadlines, cancellation, backpressure, diagnostics and health (#243).
 - [Codex local integration](codex-local-integration.md) — EPIC-04 Codex -> CG local no-key MCP boundary.
+- [Codex local setup and operator runbook](codex-local-setup.md) — bootstrap, secret-free configuration, CLI fallback and reproducible smoke tests (#244).
 - [Local MCP server](local-mcp-server.md) — #238 stdio lifecycle, discovery and transport; #239 facade integration.
 - [MCP connector/plugin runtime](mcp-connector-runtime.md) — EPIC-07 planned CG -> external systems boundary.
 - [Local model runtime / SLM-LxM boundary](local-model-runtime.md) — CG-27 signal adapters and standalone CPU/GPU benchmark framework; CG-27.01 optional service and qualification lifecycle; Qwen3-8B is a reference candidate only.

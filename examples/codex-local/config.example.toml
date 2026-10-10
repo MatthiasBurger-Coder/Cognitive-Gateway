@@ -1,0 +1,16 @@
+# Merge this table into Codex settings after replacing paths and pinning a
+# qualified initialize.clientInfo pair. Bootstrap generates absolute local paths.
+[mcp_servers.cognitive_gateway]
+command = "/usr/bin/env"
+args = ["-i", "/absolute/path/to/cg-mcp",
+  "--client-name", "codex", "--client-version", "VERIFIED_WIRE_VERSION",
+  "--principal", "operator", "--workspace", "workspace-example",
+  "--project", "project-example", "--binding", "binding-example",
+  "--admission", "/absolute/path/to/admission.json",
+  "--cwd", "/absolute/path/to/project",
+  "--repository", "/absolute/path/to/project",
+  "--session", "codex-session-example"]
+env_vars = []
+startup_timeout_sec = 10
+tool_timeout_sec = 35
+enabled_tools = ["cg_situation_inspect_v1", "cg_situation_assess_v1"]

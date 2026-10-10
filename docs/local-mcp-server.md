@@ -95,8 +95,8 @@ python3 -m unittest discover -s tests/contracts
 python3 scripts/check-local-mcp-protocol.py
 bash scripts/check-architecture.sh
 python3 -m unittest discover -s tests/architecture
-cargo llvm-cov -p gateway-application -p gateway-daemon --lib --bin cg-mcp \
-  --test local_mcp --test codex_facade --test codex_isolation \
+cargo llvm-cov -p gateway-application -p gateway-daemon --lib --bin cg-mcp --bin cg-local \
+  --test local_mcp --test codex_facade --test codex_isolation --test codex_local_cli \
   --json --output-path target/local-mcp-coverage.json
 python3 scripts/check-local-mcp-coverage.py target/local-mcp-coverage.json
 ```

@@ -75,9 +75,9 @@ The adapter does not log raw frames, authentication state or environment dumps.
 
 ```sh
 cargo test -p gateway-application --test codex_facade --locked
-cargo test -p gateway-daemon --test codex_isolation --test local_mcp --locked
-cargo llvm-cov -p gateway-application -p gateway-daemon --lib --bin cg-mcp \
-  --test local_mcp --test codex_facade --test codex_isolation --locked \
+cargo test -p gateway-daemon --test codex_isolation --test codex_local_cli --test local_mcp --locked
+cargo llvm-cov -p gateway-application -p gateway-daemon --lib --bin cg-mcp --bin cg-local \
+  --test local_mcp --test codex_facade --test codex_isolation --test codex_local_cli --locked \
   --json --output-path target/codex-security-coverage.json
 python3 scripts/check-local-mcp-coverage.py target/codex-security-coverage.json
 python3 scripts/quality-gate.py

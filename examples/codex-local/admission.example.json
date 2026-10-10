@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "mappings": [
+    {
+      "repository": "/absolute/path/to/project",
+      "scope": {
+        "workspace_id": "workspace-example",
+        "project_id": "project-example",
+        "binding_id": "binding-example"
+      },
+      "canonical_scope": "canonical-example",
+      "principal": "operator",
+      "session_id": "codex-session-example",
+      "revision": "mapping-1",
+      "resources": []
+    }
+  ]
+}
