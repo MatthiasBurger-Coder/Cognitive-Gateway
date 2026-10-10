@@ -22,6 +22,11 @@ host explicitly maps the admitted scope to a canonical ContextScopeId.
 | `evidence.inspect` | `ObservationEvidenceSet` validated serialization contract | Inspection of existing admitted evidence; no new evidence repository |
 | `session.*` | `CodexHost::session` reserved for shared #272/#273/#275 services | Unsupported by default; no facade lifecycle or consent authority |
 
+[EPIC-04.07 policy and consent gates](codex-policy-gates.md) additionally require
+trusted operation authority evaluated by the existing CG PolicyEngine. Availability
+checks and discovery cannot grant permission; mutations require explicit enablement
+and verified consent. Scoped resource reads use the same gate.
+
 `CodexHost` is a trusted outbound port. It admits operations, resolves records,
 maps records to canonical commands and applies current disclosure policy.
 Implementations must parse exact supported Rust payload contracts rather than

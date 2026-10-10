@@ -1,5 +1,7 @@
 //! EPIC-04.04 provider-independent application facade. Protocol framing stays outside.
 pub mod assessment;
+pub mod authorization;
+pub use authorization::*;
 pub mod contracts;
 pub mod isolation;
 pub mod ports;
@@ -137,6 +139,14 @@ impl<H: CodexHost> CodexFacade<H> {
             host,
             binding,
         })
+    }
+    fn authorize(&self, call: &Call) -> Result<(), FacadeError> {
+        // Service availability and disclosure checks cannot replace policy.
+        self.host.authorize(call)?;
+        let policy = self.host.operation_policy(call)?;
+        let report = policy.evaluate(call)?;
+        self.host.policy_decision(call, &report);
+        decision_result(&report)
     }
     fn source(&self, call: &Call, source: &Value) -> Result<Value, FacadeError> {
         if source["kind"] == "document" {
@@ -429,7 +439,7 @@ impl<H: CodexHost> CodexFacade<H> {
             binding: self.binding.clone(),
             source_provenance: RefCell::new(vec![]),
         };
-        self.host.authorize(&call).map_err(FacadeError::code)?;
+        self.authorize(&call).map_err(FacadeError::code)?;
         let (result, mut explainability, evidence, mut provenance) =
             if operation.starts_with("session.") {
                 if let Some(task_id) = call.input["session_id"].as_str() {
@@ -532,7 +542,7 @@ impl<H: CodexHost> CodexApplicationPort for CodexFacade<H> {
             binding: self.binding.clone(),
             source_provenance: RefCell::new(vec![]),
         };
-        self.host.authorize(&call)?;
+        self.authorize(&call)?;
         let trace = self.binding.explanation();
         if trace["id"] == id && trace["revision"] == revision && trace["digest"] == digest {
             return Ok(

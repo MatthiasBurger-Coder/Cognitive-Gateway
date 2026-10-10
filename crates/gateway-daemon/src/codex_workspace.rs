@@ -169,6 +169,53 @@ impl LocalCodexHost {
     }
 }
 impl CodexHost for LocalCodexHost {
+    fn operation_policy(&self, call: &Call) -> Result<OperationPolicy, FacadeError> {
+        self.check(call)?;
+        // The immutable workspace admission grants only these local inspections.
+        // Discovery, execution depth and input documents cannot enlarge this list.
+        let ids: Vec<_> = ["situation.inspect", "situation.assess", "resource.read"]
+            .into_iter()
+            .map(operation_capability)
+            .collect::<Result<_, _>>()?;
+        let authority = gateway_policy::PolicyAuthority {
+            policies: vec![
+                gateway_domain::PolicyDefinition::new(
+                    gateway_domain::PolicyId::new("local-workspace-inspection").unwrap(),
+                    "Admitted immutable local inspection only",
+                    ids.clone(),
+                )
+                .unwrap(),
+            ],
+            capabilities: ids
+                .iter()
+                .map(|id| {
+                    (
+                        id.clone(),
+                        gateway_domain::CapabilityDefinition::new(
+                            id.clone(),
+                            gateway_domain::CapabilityClass::Inspect,
+                        ),
+                    )
+                })
+                .collect(),
+            ..Default::default()
+        };
+        Ok(OperationPolicy {
+            authority,
+            facts: gateway_policy::StepFacts {
+                authorizations: ids
+                    .into_iter()
+                    .map(|id| (id, gateway_policy::Approval::Granted))
+                    .collect(),
+                ..Default::default()
+            },
+            process: gateway_policy::ProcessReadiness::NotApplicable,
+            operating_mode: gateway_domain::OperatingMode::Development,
+            execution_profile: gateway_domain::ExecutionProfile::FullPath,
+            mutations_enabled: false,
+        })
+    }
+
     fn authorize(&self, call: &Call) -> Result<(), FacadeError> {
         self.check(call)?;
         match call.operation.as_str() {
