@@ -1,8 +1,8 @@
-//! Dedicated private-stdio entrypoint; no environment/auth-store reads.
+//! Dedicated private-stdio entrypoint; environment names only, no auth-store reads.
 use gateway_application::codex::{CodexFacade, WorkspaceReference, WorkspaceResolver};
 use gateway_daemon::codex_workspace::LocalWorkspaceResolver;
 use gateway_daemon::local_mcp::{
-    LaunchBinding, MAX_FRAME_BYTES, Server, transport::StdioTransport,
+    LaunchBinding, MAX_FRAME_BYTES, Server, environment_allowed, transport::StdioTransport,
 };
 use std::io::Read;
 use std::time::Duration;
@@ -14,6 +14,10 @@ fn main() {
             "cg-mcp --client-name NAME --client-version VERSION --principal ID --workspace ID --project ID --binding ID\nPrivate stdio MCP; trusted launcher arguments required. No provider credentials. Optional admission: --admission FILE --cwd ABSOLUTE_PATH --repository ABSOLUTE_PATH --session ID."
         );
         return;
+    }
+    if !environment_allowed(std::env::vars_os().map(|(name, _)| name)) {
+        eprintln!("Local MCP credential environment denied; launch with a clean environment.");
+        std::process::exit(2);
     }
     let keys = [
         "--client-name",

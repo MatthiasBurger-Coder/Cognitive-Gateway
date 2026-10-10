@@ -3,6 +3,7 @@ pub mod assessment;
 pub mod contracts;
 pub mod isolation;
 pub mod ports;
+pub mod security;
 use crate::{
     DeclarativeSituationApplication,
     context_application::{CompileStepInput, ContextApplication, ContextApplicationError},
@@ -142,6 +143,9 @@ impl<H: CodexHost> CodexFacade<H> {
             if source["contract_version"] != "1.0" {
                 return Err(FacadeError::UnsupportedVersion);
             }
+            if !security::inline_allowed(&source["document"]) {
+                return Err(FacadeError::SensitivityDenied);
+            }
             return Ok(source["document"].clone());
         }
         self.reference(call, &source["reference"])
@@ -187,6 +191,14 @@ impl<H: CodexHost> CodexFacade<H> {
         }
         let document =
             serde_json::from_str(&record.document).map_err(|_| FacadeError::InvalidInput)?;
+        if !security::credential_free(&document)
+            || !security::inline_allowed(&document)
+            || !security::credential_free(
+                &json!({"reference":record.reference,"provenance":record.provenance}),
+            )
+        {
+            return Err(FacadeError::SensitivityDenied);
+        }
         for entry in record.provenance {
             if !call.source_provenance.borrow().contains(&entry) {
                 call.source_provenance.borrow_mut().push(entry);
@@ -377,6 +389,9 @@ impl<H: CodexHost> CodexFacade<H> {
         if !bounded(request) {
             return Err("CG_LIMIT_EXCEEDED");
         }
+        if !security::credential_free(request) {
+            return Err("CG_SENSITIVITY_DENIED");
+        }
         if request["schema_version"] != "1.0" {
             return Err("CG_UNSUPPORTED_VERSION");
         }
@@ -422,6 +437,9 @@ impl<H: CodexHost> CodexFacade<H> {
                         .map_err(FacadeError::code)?;
                 }
                 let session = self.host.session(&call).map_err(FacadeError::code)?;
+                if !security::inline_allowed(&session) {
+                    return Err("CG_SENSITIVITY_DENIED");
+                }
                 if !contracts::valid(&session, &common["$defs"]["session_result"], &common) {
                     return Err("CG_INTERNAL_ERROR");
                 }
@@ -436,10 +454,11 @@ impl<H: CodexHost> CodexFacade<H> {
                     .map_err(FacadeError::code)?;
                 // The host must keep secrets reference-only. Invalid projection fails closed.
                 if projection.source["kind"] == "document"
-                    && projection
-                        .provenance
-                        .iter()
-                        .any(|p| p["sensitivity"] == "SECRET")
+                    && (!security::inline_allowed(&projection.source["document"])
+                        || projection
+                            .provenance
+                            .iter()
+                            .any(|p| p["sensitivity"] == "SECRET"))
                 {
                     return Err("CG_SENSITIVITY_DENIED");
                 }
@@ -472,6 +491,9 @@ impl<H: CodexHost> CodexFacade<H> {
         explainability.push(self.binding.explanation());
         let response = json!({"schema_version":"1.0", "scope":self.scope, "operation":operation, "correlation":call.correlation,
             "status":"ok", "result":result, "explainability":explainability, "evidence":evidence, "provenance":provenance, "diagnostics":[]});
+        if !security::credential_free(&response) {
+            return Err("CG_SENSITIVITY_DENIED");
+        }
         if !contracts::valid(
             &response,
             &contracts::artifact("response.schema.json").unwrap(),
@@ -490,6 +512,12 @@ impl<H: CodexHost> CodexApplicationPort for CodexFacade<H> {
         revision: &str,
         digest: &str,
     ) -> Result<Value, FacadeError> {
+        if [id, revision, digest]
+            .iter()
+            .any(|v| security::credential_text(v))
+        {
+            return Err(FacadeError::SensitivityDenied);
+        }
         if *scope != self.scope {
             return Err(FacadeError::ScopeDenied);
         }
@@ -542,6 +570,7 @@ impl<H: CodexHost> CodexApplicationPort for CodexFacade<H> {
             let mut response = contracts::failure(code);
             let common = contracts::artifact("common.schema.json").unwrap();
             if bounded(request)
+                && security::credential_free(request)
                 && request["scope"] == self.scope
                 && request["operation"] == operation
                 && contracts::valid(

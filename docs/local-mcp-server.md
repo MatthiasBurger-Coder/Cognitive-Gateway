@@ -31,8 +31,10 @@ env -i target/debug/cg-mcp \
 The fixture's client version is illustrative. An actual client launch must pin
 its supported name/version rather than reuse the fixture identity. The launcher
 must pass an explicit environment allowlist excluding provider credentials;
-`env -i` demonstrates an empty environment. The adapter does not read credential
-variables, auth stores, config files or home directories.
+`env -i` demonstrates an empty environment. The adapter checks inherited variable
+names and refuses credential-bearing names without using their values. It does
+not read auth stores or home directories. Its only configuration read is the
+explicit admission file. See [credential and sensitive-data isolation](codex-secret-isolation.md).
 
 ## Surface and application availability
 
@@ -52,7 +54,8 @@ The [shared application facade](codex-application-facade.md) (#239) is implement
 and injectable through `Server::with_application`. The standalone launcher accepts an explicit #240 admission file, cwd, repository and client session; its local host admits situation queries and scoped resource reads. A discovery-only launch uses the unavailable host and returns `CG_UNSUPPORTED_CAPABILITY`. Session commands delegate
 only to shared application services when installed. Scoped resources require the admitted workspace host. No canonical use case is bypassed or reimplemented.
 
-Recognized tool calls validate envelope version, operation/name agreement,
+Credential-bearing frames are rejected anonymously before correlation or dispatch.
+Other recognized tool calls validate envelope version, operation/name agreement,
 strict frozen request shape and exact launch scope in that order. Results carry
 identical structured and serialized envelopes. Errors use frozen diagnostic
 triples without rejected payloads. The validator implements only the keywords

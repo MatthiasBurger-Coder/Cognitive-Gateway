@@ -12,6 +12,8 @@ mod composition;
 #[allow(dead_code)]
 #[path = "support/context_fixture.rs"]
 mod context_fixture;
+#[path = "support/codex_security.rs"]
+mod security_cases;
 mod support;
 
 fn fixture(name: &str) -> Value {

@@ -1,6 +1,6 @@
 # Current Architecture State
 
-**Reference date:** 2026-10-04
+**Reference date:** 2026-10-10
 
 This document is the compact status map for the current Cognitive Gateway architecture. It distinguishes implemented contracts from planned architecture so that issue descriptions, arc42 and code are not accidentally treated as equivalent maturity.
 
@@ -79,7 +79,7 @@ flowchart LR
 | General provider-independent model invocation | PLANNED | EPIC-06 #178 owns the general model invocation boundary. |
 | MCP connector/plugin runtime | PLANNED | EPIC-07 #223 owns external MCP server integration. |
 | GitHub MCP connector | PLANNED | Reference connector under EPIC-07. |
-| Codex -> CG local no-key MCP | PARTIAL | #238 implements [private stdio lifecycle/discovery](local-mcp-server.md); #236 / ADR-020 define trust. [Application facade](codex-application-facade.md) #239 is implemented and injectable. [Workspace/session isolation](codex-scope-isolation.md) #240 supplies admitted situation queries and scoped resource reads; discovery-only calls remain unsupported. Live client qualification remains #245. |
+| Codex -> CG local no-key MCP | PARTIAL | #238 implements [private stdio lifecycle/discovery](local-mcp-server.md); #236 / ADR-020 define trust. [Application facade](codex-application-facade.md) #239 is implemented and injectable. [Workspace/session isolation](codex-scope-isolation.md) #240 supplies admitted situation queries and scoped resource reads; discovery-only calls remain unsupported. [Credential and sensitive-data isolation](codex-secret-isolation.md) #241 checks launch environment, admission, request/result disclosure and trace/cache inputs. Policy/consent integration remains #242; live client qualification remains #245. |
 
 ## Normative boundaries
 

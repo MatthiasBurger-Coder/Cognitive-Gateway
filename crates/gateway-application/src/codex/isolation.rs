@@ -1,5 +1,5 @@
 //! Trusted launch bindings; identifiers are claims, never authority.
-use super::{FacadeError, contracts};
+use super::{FacadeError, contracts, security};
 use gateway_domain::ContextScopeId;
 use serde_json::{Value, json};
 use sha2::{Digest, Sha256};
@@ -21,6 +21,19 @@ pub struct ScopeBinding {
 
 impl ScopeBinding {
     pub fn validate(&self) -> Result<(), FacadeError> {
+        if !security::credential_free(&self.scope)
+            || [
+                &self.session.principal,
+                &self.session.session_id,
+                &self.session.connection_id,
+                &self.mapping_revision,
+                &self.canonical_scope.to_string(),
+            ]
+            .iter()
+            .any(|v| security::credential_text(v))
+        {
+            return Err(FacadeError::SensitivityDenied);
+        }
         let common = contracts::artifact("common.schema.json").unwrap();
         if !contracts::valid(&self.scope, &common["$defs"]["scope"], &common)
             || ![
@@ -87,6 +100,11 @@ impl ScopeBinding {
         provenance: &[Value],
     ) -> Result<String, FacadeError> {
         self.validate()?;
+        if !security::credential_free(
+            &json!({"operation":operation,"references":references,"provenance":provenance}),
+        ) {
+            return Err(FacadeError::SensitivityDenied);
+        }
         let common = contracts::artifact("common.schema.json").unwrap();
         if !contracts::token(operation)
             || references

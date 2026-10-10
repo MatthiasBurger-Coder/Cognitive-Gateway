@@ -3,6 +3,7 @@ mod contracts;
 pub(crate) mod decode;
 pub mod transport;
 
+use gateway_application::codex::security;
 use gateway_application::codex::{CodexApplicationPort, CodexFacade};
 use serde_json::{Value, json};
 use std::collections::BTreeSet;
@@ -12,6 +13,14 @@ use transport::{Transport, TransportError};
 pub const PROTOCOL_VERSION: &str = "2025-11-25";
 pub const MAX_FRAME_BYTES: usize = 1_048_576;
 const MAX_REQUESTS: usize = 10_000;
+
+/// Inspect names only; no provider values or client authentication files are read.
+pub fn environment_allowed(names: impl IntoIterator<Item = std::ffi::OsString>) -> bool {
+    names.into_iter().all(|name| {
+        name.to_str()
+            .is_none_or(|name| !security::credential_name(name))
+    })
+}
 
 /// Trusted launcher input, never constructed from MCP request claims.
 #[derive(Debug, Clone)]
@@ -39,7 +48,7 @@ impl LaunchBinding {
             binding,
         ]
         .iter()
-        .all(|text| contracts::token(text))
+        .all(|text| contracts::token(text) && !security::credential_text(text))
         {
             return None;
         }
@@ -113,6 +122,12 @@ impl Server {
             Ok(value) => value,
             Err(_) => return Some(rpc_error(Value::Null, -32700, "Parse error")),
         };
+        if !security::credential_free(&value) {
+            // Do not echo request IDs or retain credential-bearing notifications.
+            return value
+                .get("id")
+                .map(|_| rpc_error(Value::Null, -32600, "Invalid Request"));
+        }
         let id = value.get("id").cloned();
         if !params_object(
             &value,
@@ -260,6 +275,18 @@ impl Server {
             self.application
                 .execute(tool["operation"].as_str().unwrap(), request)
         };
+        let envelope = if security::credential_free(&envelope)
+            && (envelope["result"]["canonical_result"]["kind"] != "document"
+                || (security::inline_allowed(&envelope["result"]["canonical_result"]["document"])
+                    && !envelope["provenance"].as_array().is_some_and(|entries| {
+                        entries.iter().any(|p| p["sensitivity"] == "SECRET")
+                    })))
+            && security::inline_allowed(&envelope["result"])
+        {
+            envelope
+        } else {
+            contracts::failure("CG_SENSITIVITY_DENIED")
+        };
         result(
             id,
             json!({"structuredContent":envelope,"content":[{"type":"text","text":envelope.to_string()}],"isError":envelope["status"] != "ok"}),
@@ -297,10 +324,17 @@ impl Server {
                     .application
                     .read_resource(&scope, parts[9], parts[10], parts[11])
                 {
-                    return result(
-                        id,
-                        json!({"contents":[{"uri":uri,"mimeType":"application/json","text":resource.to_string()}]}),
-                    );
+                    if security::credential_free(&resource)
+                        && security::inline_allowed(&resource["document"])
+                        && !resource["provenance"].as_array().is_some_and(|entries| {
+                            entries.iter().any(|p| p["sensitivity"] == "SECRET")
+                        })
+                    {
+                        return result(
+                            id,
+                            json!({"contents":[{"uri":uri,"mimeType":"application/json","text":resource.to_string()}]}),
+                        );
+                    }
                 }
             }
         }
