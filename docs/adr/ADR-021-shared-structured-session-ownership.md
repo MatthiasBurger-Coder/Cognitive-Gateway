@@ -5,7 +5,16 @@
 - **Scope:** #272/#273/#275 and EPIC-04.12 #293; extends ADR-008/ADR-009/ADR-020
 - **Product decision:** User selected a verified context artifact as the explicit goal on 2026-10-10
 
-## Context
+## Current delivery state — 2026-10-11
+
+The structured runtime and v2 binding are implemented in the shipped hosts;
+[shared-runtime evidence](../shared-session-implementation.md) and
+[installed-client lifecycle evidence](../codex-installed-client-qualification.md)
+record their respective scopes. Fresh full-parent acceptance remains required.
+The context and original admission conditions below describe the decision-time
+baseline, not missing services in the current delivery. #279 remains separate.
+
+## Original context
 
 The inbound facade reserves session operations but provides no shared session
 service. A private MCP coordinator would duplicate application authority and
@@ -53,7 +62,7 @@ or completion. #276 owns versioned durable state, conditional commits, fencing
 and recovery/reconciliation. CG-14 diagnostic JSON is not a checkpoint. #277
 owns cumulative budgets and deadlines; reconnect/replan/restart cannot reset them.
 
-## Consequences and acceptance gate
+## Original consequences and acceptance gate
 
 This contract decision is ready for #272 implementation. Normative contract
 completion and shared-service execution are separate evidence levels. Consumers

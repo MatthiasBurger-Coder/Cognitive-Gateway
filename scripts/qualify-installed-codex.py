@@ -274,7 +274,7 @@ def main():
     output = args.output.resolve()
     output.mkdir(parents=True, exist_ok=False)
     report = {'scope': 'installed Codex -> shipped CG inspection', 'status': 'RUNNING',
-              'epic_04_status': 'NOT_COMPLETE', 'inference_started': False,
+              'epic_04_status': 'NOT_COMPLETE', 'closure_allowed': False, 'inference_started': False,
               'cg_environment': 'empty', 'provider_authentication_used': False,
               'limitations': ['Canonical resolve/explain/context and shared-session lifecycle require separate qualification.',
                               'This local inspection proof does not qualify EPIC-08 or model/connector behavior.'],
@@ -575,6 +575,8 @@ def main():
             if not unchanged:
                 report['status'] = 'FAIL'
                 report['diagnostic'] = 'Candidate sources or executables changed during qualification.'
+            else:
+                report['epic_04_status'] = 'NOT_ASSESSED'
         report['artifact_sha256'] = {path.name: sha256(path) for path in output.iterdir() if path.is_file()}
         (output / 'report.json').write_text(json.dumps(report, indent=2) + '\n')
     print(f"{report['status']}: {output / 'report.json'}")

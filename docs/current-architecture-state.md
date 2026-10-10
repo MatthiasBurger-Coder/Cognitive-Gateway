@@ -3,9 +3,10 @@
 
 Current full-parent acceptance is governed by [EPIC-04 acceptance](epic-04-acceptance.md).
 Shared structured services and installed-client lifecycle proof are delivered;
-older evidence below retains its historical scope. Parent #126 remains NOT_COMPLETE.
+older evidence below retains its historical scope. Fresh full reconciliation
+determines the current parent acceptance state.
 
-**Reference date:** 2026-10-10
+**Reference date:** 2026-10-11
 
 This document is the compact status map for the current Cognitive Gateway architecture. It distinguishes implemented contracts from planned architecture so that issue descriptions, arc42 and code are not accidentally treated as equivalent maturity.
 
@@ -84,7 +85,7 @@ flowchart LR
 | General provider-independent model invocation | PLANNED | EPIC-06 #178 owns the general model invocation boundary. |
 | MCP connector/plugin runtime | PLANNED | EPIC-07 #223 owns external MCP server integration. |
 | GitHub MCP connector | PLANNED | Reference connector under EPIC-07. |
-| Codex -> CG local no-key MCP | PARTIAL | #238 implements [private stdio lifecycle/discovery](local-mcp-server.md); #236 / ADR-020 define trust. [Application facade](codex-application-facade.md) #239 is implemented and injectable. [Workspace/session isolation](codex-scope-isolation.md) #240 supplies admitted situation queries and scoped resource reads; discovery-only calls remain unsupported. [Credential and sensitive-data isolation](codex-secret-isolation.md) #241 checks launch environment, admission, request/result disclosure and trace/cache inputs. [Current policy/consent gates](codex-policy-gates.md) #242 and [bounded runtime](codex-runtime.md) #243 are implemented. #245 adds [inbound component qualification](codex-release-qualification.md); [canonical host wiring](codex-canonical-host.md) now provides resolve/explain/context through the shipped binaries, and [installed Codex qualification](codex-installed-client-qualification.md) exercises those paths with CLI 0.162.1. The accepted [shared session specification](shared-session-contract.md) / ADR-021 defines the verified artifact goal and explicit v2 boundary; typed services and supported shared session lifecycle remain pending, separate from #279 full runtime. |
+| Codex -> CG local no-key MCP | PARTIAL | #238 implements [private stdio lifecycle/discovery](local-mcp-server.md); #236 / ADR-020 define trust. [Application facade](codex-application-facade.md) #239 is implemented and injectable. [Workspace/session isolation](codex-scope-isolation.md) #240 supplies admitted situation queries and scoped resource reads; discovery-only calls remain unsupported. [Credential and sensitive-data isolation](codex-secret-isolation.md) #241 checks launch environment, admission, request/result disclosure and trace/cache inputs. [Current policy/consent gates](codex-policy-gates.md) #242 and [bounded runtime](codex-runtime.md) #243 are implemented. #245 adds [inbound component qualification](codex-release-qualification.md); [canonical host wiring](codex-canonical-host.md) now provides resolve/explain/context through the shipped binaries, and [installed Codex qualification](codex-installed-client-qualification.md) exercises those paths with CLI 0.162.1. The accepted [shared session specification](shared-session-contract.md) / ADR-021 defines the verified artifact goal and explicit v2 boundary. Typed services, the shared coordinator, trusted interactions and PostgreSQL lifecycle/recovery are implemented and exercised by [runtime qualification](shared-session-implementation.md) and installed-client lifecycle checks. Fresh full-parent reconciliation after the 2026-10-11 evidence-contract correction remains required; #279 full model/connector/runtime acceptance is separate. |
 
 ## Normative boundaries
 

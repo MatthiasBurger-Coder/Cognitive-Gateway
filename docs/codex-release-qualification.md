@@ -3,7 +3,8 @@
 
 Current full-parent acceptance is governed by [EPIC-04 acceptance](epic-04-acceptance.md).
 Shared structured services and installed-client lifecycle proof are delivered;
-older evidence below retains its historical scope. Parent #126 remains NOT_COMPLETE.
+older evidence below retains its historical scope. Fresh full reconciliation
+determines the current parent acceptance state.
 
 The qualification harness starts the real Rust `cg-mcp` and `cg-local` executables
 with empty environments, binds explicit temporary workspace roots, and exchanges
@@ -19,9 +20,11 @@ Rust services, exercised by `tests/codex-local/test_canonical_host.py`. The olde
 injected-host fixtures remain component evidence. Shared session projections are
 qualified through `Server -> CodexFacade -> CodexHost`, with current CG policy and
 consent checks. The projection fixture supplies running, clarification pause,
-consent pause and cancelled results; it implements no task coordinator. Shared
-durable services #272/#273/#275 are absent. Supported session lifecycle operations
-against those services remain an acceptance gap; this report does not close #245.
+consent pause and cancelled results; it implements no task coordinator. The shipped v2 path now delegates to real shared durable services
+#272/#273/#275, with PostgreSQL recovery and trusted interaction authority.
+See [shared-runtime qualification](shared-session-implementation.md) and
+[installed-client qualification](codex-installed-client-qualification.md).
+This component report alone does not close the broad #245 definition of done.
 
 ## Reproduction and retained evidence
 
@@ -37,7 +40,10 @@ security, bridge, failure, executable golden, protocol/schema and architecture
 checks, formatting and workspace Clippy. It measures the extended sixteen-file
 MCP coverage gate at >=95% per file. Any gate failure, missing/low coverage, or
 source change during execution returns nonzero and records `FAIL`. A successful
-run records `QUALIFIED_COMPONENT_SCOPE` and `epic_04_status: NOT_COMPLETE`.
+run records `QUALIFIED_COMPONENT_SCOPE`, `epic_04_status: NOT_ASSESSED` and
+`closure_allowed: false`; failed checks retain `NOT_COMPLETE`. These producer
+fields were corrected on 2026-10-11. Older retained reports preserve their
+original `NOT_COMPLETE` value and cannot be upgraded by editing them.
 `report.json` retains commands, exit codes, Git revision, worktree status, source
 SHA-256 hashes, artifact hashes, timestamps, coverage and explicit limitations.
 Logs retain individual test names. A dirty candidate is reviewable through its
@@ -52,7 +58,9 @@ Neither mode substitutes for the repository's complete release quality gate.
 
 All paths below are relative to the checkout root. The fixture identity supplies no installed-client proof. A separate
 [installed-client run](codex-installed-client-qualification.md) exercises actual
-Codex discovery and inspect/resolve/explain/compile; shared sessions remain absent.
+Codex discovery, inspect/resolve/explain/compile and the supported v2 shared
+sessions. Each report retains its own scope; full parent acceptance requires
+[fresh aggregation of all 24 criteria](epic-04-acceptance.md).
 
 | #245 criterion | Objective evidence | Qualification boundary |
 | --- | --- | --- |
@@ -67,15 +75,15 @@ Codex discovery and inspect/resolve/explain/compile; shared sessions remain abse
 | No provider dependency in inner authority | `scripts/check-architecture.sh`, `test_dependencies.py`, `test_local_mcp_boundary.py` | Cargo dependency mutations plus framing/module guards |
 | Architecture remains green | `architecture.log`, `architecture-regressions.log`, workspace Clippy | Existing gates unchanged |
 | >=95% materially changed production coverage | `local-mcp-coverage.json`, per-file coverage in report | Canonical host/mapping and changed pipeline added to measured gate; >=95% for each required file |
-| Session start/status, pauses and cancellation projections | `codex_qualification.rs::shared_host_start_status_pause_and_cancellation_projections_cross_the_bridge`; `session-projections.json` | Shared host contract projection proof; durable service lifecycle remains pending |
-| All EPIC-04 criteria have objective evidence | This matrix and slice mapping below | Component evidence complete; full EPIC-04 acceptance remains pending shared service integration |
+| Session start/status, pauses and cancellation projections | `codex_qualification.rs::shared_host_start_status_pause_and_cancellation_projections_cross_the_bridge`; `session-projections.json` | Shared host contract projection proof; durable lifecycle is separately exercised by #294/#295 |
+| All EPIC-04 criteria have objective evidence | This matrix and slice mapping below | Component mapping only; full EPIC-04 acceptance requires fresh #296 reconciliation |
 | Distinguish inbound from #279 full runtime | Machine report scope/status/limitations | No connector/model completion or full runtime release claim |
 
 ## EPIC-04 slice traceability
 
 The parent #126 acceptance criteria map individually as follows. These are
-component proofs; the installed-client and integrated-session gaps above remain
-explicit even when the listed regression tests pass.
+component proofs. Installed-client and shared-service evidence are separate
+inputs to full acceptance even when these regression tests pass.
 
 | Parent criterion (in issue order) | Reproducible automated evidence |
 | --- | --- |
@@ -114,12 +122,13 @@ explicit even when the listed regression tests pass.
 
 ## Release decision
 
-The harness can qualify the inbound component scope. EPIC-04's full release
-decision remains **NOT COMPLETE** until shared session start/status,
-clarification/consent pause and cancellation are exercised against the supported
-shared services rather than supplied projections. Installed-client interoperability
-also requires a controlled run with its exact initialize name/version pair. #279
-must independently qualify connector/model and durable runtime behavior.
+The harness qualifies the inbound component scope. Real shared-session
+start/status, clarification/consent pause, continuation and cancellation now
+have separate shared-service/PostgreSQL and installed-client evidence. Full
+EPIC-04 acceptance still requires fresh source-bound reconciliation of all 24
+criteria after the producer-contract correction; green component evidence alone
+never supplies that decision. #279 independently qualifies its broader
+model/connector/system scope.
 
 Prior EPIC-04.10 verification on 2026-10-10: the standalone component harness returned
 `QUALIFIED_COMPONENT_SCOPE`; all ten required gates passed, including nineteen
@@ -132,7 +141,7 @@ passed its dedicated test target. Local evidence is retained under
 `target/epic04-245-workspace-tests.log`. This is component evidence, not execution
 of the separate complete release gate or qualification of an installed client.
 
-## Delivery-gap candidate verification — 2026-10-10
+## Historical delivery-gap candidate verification — 2026-10-10
 
 The extended standalone runner completed all ten gates and its own coverage
 measurement with `QUALIFIED_COMPONENT_SCOPE` / `NOT_COMPLETE`. All sixteen
@@ -150,6 +159,6 @@ retained in `target/epic04-gap-workspace-tests.log`; the subsequent compatibilit
 fix also passed the dedicated canonical target and complete component gates.
 
 These are locally executed candidate checks, not a merged release or full
-repository release-gate run. Shared session services remain absent; both reports
+repository release-gate run. At that intermediate candidate, shared session services remained absent; both reports
 retain EPIC-04 NOT_COMPLETE. The final documentation candidate is checked again
 with the unchanged measured Rust coverage in `target/epic04-gap-review/`.
