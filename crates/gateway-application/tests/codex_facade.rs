@@ -305,6 +305,7 @@ fn registry_resolver_explain_and_evidence_use_existing_owners() {
         }
         let response = app.execute(operation, &request);
         assert_eq!(response["status"], "ok", "{operation}: {response}");
+        assert_eq!(app.execute(operation, &request), response);
     }
 }
 #[test]

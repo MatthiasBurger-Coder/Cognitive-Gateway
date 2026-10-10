@@ -42,6 +42,17 @@ class CodexContractTests(unittest.TestCase):
                 name = 'request' if '.request.' in path.name else 'resource' if '.resource.' in path.name else 'response'
                 self.valid(name + '.schema.json', load(path))
 
+    def test_qualification_goldens_match_independent_frozen_schemas(self):
+        golden = ROOT / 'tests/fixtures/codex-qualification'
+        self.valid('response.schema.json', load(golden / 'inspect.response.json'))
+        envelope = load(FIXTURES / 'session.inspect.response.json')
+        for scenario in load(golden / 'session-projections.json'):
+            with self.subTest(operation=scenario['operation'], status=scenario['projection']['status']):
+                response = copy.deepcopy(envelope)
+                response.update(status='ok', operation=scenario['operation'], diagnostics=[],
+                                result=scenario['projection'])
+                self.valid('response.schema.json', response)
+
     def test_unknown_versions_fields_and_operations_fail_closed(self):
         for suffix in ['request', 'response', 'resource']:
             original = load(FIXTURES / ('assessment.resource.json' if suffix == 'resource'
