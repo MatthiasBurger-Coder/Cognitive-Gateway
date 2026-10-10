@@ -98,10 +98,15 @@ fn check(value: &Value, encoded_depth: usize) -> bool {
         }
         match value {
             Value::Object(object) => {
-                if object
-                    .keys()
-                    .any(|key| credential_name(key) || credential_text(key))
-                {
+                if object.iter().any(|(key, value)| {
+                    credential_name(key)
+                        || credential_text(key)
+                        || (key.eq_ignore_ascii_case("authorization")
+                            && value.as_str().is_some_and(|text| {
+                                let text = text.trim_start().to_ascii_lowercase();
+                                text.starts_with("bearer ") || text.starts_with("basic ")
+                            }))
+                }) {
                     return false;
                 }
                 pending.extend(object.values().map(|v| (v, depth + 1)));
@@ -177,6 +182,8 @@ mod tests {
         assert!(!credential_free(
             &json!({"Authorization":"Basic RkFLRV9DUkVERU5USUFMOjAxMjM="})
         ));
+        assert!(!credential_free(&json!({"Authorization":"Bearer x"})));
+        assert!(!credential_free(&json!({"authorization":"Basic eA=="})));
         assert!(!credential_free(
             &json!({"text":"{\"api_key\":\"opaque\"}"})
         ));
