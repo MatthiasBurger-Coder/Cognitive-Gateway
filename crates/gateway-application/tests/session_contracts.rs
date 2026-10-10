@@ -714,6 +714,10 @@ fn checkpoint() -> SessionCheckpoint {
         pending: None,
         accepted_consent: None,
         authority_events: vec![],
+        selected_source: None,
+        artifact: None,
+        lease_until_ms: None,
+        initial_assessment: None,
     }
 }
 
@@ -871,6 +875,7 @@ fn append(current: &FencedSession, command: Option<CommandId>) -> JournalAppend 
         fence: current.fence,
         command,
         next,
+        records: vec![],
     }
 }
 

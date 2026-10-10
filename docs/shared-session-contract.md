@@ -1,11 +1,10 @@
 # Shared session contracts and Codex binding — EPIC-04.12
 
 Date: 2026-10-10. Contract decision: **READY_FOR_WORKFLOW** for #272 contract
-implementation. Runtime status: **NOT_IMPLEMENTED**. ADR-021 records the decision.
-This is a normative application API specification. A candidate typed Rust
-prerequisite is recorded in [shared-session-implementation.md](shared-session-implementation.md).
-It provides contract/admission types; no coordinator, persistence adapter or
-passing session qualification is delivered.
+implementation. The structured runtime and v2 binding are implemented; their
+qualification is recorded in [shared-session-implementation.md](shared-session-implementation.md).
+ADR-021 records the ownership decision. This remains the normative application
+API specification; runtime acceptance is established by the separate retained evidence.
 
 Owners: [#272 contracts](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/issues/272),
 [#273 coordinator](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/issues/273),
@@ -62,13 +61,13 @@ owners remain EPIC-05/06/07 and #274, respectively.
 | `DeclarativeResolutionApplication`, `ResolvedPlan`, snapshot/composition ports | Pinned capability/process closure, resolution and explanation |
 | `PolicyApplication`, `PolicyEngine`, `PolicyAuthority`, `StepFacts` | Current authorization, evidence, consent and process gate; capability-level consent facts alone do not prove exact action consent |
 | `ContextApplication::compile_step`, `CompiledStep` | Canonical context artifact production, disclosure and validated IR |
-| `ClosedLoop`, `VerifiedOutcomeReceipt` | Continue/Replan/Pause/Success/Stopped decisions and verified outcome evaluation; no durable session/recovery API exists |
+| `ClosedLoop`, `VerifiedOutcomeReceipt` | Continue/Replan/Pause/Success/Stopped decisions and verified outcome evaluation; shared sessions add durable lifecycle/recovery around the existing evaluation |
 
 The application owns one session service used by CLI and Codex. The daemon
 composition root injects current authority, input admission, artifact storage,
 verification, interaction authority and journal ports. Adapters translate commands
-and disclose results. `CodexHost::session` is currently an unsupported `Value`
-projection hook, not the shared typed API. #272 owns the typed API; #273 owns its
+and disclose results. The frozen v1 `CodexHost::session` remains an unsupported `Value`
+projection hook. V2 uses `SessionApplicationPort` through the shared coordinator. #272 owns the typed API; #273 owns its
 execution. Neither MCP connection lifetime nor Codex approvals own CG lifecycle.
 
 ```mermaid
@@ -210,7 +209,8 @@ JSON hashing or scope-free capability consent is insufficient. Never display a
 request as an approval record. The trusted CG consent authority owns issuance,
 denial and withdrawal, authenticated issuer and live revocation checks. Its
 verified record must bind that complete tuple and its own pinned version/digest.
-The store and issuer are #275 prerequisites, not an implemented CG grant service.
+The #275-owned store and authenticated issuer are implemented by the shared
+PostgreSQL repository and trusted operator boundary; see the runtime report.
 
 Approve requires expected revision to equal the pending issuance revision and
 the record's bound revision. Acceptance persists the consumed request, record
@@ -304,8 +304,8 @@ fixtures, exact version/tool/resource routing and sanitized reason mappings befo
 exposure. v2 session tools use `cg_session_<command>_v2`; their envelopes explicitly
 state `2.0`. v1 tools/resources remain unchanged. Discovery advertises only enabled
 exact versions; negotiation does not turn unsupported owners into services.
-This document does not publish or claim an executable v2 endpoint. MCP protocol
-date and application envelope version remain independent.
+The exact executable v2 schemas and routing are published under `schemas/codex/v2`.
+MCP protocol date and application envelope version remain independent.
 
 ## Requirement and delivery gate matrix
 
@@ -314,15 +314,15 @@ not independent approval: requirements (explicit artifact goal), architecture
 (one coordinator and exact authority), automation (Rust API/daemon injection,
 frozen schema routing), testing (contract vs service vs installed path).
 
-| ID / #293 requirement | Contract evidence (VERIFIED by role review) | Implementation owner / prerequisite gate | Execution evidence status (BLOCKED) |
+| ID / #293 requirement | Contract evidence (VERIFIED by role review) | Implementation owner / prerequisite gate | Runtime evidence (see implementation report) |
 | --- | --- | --- | --- |
-| SC-01 ADR, typed API and immutable identities | ADR-021; typed commands/query and owner sections | #272 typed validation/concurrent start/owner negatives; #273 shared coordinator | NOT_RUN; services absent |
-| SC-02 revision/replay/terminal/interaction/expiry/consent | Lifecycle table and trusted-interaction tuple/approval revision rule | #272 stale/replay/terminal gate; #275 one-use, expiry, changed action/arguments/authority and withdrawal gate | NOT_RUN |
-| SC-03 baseline and unsupported capabilities | Explicit artifact goal/verifier; existing services table | #273 real artifact observations and CG-14 verified completion; EPIC-05/06/07 remain unsupported | Canonical services exist; session proof NOT_RUN |
-| SC-04 trusted plans/answers and CG consent | Private validated types, question/consent issuer and normal admission | #275 trusted issuer/store and source validation; semantic plan needs #188, excluded from baseline | NOT_RUN |
-| SC-05 disconnect/reconnect/current authority/persistence | Recovery section and uncertainty/cancellation rules | #276 crash/fencing/corruption/read-back gate (depends #272/#273/#274/#275); #277 budgets/deadline gate | NOT_RUN |
-| SC-06 frozen v1 comparison / versioned change | Exact mapping table, unchanged v1 and explicit v2 scope | #294 strict v2 schemas/parser/fixtures/routing and backward compatibility gate | Existing v1 checks apply; v2 NOT_IMPLEMENTED |
-| SC-07 evidence levels and linked prerequisites | This matrix and ordered gates below; #297 planning evidence | #294 shipped host; #295 installed client; #296 full parent reconciliation; #279 system scope | Session qualification NOT_RUN; EPIC-04 NOT_COMPLETE |
+| SC-01 ADR, typed API and immutable identities | ADR-021; typed commands/query and owner sections | #272 typed validation/concurrent start/owner negatives; #273 shared coordinator | Shared application, PostgreSQL and actual executable checks |
+| SC-02 revision/replay/terminal/interaction/expiry/consent | Lifecycle table and trusted-interaction tuple/approval revision rule | #272 stale/replay/terminal gate; #275 one-use, expiry, changed action/arguments/authority and withdrawal gate | Shared-service and actual executable checks |
+| SC-03 baseline and unsupported capabilities | Explicit artifact goal/verifier; existing services table | #273 real artifact observations and CG-14 verified completion; EPIC-05/06/07 remain unsupported | Stored-artifact verification and CG-14 completion checks |
+| SC-04 trusted plans/answers and CG consent | Private validated types, question/consent issuer and normal admission | #275 trusted issuer/store and source validation; semantic plan needs #188, excluded from baseline | Shared-service and actual executable checks |
+| SC-05 disconnect/reconnect/current authority/persistence | Recovery section and uncertainty/cancellation rules | #276 crash/fencing/corruption/read-back gate (depends #272/#273/#274/#275); #277 budgets/deadline gate | Shared-service and actual executable checks |
+| SC-06 frozen v1 comparison / versioned change | Exact mapping table, unchanged v1 and explicit v2 scope | #294 strict v2 schemas/parser/fixtures/routing and backward compatibility gate | Frozen v1 regressions and exact v2 discovery/schema checks |
+| SC-07 evidence levels and linked prerequisites | This matrix and ordered gates below; #297 planning evidence | #294 shipped host; #295 installed client; #296 full parent reconciliation; #279 system scope | #294 structured-runtime qualification; #295/#296 remain separate |
 
 Order: accepted specification -> #272 typed contract/fixture gate -> #273 and
 #275 service gates -> #274 supported invocation boundary / #276 recovery gate ->
@@ -366,7 +366,9 @@ The full release/coverage gate was not run for this documentation-only change.
 These checks establish unchanged v1 compatibility and repository integrity;
 they do not execute the specified shared API, v2 schemas, artifact verifier,
 trusted interaction service or restart recovery. Those remain BLOCKED/NOT_RUN
-at SHARED_SERVICE, EXECUTABLE and INSTALLED_CLIENT session evidence levels.
+in this historical contract-only candidate. The subsequent #294 runtime
+report separately records SHARED_SERVICE and EXECUTABLE qualification;
+INSTALLED_CLIENT session qualification remains with #295.
 All seven #293 contract criteria are documented and reviewed; runtime criteria
 remain assigned to the prerequisite owners above. No issue/epic closure or
 independent reviewer approval is inferred from this record.

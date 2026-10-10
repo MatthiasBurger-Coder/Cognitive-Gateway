@@ -1009,3 +1009,109 @@ mod policy_gates {
         assert_eq!(reports.borrow()[0].decision, PolicyDecision::Deny);
     }
 }
+
+#[test]
+fn unavailable_host_and_adapter_defaults_never_enable_services_or_authority() {
+    struct Probe;
+    impl CodexHost for Probe {
+        fn authorize(&self, call: &Call) -> Result<(), FacadeError> {
+            let host = UnavailableHost;
+            assert!(matches!(
+                host.authorize(call),
+                Err(FacadeError::UnsupportedCapability)
+            ));
+            assert!(matches!(
+                host.operation_policy(call),
+                Err(FacadeError::PolicyDenied)
+            ));
+            host.policy_decision(call, &test_policy(call).evaluate(call).unwrap());
+            assert!(matches!(
+                host.resource_reference(call, "id", "1", "digest"),
+                Err(FacadeError::ReferenceUnavailable)
+            ));
+            assert!(matches!(
+                host.reference(call, &Value::Null),
+                Err(FacadeError::ReferenceUnavailable)
+            ));
+            assert!(matches!(
+                host.resolution(call, &[]),
+                Err(FacadeError::UnsupportedCapability)
+            ));
+            assert!(matches!(
+                host.resolved(call, &Value::Null),
+                Err(FacadeError::UnsupportedCapability)
+            ));
+            assert!(matches!(
+                host.compile(call, &[]),
+                Err(FacadeError::UnsupportedCapability)
+            ));
+            assert!(matches!(
+                host.registry(call),
+                Err(FacadeError::UnsupportedCapability)
+            ));
+            assert!(matches!(
+                host.evidence(call, &[]),
+                Err(FacadeError::UnsupportedCapability)
+            ));
+            assert!(matches!(
+                host.project(call, "cg.intent", Value::Null),
+                Err(FacadeError::SensitivityDenied)
+            ));
+            assert!(matches!(
+                host.session_owner(call, "task"),
+                Err(FacadeError::UnsupportedCapability)
+            ));
+            assert!(matches!(
+                host.session(call),
+                Err(FacadeError::UnsupportedCapability)
+            ));
+            Err(FacadeError::UnsupportedCapability)
+        }
+    }
+    let app = CodexFacade::with_binding(
+        ScopeBinding {
+            scope: fixture("situation.inspect.request")["scope"].clone(),
+            canonical_scope: ContextScopeId::new("project-a").unwrap(),
+            mapping_revision: "1".into(),
+            session: SessionContext {
+                principal: "operator".into(),
+                session_id: "test-session".into(),
+                connection_id: "binding-example".into(),
+            },
+        },
+        Probe,
+    )
+    .unwrap();
+    assert_eq!(
+        code(&app.execute("situation.inspect", &fixture("situation.inspect.request"))),
+        "CG_UNSUPPORTED_CAPABILITY"
+    );
+    struct Bare;
+    impl CodexApplicationPort for Bare {
+        fn execute(&self, _: &str, _: &Value) -> Value {
+            json!({"invocations":1})
+        }
+    }
+    let context = RequestContext::new(
+        "probe".into(),
+        std::time::Instant::now() + std::time::Duration::from_secs(10),
+    );
+    assert!(!Bare.session_v2_enabled());
+    assert_eq!(
+        Bare.execute_with_context("session.start", &Value::Null, &context),
+        json!({"invocations":1})
+    );
+    assert_eq!(
+        Bare.read_with_context(&Value::Null, "id", "1", "digest", &context),
+        Err(FacadeError::ScopeDenied)
+    );
+    context.cancel();
+    assert_eq!(
+        Bare.execute_with_context("session.start", &Value::Null, &context)["status"],
+        "error"
+    );
+    assert!(
+        Bare.read_with_context(&Value::Null, "id", "1", "digest", &context)
+            .is_err()
+    );
+}

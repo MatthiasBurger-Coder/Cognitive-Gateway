@@ -120,6 +120,9 @@ impl CodexHost for UnavailableHost {}
 
 /// Driving port used by adapters; no domain crate access is required.
 pub trait CodexApplicationPort {
+    fn session_v2_enabled(&self) -> bool {
+        false
+    }
     fn execute(&self, operation: &str, request: &Value) -> Value;
     fn execute_with_context(
         &self,

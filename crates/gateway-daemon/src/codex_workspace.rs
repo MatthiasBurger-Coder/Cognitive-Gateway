@@ -25,6 +25,8 @@ struct Mapping {
     resources: Vec<Value>,
     #[serde(default)]
     canonical: Option<crate::codex_canonical::CanonicalAdmission>,
+    #[serde(default)]
+    sessions: Option<crate::local_sessions::SessionAdmission>,
 }
 
 pub struct LocalWorkspaceResolver {
@@ -141,6 +143,7 @@ impl LocalWorkspaceResolver {
             binding: binding.clone(),
             resources: mappings[0].resources.clone(),
             canonical: mappings[0].canonical.clone(),
+            sessions: mappings[0].sessions.clone(),
         })
     }
 }
@@ -180,9 +183,10 @@ impl WorkspaceResolver for LocalWorkspaceResolver {
 }
 
 pub struct LocalCodexHost {
-    binding: ScopeBinding,
-    resources: Vec<Value>,
-    canonical: Option<crate::codex_canonical::CanonicalAdmission>,
+    pub(crate) binding: ScopeBinding,
+    pub(crate) resources: Vec<Value>,
+    pub(crate) canonical: Option<crate::codex_canonical::CanonicalAdmission>,
+    pub(crate) sessions: Option<crate::local_sessions::SessionAdmission>,
 }
 impl LocalCodexHost {
     fn canonical_provenance(&self, reference: &Value) -> Result<Vec<Value>, FacadeError> {
@@ -500,7 +504,7 @@ pub fn admit_local(
     session: &str,
     principal: &str,
     scope: &Value,
-) -> Result<(ScopeBinding, CodexFacade<LocalCodexHost>), FacadeError> {
+) -> Result<(ScopeBinding, crate::local_sessions::LocalApplication), FacadeError> {
     let file = std::fs::File::open(admission).map_err(|_| FacadeError::InvalidInput)?;
     let mut text = String::new();
     file.take(crate::local_mcp::MAX_FRAME_BYTES as u64)
@@ -518,6 +522,18 @@ pub fn admit_local(
         return Err(FacadeError::ScopeDenied);
     }
     let host = resolver.host(&binding)?;
+    let enabled = host
+        .sessions
+        .as_ref()
+        .is_some_and(|sessions| sessions.enabled);
     let facade = CodexFacade::with_binding(binding.clone(), host)?;
-    Ok((binding, facade))
+    let application = crate::local_sessions::LocalApplication::new(
+        facade,
+        binding.clone(),
+        admission,
+        cwd,
+        repository,
+        enabled,
+    );
+    Ok((binding, application))
 }

@@ -1,0 +1,107 @@
+{
+  "contract": "cg.evidence",
+  "contract_version": "2.0",
+  "document": {
+    "contract": "cg.evidence",
+    "contract_version": "2.0",
+    "evidence": [
+      "artifact-verification"
+    ],
+    "facts": [
+      "artifact-verified"
+    ],
+    "goal_outcome": "SATISFIED",
+    "verification": {
+      "artifact": {
+        "digest": "sha256:b11b19ba0d7a83473e97de41effc8a55e9447d37859e116da2499b08ca2ebf4f",
+        "id": "compile-run-b49db9d0c4e281e0f2379b5bda4975f263704660c94195a1419b33abcb01f04d-2",
+        "revision": "1"
+      },
+      "basis": {
+        "plan": {
+          "digest": "sha256:c4628b59da6d7a464254ca264e0b75a7c00cc322f6b2e4839667f3c99e6c7ded",
+          "id": "plan",
+          "revision": "1"
+        },
+        "projection": {
+          "digest": "sha256:7de4f3ea61fd60a3bfb2834435c1235acdb8af20e053adadcb50142766f17553",
+          "id": "projection",
+          "revision": "1"
+        },
+        "scope": "external-project",
+        "sources": [],
+        "step": "step-condition.0"
+      },
+      "checks": [
+        "canonical_bytes",
+        "digest",
+        "domain_ir",
+        "catalog",
+        "scope",
+        "step",
+        "pinned_inputs",
+        "provenance",
+        "disclosure",
+        "current_policy"
+      ],
+      "contract": "cg.artifact-verification",
+      "contract_version": "2.0",
+      "current_basis": {
+        "admission": null,
+        "plan": "plan-delta-747ec95a56539949224ae7c4bba9a2262efd77d1f228ccba2891138d455a729d",
+        "plan_fingerprint": "cabdec603b9787b9b9e3000c20177175ff4b7120381310dc08e98ca059544b89",
+        "process_catalog_fingerprint": "d42b9de5837ee08a2cebc5c713e5f280baae9f9393d7a4659d47c9236e57ad52",
+        "process_state_fingerprint": "986fb472ed53b38d07e62f754fd866b8240792d9b7a28c604b5115a74406290f",
+        "registry_fingerprint": "0fc85602f4c6da1163a5bf50dc9723a066bd04d2a8716dd4e5d8775dfcc2a3e3",
+        "rule_version": "1.0",
+        "scope": "external-project",
+        "situation": "external-situation",
+        "situation_fingerprint": "aedc9ca2e31bb9e0ee2d919a7c571bffdf8e4bb3a26a20f94a878afbceb5fcef"
+      },
+      "dispatch": "compile-run-b49db9d0c4e281e0f2379b5bda4975f263704660c94195a1419b33abcb01f04d-2",
+      "goal": {
+        "digest": "sha256:bf81205edb430a9d1b641e51211bd54e27049fb74abcca8db9632ce2fc6e11d7",
+        "id": "supported-goal",
+        "revision": "1"
+      },
+      "owner": {
+        "binding": "binding-example",
+        "client_owner": "owner-e3e9f8b6c44149e39d5cc9df2cb0b138",
+        "principal": "operator",
+        "project": "project-example",
+        "workspace": "workspace-example"
+      },
+      "policy": {
+        "capability_classes": {
+          "architecture.dependency-analysis": "INSPECT"
+        },
+        "decision": "ALLOW",
+        "findings": [
+          {
+            "decision": "ALLOW",
+            "reason": "ALLOWED",
+            "subject": "step-condition.0"
+          }
+        ],
+        "policies": [
+          "inspect-policy"
+        ],
+        "schema_version": 1,
+        "step": "step-condition.0"
+      },
+      "run": "run-b49db9d0c4e281e0f2379b5bda4975f263704660c94195a1419b33abcb01f04d",
+      "session": "session-b49db9d0c4e281e0f2379b5bda4975f263704660c94195a1419b33abcb01f04d"
+    }
+  },
+  "reference": {
+    "digest": "sha256:136d1da0e8a4f82e8a5ceb214c9409d8eb6f3e5bc6abf86217aea34d824e6515",
+    "id": "evidence-run-b49db9d0c4e281e0f2379b5bda4975f263704660c94195a1419b33abcb01f04d",
+    "revision": "1"
+  },
+  "schema_version": "2.0",
+  "scope": {
+    "binding_id": "binding-example",
+    "project_id": "project-example",
+    "workspace_id": "workspace-example"
+  }
+}

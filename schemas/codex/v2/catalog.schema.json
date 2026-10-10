@@ -1,0 +1,102 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "cg://contracts/2.0/catalog.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "2.0"
+    },
+    "tools": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+          },
+          "operation": {
+            "enum": [
+              "session.start",
+              "session.inspect",
+              "session.clarify",
+              "session.approve",
+              "session.continue",
+              "session.cancel"
+            ]
+          },
+          "annotations": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "readOnlyHint": {
+                "type": "boolean"
+              },
+              "destructiveHint": {
+                "type": "boolean"
+              },
+              "idempotentHint": {
+                "type": "boolean"
+              },
+              "openWorldHint": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "readOnlyHint",
+              "destructiveHint",
+              "idempotentHint",
+              "openWorldHint"
+            ]
+          },
+          "execution": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "taskSupport": {
+                "const": "forbidden"
+              }
+            },
+            "required": [
+              "taskSupport"
+            ]
+          }
+        },
+        "required": [
+          "name",
+          "operation",
+          "annotations",
+          "execution"
+        ]
+      },
+      "maxItems": 6
+    },
+    "resources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "uri": {
+            "type": "string"
+          },
+          "kind": {
+            "const": "static"
+          }
+        },
+        "required": [
+          "uri",
+          "kind"
+        ]
+      },
+      "maxItems": 6
+    }
+  },
+  "required": [
+    "schema_version",
+    "tools",
+    "resources"
+  ]
+}

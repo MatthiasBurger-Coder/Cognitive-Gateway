@@ -874,3 +874,50 @@ fn admitted_facade_runs_through_deterministic_transport() {
         result["structuredContent"]
     );
 }
+
+#[test]
+fn oversized_application_output_is_replaced_by_a_bounded_failure() {
+    struct Oversized;
+    impl CodexApplicationPort for Oversized {
+        fn execute(&self, _: &str, _: &Value) -> Value {
+            json!({"status":"ok","result":{"oversized":"x".repeat(MAX_FRAME_BYTES)}})
+        }
+    }
+    let mut server = Server::with_application(binding(), Box::new(Oversized));
+    handle(&mut server, initialize());
+    server.handle(br#"{"jsonrpc":"2.0","method":"notifications/initialized"}"#);
+    let arguments: Value = serde_json::from_str(include_str!(
+        "../../../../tests/fixtures/codex-v1/situation.inspect.request.json"
+    ))
+    .unwrap();
+    let response = handle(
+        &mut server,
+        request(
+            2,
+            "tools/call",
+            json!({"name":"cg_situation_inspect_v1","arguments":arguments}),
+        ),
+    );
+    assert_eq!(
+        response["result"]["structuredContent"]["diagnostics"][0]["code"],
+        "CG_LIMIT_EXCEEDED"
+    );
+    assert!(response.to_string().len() < 1024);
+}
+
+#[test]
+fn direct_dispatch_enforces_input_limit_before_parsing_and_keeps_phase() {
+    let mut server = Server::new(binding());
+    let frame = request(1, "ping", json!({})).to_string();
+    server.limits.input_bytes = frame.len() + 1;
+    assert_eq!(
+        server.handle(frame.as_bytes()).unwrap()["result"],
+        json!({})
+    );
+    server.limits.input_bytes = frame.len();
+    let refused = server.handle(frame.as_bytes()).unwrap();
+    assert_eq!(refused["id"], Value::Null);
+    assert_eq!(refused["error"]["code"], -32000);
+    assert_eq!(refused["error"]["message"], "Request limit exceeded");
+    assert_eq!(server.phase, Phase::New);
+}
