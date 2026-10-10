@@ -25,6 +25,11 @@ See [`adr/`](adr/) for accepted architecture decisions.
 
 ## Core domain contract
 
+See [CGSL scope and canonical vocabulary](cgsl-scope-and-vocabulary.md) for
+EPIC-05.01 task semantics, the finite formal-core vocabulary and boundaries
+to existing domains. The [semantic interpretation architecture](semantic-language-and-interpretation.md)
+distinguishes this specification from planned compiler/runtime capabilities.
+
 See [`retrieval-plane.md`](retrieval-plane.md) for CG-15 versioned retrieval,
 embedding lineage, token estimation, reservations and bounded execution contracts.
 See [`retrieval-pipeline.md`](retrieval-pipeline.md) for CG-16 federated source

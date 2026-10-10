@@ -8,6 +8,11 @@ The current deterministic core can consume structured task/context contracts, bu
 
 ## Purpose
 
+The normative [CGSL scope and canonical vocabulary](cgsl-scope-and-vocabulary.md)
+defines the EPIC-05.01 semantic baseline, construct ownership, validation
+responsibilities and domain boundaries. Grammar and runtime implementation
+remain separate planned slices.
+
 CGSL and `SemanticTaskIR` form the semantic boundary between ambiguous human language and deterministic planning/execution.
 
 ```mermaid
