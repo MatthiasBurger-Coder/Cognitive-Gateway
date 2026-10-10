@@ -103,3 +103,48 @@ The safety classification of a capability: `INSPECT` is read-only, while
 A typed execution-planning rule, such as feature freeze or a requirement for
 explicit consent before mutation. Constraints can restrict a mode/profile pair
 without making those dimensions the same concept.
+
+## CGSL (Cognitive Gateway Semantic Language)
+
+The provider-independent formal language describing resolved task meaning.
+Its finite [canonical vocabulary](../cgsl-scope-and-vocabulary.md) defines
+outcomes, subjects, inputs, knowledge, restrictions and result contracts.
+It does not define process execution or provider prompts.
+
+## SemanticTaskIR
+
+The planned versioned, typed canonical result of CGSL semantic compilation.
+Only validated, uniquely resolved mandatory semantics may enter an executable
+task representation. It reuses CG-06/07/08 contracts and is distinct from
+ExecutionContextIR, Plan IR and Process IR.
+
+## Interpretation Context
+
+Relevant request-scoped knowledge used to resolve what a user means. It is
+separate from runtime context compilation and does not replay whole conversation
+history or create policy authority.
+
+## Knowledge Gap
+
+An explicit absence of information required to resolve a task semantic field.
+It remains visible until supplied or resolved; it is not permission to invent
+a value. CGSL's canonical construct is `knowledge_gap`.
+
+## Semantic Ambiguity
+
+Competing candidate interpretations of one task semantic field. Candidates
+remain explicit until uniquely resolved; order or confidence alone cannot
+settle them. This differs from CG-08 executor-binding ambiguity.
+
+## Assumption
+
+An explicit temporary premise not established as verified knowledge. It remains
+distinct from facts, observations, evidence, inferences and hypotheses and cannot
+manufacture authority or mandatory resolved semantics.
+
+## Output Contract and Verification Contract
+
+The output contract defines the structured shape and meaning of the requested
+result. The verification contract defines checks for its acceptance. Declaring
+either contract does not establish that a result passed verification, a process
+gate passed, or execution was authorized.
