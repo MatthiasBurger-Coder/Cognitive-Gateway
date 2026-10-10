@@ -2,8 +2,10 @@
 
 Date: 2026-10-10. Contract decision: **READY_FOR_WORKFLOW** for #272 contract
 implementation. Runtime status: **NOT_IMPLEMENTED**. ADR-021 records the decision.
-This is a normative application API specification, not a delivered Rust trait,
-coordinator, persistence adapter or passing session qualification.
+This is a normative application API specification. A candidate typed Rust
+prerequisite is recorded in [shared-session-implementation.md](shared-session-implementation.md).
+It provides contract/admission types; no coordinator, persistence adapter or
+passing session qualification is delivered.
 
 Owners: [#272 contracts](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/issues/272),
 [#273 coordinator](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/issues/273),

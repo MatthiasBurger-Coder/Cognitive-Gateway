@@ -1,0 +1,189 @@
+{
+  "type": "llvm.coverage.json.export",
+  "version": "3.1.0",
+  "data": [
+    {
+      "files": [
+        {
+          "filename": "crates/gateway-application/src/sessions/admission.rs",
+          "summary": {
+            "branches": {
+              "count": 0,
+              "covered": 0,
+              "notcovered": 0,
+              "percent": 0.0
+            },
+            "mcdc": {
+              "count": 0,
+              "covered": 0,
+              "notcovered": 0,
+              "percent": 0.0
+            },
+            "functions": {
+              "count": 4,
+              "covered": 4,
+              "percent": 100.0
+            },
+            "instantiations": {
+              "count": 4,
+              "covered": 4,
+              "percent": 100.0
+            },
+            "lines": {
+              "count": 79,
+              "covered": 79,
+              "percent": 100.0
+            },
+            "regions": {
+              "count": 107,
+              "covered": 105,
+              "notcovered": 2,
+              "percent": 98.13084112149532
+            }
+          }
+        },
+        {
+          "filename": "crates/gateway-application/src/sessions/authority.rs",
+          "summary": {
+            "branches": {
+              "count": 0,
+              "covered": 0,
+              "notcovered": 0,
+              "percent": 0.0
+            },
+            "mcdc": {
+              "count": 0,
+              "covered": 0,
+              "notcovered": 0,
+              "percent": 0.0
+            },
+            "functions": {
+              "count": 9,
+              "covered": 9,
+              "percent": 100.0
+            },
+            "instantiations": {
+              "count": 9,
+              "covered": 9,
+              "percent": 100.0
+            },
+            "lines": {
+              "count": 90,
+              "covered": 90,
+              "percent": 100.0
+            },
+            "regions": {
+              "count": 85,
+              "covered": 85,
+              "notcovered": 0,
+              "percent": 100.0
+            }
+          }
+        },
+        {
+          "filename": "crates/gateway-application/src/sessions/contracts.rs",
+          "summary": {
+            "branches": {
+              "count": 0,
+              "covered": 0,
+              "notcovered": 0,
+              "percent": 0.0
+            },
+            "mcdc": {
+              "count": 0,
+              "covered": 0,
+              "notcovered": 0,
+              "percent": 0.0
+            },
+            "functions": {
+              "count": 28,
+              "covered": 28,
+              "percent": 100.0
+            },
+            "instantiations": {
+              "count": 107,
+              "covered": 69,
+              "percent": 64.48598130841121
+            },
+            "lines": {
+              "count": 157,
+              "covered": 157,
+              "percent": 100.0
+            },
+            "regions": {
+              "count": 214,
+              "covered": 211,
+              "notcovered": 3,
+              "percent": 98.5981308411215
+            }
+          }
+        },
+        {
+          "filename": "crates/gateway-application/src/sessions/journal.rs",
+          "summary": {
+            "branches": {
+              "count": 0,
+              "covered": 0,
+              "notcovered": 0,
+              "percent": 0.0
+            },
+            "mcdc": {
+              "count": 0,
+              "covered": 0,
+              "notcovered": 0,
+              "percent": 0.0
+            },
+            "functions": {
+              "count": 7,
+              "covered": 7,
+              "percent": 100.0
+            },
+            "instantiations": {
+              "count": 7,
+              "covered": 7,
+              "percent": 100.0
+            },
+            "lines": {
+              "count": 108,
+              "covered": 108,
+              "percent": 100.0
+            },
+            "regions": {
+              "count": 135,
+              "covered": 134,
+              "notcovered": 1,
+              "percent": 99.25925925925925
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "evidence_level": "CONTRACT",
+  "runtime_status": "NOT_IMPLEMENTED",
+  "issue_294_status": "NOT_COMPLETE",
+  "command": [
+    "cargo",
+    "llvm-cov",
+    "-p",
+    "gateway-application",
+    "--test",
+    "session_contracts",
+    "--locked",
+    "--json",
+    "--output-path",
+    "/tmp/cg-session-contract-coverage.json"
+  ],
+  "raw_report_sha256": "34b52055df30e48ee02a01c0f51f913983e24421e98dba3cd61f7d4f739fd024",
+  "source_sha256": {
+    "crates/gateway-application/src/sessions/admission.rs": "63b5f40936fbf7a34c9a976bbd805661e7d13165d5a5d3b18c886db3f482f74b",
+    "crates/gateway-application/src/sessions/authority.rs": "5919b827212f238dc70104765bb7f6776c089de68715edfaf266ffdc360d5d83",
+    "crates/gateway-application/src/sessions/contracts.rs": "2fa1c8c564c1c19f586889ad9dedf9eee8c47fa43653d3e41606ad8e3204a8e2",
+    "crates/gateway-application/src/sessions/journal.rs": "3b6db2dfe01c64bbb244ea56c7a7c8b8660b2a34043ad6ad01f298ced15281e0",
+    "crates/gateway-application/src/sessions/mod.rs": "df773cdedd5691a123012fedeb87d452302e24b12c7f91f28c5be588e5524241",
+    "crates/gateway-application/src/lib.rs": "914637658d64634b9cd5a59176dec4698eede7b660b5dd7df924b071cb77d168",
+    "crates/gateway-application/tests/session_contracts.rs": "188ba4759774fd8302fc9a687de2cd233fbe9adfda0898d630b114403866d97e",
+    "scripts/check-session-contract-coverage.py": "662b78e4a89a77fdecd8f37b8fd879e2e3ac270a49ed3f47cba0e5ceb9b57d1d",
+    "scripts/check-local-mcp-coverage.py": "b92deffac18408b80e13fe7e4c246a72f643f97caf358c319c3f7d6c5b61e0a0"
+  }
+}
