@@ -1,0 +1,109 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-10-10T15:33:54.213905+00:00",
+  "revision": "073ce8206a5506877053ae88e925cb8dfb619174",
+  "evidence_level": "CONTRACT",
+  "status": "PASS_CONTRACT_PREREQUISITE_ONLY",
+  "issue": 294,
+  "issue_status": "NOT_COMPLETE",
+  "owner_issue": 272,
+  "owner_issue_status": "PARTIAL",
+  "source_sha256": {
+    "crates/gateway-application/src/sessions/admission.rs": "63b5f40936fbf7a34c9a976bbd805661e7d13165d5a5d3b18c886db3f482f74b",
+    "crates/gateway-application/src/sessions/authority.rs": "5919b827212f238dc70104765bb7f6776c089de68715edfaf266ffdc360d5d83",
+    "crates/gateway-application/src/sessions/contracts.rs": "2fa1c8c564c1c19f586889ad9dedf9eee8c47fa43653d3e41606ad8e3204a8e2",
+    "crates/gateway-application/src/sessions/journal.rs": "3b6db2dfe01c64bbb244ea56c7a7c8b8660b2a34043ad6ad01f298ced15281e0",
+    "crates/gateway-application/src/sessions/mod.rs": "df773cdedd5691a123012fedeb87d452302e24b12c7f91f28c5be588e5524241",
+    "crates/gateway-application/src/lib.rs": "914637658d64634b9cd5a59176dec4698eede7b660b5dd7df924b071cb77d168",
+    "crates/gateway-application/tests/session_contracts.rs": "188ba4759774fd8302fc9a687de2cd233fbe9adfda0898d630b114403866d97e",
+    "scripts/check-session-contract-coverage.py": "662b78e4a89a77fdecd8f37b8fd879e2e3ac270a49ed3f47cba0e5ceb9b57d1d",
+    "scripts/check-local-mcp-coverage.py": "b92deffac18408b80e13fe7e4c246a72f643f97caf358c319c3f7d6c5b61e0a0"
+  },
+  "coverage_artifact": "docs/evidence/EPIC-04.13-shared-contract-coverage.json",
+  "coverage_artifact_sha256": "b406e6297279fef9fb376b15c751ec8df390d24376b3054ea2862d90cd7c012b",
+  "coverage_files": {
+    "crates/gateway-application/src/sessions/admission.rs": {
+      "count": 79,
+      "covered": 79,
+      "percent": 100.0
+    },
+    "crates/gateway-application/src/sessions/authority.rs": {
+      "count": 90,
+      "covered": 90,
+      "percent": 100.0
+    },
+    "crates/gateway-application/src/sessions/contracts.rs": {
+      "count": 157,
+      "covered": 157,
+      "percent": 100.0
+    },
+    "crates/gateway-application/src/sessions/journal.rs": {
+      "count": 108,
+      "covered": 108,
+      "percent": 100.0
+    }
+  },
+  "checks": [
+    {
+      "command": "cargo test -p gateway-application --locked",
+      "status": "PASS"
+    },
+    {
+      "command": "cargo test -p gateway-daemon --test codex_contracts --locked",
+      "status": "PASS",
+      "tests": 2
+    },
+    {
+      "command": "cargo llvm-cov -p gateway-application --test session_contracts --locked --json --output-path /tmp/cg-session-contract-coverage.json",
+      "status": "PASS",
+      "tests": 10
+    },
+    {
+      "command": "python3 scripts/check-session-contract-coverage.py /tmp/cg-session-contract-coverage.json",
+      "status": "PASS",
+      "minimum_percent": 95
+    },
+    {
+      "command": "python3 scripts/check-session-contract-coverage.py --self-test",
+      "status": "PASS"
+    },
+    {
+      "command": "python3 -m unittest discover -s tests/contracts -p 'test_*.py'",
+      "status": "PASS",
+      "tests": 12
+    },
+    {
+      "command": "python3 -m unittest discover -s tests/architecture -p 'test_*.py'",
+      "status": "PASS",
+      "tests": 19
+    },
+    {
+      "command": "bash scripts/check-architecture.sh",
+      "status": "PASS"
+    },
+    {
+      "command": "cargo clippy --workspace --all-targets --locked -- -D warnings",
+      "status": "PASS"
+    },
+    {
+      "command": "cargo fmt --all --check",
+      "status": "PASS"
+    },
+    {
+      "command": "git diff --check",
+      "status": "PASS"
+    }
+  ],
+  "not_run": [
+    "real shared coordinator and independent artifact verification",
+    "trusted consent issuance/store and real clarification/consent pauses",
+    "durable command ledger, concurrent start/dispatch, restart and recovery",
+    "aggregate runtime dispatch budgeting and cancellation",
+    "version 2 CLI/MCP composition and installed-client session acceptance"
+  ],
+  "limitations": [
+    "Pure typed admission and conditional-append validation do not establish storage atomicity or actual session transitions.",
+    "No production SessionApplicationPort or SessionJournalPort implementation is delivered.",
+    "Frozen v1 remains unchanged and session operations remain unsupported."
+  ]
+}

@@ -38,6 +38,7 @@ pub mod resolution_process;
 pub mod resolution_skills;
 pub mod resolution_snapshot;
 pub mod retrieval_pipeline;
+pub mod sessions;
 pub mod situation_application;
 
 pub use external_context::{
