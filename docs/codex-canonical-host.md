@@ -28,9 +28,10 @@ digests. `policy` must be the complete strict policy document accepted by
 profile and step facts. It is trusted operator configuration, never tool input.
 The catalog must be an absolute existing directory within the explicitly
 admitted repository. Protect the catalog and admission file as authority inputs.
-The host reads current catalog definitions for each resolution; admission
-snapshots and policy remain immutable for that launch. Changing them requires
-a new validated launch, rather than a client-supplied override.
+Admission captures the canonical resolution basis, including catalog and process
+fingerprints. Each operation reloads the catalog and compares its basis with that
+launch-time pin; drift returns `CG_STALE_REVISION`. Admission snapshots and policy
+remain immutable for that launch. Changing them requires a new validated launch.
 
 Each pinned source must exist in `mapping.resources` with its exact reference,
 canonical JSON document digest, mapping scope and explicit provenance. SECRET
@@ -43,7 +44,9 @@ mutations disabled.
 
 ## Calls and result references
 
-Resolve takes the admitted `plan`, `rules` and `process` references. Its response
+Resolve takes the exact admitted `plan`, `rules` and `process` references;
+identical documents under alternate IDs cannot substitute for these pins. Explain
+and compile accept only the generated resolution identity. Its response
 provenance includes a generated `cg.resolution / 1.0` reference with ID
 `local-resolution`, the admission mapping revision and the canonical artifact's
 SHA-256 digest. The generated reference preserves the source lineage and highest
@@ -80,3 +83,11 @@ resource reads, missing/stale/cross-scope references, current policy, consent,
 invalid projections, catalog confinement and SECRET admission refusal. The
 coverage gate includes the new host and mapper plus the shared CLI pipeline.
 This delivers canonical operations; it does not install shared session services.
+
+## Rollback
+
+Remove the selected mapping's `canonical` block and restart `cg-mcp` / `cg-local`
+with the validated admission document. The host then admits only inspection,
+assessment and resource reads; resolve, explain and compile return unsupported.
+Existing inspection resources remain available, including resources whose ID is
+`local-resolution` when canonical operations are disabled.
