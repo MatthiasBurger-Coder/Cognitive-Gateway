@@ -1,6 +1,5 @@
 info: cargo-llvm-cov currently setting cfg(coverage); you can opt-out it by passing --no-cfg-coverage
-   Compiling gateway-daemon v0.1.0 (/mnt/d/Projects/Cognitive-Gateway/crates/gateway-daemon)
-    Finished `test` profile [unoptimized + debuginfo] target(s) in 12.42s
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.64s
      Running unittests src/lib.rs (target/session-coverage/debug/deps/gateway_application-c1adbf75ddb4b55e)
 
 running 43 tests
@@ -48,7 +47,7 @@ test situation_application::tests::inspection_reuses_cg02_types_and_captures_cg0
 test situation_application::tests::invalid_document_is_reported_at_the_application_boundary ... ok
 test situation_application::tests::process_identity_and_revision_mismatches_fail_closed_without_mutation ... ok
 
-test result: ok. 43 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.74s
+test result: ok. 43 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.68s
 
      Running tests/codex_facade.rs (target/session-coverage/debug/deps/codex_facade-d65fae6626144775)
 
@@ -73,7 +72,7 @@ test shared_task_sessions_require_the_exact_immutable_client_owner ... ok
 test unavailable_host_and_adapter_defaults_never_enable_services_or_authority ... ok
 test validation_precedence_scope_versions_and_pins_fail_closed ... ok
 
-test result: ok. 19 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 10.74s
+test result: ok. 19 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 10.43s
 
      Running tests/session_contracts.rs (target/session-coverage/debug/deps/session_contracts-d12e7e1f1bbd22db)
 
@@ -102,7 +101,7 @@ test initial_goal_assessment_is_real_retained_and_cannot_claim_observed_success 
 test real_coordinator_verifies_goal_and_rejects_corrupt_stored_artifacts ... ok
 test v2_boundary_refuses_wrong_versions_claims_and_invalid_projections ... ok
 
-test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 20.74s
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 20.61s
 
      Running unittests src/lib.rs (target/session-coverage/debug/deps/gateway_daemon-0d7deab0e37e176c)
 
@@ -143,7 +142,7 @@ test session_store::tests::postgres_commit_ambiguity_and_checksum_damage_are_exp
 test session_store::tests::postgres_trusted_grants_preserve_denial_withdrawal_and_consumed_history ... ok
 test session_store::tests::terminal_revocation_updates_authority_audit_without_revising_the_task ... ok
 
-test result: ok. 35 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.97s
+test result: ok. 35 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.94s
 
      Running unittests src/bin/cg.rs (target/session-coverage/debug/deps/cg-34b620aeb28afbc7)
 
@@ -168,7 +167,7 @@ test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; fini
 running 1 test
 test shipped_host_canonical_operations_and_authority_negatives ... ok
 
-test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 9.20s
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 8.52s
 
      Running tests/codex_isolation.rs (target/session-coverage/debug/deps/codex_isolation-46c9496fa7f33e25)
 
@@ -195,7 +194,7 @@ test bootstrap_check_and_headless_protocol_parity ... ok
 test cli_keeps_facade_scope_policy_and_classification_gates ... ok
 test cli_rejects_bad_setup_and_credentials_without_echo ... ok
 
-test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.27s
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.15s
 
      Running tests/codex_qualification.rs (target/session-coverage/debug/deps/codex_qualification-9552272eb9ccf59a)
 
@@ -204,7 +203,7 @@ test canonical_inspect_resolve_explain_and_context_are_deterministic_through_mcp
 test client_approval_cannot_replace_trusted_consent_or_dispatch_session_mutations ... ok
 test shared_host_start_status_pause_and_cancellation_projections_cross_the_bridge ... ok
 
-test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 7.18s
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 7.20s
 
      Running tests/declarative_cli.rs (target/session-coverage/debug/deps/declarative_cli-a5128d4ebed4ada3)
 
@@ -229,7 +228,7 @@ test policy_denial_and_stale_inputs_never_compile ... ok
 test satisfied_goal_is_noop_and_inspect_capability_cannot_authorize_change ... ok
 test unresolved_and_blocked_results_keep_diagnostics_and_fail_closed ... ok
 
-test result: ok. 19 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 21.36s
+test result: ok. 19 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 22.33s
 
      Running tests/local_mcp.rs (target/session-coverage/debug/deps/local_mcp-161e98ce868ea394)
 
@@ -240,9 +239,9 @@ test local_mcp_subprocess_conformance_without_provider_credentials ... ok
 test real_stdio_credentials_in_requests_and_auth_failures_never_reach_output ... ok
 test runtime_configuration_and_diagnostics_are_bounded ... ok
 
-test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.63s
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.68s
 
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.07s
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.27s
 test_baseline_cli_mcp_restart_verified_evidence_and_replay (test_sessions.SharedSessions.test_baseline_cli_mcp_restart_verified_evidence_and_replay) ... ok
 test_changed_action_invalidates_consent_and_expired_reply_cannot_resume (test_sessions.SharedSessions.test_changed_action_invalidates_consent_and_expired_reply_cannot_resume) ... ok
 test_clarification_is_a_real_input_choice_and_never_consent (test_sessions.SharedSessions.test_clarification_is_a_real_input_choice_and_never_consent) ... ok
@@ -253,11 +252,11 @@ test_postgres_failure_after_artifact_commit_recovery_fences_without_redispatch (
 test_v2_discovery_strict_wire_and_current_host_denials (test_sessions.SharedSessions.test_v2_discovery_strict_wire_and_current_host_denials) ... ok
 
 ----------------------------------------------------------------------
-Ran 8 tests in 72.103s
+Ran 8 tests in 70.351s
 
 OK
 
-    Finished report saved to /tmp/cg-shared-session-release/coverage.json
+    Finished report saved to /tmp/cg-shared-session-isolated/coverage.json
 crates/gateway-application/src/sessions/contracts.rs: 157/157 lines (100.00%)
 crates/gateway-application/src/sessions/admission.rs: 79/79 lines (100.00%)
 crates/gateway-application/src/sessions/authority.rs: 90/90 lines (100.00%)

@@ -29,7 +29,7 @@ class SharedSessions(unittest.TestCase):
     client = canonical.CanonicalHost.client
 
     def configure(self, consent=False):
-        self.prepare()
+        self.prepare(scope='session-project-' + uuid.uuid4().hex)
         mapping = self.admission['mappings'][0]
         # Distinct durable owner per case, stable across all CLI/MCP connections.
         mapping['session_id'] = 'owner-' + uuid.uuid4().hex
@@ -43,7 +43,7 @@ class SharedSessions(unittest.TestCase):
         store.chmod(0o600)
         ref = lambda name: {k: self.references[name][k] for k in ('id', 'revision', 'digest')}
         self.config = {'store_file': str(store), 'intent': self.intent,
-                       'basis': {'scope': 'external-project', 'plan': ref('plan'),
+                       'basis': {'scope': mapping['canonical_scope'], 'plan': ref('plan'),
                                  'step': 'step-condition.0', 'projection': ref('projection'), 'sources': []},
                        'execution': {'mode': 'DEVELOPMENT', 'profile': 'FULL_PATH'},
                        'max_actions': 3, 'max_retries': 1, 'ttl_ms': 300000,
@@ -215,7 +215,7 @@ class SharedSessions(unittest.TestCase):
     def add_sources(self):
         for name in ('source-a', 'source-b'):
             document = {'id': name, 'kind': 'knowledge', 'content': 'An admitted source for the task',
-                        'scope': 'external-project', 'step': 'step-condition.0', 'source': 'fixture://' + name,
+                        'scope': self.config['basis']['scope'], 'step': 'step-condition.0', 'source': 'fixture://' + name,
                         'revision': '1', 'quality': {'trust': 'RETRIEVED_CONTENT', 'sensitivity': 'PUBLIC',
                         'confidence': {'kind': 'UNKNOWN'}, 'conflict': 'NONE', 'freshness': 'FRESH', 'uncertainty': 'NONE'},
                         'rationale': 'Task source alternative', 'evidence': [], 'validation': None}

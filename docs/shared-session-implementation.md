@@ -129,6 +129,8 @@ python3 scripts/cognitive-test-host.py bash scripts/qualify-shared-sessions.sh /
 
 This runs against a disposable loopback PostgreSQL host, requires the database
 for the mandatory gate, tests contracts/shared services/actual executables,
+uses distinct canonical project scopes per scenario so repeated full-gate runs
+share the database without exhausting another scenario's bounded journal,
 independently validates public responses, retains transition transcripts and
 verified evidence, and enforces measured >=95% coverage for every applicable
 changed executable production file. The same gate is registered in

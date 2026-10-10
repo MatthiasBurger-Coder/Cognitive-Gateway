@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "recorded_at": "2026-10-10T16:58:46.645601+00:00",
-  "candidate_base_revision": "49f232aa013159c380bf18597fa7d1cada8e6aac",
+  "recorded_at": "2026-10-10T17:05:26.497697+00:00",
+  "candidate_base_revision": "02511990698c30230241ce069c3b9413765f68de",
   "issue": 294,
   "issue_status": "COMPLETE",
   "status": "QUALIFIED_STRUCTURED_CONTEXT_ARTIFACT_RUNTIME",
@@ -26,11 +26,7 @@
     "crates/gateway-application/src/sessions/contracts.rs": "8bcd8c9a0b52c59ab14552823a7da0719d1c32ec690188b801aced84bef2d93a",
     "crates/gateway-application/src/sessions/coordinator.rs": "47ab445ad39b4cb9a0d77be39905fe3fb4eeb8cc83d44dc3fdad32091ee9f0b7",
     "crates/gateway-application/src/sessions/journal.rs": "80b9b960a35ed46b5513bd7aec5101cf32dabcfd2d4a5e4c1622251530c3f246",
-    "crates/gateway-application/src/sessions/mod.rs": "20e425288d394f8655171512e45bfb53ce90791606fcc450a35632a011f2bf86",
     "crates/gateway-application/src/sessions/verification.rs": "8e0d14b07cb75185053157d5e898289d74119c52eee4ba3a6072fe2a49e6048c",
-    "crates/gateway-application/tests/codex_facade.rs": "4261d38816bccb1311a908239bd408ae4aeb396f1dd041e83d8ff3103fc9481c",
-    "crates/gateway-application/tests/session_contracts.rs": "d8a9366dccec85ccb4df05d362e66fdfc79d5d749ae89005dc82ec3d459184c1",
-    "crates/gateway-application/tests/session_runtime.rs": "0b02f6ce95ea68b3f76d5977a1123dec5c55f5901d3487e7dd28ff403163ae64",
     "crates/gateway-daemon/src/bin/cg-local.rs": "708955cb29cd0790ca70a1d74591a7f1c4d486fbdc78afed8f444d86405fc7d6",
     "crates/gateway-daemon/src/bin/cg-mcp.rs": "5b3388a623928487e52d1b949cf189e1561c8f55869bcf5a2b3999ac3f5236d9",
     "crates/gateway-daemon/src/codex_canonical.rs": "0072c55e25e228c3b59c7d7517c554caaf2766003f83beb29e2f1112247bbae5",
@@ -38,28 +34,16 @@
     "crates/gateway-daemon/src/cognitive_store.rs": "83a5eec4bce182143db0ff7e4500452a134e6e415638a6f2e2968eeb4857ae0f",
     "crates/gateway-daemon/src/declarative_cli/host_mapping.rs": "f4278084b14ed06d350f37acb1aa6fd9ea00bb78fcc2d82b493642c0ce69bfdb",
     "crates/gateway-daemon/src/declarative_cli/pipeline.rs": "52f54226bd3ef46103fc23d1ae87dc58f67f77c3a0a2aaeadfc61aa2b781c1b0",
-    "crates/gateway-daemon/src/lib.rs": "0d3ee7251f6bb894644af3e5bfdb9c7357dd576707c8fec67d705dae7d6c5037",
     "crates/gateway-daemon/src/local_mcp/contracts.rs": "a3cb65ea07a174692154c6fa24737bc8891027ff69399f30ee69a633a6305c0e",
     "crates/gateway-daemon/src/local_mcp/decode.rs": "8e18eeafd79451b1508e5e5ff3470fbcd2c49db7d8a904fc09007e9a06661f13",
     "crates/gateway-daemon/src/local_mcp/mod.rs": "952fb8efe540bdd57598de335d24223a4b444818a13e97ae305a16ffa281d598",
     "crates/gateway-daemon/src/local_mcp/runtime.rs": "e35733968cc6cd795a49ef903b85c2ee9de08e9a6aed1c1b7ab02526a9d53afc",
-    "crates/gateway-daemon/src/local_mcp/tests.rs": "9c998d14e439bb90a1b31ede5f7a3484745d3c08e90729968d93c45840dabcbe",
     "crates/gateway-daemon/src/local_mcp/transport.rs": "d2a0a4b049256409a7942b2eb4cc70b3ff14384105c5465ee7026ad940f72303",
     "crates/gateway-daemon/src/local_sessions.rs": "2e1d3416a2edbf3ec8fca392f7e0fbcb122b654fdb14207ca1f020abab407dc1",
     "crates/gateway-daemon/src/session_store.rs": "93558c98d7ef3ee318c6f9010e0a030825b53557377b31224a3947e42596ce92",
-    "crates/gateway-daemon/src/session_store_tests.rs": "b3fdaea800bbaecb8f3e1a8677c27633c32118542fcca4eafacac86e739eb95c",
-    "crates/gateway-daemon/tests/codex_sessions.rs": "0100c856e848dacf4e61405398218944c4a632439d8d665e95fb4376c6ad0df5",
-    "schemas/codex/v2/catalog.json": "8dafde3da27cfdf4b364924b2fb84048e2125c37b6864161eb1f61162e6946d8",
-    "schemas/codex/v2/catalog.schema.json": "2e6c90958d90cc01e46d511884edfbc042b8109a85d0f86f28ffcd5de804823f",
-    "schemas/codex/v2/common.schema.json": "b30e67c71c70679d19bb81921f07bc8e273839e390eb4553f247d6a06b3311c4",
-    "schemas/codex/v2/request.schema.json": "302cd0998ce196f5dc8fb43594262e15f35165b0e86eed95c42adb83766febdb",
-    "schemas/codex/v2/resource.schema.json": "5e469fcc2417bcda54f390adba864fdb30737907f44edc93b0d8ff3870a2468c",
-    "schemas/codex/v2/response.schema.json": "fa04a6755f8414b937a4107c115ec4ca2644f0433143373a0f514f4c04087212",
     "scripts/check-local-mcp-coverage.py": "b92deffac18408b80e13fe7e4c246a72f643f97caf358c319c3f7d6c5b61e0a0",
-    "scripts/check-session-runtime-coverage.py": "d3f73906c36c734c3ba0da0b410ca29840adcde76529b3fe153311ca0e9ca8ad",
-    "scripts/qualify-shared-sessions.sh": "2c0d1ecf3aaf235983968923bc186a78b230a74502b387afe9ee8c7b1d6e0c04",
-    "scripts/quality-gates.json": "6bb1c829582a0750b53aea915ca1d6a5e5d682212409a484667212eff47ab99c",
-    "tests/codex-local/test_sessions.py": "d58b2ded49490732612aff45cc54269f3b267e4ab9ee74bc5d0e2a52da44d74a"
+    "tests/codex-local/test_canonical_host.py": "493489b10f56ad0120dfa7568655b7a17273d2289cd105de2e4f41d3f8c016ea",
+    "tests/codex-local/test_sessions.py": "3bb539661328cefae54401c734600c4a27d7f6a484f7f2cfce71f4d725058043"
   },
   "binary_sha256": {
     "cg": "b774fdfaa9de1f01b3c74ce0c88146968a53c2747db14891c67ed8e32849628a",
@@ -252,13 +236,13 @@
         "percent": 97.55639097744361
       }
     },
-    "raw_llvm_export_sha256": "cad9c027d401035b5bbdc7a1b9fd7b94416530bb738715d7317e40f79605fe76"
+    "raw_llvm_export_sha256": "0260e96461e90cd9878574b7c7f17f916ff8d9db20337a11d875ad16c051e869"
   },
   "artifact_sha256": {
     "docs/evidence/EPIC-04.13-shared-runtime-coverage.json": "0d1d8d04d59113df98cce2966a18cda7a7fb0f6547ed88931cfa09892dd9e068",
-    "docs/evidence/EPIC-04.13-shared-runtime-transitions.jsonl": "94cc4b0e0b15200e752e179c8eabf47bfe240ba4f9b21dc26495c99b97296c9a",
-    "docs/evidence/EPIC-04.13-shared-runtime-evidence.json": "b7beede3a2f281a0f55d4200f7ffc1ad60fc9d41f5a2655899e1b0ed9328ffe1",
-    "docs/evidence/EPIC-04.13-shared-runtime.log": "b91c0c543223dd0d835474bdd0e7a86d5f1d0f24d8d8c8ceed21f79bd48ab82b"
+    "docs/evidence/EPIC-04.13-shared-runtime-transitions.jsonl": "54a66ca43c4ed78d756a43b738c8e3f20708d2cf764d7918cbb0cbb10cc54849",
+    "docs/evidence/EPIC-04.13-shared-runtime-evidence.json": "f9daf7ddd3b5a004a89aa1b9604d9385d55c9c341313c9e9dee2222c291bcbe7",
+    "docs/evidence/EPIC-04.13-shared-runtime.log": "bf4bff09a64cc2572e81a7e5c74cd0ee7edd614fd7977c15e1d6b586f766d3e5"
   },
   "scope": {
     "supported": "Registered exact structured context-artifact goal; shared coordinator, clarification, trusted consent, persisted budgets, fencing, cancellation and explicit recovery",

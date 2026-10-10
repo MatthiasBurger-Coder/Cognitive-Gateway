@@ -13,22 +13,22 @@
     "goal_outcome": "SATISFIED",
     "verification": {
       "artifact": {
-        "digest": "sha256:b11b19ba0d7a83473e97de41effc8a55e9447d37859e116da2499b08ca2ebf4f",
-        "id": "compile-run-b49db9d0c4e281e0f2379b5bda4975f263704660c94195a1419b33abcb01f04d-2",
+        "digest": "sha256:095899d3a4b9a0d8329d250603bfd11dc8ee53e019318722c37d196e53e63155",
+        "id": "compile-run-5065461fb2e90c8bc54a2c918ddb8f4eec38bee08b40cf811bab5f9ffaeada53-2",
         "revision": "1"
       },
       "basis": {
         "plan": {
-          "digest": "sha256:c4628b59da6d7a464254ca264e0b75a7c00cc322f6b2e4839667f3c99e6c7ded",
+          "digest": "sha256:78816ad203e5955022d973a0d3f114224607e4365a2487510bf475e8ba68e652",
           "id": "plan",
           "revision": "1"
         },
         "projection": {
-          "digest": "sha256:7de4f3ea61fd60a3bfb2834435c1235acdb8af20e053adadcb50142766f17553",
+          "digest": "sha256:87ea1a26be7e4e33797fcbd68afaa901ebb4fc7b53c93847055cdce3d7eab0f9",
           "id": "projection",
           "revision": "1"
         },
-        "scope": "external-project",
+        "scope": "session-project-66e6ff8f1d5843709d31af6333ee4159",
         "sources": [],
         "step": "step-condition.0"
       },
@@ -54,11 +54,11 @@
         "process_state_fingerprint": "986fb472ed53b38d07e62f754fd866b8240792d9b7a28c604b5115a74406290f",
         "registry_fingerprint": "0fc85602f4c6da1163a5bf50dc9723a066bd04d2a8716dd4e5d8775dfcc2a3e3",
         "rule_version": "1.0",
-        "scope": "external-project",
+        "scope": "session-project-66e6ff8f1d5843709d31af6333ee4159",
         "situation": "external-situation",
         "situation_fingerprint": "aedc9ca2e31bb9e0ee2d919a7c571bffdf8e4bb3a26a20f94a878afbceb5fcef"
       },
-      "dispatch": "compile-run-b49db9d0c4e281e0f2379b5bda4975f263704660c94195a1419b33abcb01f04d-2",
+      "dispatch": "compile-run-5065461fb2e90c8bc54a2c918ddb8f4eec38bee08b40cf811bab5f9ffaeada53-2",
       "goal": {
         "digest": "sha256:bf81205edb430a9d1b641e51211bd54e27049fb74abcca8db9632ce2fc6e11d7",
         "id": "supported-goal",
@@ -66,7 +66,7 @@
       },
       "owner": {
         "binding": "binding-example",
-        "client_owner": "owner-e3e9f8b6c44149e39d5cc9df2cb0b138",
+        "client_owner": "owner-421cec4d4cde4e5dbfd411e8493a8fef",
         "principal": "operator",
         "project": "project-example",
         "workspace": "workspace-example"
@@ -89,13 +89,13 @@
         "schema_version": 1,
         "step": "step-condition.0"
       },
-      "run": "run-b49db9d0c4e281e0f2379b5bda4975f263704660c94195a1419b33abcb01f04d",
-      "session": "session-b49db9d0c4e281e0f2379b5bda4975f263704660c94195a1419b33abcb01f04d"
+      "run": "run-5065461fb2e90c8bc54a2c918ddb8f4eec38bee08b40cf811bab5f9ffaeada53",
+      "session": "session-5065461fb2e90c8bc54a2c918ddb8f4eec38bee08b40cf811bab5f9ffaeada53"
     }
   },
   "reference": {
-    "digest": "sha256:136d1da0e8a4f82e8a5ceb214c9409d8eb6f3e5bc6abf86217aea34d824e6515",
-    "id": "evidence-run-b49db9d0c4e281e0f2379b5bda4975f263704660c94195a1419b33abcb01f04d",
+    "digest": "sha256:9d0fd2635a50597990c32b3146dc55158d58b1c23d613138d910c452752e2678",
+    "id": "evidence-run-5065461fb2e90c8bc54a2c918ddb8f4eec38bee08b40cf811bab5f9ffaeada53",
     "revision": "1"
   },
   "schema_version": "2.0",
