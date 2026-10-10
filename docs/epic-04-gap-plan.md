@@ -1,5 +1,10 @@
 # EPIC-04 delivery-gap review and implementation plan
 
+
+Current full-parent acceptance is governed by [EPIC-04 acceptance](epic-04-acceptance.md).
+Shared structured services and installed-client lifecycle proof are delivered;
+older evidence below retains its historical scope. Parent #126 remains NOT_COMPLETE.
+
 Date: 2026-10-10. Inspected baseline: `4d28315` (merged #291).
 Parent: [EPIC-04 #126](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/issues/126).
 This plan extends the existing inbound integration; it does not replace EPIC-08

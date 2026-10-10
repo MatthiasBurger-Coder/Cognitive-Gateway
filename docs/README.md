@@ -234,3 +234,5 @@ Run `python3 scripts/quality-gate.py` for the complete CG-13 gate. See [the rele
 - [CG-29 distributed cognitive worker fabric](worker-fabric.md) — immutable snapshots, scoped scheduling, fencing, bounded retries, local adapter and orchestrator boundary.
 
 - [Complete EPIC-03 acceptance](epic-03-complete-acceptance.md) — original criteria plus ML lifecycle, concrete CPU training/inference, PostgreSQL restart/rollback and isolated workers.
+
+- [Full EPIC-04 acceptance](epic-04-acceptance.md) — all 24 parent criteria and fail-closed closure enforcement.

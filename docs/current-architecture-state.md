@@ -1,5 +1,10 @@
 # Current Architecture State
 
+
+Current full-parent acceptance is governed by [EPIC-04 acceptance](epic-04-acceptance.md).
+Shared structured services and installed-client lifecycle proof are delivered;
+older evidence below retains its historical scope. Parent #126 remains NOT_COMPLETE.
+
 **Reference date:** 2026-10-10
 
 This document is the compact status map for the current Cognitive Gateway architecture. It distinguishes implemented contracts from planned architecture so that issue descriptions, arc42 and code are not accidentally treated as equivalent maturity.

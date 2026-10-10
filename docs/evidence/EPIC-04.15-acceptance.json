@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "issue": 296,
+  "revision": "f7244c5e98f01ee75a9d4ed745bdfc364a7685e9",
+  "source_dirty": true,
+  "scope": "Acceptance enforcement and complete parent reconciliation; parent closure denied",
+  "enforcement_validation": "PASS",
+  "epic_04_status": "NOT_COMPLETE",
+  "closure_allowed": false,
+  "requirement_rows": 24,
+  "checks": {
+    "architecture_acceptance_regressions": 31,
+    "frozen_contract_tests": 12,
+    "architecture_guard": "PASS",
+    "format": "PASS",
+    "diff_check": "PASS",
+    "component_runner": "QUALIFIED_COMPONENT_SCOPE",
+    "installed_client_shared_sessions": "QUALIFIED_INSTALLED_SHARED_SESSIONS"
+  },
+  "coverage": "Reused EPIC-04.13 measurement; independently verified all bound Rust source hashes unchanged",
+  "source_sha256": {
+    "scripts/qualify-epic04.py": "ee46ba50a002f826479fc0d61462a4d19e1b160b89e324a1e913b02b5c78bdf0",
+    "scripts/epic04-acceptance.json": "11e8e40f07d7b05c2a6e6c4417af37b458f6c4ca9cad38d424f1a37eb4e21dab",
+    "scripts/qualify-codex-local.py": "51b4800363af73983208e83b1bbd3027fa00a5df6bae2276495af43324dd8627",
+    "tests/architecture/test_epic04_acceptance.py": "da2d6f336d80e30473e9e9af8c1abd8817c48945e47ee7ab5191129ea8bfecc4",
+    ".github/workflows/epic04-closure.yml": "3e0715e4742c0e48623330789754d26cfcca8239ceae5f6b7448bce2c760fdc2",
+    "docs/epic-04-acceptance.md": "f31af9be05e5a738b6ac6bd630410c13987ec4a88db9a3fab6ed868c0e4e8b6a"
+  },
+  "artifact_sha256": {
+    "EPIC-04.15-regressions.log": "bbce1d2d6ee1fbb39ec7110858db500b6e3d0651d8616d296a03604df9afe68f",
+    "EPIC-04.15-contracts.log": "60563b5da2ff4851fa84d23bc9c6c266d5a937cfb4f84d38ca090a23decbd5b4"
+  },
+  "reproduce": "python3 -m unittest discover -s tests/architecture -v; python3 scripts/qualify-epic04.py --run --output target/epic04-acceptance",
+  "limitations": [
+    "Mandatory evidence explicitly retains EPIC-04 NOT_COMPLETE",
+    "[Errno 2] No such file or directory: 'target/missing-full-epic04-quality.json'",
+    "Mandatory evidence explicitly retains EPIC-04 NOT_COMPLETE"
+  ],
+  "external_issue_updates": "None; #126 remains open, #245 broad acceptance not proven; no original or added requirement removed",
+  "full_runtime_issue": 279,
+  "full_runtime_status": "SEPARATE_ACCEPTANCE",
+  "review": "Four sequential role passes by one agent; no independent reviewer or approval claimed"
+}
