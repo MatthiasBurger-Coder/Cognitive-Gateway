@@ -19,8 +19,9 @@ and [configuration/recovery](shared-session-implementation.md).
 
 The intake assessments and matrix below retain the inspected historical baseline.
 They do not describe missing structured services in the current delivery.
-Installed Codex-client session qualification (#295), parent reconciliation (#296)
-and complete EPIC-08/model/connector acceptance remain separate.
+Installed Codex-client session qualification (#295) now has its own
+[installed-client evidence](codex-installed-client-qualification.md). Parent
+reconciliation (#296) and complete EPIC-08/model/connector acceptance remain separate.
 
 ## Three Amigos intake gate (historical baseline)
 
@@ -80,8 +81,11 @@ claimed by the completed canonical and client work.
   were added to the >=95% per-file coverage gate; first measurement passed.
 - #295: installed Codex 0.162.1 invoked inspection, resolve, explain and compile
   with complete CLI envelope parity. This exposed and repaired explicit protocol
-  2025-06-18 and discovery `_meta` incompatibilities. Full session qualification
-  remains pending; the report retains NOT_COMPLETE.
+  2025-06-18 and discovery `_meta` incompatibilities. The extended probe now
+  qualifies all six shared-session tools, exact v1/v2 catalogs, verified evidence,
+  consent/clarification, explicit cancellation, EOF/restart, CLI inspection
+  parity and refusal paths. See [installed-client qualification](codex-installed-client-qualification.md).
+  Parent acceptance remains separate; the report retains EPIC-04 NOT_COMPLETE.
 - #297: adapted skill created and structurally validated. [Scenario review](three-amigos-skill-validation.md)
   records decisions on real failures without inventing independent reviewers.
 - #293: [shared contracts](shared-session-contract.md) specified with accepted

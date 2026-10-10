@@ -1,0 +1,765 @@
+{
+  "scope": "installed Codex -> shipped CG canonical and shared structured-session operations",
+  "status": "QUALIFIED_INSTALLED_SHARED_SESSIONS",
+  "epic_04_status": "NOT_COMPLETE",
+  "inference_started": false,
+  "cg_environment": "empty",
+  "provider_authentication_used": false,
+  "limitations": [
+    "Only the registered structured context-artifact task is qualified; full EPIC-04 reconciliation remains separate.",
+    "This local inspection proof does not qualify EPIC-08 or model/connector behavior."
+  ],
+  "revision": "8a33f48c79e9863afd489d9cda6c8a804405d0ae",
+  "started_at_unix": 1791658793.200959,
+  "command": [
+    "/usr/bin/python3",
+    "scripts/qualify-installed-codex.py",
+    "--shared-session-fixture",
+    "--output",
+    "target/installed-codex-shared-final"
+  ],
+  "cleanup": [
+    {
+      "eof_exit_code": 0,
+      "forced": false,
+      "elapsed_seconds": 0.031826615013414994
+    },
+    {
+      "eof_exit_code": 0,
+      "forced": false,
+      "elapsed_seconds": 0.0317213759990409
+    },
+    {
+      "eof_exit_code": 0,
+      "forced": false,
+      "elapsed_seconds": 0.031873107014689595
+    },
+    {
+      "eof_exit_code": 0,
+      "forced": false,
+      "elapsed_seconds": 0.03185832902090624
+    },
+    {
+      "eof_exit_code": 0,
+      "forced": false,
+      "elapsed_seconds": 0.031664531998103485
+    },
+    {
+      "eof_exit_code": 0,
+      "forced": false,
+      "elapsed_seconds": 0.015627937973476946
+    },
+    {
+      "eof_exit_code": 0,
+      "forced": false,
+      "elapsed_seconds": 0.015537322004092857
+    }
+  ],
+  "source_dirty": true,
+  "installed_client": {
+    "launcher_path": "/home/micro/.nvm/versions/node/v24.19.0/lib/node_modules/@openai/codex/bin/codex.js",
+    "launcher_sha256": "61b0194f3bb6534439c8d26a3ed57d0805f84b884588b761795323eeb92fcf70",
+    "version": "codex-cli 0.162.1",
+    "native_binary": {
+      "path": "/home/micro/.nvm/versions/node/v24.19.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-linux-x64/vendor/x86_64-unknown-linux-musl/bin/codex",
+      "sha256": "628e35487d888a28f0427fc37501da529dd3d81fcbad7a2c3421c1e8670d92e1"
+    }
+  },
+  "source_sha256": {
+    "crates/gateway-application/src/closed_loop.rs": "279fc6c1baa9055935ac29b4af4c54cca8eeb31355f98406d80c5ff777bb01c9",
+    "crates/gateway-application/src/codex/assessment.rs": "d30d28901119008ba7cd4c2cc309ec1ad8a90e28c3f871475b3eca2ecc8424ac",
+    "crates/gateway-application/src/codex/authorization.rs": "a75253f4a25f57cb228e1eec3578eb281a7b75cbbb2ea504dece1f93019d13e8",
+    "crates/gateway-application/src/codex/contracts.rs": "fe2feff9b089652761ddbf8899f6b7a4f520e2775fdf46737aeacded6e28936d",
+    "crates/gateway-application/src/codex/isolation.rs": "2c963cfa7f16141a533787cabd86e0f172fbd1aae4ff8c8903463995bf009802",
+    "crates/gateway-application/src/codex/mod.rs": "e9c21bd372448d3c147804115eec5be7ba5851d217cfc2d73da6a240647ee642",
+    "crates/gateway-application/src/codex/ports.rs": "0bd8ce9ed9a9af3b259fc36528195f09e24db8493ac8e4a4a22b7d0ea7dcd8a8",
+    "crates/gateway-application/src/codex/runtime.rs": "37ec68d5384c07bfafc9d5c4f6d0d8be280af4692ae9702c9d6247a0dffa8c8d",
+    "crates/gateway-application/src/codex/security.rs": "c00a79373e0a9a4af0f2600387e67e360d9606631b941fb42145dc0729375a99",
+    "crates/gateway-application/src/cognitive_routing.rs": "5d26b18b9db81916cae0cbc278e7e69ee3a8b971d813cdeb3fa36b309fcca003",
+    "crates/gateway-application/src/context.rs": "cc5020c45d84196bc236be4fe19c23ab435d342bda93a885942d624280aa24cf",
+    "crates/gateway-application/src/context_application.rs": "ba489b8cd7ead954ec48d28902df90fc4128edbc4569552bd8986ab48e882186",
+    "crates/gateway-application/src/context_budgeting.rs": "ed7d7a304851314bb9b2f56beaeaa0cb8c583b22c1297a99fcb6ea05dd0a7b18",
+    "crates/gateway-application/src/evaluation.rs": "1d5329564f5ea227bb2d29e76a67e6abb03bf38623fde2edf749e1e0904cd24d",
+    "crates/gateway-application/src/experience_patterns.rs": "2fb3e600d8aefe0475a6162d98718a9e0fa0b8364396d7c97adffe941622a720",
+    "crates/gateway-application/src/external_context.rs": "f2e52334439929e100e7bea8a8844be9276312be7a8c9793ec138da64043ff56",
+    "crates/gateway-application/src/graph_retrieval.rs": "07c80dc81ef6a4f84008632436e6a627df8729761523b6f7788d776c4812dc4c",
+    "crates/gateway-application/src/lib.rs": "914637658d64634b9cd5a59176dec4698eede7b660b5dd7df924b071cb77d168",
+    "crates/gateway-application/src/local_inference.rs": "0fc2a6c06b6f35401197a6ea677b3b9177d2a9dc383e681445bfbec53367a37b",
+    "crates/gateway-application/src/memory.rs": "2effa08b646c90c1219afda77cf47bbb7822a09f961abae91d72f6d6e4cac7f4",
+    "crates/gateway-application/src/model_releases.rs": "fbc443e01631b6d35acd962bfc686b2fa463c97cc56dfb3b645f1efbdc776664",
+    "crates/gateway-application/src/offline_learning.rs": "d89adbb075aa345ada07b5f36baed8b50aaa228104cc9656664ec04e581c2eaa",
+    "crates/gateway-application/src/parallel_execution.rs": "7f9bae446fb3dea1a54eea0ff2371e956e70bd43084ae7f492447620c557817f",
+    "crates/gateway-application/src/planning_application.rs": "07b6418fb254952c3adcb12767d9e7a05b2a4a23602fbbe784fc3ecf80686add",
+    "crates/gateway-application/src/policy_application.rs": "49f4c4991f07083e9fba2b77049c6af429fd20ffb5935f311da58e9ee6570516",
+    "crates/gateway-application/src/ports/inbound.rs": "c984838faf2330b8feacfd1a32bcfa2e50a2d94ac884e4915a8d10b85005e6d0",
+    "crates/gateway-application/src/ports/mod.rs": "50d324d920539c50ae9842fac87d3d341f205fc13c80ae6c03e3d617adaae494",
+    "crates/gateway-application/src/ports/outbound.rs": "2df262ac650c6a044f4fc81e69053df92c6526b2201794cefa2b659391eec989",
+    "crates/gateway-application/src/procedure_evaluation.rs": "9849a7e04c6d5d12e55bd6e4ca54228b3a1b5a2110864ab3ffa0eef9d43d5ce6",
+    "crates/gateway-application/src/procedure_promotion.rs": "11fa786ead193429c66680ef7e4f876d19accf47ae6e2f3dac62249736c4a2a1",
+    "crates/gateway-application/src/reasoning_strategy.rs": "378ddc780eba99f588ceeb223d8d858c601093b161380c3a8d4c697c16b86b4f",
+    "crates/gateway-application/src/recursive_retrieval.rs": "00ea51b2f701899f61e37b66cd083f48e1f6f0e721b77499bfc23e957ecb702c",
+    "crates/gateway-application/src/reflex.rs": "edf7d76bb7689358eb4c8f0e93bc9f3cd4f6536255705f8f98e73f33cd26d1b9",
+    "crates/gateway-application/src/resolution.rs": "e0aca0ed6b79b313bbff2771c6737dd9e65160f3ae2a963597ad6dcba3f69191",
+    "crates/gateway-application/src/resolution_agents.rs": "eba15be5b1ea3d843f0f7c121d38fa88f70480aba82cdb0df4a995ce289c4b18",
+    "crates/gateway-application/src/resolution_applicability.rs": "844cb3bb1e0ddd17e62323301986baaec327648eab6432d8a8fce532559db994",
+    "crates/gateway-application/src/resolution_application.rs": "fa2bb0515563d809f66eb08a71be9daba453c61475ac2a3e699f57507d5eaa30",
+    "crates/gateway-application/src/resolution_artifact.rs": "1a4668f3f7307e8ae56ccbf5d728090eaae3549dcd8dd69bf531f66482086b85",
+    "crates/gateway-application/src/resolution_candidates.rs": "2b6eefb602fd669fe29ee7bb78cc448ed63867102035c5e118fcb3e174e9b63e",
+    "crates/gateway-application/src/resolution_composition.rs": "ea8e325dadbebe177e11ff276cab5e594a6e12eb183903fd4757eb4628468540",
+    "crates/gateway-application/src/resolution_encoding.rs": "290c0aeb620833099f6a664075fb1f93c9ab8dae4e896db5d36779cd6ca2c0f8",
+    "crates/gateway-application/src/resolution_explain.rs": "ef786739c5ae40fba9b39f17a26742feaf0052b56896ea39525026fa535a0448",
+    "crates/gateway-application/src/resolution_process.rs": "ab483bef75e71428a180a210b20c124b139cbbd87fb28959b435e8cee5a45630",
+    "crates/gateway-application/src/resolution_skills.rs": "632c69037a4dad0b19fb6d669b367ff1e7b09463b6ebab4aa98d263b4e13f76a",
+    "crates/gateway-application/src/resolution_snapshot.rs": "0c4dc9929a468377865af6122690e10f242d3af3c4b3609770d1823aad4d8af6",
+    "crates/gateway-application/src/retrieval_pipeline/tests.rs": "c151d8ae5fe4fc26eb6f90ee9365b11bdfd44fe8612768d03550145a3c12b8ee",
+    "crates/gateway-application/src/retrieval_pipeline.rs": "85989003a63aaae5f332da2bbece6f99dfc4d6f3f7404bdbdbbd52e9160fed32",
+    "crates/gateway-application/src/sessions/admission.rs": "63b5f40936fbf7a34c9a976bbd805661e7d13165d5a5d3b18c886db3f482f74b",
+    "crates/gateway-application/src/sessions/authority.rs": "5919b827212f238dc70104765bb7f6776c089de68715edfaf266ffdc360d5d83",
+    "crates/gateway-application/src/sessions/boundary.rs": "7d0f5b2f2c8d785a665b48c9ec16820763283d2027b7e676ec9c811c22579b46",
+    "crates/gateway-application/src/sessions/contracts.rs": "8bcd8c9a0b52c59ab14552823a7da0719d1c32ec690188b801aced84bef2d93a",
+    "crates/gateway-application/src/sessions/coordinator.rs": "47ab445ad39b4cb9a0d77be39905fe3fb4eeb8cc83d44dc3fdad32091ee9f0b7",
+    "crates/gateway-application/src/sessions/journal.rs": "80b9b960a35ed46b5513bd7aec5101cf32dabcfd2d4a5e4c1622251530c3f246",
+    "crates/gateway-application/src/sessions/mod.rs": "20e425288d394f8655171512e45bfb53ce90791606fcc450a35632a011f2bf86",
+    "crates/gateway-application/src/sessions/verification.rs": "8e0d14b07cb75185053157d5e898289d74119c52eee4ba3a6072fe2a49e6048c",
+    "crates/gateway-application/src/situation_application.rs": "f4bfc5f9f5e14ad136296cfb2420104e1a65e675e6c78e271948c4ee78e1bda2",
+    "crates/gateway-application/src/worker_fabric.rs": "fbcd34d54089e9832b3d0a7a7df7b4d6e4adc6dcb18d8bff1db68b8cb6bb2a48",
+    "crates/gateway-application/tests/cg06_end_to_end.rs": "17b77fb10a8af4dbb155ca58435200034988109759ad9fcd0511f1e36e8f63fb",
+    "crates/gateway-application/tests/cg07_end_to_end.rs": "71529aaa61635d6e2d920077814f2dbd73b7b6713e7af28c650eec76283cfb0b",
+    "crates/gateway-application/tests/cg08_end_to_end.rs": "c8766aed943723e362cbf291d0dda0e6af054bb4edeb95c4e590ac1ca6de06b9",
+    "crates/gateway-application/tests/codex_facade.rs": "4261d38816bccb1311a908239bd408ae4aeb396f1dd041e83d8ff3103fc9481c",
+    "crates/gateway-application/tests/cognitive_routing.rs": "e1d5d79223d2772e3afbebf9208a9623f3658da93bba4f5f84b90146cd1b94ae",
+    "crates/gateway-application/tests/context_application.rs": "7a697d19af59d79f347fcea5eb4ae2103b086c7ad00ff64111309b7c2c70737f",
+    "crates/gateway-application/tests/policy_application.rs": "ab85711f6dcd7dffb3490f364a9eb29b3b690777d9505a08fc71c4cab3333023",
+    "crates/gateway-application/tests/procedure_evaluation.rs": "fe9583b9aa6ec392a22884e54b3f97dba89343ca5bba4c4e28eec8e30dcebfac",
+    "crates/gateway-application/tests/procedure_promotion.rs": "0c990bb71f939d2dbfc62d3ac221a0aaab5d705e0248f36eda1ae1e1c76e081b",
+    "crates/gateway-application/tests/reasoning_strategy.rs": "d89e5812d6306931ab25d2850d9132ae093267ce1054dfdad9380468d24cebc8",
+    "crates/gateway-application/tests/resolution_agents.rs": "9a0b5c9ae7e5586b6ffd691900b314e790566c6aa6ecc1caa8411cf354d1b78d",
+    "crates/gateway-application/tests/resolution_applicability.rs": "125f6013763f264bd51851c5ef719bb3c16900935d3b3332963efb54c006f752",
+    "crates/gateway-application/tests/resolution_application.rs": "0986840b4605fe3f30f97684c6a1d0509dd2bf0f983cc298c444af05a7eb7a24",
+    "crates/gateway-application/tests/resolution_artifact.rs": "35c4d57ac6007f3128a26374dc1e5d0b9d1cafd5568b2c402a6fc690654d6149",
+    "crates/gateway-application/tests/resolution_candidates.rs": "1a3e7348566158d2978b91797fc29874e7303b4d7f5bec9f2decbf0a5febb5db",
+    "crates/gateway-application/tests/resolution_composition.rs": "b21c2b0c6b8172836f261eeed046560a2595e9d06f775b3c6f51a02f3667715d",
+    "crates/gateway-application/tests/resolution_contract.rs": "8a7385cc706c6cd5ad0e5203aa07421ed9b95c27fd76aec2894aa5c79a62b9ad",
+    "crates/gateway-application/tests/resolution_explain.rs": "e7e6f7b8486ad66acca2183b901b64dbb393786810be0069b0aedb5a4997751b",
+    "crates/gateway-application/tests/resolution_process.rs": "37926561b12ee61c4c9346ac80dd19d241970ad60f2b084ce4e7530200670875",
+    "crates/gateway-application/tests/resolution_skills.rs": "63d753faecccce2c7fbab2fc8206a3e8f01b10c8353db160223bf2bbc39db089",
+    "crates/gateway-application/tests/resolution_snapshot.rs": "18fbb10408ed645010fec4af5de71f939986634a389a30db47a010a840cc9625",
+    "crates/gateway-application/tests/session_contracts.rs": "d8a9366dccec85ccb4df05d362e66fdfc79d5d749ae89005dc82ec3d459184c1",
+    "crates/gateway-application/tests/session_runtime.rs": "0b02f6ce95ea68b3f76d5977a1123dec5c55f5901d3487e7dd28ff403163ae64",
+    "crates/gateway-application/tests/support/cg08_reference.rs": "b1d6d43700d35c6a39089433e3e067fc6848c2e8daedf3dd2fda7d5d5d7ac431",
+    "crates/gateway-application/tests/support/cg30.rs": "5ca3efe893f209c9ac381cb35405bb8a6504321b0bc86edaa2f1eac5cae55b4c",
+    "crates/gateway-application/tests/support/closed_loop.rs": "109e474720d3cae7276f6d5859fb240fdba08dce2abbedf7ef65a4c5bdd4af85",
+    "crates/gateway-application/tests/support/codex_security.rs": "58379caca8d516f48e70a4d80185f4cc874ed836b1851564fd4e1f062f64a9d6",
+    "crates/gateway-application/tests/support/composition.rs": "f31efe9643fa5dfde92a6fd9886d9cdbebabdc224463c8f8cff164884b192285",
+    "crates/gateway-application/tests/support/context_fixture.rs": "82717ea76bea2ea55f30af061544b1531e0ad2e58a32e628011859565cc512ba",
+    "crates/gateway-application/tests/support/explain_cases.rs": "c8f603d67874557f4082fc5128cbf9a8adec0dce6816bd8fe71811d2fcda6fc2",
+    "crates/gateway-application/tests/support/mod.rs": "f6ffad0d03a5ec46a610e9f67c6181f4cf7a22c9edff27bd5756bcfb108cbf8e",
+    "crates/gateway-application/tests/support/reflex_cases.rs": "57ca8a8ee066910874f700edfaf6abbe4b98304f515184eaf4718f696f257f3b",
+    "crates/gateway-application/tests/support/skill_conditions.rs": "f556c1f861b866c082a97df8c79df661be15c15f77c180fb350e06295c5085a6",
+    "crates/gateway-context/src/budgeted.rs": "7462dfc42e87ba38fc056f73311bc63563214f73cb19c0041c45e2ae08123fc4",
+    "crates/gateway-context/src/compiled.rs": "f0ca6beba208bcb508caa473ead848013024940aaf2f233d68fd31849b7ce1c5",
+    "crates/gateway-context/src/lib.rs": "8930764f5a46e6b1a35005761aab916ab7924a1257df84a0485eef4143cff926",
+    "crates/gateway-context/tests/budgeted_selection.rs": "0241f949e3ae9ea8b3e6ccda73d2cd7c88eb1945c185ee34295c374e8aeacb57",
+    "crates/gateway-context/tests/compiled_context.rs": "e0d0c16f4b5dcce0fedb0867b48d296d06b9aaf2ab3ac4f62b9d6f3fde824c30",
+    "crates/gateway-context/tests/context_compiler.rs": "c44fc1bf3104572fc854a5e262e9632978ff76c901c6d93d19f901f5069c3ced",
+    "crates/gateway-context/tests/v2_handoff.rs": "8ac7d3b908e8caa7381ca7dcc89494dffecbcb775bfd4c3a3b7c0f18fc85d241",
+    "crates/gateway-daemon/examples/local-model-proposal.rs": "7cfc4149e25fe2292d7c620a66889e05d785e2ba1ca1f9a92c6adba6f505832b",
+    "crates/gateway-daemon/src/bin/cg-local.rs": "708955cb29cd0790ca70a1d74591a7f1c4d486fbdc78afed8f444d86405fc7d6",
+    "crates/gateway-daemon/src/bin/cg-mcp.rs": "5b3388a623928487e52d1b949cf189e1561c8f55869bcf5a2b3999ac3f5236d9",
+    "crates/gateway-daemon/src/bin/cg-registry.rs": "8a9092cf0cfa6e22889d1fae64f8e756f3fec064154800e328624c11e7475871",
+    "crates/gateway-daemon/src/bin/cg.rs": "0028b8a98cb7aa75ad6de0287b2ad736b21b671bd2f39add9006f86c2de56428",
+    "crates/gateway-daemon/src/bounded_process.rs": "514b8b885f3894b85d1baa9c8963d263f0834ae24a27252565b5c0bb4b067df5",
+    "crates/gateway-daemon/src/codex_canonical.rs": "0072c55e25e228c3b59c7d7517c554caaf2766003f83beb29e2f1112247bbae5",
+    "crates/gateway-daemon/src/codex_workspace.rs": "885495874811e07a45b62f776c9fbad104840a19a8b57af93236d81688ba0ffc",
+    "crates/gateway-daemon/src/cognitive_store.rs": "83a5eec4bce182143db0ff7e4500452a134e6e415638a6f2e2968eeb4857ae0f",
+    "crates/gateway-daemon/src/cpu_learning.rs": "49b52ef51617edc5521f96fdf820234589b8281dbb4b5674b1b263a2c5190df9",
+    "crates/gateway-daemon/src/declarative_cli/host_mapping.rs": "f4278084b14ed06d350f37acb1aa6fd9ea00bb78fcc2d82b493642c0ce69bfdb",
+    "crates/gateway-daemon/src/declarative_cli/inputs.rs": "387dba05b75538d6a0381a3712767648fa94bb93a9d86bfc983558dfcecf6869",
+    "crates/gateway-daemon/src/declarative_cli/json_input.rs": "b7ee76998ddf25e6fc71c90aec74998947d770d4cf6d45382fc82a944557940d",
+    "crates/gateway-daemon/src/declarative_cli/mod.rs": "48db1cbe8ede4999cb0181a55457793d53fee46d8428a5a8472f8119c86ae099",
+    "crates/gateway-daemon/src/declarative_cli/patterns_cli.rs": "6954562127e74413046c89ca181a4f092910e8c59b2bc12026461863db535967",
+    "crates/gateway-daemon/src/declarative_cli/pipeline.rs": "52f54226bd3ef46103fc23d1ae87dc58f67f77c3a0a2aaeadfc61aa2b781c1b0",
+    "crates/gateway-daemon/src/declarative_cli/procedure_cli.rs": "d98825457faced534e4d44ccd1d6556ec0e04ae6108e2faeaa66d17f7ce6c077",
+    "crates/gateway-daemon/src/declarative_cli/promotion_cli.rs": "929ae108409eceffa4027ca0174306c2c84008fd71d5c56bfca4c3f132c17c16",
+    "crates/gateway-daemon/src/durable_models.rs": "a9dea7531bce3644bada3cc4dafcf7c505034b3f1581d0fb6050e23e097cbb8d",
+    "crates/gateway-daemon/src/durable_workers.rs": "b4f82c75da320e5d186028ebc715e2467448d96b7938091112b00fa0c2c3f00c",
+    "crates/gateway-daemon/src/experience_patterns.rs": "aa955131bb676f38a90089be64c766c9da4e4b5317fb5369ce37610dd6d09418",
+    "crates/gateway-daemon/src/graph_retrieval.rs": "d8003c1190ee82e6b134b39dc8d6f5ee69f30685a9151ae5081491299d026513",
+    "crates/gateway-daemon/src/lib.rs": "0d3ee7251f6bb894644af3e5bfdb9c7357dd576707c8fec67d705dae7d6c5037",
+    "crates/gateway-daemon/src/local_inference.rs": "3d5efb5dc008b65e70f613c27ec9d151198448d73faf783d46936af00ead7f5b",
+    "crates/gateway-daemon/src/local_mcp/contracts.rs": "a3cb65ea07a174692154c6fa24737bc8891027ff69399f30ee69a633a6305c0e",
+    "crates/gateway-daemon/src/local_mcp/decode.rs": "8e18eeafd79451b1508e5e5ff3470fbcd2c49db7d8a904fc09007e9a06661f13",
+    "crates/gateway-daemon/src/local_mcp/mod.rs": "952fb8efe540bdd57598de335d24223a4b444818a13e97ae305a16ffa281d598",
+    "crates/gateway-daemon/src/local_mcp/runtime.rs": "e35733968cc6cd795a49ef903b85c2ee9de08e9a6aed1c1b7ab02526a9d53afc",
+    "crates/gateway-daemon/src/local_mcp/tests.rs": "9c998d14e439bb90a1b31ede5f7a3484745d3c08e90729968d93c45840dabcbe",
+    "crates/gateway-daemon/src/local_mcp/transport.rs": "d2a0a4b049256409a7942b2eb4cc70b3ff14384105c5465ee7026ad940f72303",
+    "crates/gateway-daemon/src/local_sessions.rs": "2e1d3416a2edbf3ec8fca392f7e0fbcb122b654fdb14207ca1f020abab407dc1",
+    "crates/gateway-daemon/src/main.rs": "4c905b6f6cfd763f1ba40abc5418fb7468ad4259aa942711168b5497d1ceb7cb",
+    "crates/gateway-daemon/src/memory.rs": "07ae52495bff2fa5769127800848aaa716550b3927fd518964efd20ccadd6689",
+    "crates/gateway-daemon/src/postgres_experience.rs": "547327b4dd622495136a55703d2998c7d8dd76341fb84501f10917a09acfe62b",
+    "crates/gateway-daemon/src/postgres_memory.rs": "70ad4aaa8165087c0be07b15767916aa61d5e7fcaf4f3d78171f72e536287c45",
+    "crates/gateway-daemon/src/procedure_promotion_store.rs": "320f45cb5bf919a66e71cc2f05e2fbc547b059830457b090528892961501fd4f",
+    "crates/gateway-daemon/src/registry_cli.rs": "e75d48630679c585830129b585a9179dc4baccb6237111496e5228ad43d785fd",
+    "crates/gateway-daemon/src/retrieval.rs": "0eb8489dd433424513571fc88209bb5878fad09886689b3e604d8be126671fd4",
+    "crates/gateway-daemon/src/session_store.rs": "93558c98d7ef3ee318c6f9010e0a030825b53557377b31224a3947e42596ce92",
+    "crates/gateway-daemon/src/session_store_tests.rs": "b3fdaea800bbaecb8f3e1a8677c27633c32118542fcca4eafacac86e739eb95c",
+    "crates/gateway-daemon/src/worker_fabric.rs": "3c509d57897d506fad894230776df5f8ae8b4b158633d2f9ed6caf8fd3a8e3d6",
+    "crates/gateway-daemon/tests/codex_canonical.rs": "d08ac59d26f2431cbfa32ea0e3027a64d5d155edcc5131c0ec9b52097f706ef1",
+    "crates/gateway-daemon/tests/codex_contracts.rs": "cb2f21dd4e3f46332c0ab355e5a9e164cf748f75c2a1abb145df497456fa3c7d",
+    "crates/gateway-daemon/tests/codex_isolation.rs": "137cbac8b74bb91725526fe2f38e66129b197b80f47813990d192cd60017c6f1",
+    "crates/gateway-daemon/tests/codex_local_cli.rs": "2efb758d2c4fca38bcd2326a3d888a6fad6dff011843ef124b96e760b71071cc",
+    "crates/gateway-daemon/tests/codex_qualification.rs": "c7c7cccf8d564daf9b681f35375dbdd022ab4c8646fb71f74a778ae52847bec7",
+    "crates/gateway-daemon/tests/codex_sessions.rs": "0100c856e848dacf4e61405398218944c4a632439d8d665e95fb4376c6ad0df5",
+    "crates/gateway-daemon/tests/declarative_cli/cg12.rs": "0ca05e3d002f04aae9c063e0e2c74c6529928e036ea3331f4da657f2a98f6bde",
+    "crates/gateway-daemon/tests/declarative_cli.rs": "05aaf3c03e7ac547bba483161fe8da441ef8eded32cee508d8318f6cb6847e4a",
+    "crates/gateway-daemon/tests/experience_patterns.rs": "bcc2dbdd08e30fba37ada9f8771c26758a9728551e60afae93318c200f17b311",
+    "crates/gateway-daemon/tests/governed_memory.rs": "b43c74545835f3dc532261ed65f395a791b6f09604023bd91182cfc48e5ce436",
+    "crates/gateway-daemon/tests/graph_retrieval.rs": "c8aac0b3ba75816a5820257bace3059afb5e6ee57ca32e74455661ea61233047",
+    "crates/gateway-daemon/tests/local_inference.rs": "d41641479508ef5fab602583ff5b954bba63e3fcbc263b1466a851526c2f4eeb",
+    "crates/gateway-daemon/tests/local_mcp.rs": "94659cb6b008f620087e850d16fb846d00a9cc0d797b9e3a66a5d8d4d1b21443",
+    "crates/gateway-daemon/tests/offline_learning.rs": "9a6addea2e4bb4b65260769a523893e92eb3987203aca5d80d537d86e50ba1c4",
+    "crates/gateway-daemon/tests/postgres_experience.rs": "d9d1ded139b679f69ade87247909087dd7ea8032bb0c009ea3ede705295fe0cb",
+    "crates/gateway-daemon/tests/procedure_evaluation_cli.rs": "54a32de2cd455d4bf62bdf3f1f40b3c21d842922bae68355fba5398ca3eb4152",
+    "crates/gateway-daemon/tests/procedure_promotion_cli.rs": "9ef6e897b1c56c370b07f08b9e28f69f1eb9b4c3a1c650a31db35ae85eb9c859",
+    "crates/gateway-daemon/tests/registry_cli.rs": "cad0bb6b03b4b2b816f5d985378637471919ca9599d46d08213cffa523bb611c",
+    "crates/gateway-daemon/tests/retrieval.rs": "e0757f4192ea36473aba714f29b7e6f4ac132469ecaabf08661a313e01ed82dc",
+    "crates/gateway-daemon/tests/support/epic03_learning.rs": "4202a93ad53c93d1c3f9d55d9b67726bc570921107664385f2ae5feb93a92a38",
+    "crates/gateway-daemon/tests/support/epic03_workers.rs": "0dd5c32b19b024fd7e212b6cde08112fe0d7b41d678044cd3bd47b7f1264cf2b",
+    "crates/gateway-daemon/tests/worker_fabric.rs": "2dad8880efa02ebd2d68df30ae840c73f7438d08d7fc4a09e4c684f63d2287f4",
+    "crates/gateway-domain/src/agent.rs": "11aed51dae8df61116948c6f561ddc67401d1e2e922a8ff697ed41ab74d3f8f6",
+    "crates/gateway-domain/src/capability.rs": "b329fa3a6cd169427efa44603964ae70d36cb5778cb3c54ff9ff784c2f4071cb",
+    "crates/gateway-domain/src/capability_requirements.rs": "a358dda42d3010601eb3c39717829ffa5e7ee71eacd5d17c157dbfbb783bead2",
+    "crates/gateway-domain/src/cg06_serialization.rs": "895eb4345d201c7c62a66e54bc27bd0a07c8fbb75af7fc72fa857894e8681f11",
+    "crates/gateway-domain/src/cognitive_routing.rs": "c99f01111387344807b9d5b46e68da5b4bca91f647933e8064b40c3cf09a93e2",
+    "crates/gateway-domain/src/comparison.rs": "5dc731acdaa5bb2f7c02441d1b0450f680967c9ae9f1de48846ca4c39afbb5de",
+    "crates/gateway-domain/src/constraint.rs": "84f08c9a3b19c7446e74d842fa54d3b5d07ec674f8296b199ceef707a1abb47d",
+    "crates/gateway-domain/src/declarative_context.rs": "effc12c986a3a8f1ebe9dec012cc041deccd9998bdc5fc62a61e42d0bb344b4e",
+    "crates/gateway-domain/src/definition_contract.rs": "109448911e7081094690f917f1308524e7f59290dfc20b79ab7e53e327de26da",
+    "crates/gateway-domain/src/definitions.rs": "5b1f59b0eec97e224804e0603a8b1f4a38e3cfc6fb6c6d6084f90dbab8b1cc8b",
+    "crates/gateway-domain/src/delta.rs": "a5ecc413a9d70a666ee1c10f77ab842497b8ce2d6a7f84fd779a8c3e4719da5c",
+    "crates/gateway-domain/src/evaluation.rs": "cbd6ead07e3ca75168d153879f05a03baf32d02879fff8e2f51a657918be7065",
+    "crates/gateway-domain/src/execution_context.rs": "236521143568688a5a69ed9e44b5c4bab37fdaae345c3cd0e4e13d206e15264d",
+    "crates/gateway-domain/src/execution_context_v2.rs": "efce5e0ec0f07b461775c24577b40db2e5e767441b4e6a05d3fb6a78611a65a1",
+    "crates/gateway-domain/src/execution_profile.rs": "7742cb26cebfcdd998f15df4ca261b2ddbc06468d4a272f9aeefa1091959f447",
+    "crates/gateway-domain/src/explainability.rs": "a73dfecf0d85ae009b572c9ecbe2bcf7e7a0b9c55a2b6b111473f031e8750570",
+    "crates/gateway-domain/src/identifiers.rs": "172b8b0f079d005d07c76858d872fc7a64f6a4301b259c2ef1c0fb87bc6e7b7a",
+    "crates/gateway-domain/src/intent.rs": "f392b9505bab97a2f2bb2ba5b25f6d284fdf7048dec9cd30bd6892f20dbfbfe8",
+    "crates/gateway-domain/src/knowledge_graph.rs": "5b826c0c940b36a1e76a6fe34fc8949ca468f235c528c2d480c3c73ea7131baa",
+    "crates/gateway-domain/src/learning.rs": "5707fd0a1c11f95c42929174de5e7bd97f266563ce2f6f686a7e4cf62a0b58c5",
+    "crates/gateway-domain/src/lib.rs": "90cb72e3655c70e00ef8ab545bd6b91343a7ae6e6f8058d2319c4dabd2a8a22c",
+    "crates/gateway-domain/src/memory.rs": "3acd003d1adc4c28f1f6f274da7daf25c64e8d3b846201a1016b01c8f48843dc",
+    "crates/gateway-domain/src/normalization.rs": "d3cf241fd2a3393297525f2ef3b987eb69d10f4459d63b646a9eee2f1e34602f",
+    "crates/gateway-domain/src/observation.rs": "98a2f0e1957507aacec3f7f1d41226a20c838ff0f6fb5c1189f3c4c158c88c78",
+    "crates/gateway-domain/src/offline_learning.rs": "74f0c3daafc3655197ad29e4baa3bbd808d1a52bd04c05a6d7801b8b007ba271",
+    "crates/gateway-domain/src/operating_mode.rs": "341d300016b45c430bd6017052056e052cee3b060394cf7d9e6b8c45fada68ca",
+    "crates/gateway-domain/src/plan_graph.rs": "aee3740b3c0385a3fef96d78ce125e8755fba169b9ac698817420a54c3df3bd6",
+    "crates/gateway-domain/src/planner.rs": "3163a747bc661d5d7a6d727a44794de4ab2902a36bc80c2198dedc02155a1ae9",
+    "crates/gateway-domain/src/planning.rs": "22a612fc1b88a9ecb22c5b91c636304d4bf8d1fe288d52c8cf943e11049fd073",
+    "crates/gateway-domain/src/planning_input.rs": "d44dd3611b320c593847ad22a90f44535bda7fd031e57e2db405e2bfa23d396b",
+    "crates/gateway-domain/src/planning_serialization.rs": "c8e763016475291673377aefbddee0722e3446031cb128646f26ebe7744755cb",
+    "crates/gateway-domain/src/planning_validation.rs": "f6ac2aa4c5abf7788369119a93c3997914927c3699abf8f8b87c30e75453a0e6",
+    "crates/gateway-domain/src/policy.rs": "3b4e0be3f28c912f572fdbab065de3799fd7c1ae17ef0f37fa6a6c889ede59a2",
+    "crates/gateway-domain/src/procedure_evaluation.rs": "02aaf8fe222e86406af53559376825135a84cacc4cbf0707f582085793a7b4f0",
+    "crates/gateway-domain/src/procedure_promotion.rs": "c46424b87e3543f030801502a7591a93565bc2d5d4ed2c104abef7c2e5070c1f",
+    "crates/gateway-domain/src/quality.rs": "4ace980e356c0eb086236443d4baf013ad44e7732dd63ea78987b6f83b39c120",
+    "crates/gateway-domain/src/reasoning_strategy.rs": "1bad0f03e2c10f78a40774f8913f541c2b94e1560243fb0748ca0cd5571b2e8c",
+    "crates/gateway-domain/src/relationships.rs": "53c5ef6effdc052aa09a5de764226361b65af17e06ab6b709dab158be2a39801",
+    "crates/gateway-domain/src/retrieval.rs": "42a8853234fb1338818185f4e08abbfb5260333e6d9abca0687eb2c910f24eeb",
+    "crates/gateway-domain/src/retrieval_plane/budget.rs": "a71cc049b8ccce7095fbf34077ad8369d924652637c4b3e6eb11d35488af98b7",
+    "crates/gateway-domain/src/retrieval_plane/embedding.rs": "aa02bb22230d12fbaa680f6e42e09cba86d30e4c1a49511465b806d89c04d0ff",
+    "crates/gateway-domain/src/retrieval_plane/mod.rs": "55d14c2e4a00953db810406c09832c2e0310f3c0c95f6085c1ef0c1b074d5d1d",
+    "crates/gateway-domain/src/retrieval_plane/plan.rs": "726a3b69354640f5b1f9e84aad29efb6f23c7b46794dc28e9a94d0d53c54c2f0",
+    "crates/gateway-domain/src/retrieval_plane/result.rs": "13eb0fc14e02a353663712eea420ac3f8f831fd56b1e72aa31f24c0a9fe9a9b5",
+    "crates/gateway-domain/src/retrieval_plane/sufficiency.rs": "1b301a354afd8d790c366d19da9115c61d8d7195d32f9bfe0fc1debe320da5ad",
+    "crates/gateway-domain/src/retrieval_plane/tokens.rs": "a571f7a4e29f27d6971cc3949f5db569311329e2c06ed2d77ece89cacc437307",
+    "crates/gateway-domain/src/serialization.rs": "3e5a8b2ebfa771d09c9807ba597fa3ab821f8dc050667fb60a24c6e93b1219c1",
+    "crates/gateway-domain/src/situation.rs": "561112272d4e979534d73cd047c1ccd481193323c426e3678699273e306d3c19",
+    "crates/gateway-domain/src/skill.rs": "827a772e0b4a53cf92a67aae6096a268fbc621555f1f069f7cb5a0ba166ce0b4",
+    "crates/gateway-domain/src/state.rs": "2a6248026fd518ef18a8709ad2d574c6630555fc97c1c5dd60e141546a669166",
+    "crates/gateway-domain/src/task.rs": "2f0b69e85338b4c774c343553bc6a669f705da209dff68156e3d163f10deabf2",
+    "crates/gateway-domain/src/validation.rs": "312c9ab2db8e158f4ee98929f4ccd9d3315e02cac48e999d23310aa05e3755c1",
+    "crates/gateway-domain/src/version.rs": "57a78889c95bae04f4d18bd39c206dff79be9a4957b284db0beb1109b410937f",
+    "crates/gateway-domain/src/worker_fabric.rs": "465573dcd467a05528c7944e607c4ebdf70bd0eab647b8c7baa7d7853ffe31d1",
+    "crates/gateway-domain/src/workflow.rs": "eca3ac0833529134b926204a0aae86e296e07cb793e870d7334f7d91cb78d6a0",
+    "crates/gateway-domain/tests/cognitive_routing.rs": "9a4d1510a94d8394ca309ee0276295f982a91528931d010980a7c9cafd22c12b",
+    "crates/gateway-domain/tests/declarative_context.rs": "7739f39faef62cb739d57715d972803efe336a84cf33a7c4811f9bcbf858c910",
+    "crates/gateway-domain/tests/definition_contracts.rs": "8d77e5c5738754d56366e8d601f012ffd47eae3d2e145f803b737b9fb3a6421f",
+    "crates/gateway-domain/tests/evaluation.rs": "ea635f8901d872c1ea49944d5b2ecdcf8e21ac587f7922b1238a8bb0081cfd0f",
+    "crates/gateway-domain/tests/execution_context_v2.rs": "bea8b6ba3e8a919e1681cac168239bfb26456d462db05d8a0ff0b9491ef8723b",
+    "crates/gateway-domain/tests/knowledge_graph.rs": "202a31cd90c2ea4ecfa3384c8c28f9cc065eb4c67b4c0a6a29af8e1f61a5e0df",
+    "crates/gateway-domain/tests/learning_contracts.rs": "414cb481891afd91b0295c58b03dac71f3568299a7271d5e1ca0e385fb34babb",
+    "crates/gateway-domain/tests/procedure_evaluation.rs": "6cfff6c971bf4668e6004715c3ae05b8c469ecbc2a387c81f92871f3a8027db0",
+    "crates/gateway-domain/tests/procedure_promotion.rs": "c6a9a990957d16bf37c0a419cc4e5ef12769ebd45f2818ee242a2bfd35c38b2e",
+    "crates/gateway-domain/tests/reasoning_strategy.rs": "d9c91440cd8c3aeba97ddec81524b285268c5948d9b6162ea7a7c9a1da3933c4",
+    "crates/gateway-domain/tests/reference_scenarios.rs": "b77adb9350392c3c6624da9761b9d21c7ac72b612d8ae63cb96582140468f8bd",
+    "crates/gateway-domain/tests/retrieval_plane.rs": "6d5234dbf9eb744c30ec8f599713b9564ed9abadd767466bd649a8e26eff5e8d",
+    "crates/gateway-domain/tests/worker_fabric.rs": "bb69f32ca6c792afe81ca28a5c3ccb2cc533e024473049a231815a41413e7fdf",
+    "crates/gateway-policy/src/lib.rs": "0fc05382689ea0ab243ed9b11121d84022fed4070c631a8d9a5b281e44f3af88",
+    "crates/gateway-policy/tests/policy_engine.rs": "f0b75fd3934022a26a6805dd0e9301b50b2100f5a733fe066caab6c50182a873",
+    "crates/gateway-process/src/application.rs": "5476dc1bae2597d5c36521d8d45bc9844603652a1a6dc30cb7252f524b2beb4d",
+    "crates/gateway-process/src/authorization.rs": "3ea2c95b926d4dfe2ca097fcad7d5b9653236596445ba7167a23f5ae544220c6",
+    "crates/gateway-process/src/compiler.rs": "83e580309bf65d3967bc46eb907df72aff4d7be2d1114e65b49e137d4b11c287",
+    "crates/gateway-process/src/constraints.rs": "c1f8f4f2715864f66c98c7180e2064f995b1f9d867260ca0f0072be86512b0c2",
+    "crates/gateway-process/src/error.rs": "d76c9fae6c5667910fc96b7f8ee0e58f818c14352ca4afff1357bffb72ad59d5",
+    "crates/gateway-process/src/evaluator.rs": "9353b6d77c67a67a9d7b087e60273f1647404151814fdcd841138e1faf86c751",
+    "crates/gateway-process/src/identifiers.rs": "31d2c509f1dd9174bc546a34700ebe6bbb8ffb1b6310fe3c05fc4f51302299d7",
+    "crates/gateway-process/src/instance.rs": "1b2e3005065edeed5e956019ab4cd13decd51f7858c4d79e79254b8d724a05dc",
+    "crates/gateway-process/src/ir.rs": "50e3110c7304163a72958b54dbf4a7674c1d90295a7239b494a809c1a9d863ac",
+    "crates/gateway-process/src/lib.rs": "47a280f06d395952380803b2152ddbecfb7760994a61ce6db2e4b0342c98f100",
+    "crates/gateway-process/src/lifecycle.rs": "38d6412208391e5f700304d8fcff680e6ae22702360b5c6419a9dc115d6fe2d7",
+    "crates/gateway-process/src/mutation.rs": "c90e6485813468d824c42a911a9e590cb1c49878f1795ee6cd621be6245a6ebf",
+    "crates/gateway-process/src/registry.rs": "e2ad4ec36850105cca57455bab316a86bab7973d3e8e32977df5b6878e43f24e",
+    "crates/gateway-process/src/source.rs": "e7db9864373eaa7c42ebcb1adbcba7f78b5430262e785e0c5f89ecb886bbaaa1",
+    "crates/gateway-process/src/validation.rs": "c57962dbc45492925438187334ee7a593a63817949050b9da5289fcaf00d60d3",
+    "crates/gateway-process/tests/coverage_contracts.rs": "7cfddd6742b72f5df928e6c3bfc56df504886f2d8fe7e889ce5bfeb900a93722",
+    "crates/gateway-process/tests/execution_graph_boundary.rs": "c8d8feafeb2c42b549d74f23be387f82ad641a086ea2f25831fe7e158eba9713",
+    "crates/gateway-process/tests/process_platform_integration.rs": "260511712752d3e1de65cad467547bd799d20802134e09bd2417ac938274c24f",
+    "crates/gateway-registry/src/capability_index.rs": "0c86f3da217f52465962e3f015b266571affaff682798fb79bfef3f1841b48f4",
+    "crates/gateway-registry/src/learned_procedures.rs": "8a6baf8267d4d9fbd3e4876e2636b80dc289c266244619d2e586e7e23391e9c1",
+    "crates/gateway-registry/src/lib.rs": "4ef491e4fe074a4b970e8125a70f5e22c241b447fd74f7b8e7714ee038e37e2e",
+    "crates/gateway-registry/src/model_capabilities.rs": "7bc79bab93bcbedf817e61dca46ed676d3691e65ca15630163ffe09cf3fff6fe",
+    "crates/gateway-registry/tests/catalog_contract.rs": "c0ec8b9619ac73e69e57219f89bbc63565cb7e12afcaf1ac8a6a567f28ab9fb6",
+    "crates/gateway-registry/tests/procedure_promotion.rs": "d8f8b3b4d8d3cf728a6e1eb67fe0248acfb8c3edf732111ed6f2d09f9b1fd004",
+    "crates/gateway-registry/tests/project_agnostic.rs": "eb68b2d1b9bce9146a7846938d6c43e336324a4f1f66978bdd741107342e4d3d",
+    "crates/gateway-workflow/src/lib.rs": "df40188057c58d1ef70dd7bad6190abd849eb976afe50fe3d82c53de6405cb0e",
+    "schemas/codex/v1/catalog.json": "731e7b7fa224dfd42c8cb698e1ad19947a994f7a5b01b8686c0170cc597eb550",
+    "schemas/codex/v1/catalog.schema.json": "271c263d7898bb8c80e5db97f213c87758883f62fc1295ed90b55590cb7aa0ed",
+    "schemas/codex/v1/common.schema.json": "cdf5a5261a7b6fef2ac1270418b6a5d729c2a0a330e4e27cc60f997a9c442c87",
+    "schemas/codex/v1/request.schema.json": "4f393f484c4f2a1b2f7386dc33d9b5283b5dc10f4bde29a9342c35cae944206a",
+    "schemas/codex/v1/resource.schema.json": "dd353b7b2db9ed18f7f1367f6aad09f03db0693d2a50e2c2f21b639aad6a0a8e",
+    "schemas/codex/v1/response.schema.json": "7c270eab7534d374b8d39c62109de782aa3f5124a9549dffaa500189c27cbcd5",
+    "schemas/codex/v2/catalog.json": "8dafde3da27cfdf4b364924b2fb84048e2125c37b6864161eb1f61162e6946d8",
+    "schemas/codex/v2/catalog.schema.json": "2e6c90958d90cc01e46d511884edfbc042b8109a85d0f86f28ffcd5de804823f",
+    "schemas/codex/v2/common.schema.json": "b30e67c71c70679d19bb81921f07bc8e273839e390eb4553f247d6a06b3311c4",
+    "schemas/codex/v2/request.schema.json": "302cd0998ce196f5dc8fb43594262e15f35165b0e86eed95c42adb83766febdb",
+    "schemas/codex/v2/resource.schema.json": "5e469fcc2417bcda54f390adba864fdb30737907f44edc93b0d8ff3870a2468c",
+    "schemas/codex/v2/response.schema.json": "fa04a6755f8414b937a4107c115ec4ca2644f0433143373a0f514f4c04087212",
+    "tests/fixtures/declarative-cli/catalog/agents/inspector.json": "e6944c76355de14248dc4432935e7179c4403ab074f30f3007ee9dea45121f5a",
+    "tests/fixtures/declarative-cli/catalog/skills/inspect.json": "fa63cf2ebcc77e35875479ccef3da767db43a0b1cbfd8a05ab085412dcc23a15",
+    "tests/fixtures/declarative-cli/context.json": "d5a2f6404778f0b019569b1084fb6e3a87276e130ef564745d96d5be6909fb16",
+    "tests/fixtures/declarative-cli/intent.json": "019fe94fb2a6f4b84201418b6f98f7c642e1ec87a7b485cddbe8d3ccc6fb6fbe",
+    "tests/fixtures/declarative-cli/policy.json": "b988cb1681dcb88bd873090c930766211e15183d6c6477e6f8e44d882dc25123",
+    "tests/fixtures/declarative-cli/process.json": "e54ec46cf5aab6e098367f7c0a988a2da5ddc7b00a05ad64902bc28c8a285344",
+    "tests/fixtures/declarative-cli/projection.json": "35a32362eb76e2b11f9ff4973cb936b0316c1cccbac6c2542c67dcb6d7cb40ac",
+    "tests/fixtures/declarative-cli/rules.json": "888886aa0f287d1084256c60827bb1947f7678f459068b850514627bffed1904",
+    "tests/codex-local/test_bootstrap.py": "62f94279881b0b9eb19da73932b0a5c57e5615c0bfa471c5ee73f5505397d413",
+    "tests/codex-local/test_canonical_host.py": "493489b10f56ad0120dfa7568655b7a17273d2289cd105de2e4f41d3f8c016ea",
+    "tests/codex-local/test_qualification.py": "7359ee24fcde2b1e9c6c21ebc19647f9b5121b8249720a60575420d1d47aa791",
+    "tests/codex-local/test_sessions.py": "3bb539661328cefae54401c734600c4a27d7f6a484f7f2cfce71f4d725058043",
+    "scripts/benchmark-local-model.py": "7e02daedf1739a7017005cc0f6f6c513e3e882ddc75d22dc823b51fb1bfa6891",
+    "scripts/benchmark-offline-learning.py": "3e91eea1a929e8dffdd9b6f5d274fdbcd0f16f952cd3294678bbe8ee86267a61",
+    "scripts/bootstrap-codex-local.py": "99adb0d7305e205b624cd340b7897ec865a2f5c2d126cc08a32e619dba3bfaf6",
+    "scripts/check-cg16-coverage.py": "10c6ecac46e6e3a8f62fe4b25314205495a50edfaadf4ed6dfc97326c7edf552",
+    "scripts/check-cg18-coverage.py": "11a18eee0f2a0b1e16015556676fd4bc5676cecdd367ed3309e082f0238e549a",
+    "scripts/check-cg19-coverage.py": "b6417e59fc98c4ac7a7d3b004b5656768e2506884e22402c2e1c3b4df68e9bd4",
+    "scripts/check-cg20-coverage.py": "c4b7a2d8ef15ef3bac84b8e0f1eb276693d39a430e2a732e09e355f79b830760",
+    "scripts/check-cg24-coverage.py": "13ddc1dd2adbda64ca9b176f14fa1b6a9cf42e497eb0a6c8a46693c9017af280",
+    "scripts/check-cg28-coverage.py": "fa008aa9c22b90afc1e146c1225c82406ed0cbd63b5d9505f7d6e841468e07f2",
+    "scripts/check-cg28a-coverage.py": "c29d15437646acd3ca1dec257992ec6ed7e291aea9e4deb64e959f9d9983f8dc",
+    "scripts/check-cg29-coverage.py": "affc58cb9ca6a1c3eb4187b1ed19972032f66e40f8898a4a8904fc6a43fe82eb",
+    "scripts/check-cli-coverage.py": "4cca1d3dc86a05e2ae78ff788b01553b10f8a9c09dfe0f0f1e19f1f2b975d6c8",
+    "scripts/check-closed-loop-coverage.py": "677e8a69e49aa05fd84c47b46126424b2d9539bf08dabdaa73ad3b85f1f1b1e6",
+    "scripts/check-codex-local.py": "5630e17082704d3cdc77bef51011a4d2b0a035448a7089bdbf0a62c6e9a2d7d7",
+    "scripts/check-context-coverage.py": "fdf6c78f8ab8c56328972e5ae7e66df733a22d017a54d647ccd630f97bfa323d",
+    "scripts/check-dependencies.py": "83e514cc8d1371b2a5e0f52ff5e7f3e39be01d192bf17c031c80839fe164d90b",
+    "scripts/check-epic03-coverage.py": "419ca154de625f1f5e7309eab87b30fb4b7b30885a28a57b7f9f47f3e22eaf86",
+    "scripts/check-local-mcp-coverage.py": "b92deffac18408b80e13fe7e4c246a72f643f97caf358c319c3f7d6c5b61e0a0",
+    "scripts/check-local-mcp-protocol.py": "8b2a589593099f0050b36417c4656c21897103690d9416ce3f72d8d5189797fb",
+    "scripts/check-policy-coverage.py": "f137b8e5df9d165e86b24783ede804e85789d0655690b7c7bdbff634475a252c",
+    "scripts/check-resolution-coverage.py": "64c3ba0a55fc20211f41707b0665bd109d3fcd312620b5159a2da2662a3dc4c4",
+    "scripts/check-retrieval-coverage.py": "54f9920387dce13dccb9e69f0878c990fa1af9cafd7e56df45a73717de29445f",
+    "scripts/check-session-contract-coverage.py": "662b78e4a89a77fdecd8f37b8fd879e2e3ac270a49ed3f47cba0e5ceb9b57d1d",
+    "scripts/check-session-runtime-coverage.py": "d3f73906c36c734c3ba0da0b410ca29840adcde76529b3fe153311ca0e9ca8ad",
+    "scripts/cognitive-test-host.py": "d25cd8d428a0c3e8ade5a81934c689edff9b87f942739b7751ead13beb78f845",
+    "scripts/qualify-cg30.py": "97ea1f9cacd3ae7f9a83f649ab6b49f7d8c3c864fffefd231da4d65ec58f3a14",
+    "scripts/qualify-codex-local.py": "d803af157a409c0c81761da3408d5a2995507ca2a7499a1e18747cac35c30195",
+    "scripts/qualify-installed-codex.py": "bf040e205f03a0ee7305c0b44412655e0ea902fce16c7e27a50af5c6a2825d35",
+    "scripts/qualify-worker-container.py": "6b9d4412b7b4b55a469a17859c698b33b8b7369c8e7b0d94331d7e3e3016ac62",
+    "scripts/quality-gate.py": "b07bcc404eb85fb577720e56a45184ef9615080e88b001fb614e7693c39e097f",
+    "scripts/quality-gates.json": "6bb1c829582a0750b53aea915ca1d6a5e5d682212409a484667212eff47ab99c",
+    "scripts/test-local-model.py": "df8f73214ced03e9fbdc04a8a063525cd248f75465995bc21a6ee58ec51e00ba",
+    "Cargo.toml": "6d7440b575b7240194ba4c55cfa1e9770c10b656bb1d335f23f404386b0de81e",
+    "Cargo.lock": "830ff7a906bb01c857bd2da04cf6c66609152a402ce2c9961a171a12e49f5203",
+    "crates/gateway-application/Cargo.toml": "7696bb6c210310f141e5159e91fbd6951af5333f4ea7b12fb6247e5e204d4094",
+    "crates/gateway-context/Cargo.toml": "25c3522a109aab7a7fd833d1f7cfe6284df0537cfffbf0c4aa90068cd1831666",
+    "crates/gateway-daemon/Cargo.toml": "4e1f56964aa50f488adf3567bfcfdd2be1bc8dab91d2fd36d92943eca4b3039e",
+    "crates/gateway-domain/Cargo.toml": "4046090aa3a98ef50a46f25e9523cdd94dde5cd95856ac55ed97bf2f55d3730e",
+    "crates/gateway-policy/Cargo.toml": "17cfbe8eaf074270256741989f6e611db099449f7cf1110e9ebb5e389d155e93",
+    "crates/gateway-process/Cargo.toml": "d3e6285913b9200ad68872c61a016fdb411a6ee1b7ab98cc1da32b60a8ba4860",
+    "crates/gateway-registry/Cargo.toml": "9a61570e3b47a5c5b8a9fdc75ddb234f472c51420a49b254a109091240beb93e",
+    "crates/gateway-workflow/Cargo.toml": "0b34ecc28de119433e32db4ec16151a9128e149dde9b836679a240078a0bc3a0"
+  },
+  "binary_sha256": {
+    "cg": "9e9dfce88c0141f2315e5bef5e6f7fa352f9c64a408ccafbf386c13fab994f49",
+    "cg-mcp": "0ff22ce413ad35a9f7501658e184724b5e41c38aef743da807a70aef3e2bd1a3",
+    "cg-local": "79318bb8ec8da8d6aab3f917c6d0180fbc8201cfd225e8a5bfc46655882d0685"
+  },
+  "client_api_schema_sha256": {
+    "v2/ListMcpServerStatusParams.json": "30b978c6502b37c9f0002aeba241f41c91d4c6adf0f92d89242b62ffde415a2d",
+    "v2/ListMcpServerStatusResponse.json": "00c56c0faacbd4950b7f446f20b11b8a95456c5108de2f1e7366a1b2e60db8c6",
+    "v2/McpResourceReadParams.json": "7ff0e4de6d70bd1c86b6d32ae781c9a841fee4d2e6d11eff8d8d0f224f7ad801",
+    "v2/McpResourceReadResponse.json": "a48af749203ed3307414750d5070facb5ae6ef8b00253f1cfd9a8124bdfcfe41",
+    "v2/McpServerEventStreamNotification.json": "44b04b6cc079ec0b99b4d29af1a69d99037505c19a2a07cff955aa298d7c181b",
+    "v2/McpServerOauthLoginCompletedNotification.json": "6bddb335e7a9a6bb1bde6a32532a903a8968aaf7854afc37857c641b723302cc",
+    "v2/McpServerOauthLoginParams.json": "83446fb61e04a361691f84fe236a51fff2ee4fb12a8f58e2e828a32cf6f6cc75",
+    "v2/McpServerOauthLoginResponse.json": "dd17c57725bfda17c1f4ab7319a3bfd78aa084ec0191fa0fcf0d17b4106bc597",
+    "v2/McpServerRefreshResponse.json": "54a77812db02175dc69053870e582d3b314af6f161f0c76846f3563b0f9487c4",
+    "v2/McpServerStatusUpdatedNotification.json": "d6f4cb120b2363d321247592f03b9afbbf2762ad6d8af31b88c1b1bf39c4c7aa",
+    "v2/McpServerToolCallParams.json": "7039a7583a1cbf38e9e0f5fe6398ff3711acd4d654b81b0be562514087fce6ba",
+    "v2/McpServerToolCallResponse.json": "04a59b2064922c37b0c49bdb2470b8fff08d943e56dba4f7280a6b34bfa52c68",
+    "v2/McpToolCallProgressNotification.json": "64a32b8282226876e749bc107a81db89d20d5ce5cb86ee6a043b960763214b1d",
+    "ClientRequest.json": "f75203a3d8fbe013035377ccb976103721abf46d4b267fb7b5b35f351ab4f399"
+  },
+  "substitutions": [
+    "Neutral admitted plan/rules/process/policy/projection snapshots and catalog; no application host substitution.",
+    "Disposable loopback PostgreSQL; registered verified context-artifact Intent and two neutral source alternatives."
+  ],
+  "canonical_checks": [
+    "capabilities.resolve: complete CLI/MCP envelope parity",
+    "state.explain: complete CLI/MCP envelope parity",
+    "context.compile: complete CLI/MCP envelope parity",
+    "stale resolution: CG_STALE_REVISION"
+  ],
+  "session_checks": [
+    "pending_clarification",
+    "CG_DUPLICATE_COMMAND",
+    "CG_INVALID_INTERACTION",
+    "runnable",
+    "CG_DUPLICATE_COMMAND",
+    "pending_consent",
+    "pending_consent",
+    "runnable",
+    "CG_DUPLICATE_COMMAND",
+    "CG_STALE_REVISION",
+    "completed",
+    "completed",
+    "pending_clarification",
+    "pending_clarification",
+    "cancelled",
+    "CG_INVALID_SESSION_STATE",
+    "CG_SCOPE_DENIED",
+    "CG_UNSUPPORTED_CAPABILITY"
+  ],
+  "session_cli_inspection_parity": true,
+  "consent_issuer": "trusted operator cg-local session.authority; never Codex approval",
+  "frozen_v1_session": "unsupported",
+  "policy_denial": "CG_CONSENT_REQUIRED",
+  "admission_denials": [
+    {
+      "field": "--client-name",
+      "runtime_status": "failed"
+    },
+    {
+      "field": "--client-version",
+      "runtime_status": "failed"
+    }
+  ],
+  "initialize": {
+    "protocol_version": "2025-06-18",
+    "client_name": "codex-mcp-client",
+    "client_version": "0.162.1",
+    "discovery_requests": [
+      {
+        "method": "tools/list",
+        "known_fields": {
+          "_meta": "dict"
+        },
+        "other_field_count": 0
+      },
+      {
+        "method": "resources/list",
+        "known_fields": {
+          "_meta": "dict"
+        },
+        "other_field_count": 0
+      },
+      {
+        "method": "resources/templates/list",
+        "known_fields": {
+          "_meta": "dict"
+        },
+        "other_field_count": 0
+      }
+    ],
+    "negotiated_protocol_version": "2025-06-18"
+  },
+  "discovered_tools": 19,
+  "canonical_response": {
+    "correlation": {
+      "request_id": "request-example"
+    },
+    "diagnostics": [],
+    "evidence": [],
+    "explainability": [
+      {
+        "contract": "cg.resolution-trace",
+        "contract_version": "1.0",
+        "digest": "sha256:d47e38f257aa1f79988d434fc26294c7dd4e7f67fd8abe3f4a42a668beba959c",
+        "id": "owner-ba80dd3ef09540ae8865fe65b8b55ac9",
+        "revision": "mapping-1"
+      }
+    ],
+    "operation": "situation.inspect",
+    "provenance": [
+      {
+        "freshness": "current",
+        "lineage": [],
+        "reference": {
+          "contract": "cg.situation",
+          "contract_version": "1.0",
+          "digest": "sha256:78fe2d94c82f12ea8fa6422c60b9b54dc7261b70698a8fb3b967e6f5134698b8",
+          "id": "operator-smoke",
+          "revision": "1"
+        },
+        "sensitivity": "PUBLIC",
+        "source_id": "synthetic-operator-smoke",
+        "source_revision": "1"
+      }
+    ],
+    "result": {
+      "canonical_result": {
+        "contract": "cg.situation",
+        "contract_version": "1.0",
+        "document": {
+          "context": {
+            "id": "external-context",
+            "schema_version": "1.0"
+          },
+          "intent": null,
+          "observed_state": {
+            "diagnostics": [],
+            "entries": [
+              {
+                "claims": [
+                  {
+                    "challenging_evidence": [],
+                    "fact": "fact-architecture",
+                    "observations": [
+                      "observation-architecture"
+                    ],
+                    "polarity": "AFFIRMED",
+                    "provenances": [
+                      "source-architecture"
+                    ],
+                    "supporting_evidence": [
+                      "evidence-architecture"
+                    ],
+                    "value": {
+                      "kind": "BOOLEAN",
+                      "value": true
+                    }
+                  }
+                ],
+                "diagnostics": [],
+                "lineage": {
+                  "evidence": [
+                    "evidence-architecture"
+                  ],
+                  "facts": [
+                    "fact-architecture"
+                  ],
+                  "observations": [
+                    "observation-architecture"
+                  ],
+                  "provenances": [
+                    "source-architecture"
+                  ]
+                },
+                "metadata": null,
+                "polarity": "AFFIRMED",
+                "status": "KNOWN",
+                "subject": "architecture.dependency",
+                "value": {
+                  "kind": "BOOLEAN",
+                  "value": true
+                }
+              },
+              {
+                "claims": [
+                  {
+                    "challenging_evidence": [],
+                    "fact": "fact-coverage",
+                    "observations": [
+                      "observation-coverage"
+                    ],
+                    "polarity": "AFFIRMED",
+                    "provenances": [
+                      "source-coverage"
+                    ],
+                    "supporting_evidence": [
+                      "evidence-coverage"
+                    ],
+                    "value": {
+                      "kind": "INTEGER",
+                      "value": 92
+                    }
+                  }
+                ],
+                "diagnostics": [],
+                "lineage": {
+                  "evidence": [
+                    "evidence-coverage"
+                  ],
+                  "facts": [
+                    "fact-coverage"
+                  ],
+                  "observations": [
+                    "observation-coverage"
+                  ],
+                  "provenances": [
+                    "source-coverage"
+                  ]
+                },
+                "metadata": null,
+                "polarity": "AFFIRMED",
+                "status": "KNOWN",
+                "subject": "coverage.percent",
+                "value": {
+                  "kind": "INTEGER",
+                  "value": 92
+                }
+              }
+            ],
+            "id": "external-state",
+            "schema_version": "1.0"
+          },
+          "records": {
+            "evidence": [
+              {
+                "content": {
+                  "kind": "INLINE",
+                  "value": "Synthetic operator smoke evidence"
+                },
+                "id": "evidence-architecture",
+                "kind": "REPORT",
+                "links": [
+                  {
+                    "fact": "fact-architecture",
+                    "relation": "SUPPORTS"
+                  }
+                ],
+                "occurred_at": null,
+                "provenance": "source-architecture",
+                "summary": "External architecture report"
+              },
+              {
+                "content": {
+                  "kind": "INLINE",
+                  "value": "Synthetic operator smoke evidence"
+                },
+                "id": "evidence-coverage",
+                "kind": "REPORT",
+                "links": [
+                  {
+                    "fact": "fact-coverage",
+                    "relation": "SUPPORTS"
+                  }
+                ],
+                "occurred_at": null,
+                "provenance": "source-coverage",
+                "summary": "External coverage report"
+              }
+            ],
+            "facts": [
+              {
+                "id": "fact-architecture",
+                "observations": [
+                  "observation-architecture"
+                ],
+                "polarity": "AFFIRMED",
+                "subject": "architecture.dependency",
+                "value": {
+                  "kind": "BOOLEAN",
+                  "value": true
+                }
+              },
+              {
+                "id": "fact-coverage",
+                "observations": [
+                  "observation-coverage"
+                ],
+                "polarity": "AFFIRMED",
+                "subject": "coverage.percent",
+                "value": {
+                  "kind": "INTEGER",
+                  "value": 92
+                }
+              }
+            ],
+            "observations": [
+              {
+                "id": "observation-architecture",
+                "occurred_at": null,
+                "provenance": "source-architecture",
+                "subject": "architecture.dependency",
+                "value": {
+                  "kind": "BOOLEAN",
+                  "value": true
+                }
+              },
+              {
+                "id": "observation-coverage",
+                "occurred_at": null,
+                "provenance": "source-coverage",
+                "subject": "coverage.percent",
+                "value": {
+                  "kind": "INTEGER",
+                  "value": 92
+                }
+              }
+            ],
+            "provenances": [
+              {
+                "acquired_at": null,
+                "id": "source-architecture",
+                "parent_provenance": [],
+                "producer": null,
+                "source_id": "external-architecture",
+                "source_kind": "TOOL",
+                "source_reference": "external://reports/architecture",
+                "source_timestamp": null
+              },
+              {
+                "acquired_at": null,
+                "id": "source-coverage",
+                "parent_provenance": [],
+                "producer": null,
+                "source_id": "external-coverage",
+                "source_kind": "TOOL",
+                "source_reference": "external://reports/coverage",
+                "source_timestamp": null
+              }
+            ]
+          },
+          "schema_version": "1.0",
+          "situation": {
+            "assessments": [],
+            "diagnostics": [],
+            "id": "external-situation",
+            "observed_state_id": "external-state",
+            "references": [],
+            "risks": [],
+            "schema_version": "1.0"
+          }
+        },
+        "kind": "document"
+      },
+      "kind": "query"
+    },
+    "schema_version": "1.0",
+    "scope": {
+      "binding_id": "binding-example",
+      "project_id": "project-example",
+      "workspace_id": "workspace-example"
+    },
+    "status": "ok"
+  },
+  "scope_denial": "CG_SCOPE_DENIED",
+  "cli_parity": true,
+  "finished_at_unix": 1791658817.6104882,
+  "artifact_sha256": {
+    "mcp-initialize.json": "5798beb0229ad12bc4123e020743aa55099576fb5bd3a58d1286293b61f6e379",
+    "rpc-evidence.json.gz": "932857db1b6297f35a44cf82faa70174a1e3e87aa2a0cc01639cb05c2f772080",
+    "verified-evidence.json": "4eb27c239b42bd38bce622530bf16abbf95e8e8e5ebf2269634cc3084806b686"
+  }
+}
