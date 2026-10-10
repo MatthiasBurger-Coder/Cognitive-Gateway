@@ -1,0 +1,54 @@
+test_current_dirty_worktree_is_rejected (test_cg30_qualification.QualificationTests.test_current_dirty_worktree_is_rejected) ... ok
+test_missing_invalid_measurements_fail_closed (test_cg30_qualification.QualificationTests.test_missing_invalid_measurements_fail_closed) ... ok
+test_release_requires_exact_clean_complete_bundle (test_cg30_qualification.QualificationTests.test_release_requires_exact_clean_complete_bundle) ... ok
+test_changed_source_or_revision_invalidates_evidence (test_codex_qualification.QualificationEvidenceTests.test_changed_source_or_revision_invalidates_evidence) ... ok
+test_every_gate_is_required_and_failures_are_rejected (test_codex_qualification.QualificationEvidenceTests.test_every_gate_is_required_and_failures_are_rejected) ... ok
+test_codex_provider_and_mcp_dependencies_stay_outside_inner_crates (test_dependencies.DependencyTests.test_codex_provider_and_mcp_dependencies_stay_outside_inner_crates) ... ok
+test_current_graph_and_all_dependency_kinds (test_dependencies.DependencyTests.test_current_graph_and_all_dependency_kinds) ... ok
+test_external_source_substitution (test_dependencies.DependencyTests.test_external_source_substitution) ... ok
+test_outward_and_cross_component_dependencies (test_dependencies.DependencyTests.test_outward_and_cross_component_dependencies) ... ok
+test_unknown_member_and_substituted_core (test_dependencies.DependencyTests.test_unknown_member_and_substituted_core) ... ok
+test_complete_evidence_and_all_critical_refusals (test_epic03_complete_admission.CompleteAdmissionTests.test_complete_evidence_and_all_critical_refusals) ... ok
+test_each_new_module_requires_real_coverage (test_epic03_complete_admission.CompleteAdmissionTests.test_each_new_module_requires_real_coverage) ... ok
+test_binding_rejects_incomplete_changed_missing_and_escape (test_epic04_acceptance.Epic04AcceptanceTests.test_binding_rejects_incomplete_changed_missing_and_escape) ... ok
+test_cli_missing_reports_nonzero_and_nonclosure_pr_passes (test_epic04_acceptance.Epic04AcceptanceTests.test_cli_missing_reports_nonzero_and_nonclosure_pr_passes) ... ok
+test_closure_claims_include_lists_urls_and_capitalization (test_epic04_acceptance.Epic04AcceptanceTests.test_closure_claims_include_lists_urls_and_capitalization) ... ok
+test_complete_gate_only_and_each_partial_refuses_closure (test_epic04_acceptance.Epic04AcceptanceTests.test_complete_gate_only_and_each_partial_refuses_closure) ... ok
+test_installed_client_full_lifecycle_and_failure_boundaries (test_epic04_acceptance.Epic04AcceptanceTests.test_installed_client_full_lifecycle_and_failure_boundaries) ... ok
+test_missing_evidence_cannot_authorize_closure (test_epic04_acceptance.Epic04AcceptanceTests.test_missing_evidence_cannot_authorize_closure) ... ok
+test_parent_matrix_preserves_all_original_and_added_criteria (test_epic04_acceptance.Epic04AcceptanceTests.test_parent_matrix_preserves_all_original_and_added_criteria) ... ok
+test_real_installed_report_cannot_be_upgraded_to_full_parent (test_epic04_acceptance.Epic04AcceptanceTests.test_real_installed_report_cannot_be_upgraded_to_full_parent) ... ok
+test_equal_count_catalog_replacement_and_wrong_operation_fail (test_installed_codex_qualification.InstalledQualificationGuardrails.test_equal_count_catalog_replacement_and_wrong_operation_fail) ... ok
+test_missing_installed_client_is_not_run_and_nonzero (test_installed_codex_qualification.InstalledQualificationGuardrails.test_missing_installed_client_is_not_run_and_nonzero) ... ok
+test_shared_mode_without_database_is_blocked (test_installed_codex_qualification.InstalledQualificationGuardrails.test_shared_mode_without_database_is_blocked) ... ok
+test_transcript_compression_preserves_exact_requests_and_responses (test_installed_codex_qualification.InstalledQualificationGuardrails.test_transcript_compression_preserves_exact_requests_and_responses) ... ok
+test_coverage_gate_rejects_missing_and_undercovered_adapter_files (test_local_mcp_boundary.LocalMcpBoundaryTests.test_coverage_gate_rejects_missing_and_undercovered_adapter_files) ... ok
+test_framing_adapter_has_no_application_or_provider_imports (test_local_mcp_boundary.LocalMcpBoundaryTests.test_framing_adapter_has_no_application_or_provider_imports) ... ok
+test_protocol_modules_remain_outside_inner_crates (test_local_mcp_boundary.LocalMcpBoundaryTests.test_protocol_modules_remain_outside_inner_crates) ... ok
+test_empty_or_invalid_manifest_cannot_pass (test_quality_gate.EvidenceTests.test_empty_or_invalid_manifest_cannot_pass) ... Local MCP coverage gate self-tests passed
+Evidence: /tmp/tmpuca_3exv/0
+Evidence: /tmp/tmpuca_3exv/1
+Evidence: /tmp/tmpuca_3exv/2
+Evidence: /tmp/tmpuca_3exv/3
+ok
+test_failure_retains_evidence_and_stops (test_quality_gate.EvidenceTests.test_failure_retains_evidence_and_stops) ... Evidence: /tmp/tmp0bk9msgm/evidence
+[1/2] first
+first failed; see /tmp/tmp0bk9msgm/evidence/01.log
+FAIL: /tmp/tmp0bk9msgm/evidence/summary.json
+ok
+test_source_changes_invalidate_successful_commands (test_quality_gate.EvidenceTests.test_source_changes_invalidate_successful_commands) ... Evidence: /tmp/tmpzu9q740e/evidence
+[1/2] first
+[2/2] second
+Source changed during the gate; rerun against a stable checkout
+FAIL: /tmp/tmpzu9q740e/evidence/summary.json
+ok
+test_success_requires_every_gate (test_quality_gate.EvidenceTests.test_success_requires_every_gate) ... Evidence: /tmp/tmpl3ae76wi/evidence
+[1/2] first
+[2/2] second
+PASS: /tmp/tmpl3ae76wi/evidence/summary.json
+ok
+
+----------------------------------------------------------------------
+Ran 31 tests in 7.822s
+
+OK

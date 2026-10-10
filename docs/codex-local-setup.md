@@ -1,5 +1,10 @@
 # Codex local setup and operator runbook — EPIC-04.09 #244
 
+
+Current full-parent acceptance is governed by [EPIC-04 acceptance](epic-04-acceptance.md).
+Shared structured services and installed-client lifecycle proof are delivered;
+older evidence below retains its historical scope. Parent #126 remains NOT_COMPLETE.
+
 This guide builds and verifies the private Codex → CG stdio connection from a
 clean checkout. CG requires no OpenAI API key, Codex token, model service,
 PostgreSQL instance or network listener for this path. Codex manages its own

@@ -1,0 +1,51 @@
+name: EPIC-04 closure acceptance
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+permissions:
+  contents: read
+jobs:
+  closure:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: Detect full acceptance closure claims
+        id: claim
+        run: |
+          python3 - <<'PY'
+          import importlib.util, json, os
+          from pathlib import Path
+          spec = importlib.util.spec_from_file_location('acceptance', 'scripts/qualify-epic04.py')
+          gate = importlib.util.module_from_spec(spec)
+          spec.loader.exec_module(gate)
+          pr = json.loads(Path(os.environ['GITHUB_EVENT_PATH']).read_text())['pull_request']
+          claims = gate.closure_claims((pr.get('title') or '') + '\n' + (pr.get('body') or ''))
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+              output.write('required=' + ('true' if claims else 'false') + '\n')
+          PY
+      - uses: dtolnay/rust-toolchain@stable
+        if: steps.claim.outputs.required == 'true'
+        with:
+          components: rustfmt, clippy, llvm-tools-preview
+      - uses: taiki-e/install-action@cargo-llvm-cov
+        if: steps.claim.outputs.required == 'true'
+      - name: Install qualification clients and validators
+        if: steps.claim.outputs.required == 'true'
+        run: |
+          python3 -m pip install -r tests/contracts/requirements.txt
+          npm install -g @openai/codex@0.162.1
+      - name: Require full evidence for EPIC-04 closure
+        if: steps.claim.outputs.required == 'true'
+        run: >-
+          python3 scripts/qualify-epic04.py --run
+          --pr-event "$GITHUB_EVENT_PATH"
+          --output target/epic04-closure-review
+      - name: Retain closure rejection evidence
+        if: always() && steps.claim.outputs.required == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: epic04-closure-review
+          path: target/epic04-closure-review
+          if-no-files-found: error

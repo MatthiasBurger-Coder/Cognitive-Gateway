@@ -1,5 +1,10 @@
 # Inbound no-key component qualification — EPIC-04.10 #245
 
+
+Current full-parent acceptance is governed by [EPIC-04 acceptance](epic-04-acceptance.md).
+Shared structured services and installed-client lifecycle proof are delivered;
+older evidence below retains its historical scope. Parent #126 remains NOT_COMPLETE.
+
 The qualification harness starts the real Rust `cg-mcp` and `cg-local` executables
 with empty environments, binds explicit temporary workspace roots, and exchanges
 newline-delimited JSON-RPC with a synthetic `codex / 1.0` client using MCP

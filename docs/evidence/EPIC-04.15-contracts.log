@@ -1,0 +1,17 @@
+test_authoritative_payload_and_pinned_resource_are_preserved (test_codex_contracts.CodexContractTests.test_authoritative_payload_and_pinned_resource_are_preserved) ... ok
+test_catalog_covers_all_operations_without_runtime_claims (test_codex_contracts.CodexContractTests.test_catalog_covers_all_operations_without_runtime_claims) ... ok
+test_errors_cannot_carry_results_or_sensitive_messages (test_codex_contracts.CodexContractTests.test_errors_cannot_carry_results_or_sensitive_messages) ... ok
+test_only_completed_sessions_have_verified_final_results (test_codex_contracts.CodexContractTests.test_only_completed_sessions_have_verified_final_results) ... ok
+test_operation_inputs_are_not_interchangeable (test_codex_contracts.CodexContractTests.test_operation_inputs_are_not_interchangeable) ... ok
+test_provenance_keeps_revision_digest_sensitivity_and_lineage (test_codex_contracts.CodexContractTests.test_provenance_keeps_revision_digest_sensitivity_and_lineage) ... ok
+test_qualification_goldens_match_independent_frozen_schemas (test_codex_contracts.CodexContractTests.test_qualification_goldens_match_independent_frozen_schemas) ... ok
+test_query_and_session_results_are_distinct (test_codex_contracts.CodexContractTests.test_query_and_session_results_are_distinct) ... ok
+test_reference_scope_tokens_and_source_variants_are_strict (test_codex_contracts.CodexContractTests.test_reference_scope_tokens_and_source_variants_are_strict) ... ok
+test_schemas_and_all_frozen_examples (test_codex_contracts.CodexContractTests.test_schemas_and_all_frozen_examples) ... ok
+test_typed_references_and_no_authority_flags (test_codex_contracts.CodexContractTests.test_typed_references_and_no_authority_flags) ... ok
+test_unknown_versions_fields_and_operations_fail_closed (test_codex_contracts.CodexContractTests.test_unknown_versions_fields_and_operations_fail_closed) ... ok
+
+----------------------------------------------------------------------
+Ran 12 tests in 0.782s
+
+OK

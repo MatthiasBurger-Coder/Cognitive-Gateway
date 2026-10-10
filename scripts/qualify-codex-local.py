@@ -66,8 +66,8 @@ def main():
               'started_at': datetime.datetime.now(datetime.timezone.utc).isoformat(),
               'limitations': [
                   'No installed Codex client/account or provider authentication is qualified.',
-                  'Standalone host supports admitted inspect/assess/resources and canonical resolve/explain/context; shared sessions remain unsupported.',
-                  'Session projections cross MCP/facade/shared host contracts; shared durable services #272/#273/#275 are absent.',
+                  'This runner qualifies canonical and inbound component behavior; shared-service lifecycle requires its separate live gate.',
+                  'Injected session projections are component proof; delivered shared durable services require PostgreSQL and installed-client evidence.',
                   'No connector/model completion, durable session lifecycle, #279 runtime or whole release gate is claimed.'],
               'requirement_matrix': 'docs/codex-release-qualification.md'}
     try:
@@ -94,6 +94,7 @@ def main():
                        '--test', 'codex_canonical', '--test', 'declarative_cli', '--locked', '--json', '--output-path', str(coverage)]
             with (output / 'coverage.log').open('w') as stream:
                 subprocess.run(command, cwd=ROOT, stdout=stream, stderr=subprocess.STDOUT, timeout=900, check=True)
+        report['binary_sha256'] = {name: digest(ROOT / 'target/debug' / name) for name in ('cg', 'cg-mcp', 'cg-local')}
         report['coverage_source'] = 'supplied existing measurement' if args.coverage_report else 'measured by this run'
         report['coverage'] = COVERAGE.check(json.loads(coverage.read_text()))
         validate(report)

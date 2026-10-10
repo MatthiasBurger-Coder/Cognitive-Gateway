@@ -1,0 +1,576 @@
+{
+  "schema_version": 1,
+  "parent": 126,
+  "whole_runtime_issue": 279,
+  "requirements": [
+    {
+      "id": "E04-01",
+      "source": "#126 original criterion 1",
+      "requirement": "Supported local connection without CG API key",
+      "production_path": "cg-mcp -> LocalCodexHost -> CodexFacade",
+      "owner": "EPIC-04 inbound; EPIC-08 owns shared lifecycle",
+      "dependencies": "#292 canonical host, #294 shared structured runtime and #295 installed-client implementation delivered; fresh full-scope qualification required",
+      "evidence": [
+        "installed",
+        "component"
+      ],
+      "required_evidence_levels": [
+        "COMPONENT",
+        "EXECUTABLE",
+        "INSTALLED_CLIENT"
+      ],
+      "executable_tests": "tests/codex-local/test_qualification.py",
+      "commands": [
+        "python3 scripts/cognitive-test-host.py python3 scripts/qualify-installed-codex.py --shared-session-fixture --output target/epic04-installed",
+        "python3 scripts/qualify-codex-local.py --output target/epic04-component"
+      ]
+    },
+    {
+      "id": "E04-02",
+      "source": "#126 original criterion 2",
+      "requirement": "Authentication outside canonical authority",
+      "production_path": "local MCP admission/credential environment guard",
+      "owner": "EPIC-04 inbound; EPIC-08 owns shared lifecycle",
+      "dependencies": "#292 canonical host, #294 shared structured runtime and #295 installed-client implementation delivered; fresh full-scope qualification required",
+      "evidence": [
+        "component",
+        "installed"
+      ],
+      "required_evidence_levels": [
+        "COMPONENT",
+        "EXECUTABLE",
+        "INSTALLED_CLIENT"
+      ],
+      "executable_tests": "crates/gateway-daemon/tests/local_mcp.rs",
+      "commands": [
+        "python3 scripts/qualify-codex-local.py --output target/epic04-component",
+        "python3 scripts/cognitive-test-host.py python3 scripts/qualify-installed-codex.py --shared-session-fixture --output target/epic04-installed"
+      ]
+    },
+    {
+      "id": "E04-03",
+      "source": "#126 original criterion 3",
+      "requirement": "No provider/MCP types in authoritative contracts",
+      "production_path": "architecture dependency and local MCP boundary guards",
+      "owner": "EPIC-04 inbound; EPIC-08 owns shared lifecycle",
+      "dependencies": "#292 canonical host, #294 shared structured runtime and #295 installed-client implementation delivered; fresh full-scope qualification required",
+      "evidence": [
+        "quality"
+      ],
+      "required_evidence_levels": [
+        "ARCHITECTURE",
+        "COVERAGE",
+        "REAL_POSTGRESQL",
+        "SHARED_SERVICE"
+      ],
+      "executable_tests": "tests/architecture/test_local_mcp_boundary.py",
+      "commands": [
+        "python3 scripts/quality-gate.py --output target/epic04-quality"
+      ]
+    },
+    {
+      "id": "E04-04",
+      "source": "#126 original criterion 4",
+      "requirement": "Explicit workspace/project/session scope",
+      "production_path": "WorkspaceResolver -> CodexFacade -> session admission",
+      "owner": "EPIC-04 inbound; EPIC-08 owns shared lifecycle",
+      "dependencies": "#292 canonical host, #294 shared structured runtime and #295 installed-client implementation delivered; fresh full-scope qualification required",
+      "evidence": [
+        "component",
+        "installed"
+      ],
+      "required_evidence_levels": [
+        "COMPONENT",
+        "EXECUTABLE",
+        "INSTALLED_CLIENT"
+      ],
+      "executable_tests": "crates/gateway-daemon/tests/codex_isolation.rs",
+      "commands": [
+        "python3 scripts/qualify-codex-local.py --output target/epic04-component",
+        "python3 scripts/cognitive-test-host.py python3 scripts/qualify-installed-codex.py --shared-session-fixture --output target/epic04-installed"
+      ]
+    },
+    {
+      "id": "E04-05",
+      "source": "#126 original criterion 5",
+      "requirement": "Equivalent canonical results",
+      "production_path": "canonical mapper -> existing resolver/explain/context services",
+      "owner": "EPIC-04 inbound; EPIC-08 owns shared lifecycle",
+      "dependencies": "#292 canonical host, #294 shared structured runtime and #295 installed-client implementation delivered; fresh full-scope qualification required",
+      "evidence": [
+        "component",
+        "installed"
+      ],
+      "required_evidence_levels": [
+        "COMPONENT",
+        "EXECUTABLE",
+        "INSTALLED_CLIENT"
+      ],
+      "executable_tests": "crates/gateway-daemon/tests/codex_canonical.rs",
+      "commands": [
+        "python3 scripts/qualify-codex-local.py --output target/epic04-component",
+        "python3 scripts/cognitive-test-host.py python3 scripts/qualify-installed-codex.py --shared-session-fixture --output target/epic04-installed"
+      ]
+    },
+    {
+      "id": "E04-06",
+      "source": "#126 original criterion 6",
+      "requirement": "Provenance/revision/sensitivity/evidence lineage preserved",
+      "production_path": "canonical references and session verified receipt resource",
+      "owner": "EPIC-04 inbound; EPIC-08 owns shared lifecycle",
+      "dependencies": "#292 canonical host, #294 shared structured runtime and #295 installed-client implementation delivered; fresh full-scope qualification required",
+      "evidence": [
+        "component",
+        "installed"
+      ],
+      "required_evidence_levels": [
+        "COMPONENT",
+        "EXECUTABLE",
+        "INSTALLED_CLIENT"
+      ],
+      "executable_tests": "crates/gateway-application/tests/codex_facade.rs",
+      "commands": [
+        "python3 scripts/qualify-codex-local.py --output target/epic04-component",
+        "python3 scripts/cognitive-test-host.py python3 scripts/qualify-installed-codex.py --shared-session-fixture --output target/epic04-installed"
+      ]
+    },
+    {
+      "id": "E04-07",
+      "source": "#126 original criterion 7",
+      "requirement": "Current CG policy/consent authorizes every operation",
+      "production_path": "CodexFacade authorization -> shared trusted interaction authority",
+      "owner": "EPIC-04 inbound; EPIC-08 owns shared lifecycle",
+      "dependencies": "#292 canonical host, #294 shared structured runtime and #295 installed-client implementation delivered; fresh full-scope qualification required",
+      "evidence": [
+        "component",
+        "quality",
+        "installed"
+      ],
+      "required_evidence_levels": [
+        "ARCHITECTURE",
+        "COMPONENT",
+        "COVERAGE",
+        "EXECUTABLE",
+        "INSTALLED_CLIENT",
+        "REAL_POSTGRESQL",
+        "SHARED_SERVICE"
+      ],
+      "executable_tests": "tests/codex-local/test_sessions.py",
+      "commands": [
+        "python3 scripts/qualify-codex-local.py --output target/epic04-component",
+        "python3 scripts/quality-gate.py --output target/epic04-quality",
+        "python3 scripts/cognitive-test-host.py python3 scripts/qualify-installed-codex.py --shared-session-fixture --output target/epic04-installed"
+      ]
+    },
+    {
+      "id": "E04-08",
+      "source": "#126 original criterion 8",
+      "requirement": "Discovery never grants authorization",
+      "production_path": "catalog projection -> separate facade admission",
+      "owner": "EPIC-04 inbound; EPIC-08 owns shared lifecycle",
+      "dependencies": "#292 canonical host, #294 shared structured runtime and #295 installed-client implementation delivered; fresh full-scope qualification required",
+      "evidence": [
+        "component",
+        "installed"
+      ],
+      "required_evidence_levels": [
+        "COMPONENT",
+        "EXECUTABLE",
+        "INSTALLED_CLIENT"
+      ],
+      "executable_tests": "crates/gateway-application/tests/codex_facade.rs",
+      "commands": [
+        "python3 scripts/qualify-codex-local.py --output target/epic04-component",
+        "python3 scripts/cognitive-test-host.py python3 scripts/qualify-installed-codex.py --shared-session-fixture --output target/epic04-installed"
+      ]
+    },
+    {
+      "id": "E04-09",
+      "source": "#126 original criterion 9",
+      "requirement": "Mutation/admin denied without explicit authorization",
+      "production_path": "facade policy -> registered typed session commands",
+      "owner": "EPIC-04 inbound; EPIC-08 owns shared lifecycle",
+      "dependencies": "#292 canonical host, #294 shared structured runtime and #295 installed-client implementation delivered; fresh full-scope qualification required",
+      "evidence": [
+        "component",
+        "installed"
+      ],
+      "required_evidence_levels": [
+        "COMPONENT",
+        "EXECUTABLE",
+        "INSTALLED_CLIENT"
+      ],
+      "executable_tests": "tests/codex-local/test_qualification.py",
+      "commands": [
+        "python3 scripts/qualify-codex-local.py --output target/epic04-component",
+        "python3 scripts/cognitive-test-host.py python3 scripts/qualify-installed-codex.py --shared-session-fixture --output target/epic04-installed"
+      ]
+    },
+    {
+      "id": "E04-10",
+      "source": "#126 original criterion 10",
+      "requirement": "Client cannot grant capabilities/policy/process authority",
+      "production_path": "CG-owned authority issuer and strict request mapping",
+      "owner": "EPIC-04 inbound; EPIC-08 owns shared lifecycle",
+      "dependencies": "#292 canonical host, #294 shared structured runtime and #295 installed-client implementation delivered; fresh full-scope qualification required",
+      "evidence": [
+        "component",
+        "installed"
+      ],
+      "required_evidence_levels": [
+        "COMPONENT",
+        "EXECUTABLE",
+        "INSTALLED_CLIENT"
+      ],
+      "executable_tests": "crates/gateway-application/tests/codex_facade.rs",
+      "commands": [
+        "python3 scripts/qualify-codex-local.py --output target/epic04-component",
+        "python3 scripts/cognitive-test-host.py python3 scripts/qualify-installed-codex.py --shared-session-fixture --output target/epic04-installed"
+      ]
+    },
+    {
+      "id": "E04-11",
+      "source": "#126 original criterion 11",
+      "requirement": "No secret/reference-only/provider leakage",
+      "production_path": "launch guard -> sensitivity projection -> fixed diagnostics",
+      "owner": "EPIC-04 inbound; EPIC-08 owns shared lifecycle",
+      "dependencies": "#292 canonical host, #294 shared structured runtime and #295 installed-client implementation delivered; fresh full-scope qualification required",
+      "evidence": [
+        "component",
+        "installed"
+      ],
+      "required_evidence_levels": [
+        "COMPONENT",
+        "EXECUTABLE",
+        "INSTALLED_CLIENT"
+      ],
+      "executable_tests": "tests/codex-local/test_qualification.py",
+      "commands": [
+        "python3 scripts/qualify-codex-local.py --output target/epic04-component",
+        "python3 scripts/cognitive-test-host.py python3 scripts/qualify-installed-codex.py --shared-session-fixture --output target/epic04-installed"
+      ]
+    },
+    {
+      "id": "E04-12",
+      "source": "#126 original criterion 12",
+      "requirement": "Unsupported protocol/schema versions fail closed",
+      "production_path": "MCP initialize admission and frozen v1/v2 validators",
+      "owner": "EPIC-04 inbound; EPIC-08 owns shared lifecycle",
+      "dependencies": "#292 canonical host, #294 shared structured runtime and #295 installed-client implementation delivered; fresh full-scope qualification required",
+      "evidence": [
+        "component",
+        "installed"
+      ],
+      "required_evidence_levels": [
+        "COMPONENT",
+        "EXECUTABLE",
+        "INSTALLED_CLIENT"
+      ],
+      "executable_tests": "tests/codex-local/test_sessions.py",
+      "commands": [
+        "python3 scripts/qualify-codex-local.py --output target/epic04-component",
+        "python3 scripts/cognitive-test-host.py python3 scripts/qualify-installed-codex.py --shared-session-fixture --output target/epic04-installed"
+      ]
+    },
+    {
+      "id": "E04-13",
+      "source": "#126 original criterion 13",
+      "requirement": "Cancellation/timeout/disconnect/malformed/overload bounded",
+      "production_path": "bounded stdio runtime -> shared cancel/journal recovery",
+      "owner": "EPIC-04 inbound; EPIC-08 owns shared lifecycle",
+      "dependencies": "#292 canonical host, #294 shared structured runtime and #295 installed-client implementation delivered; fresh full-scope qualification required",
+      "evidence": [
+        "component",
+        "quality",
+        "installed"
+      ],
+      "required_evidence_levels": [
+        "ARCHITECTURE",
+        "COMPONENT",
+        "COVERAGE",
+        "EXECUTABLE",
+        "INSTALLED_CLIENT",
+        "REAL_POSTGRESQL",
+        "SHARED_SERVICE"
+      ],
+      "executable_tests": "crates/gateway-daemon/src/local_mcp/runtime.rs",
+      "commands": [
+        "python3 scripts/qualify-codex-local.py --output target/epic04-component",
+        "python3 scripts/quality-gate.py --output target/epic04-quality",
+        "python3 scripts/cognitive-test-host.py python3 scripts/qualify-installed-codex.py --shared-session-fixture --output target/epic04-installed"
+      ]
+    },
+    {
+      "id": "E04-14",
+      "source": "#126 original criterion 14",
+      "requirement": "Existing application services reused",
+      "production_path": "LocalCodexHost -> existing canonical services/shared coordinator",
+      "owner": "EPIC-04 inbound; EPIC-08 owns shared lifecycle",
+      "dependencies": "#292 canonical host, #294 shared structured runtime and #295 installed-client implementation delivered; fresh full-scope qualification required",
+      "evidence": [
+        "component",
+        "quality",
+        "installed"
+      ],
+      "required_evidence_levels": [
+        "ARCHITECTURE",
+        "COMPONENT",
+        "COVERAGE",
+        "EXECUTABLE",
+        "INSTALLED_CLIENT",
+        "REAL_POSTGRESQL",
+        "SHARED_SERVICE"
+      ],
+      "executable_tests": "crates/gateway-daemon/tests/codex_canonical.rs",
+      "commands": [
+        "python3 scripts/qualify-codex-local.py --output target/epic04-component",
+        "python3 scripts/quality-gate.py --output target/epic04-quality",
+        "python3 scripts/cognitive-test-host.py python3 scripts/qualify-installed-codex.py --shared-session-fixture --output target/epic04-installed"
+      ]
+    },
+    {
+      "id": "E04-15",
+      "source": "#126 original criterion 15",
+      "requirement": "No duplicate EPIC-07 external connectors",
+      "production_path": "inbound adapter; connector goals explicitly unsupported",
+      "owner": "EPIC-04 inbound; EPIC-08 owns shared lifecycle",
+      "dependencies": "#292 canonical host, #294 shared structured runtime and #295 installed-client implementation delivered; fresh full-scope qualification required",
+      "evidence": [
+        "quality",
+        "installed"
+      ],
+      "required_evidence_levels": [
+        "ARCHITECTURE",
+        "COVERAGE",
+        "INSTALLED_CLIENT",
+        "REAL_POSTGRESQL",
+        "SHARED_SERVICE"
+      ],
+      "executable_tests": "tests/architecture/test_dependencies.py",
+      "commands": [
+        "python3 scripts/quality-gate.py --output target/epic04-quality",
+        "python3 scripts/cognitive-test-host.py python3 scripts/qualify-installed-codex.py --shared-session-fixture --output target/epic04-installed"
+      ]
+    },
+    {
+      "id": "E04-16",
+      "source": "#126 original criterion 16",
+      "requirement": "CLI/MCP use same facade",
+      "production_path": "cg-local and cg-mcp -> CodexFacade/LocalCodexHost",
+      "owner": "EPIC-04 inbound; EPIC-08 owns shared lifecycle",
+      "dependencies": "#292 canonical host, #294 shared structured runtime and #295 installed-client implementation delivered; fresh full-scope qualification required",
+      "evidence": [
+        "component",
+        "installed"
+      ],
+      "required_evidence_levels": [
+        "COMPONENT",
+        "EXECUTABLE",
+        "INSTALLED_CLIENT"
+      ],
+      "executable_tests": "crates/gateway-daemon/tests/codex_canonical.rs",
+      "commands": [
+        "python3 scripts/qualify-codex-local.py --output target/epic04-component",
+        "python3 scripts/cognitive-test-host.py python3 scripts/qualify-installed-codex.py --shared-session-fixture --output target/epic04-installed"
+      ]
+    },
+    {
+      "id": "E04-17",
+      "source": "#126 original criterion 17",
+      "requirement": "Architecture dependency checks green",
+      "production_path": "declarative quality manifest -> architecture guards",
+      "owner": "EPIC-04 inbound; EPIC-08 owns shared lifecycle",
+      "dependencies": "#292 canonical host, #294 shared structured runtime and #295 installed-client implementation delivered; fresh full-scope qualification required",
+      "evidence": [
+        "quality"
+      ],
+      "required_evidence_levels": [
+        "ARCHITECTURE",
+        "COVERAGE",
+        "REAL_POSTGRESQL",
+        "SHARED_SERVICE"
+      ],
+      "executable_tests": "tests/architecture/test_dependencies.py",
+      "commands": [
+        "python3 scripts/quality-gate.py --output target/epic04-quality"
+      ]
+    },
+    {
+      "id": "E04-18",
+      "source": "#126 original criterion 18",
+      "requirement": "Applicable changed production coverage >=95%",
+      "production_path": "local MCP and shared runtime per-file coverage gates",
+      "owner": "EPIC-04 inbound; EPIC-08 owns shared lifecycle",
+      "dependencies": "#292 canonical host, #294 shared structured runtime and #295 installed-client implementation delivered; fresh full-scope qualification required",
+      "evidence": [
+        "component",
+        "quality"
+      ],
+      "required_evidence_levels": [
+        "ARCHITECTURE",
+        "COMPONENT",
+        "COVERAGE",
+        "EXECUTABLE",
+        "REAL_POSTGRESQL",
+        "SHARED_SERVICE"
+      ],
+      "executable_tests": "scripts/check-session-runtime-coverage.py",
+      "commands": [
+        "python3 scripts/qualify-codex-local.py --output target/epic04-component",
+        "python3 scripts/quality-gate.py --output target/epic04-quality"
+      ]
+    },
+    {
+      "id": "E04-19",
+      "source": "#126 original criterion 19",
+      "requirement": "Every acceptance criterion has reproducible evidence",
+      "production_path": "full acceptance reconciler -> source/artifact-bound reports",
+      "owner": "EPIC-04 inbound; EPIC-08 owns shared lifecycle",
+      "dependencies": "#292 canonical host, #294 shared structured runtime and #295 installed-client implementation delivered; fresh full-scope qualification required",
+      "evidence": [
+        "component",
+        "quality",
+        "installed"
+      ],
+      "required_evidence_levels": [
+        "ARCHITECTURE",
+        "COMPONENT",
+        "COVERAGE",
+        "EXECUTABLE",
+        "INSTALLED_CLIENT",
+        "REAL_POSTGRESQL",
+        "SHARED_SERVICE"
+      ],
+      "executable_tests": "tests/architecture/test_epic04_acceptance.py",
+      "commands": [
+        "python3 scripts/qualify-codex-local.py --output target/epic04-component",
+        "python3 scripts/quality-gate.py --output target/epic04-quality",
+        "python3 scripts/cognitive-test-host.py python3 scripts/qualify-installed-codex.py --shared-session-fixture --output target/epic04-installed"
+      ]
+    },
+    {
+      "id": "E04-20",
+      "source": "#126 2026-10-04 addition 1",
+      "requirement": "One-shot/session distinction, correlated pending/status/final references",
+      "production_path": "v2 session projection -> shared coordinator -> verified receipt",
+      "owner": "EPIC-04 inbound; EPIC-08 owns shared lifecycle",
+      "dependencies": "#292 canonical host, #294 shared structured runtime and #295 installed-client implementation delivered; fresh full-scope qualification required",
+      "evidence": [
+        "quality",
+        "installed"
+      ],
+      "required_evidence_levels": [
+        "ARCHITECTURE",
+        "COVERAGE",
+        "INSTALLED_CLIENT",
+        "REAL_POSTGRESQL",
+        "SHARED_SERVICE"
+      ],
+      "executable_tests": "tests/codex-local/test_sessions.py",
+      "commands": [
+        "python3 scripts/quality-gate.py --output target/epic04-quality",
+        "python3 scripts/cognitive-test-host.py python3 scripts/qualify-installed-codex.py --shared-session-fixture --output target/epic04-installed"
+      ]
+    },
+    {
+      "id": "E04-21",
+      "source": "#126 2026-10-04 addition 2",
+      "requirement": "Shared start/inspect/continue/cancel API; no second coordinator",
+      "production_path": "cg-local/cg-mcp -> EPIC-08 shared application coordinator",
+      "owner": "EPIC-04 inbound; EPIC-08 owns shared lifecycle",
+      "dependencies": "#292 canonical host, #294 shared structured runtime and #295 installed-client implementation delivered; fresh full-scope qualification required",
+      "evidence": [
+        "quality",
+        "installed"
+      ],
+      "required_evidence_levels": [
+        "ARCHITECTURE",
+        "COVERAGE",
+        "INSTALLED_CLIENT",
+        "REAL_POSTGRESQL",
+        "SHARED_SERVICE"
+      ],
+      "executable_tests": "crates/gateway-application/tests/session_runtime.rs",
+      "commands": [
+        "python3 scripts/quality-gate.py --output target/epic04-quality",
+        "python3 scripts/cognitive-test-host.py python3 scripts/qualify-installed-codex.py --shared-session-fixture --output target/epic04-installed"
+      ]
+    },
+    {
+      "id": "E04-22",
+      "source": "#126 2026-10-04 addition 3",
+      "requirement": "Disconnect differs from cancel; resume revalidates scope/policy/consent",
+      "production_path": "shared journal recovery and revision-bound interaction authority",
+      "owner": "EPIC-04 inbound; EPIC-08 owns shared lifecycle",
+      "dependencies": "#292 canonical host, #294 shared structured runtime and #295 installed-client implementation delivered; fresh full-scope qualification required",
+      "evidence": [
+        "quality",
+        "installed"
+      ],
+      "required_evidence_levels": [
+        "ARCHITECTURE",
+        "COVERAGE",
+        "INSTALLED_CLIENT",
+        "REAL_POSTGRESQL",
+        "SHARED_SERVICE"
+      ],
+      "executable_tests": "tests/codex-local/test_sessions.py",
+      "commands": [
+        "python3 scripts/quality-gate.py --output target/epic04-quality",
+        "python3 scripts/cognitive-test-host.py python3 scripts/qualify-installed-codex.py --shared-session-fixture --output target/epic04-installed"
+      ]
+    },
+    {
+      "id": "E04-23",
+      "source": "#126 2026-10-04 addition 4",
+      "requirement": "Missing EPIC-05/06/07 features explicitly unsupported",
+      "production_path": "registered context-artifact goal admission; unsupported capability response",
+      "owner": "EPIC-04 inbound; EPIC-08 owns shared lifecycle",
+      "dependencies": "#292 canonical host, #294 shared structured runtime and #295 installed-client implementation delivered; fresh full-scope qualification required",
+      "evidence": [
+        "quality",
+        "installed"
+      ],
+      "required_evidence_levels": [
+        "ARCHITECTURE",
+        "COVERAGE",
+        "INSTALLED_CLIENT",
+        "REAL_POSTGRESQL",
+        "SHARED_SERVICE"
+      ],
+      "executable_tests": "tests/codex-local/test_sessions.py",
+      "commands": [
+        "python3 scripts/quality-gate.py --output target/epic04-quality",
+        "python3 scripts/cognitive-test-host.py python3 scripts/qualify-installed-codex.py --shared-session-fixture --output target/epic04-installed"
+      ]
+    },
+    {
+      "id": "E04-24",
+      "source": "#126 2026-10-04 addition 5",
+      "requirement": "Component evidence links separate #279 whole-session qualification",
+      "production_path": "scoped reports -> full acceptance gate; #279 separate",
+      "owner": "EPIC-04 inbound; EPIC-08 owns shared lifecycle",
+      "dependencies": "#292 canonical host, #294 shared structured runtime and #295 installed-client implementation delivered; fresh full-scope qualification required",
+      "evidence": [
+        "component",
+        "quality",
+        "installed"
+      ],
+      "required_evidence_levels": [
+        "ARCHITECTURE",
+        "COMPONENT",
+        "COVERAGE",
+        "EXECUTABLE",
+        "INSTALLED_CLIENT",
+        "REAL_POSTGRESQL",
+        "SHARED_SERVICE"
+      ],
+      "executable_tests": "tests/architecture/test_epic04_acceptance.py",
+      "commands": [
+        "python3 scripts/qualify-codex-local.py --output target/epic04-component",
+        "python3 scripts/quality-gate.py --output target/epic04-quality",
+        "python3 scripts/cognitive-test-host.py python3 scripts/qualify-installed-codex.py --shared-session-fixture --output target/epic04-installed"
+      ]
+    }
+  ]
+}
