@@ -44,6 +44,15 @@ pub struct Projection {
 }
 
 pub trait CodexHost {
+    /// Load current CG authority and verified consent for this principal, scope,
+    /// session and exact operation. Never derive grants from client documents.
+    fn operation_policy(&self, _call: &Call) -> Result<OperationPolicy, FacadeError> {
+        Err(FacadeError::PolicyDenied)
+    }
+    /// Trusted audit/explanation hook receives the deterministic CG findings.
+    /// This output is not an authorization token and must not expose secrets.
+    fn policy_decision(&self, _call: &Call, _report: &gateway_policy::StepPolicyReport) {}
+
     fn authorize(&self, _call: &Call) -> Result<(), FacadeError> {
         Err(FacadeError::UnsupportedCapability)
     }

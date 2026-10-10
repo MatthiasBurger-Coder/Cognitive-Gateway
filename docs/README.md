@@ -178,6 +178,7 @@ The approved CG-02 v2 handoff extension is documented in
 - [`codex-application-facade.md`](codex-application-facade.md): implemented application facade, canonical delegation and trusted host ports (#239).
 - [Codex scope isolation](codex-scope-isolation.md) — trusted workspace/session binding, immutable resources and provenance (#240).
 - [Codex secret isolation](codex-secret-isolation.md) — credential admission, sensitive-data projection and sanitized diagnostics (#241).
+- [EPIC-04.07 Codex operation policy and consent gates](codex-policy-gates.md)
 - [Codex local integration](codex-local-integration.md) — EPIC-04 Codex -> CG local no-key MCP boundary.
 - [Local MCP server](local-mcp-server.md) — #238 stdio lifecycle, discovery and transport; #239 facade integration.
 - [MCP connector/plugin runtime](mcp-connector-runtime.md) — EPIC-07 planned CG -> external systems boundary.

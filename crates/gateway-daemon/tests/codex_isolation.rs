@@ -551,3 +551,39 @@ fn launch_admission_denials_do_not_emit_protocol_or_configuration_content() {
         );
     }
 }
+
+#[test]
+fn local_policy_rejects_execution_authority_changes_and_session_mutations() {
+    let fixture = Fixture::new();
+    let app = fixture.app();
+    for (field, value) in [
+        ("operating_mode", "HARDENING"),
+        ("execution_profile", "FAST_PATH"),
+    ] {
+        let mut request = fixture.request.clone();
+        request["execution"][field] = json!(value);
+        let response = app.execute("situation.inspect", &request);
+        assert_eq!(response["diagnostics"][0]["code"], "CG_POLICY_DENIED");
+    }
+    for operation in [
+        "session.start",
+        "session.approve",
+        "session.continue",
+        "session.cancel",
+        "session.clarify",
+    ] {
+        let mut request: Value = serde_json::from_str(
+            &std::fs::read_to_string(format!(
+                "{}/../../tests/fixtures/codex-v1/{operation}.request.json",
+                env!("CARGO_MANIFEST_DIR")
+            ))
+            .unwrap(),
+        )
+        .unwrap();
+        request["scope"] = fixture.request["scope"].clone();
+        assert_eq!(
+            app.execute(operation, &request)["diagnostics"][0]["code"],
+            "CG_UNSUPPORTED_CAPABILITY"
+        );
+    }
+}

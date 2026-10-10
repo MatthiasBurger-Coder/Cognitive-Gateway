@@ -680,6 +680,43 @@ fn admitted_facade_runs_through_deterministic_transport() {
     use gateway_application::codex::{Call, CodexFacade, CodexHost, FacadeError, Projection};
     struct Host;
     impl CodexHost for Host {
+        fn operation_policy(
+            &self,
+            call: &Call,
+        ) -> Result<gateway_application::codex::OperationPolicy, FacadeError> {
+            use gateway_domain::{
+                CapabilityClass, CapabilityDefinition, CapabilityId, PolicyDefinition, PolicyId,
+            };
+            use gateway_policy::{Approval, PolicyAuthority, ProcessReadiness, StepFacts};
+            let id = CapabilityId::new("cg.situation.inspect").unwrap();
+            Ok(gateway_application::codex::OperationPolicy {
+                authority: PolicyAuthority {
+                    policies: vec![
+                        PolicyDefinition::new(
+                            PolicyId::new("test-inspection").unwrap(),
+                            "Explicit test policy",
+                            [id.clone()],
+                        )
+                        .unwrap(),
+                    ],
+                    capabilities: [(
+                        id.clone(),
+                        CapabilityDefinition::new(id.clone(), CapabilityClass::Inspect),
+                    )]
+                    .into(),
+                    ..Default::default()
+                },
+                facts: StepFacts {
+                    authorizations: [(id, Approval::Granted)].into(),
+                    ..Default::default()
+                },
+                process: ProcessReadiness::NotApplicable,
+                operating_mode: call.operating_mode,
+                execution_profile: call.execution_profile,
+                mutations_enabled: false,
+            })
+        }
+
         fn authorize(&self, _: &Call) -> Result<(), FacadeError> {
             Ok(())
         }

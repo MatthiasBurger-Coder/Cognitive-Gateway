@@ -1,7 +1,7 @@
 use super::*;
 use std::rc::Rc;
 
-fn binding() -> ScopeBinding {
+pub(super) fn binding() -> ScopeBinding {
     ScopeBinding {
         scope: fixture("situation.inspect.request")["scope"].clone(),
         canonical_scope: ContextScopeId::new("project-a").unwrap(),
@@ -19,6 +19,10 @@ struct SecurityHost {
     reference_document: Option<Value>,
 }
 impl CodexHost for SecurityHost {
+    fn operation_policy(&self, call: &Call) -> Result<OperationPolicy, FacadeError> {
+        Ok(test_policy(call))
+    }
+
     fn authorize(&self, _: &Call) -> Result<(), FacadeError> {
         self.calls.set(self.calls.get() + 1);
         Ok(())

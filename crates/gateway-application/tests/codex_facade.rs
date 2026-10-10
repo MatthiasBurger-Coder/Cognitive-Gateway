@@ -35,6 +35,9 @@ struct Host {
     secret: bool,
 }
 impl CodexHost for Host {
+    fn operation_policy(&self, call: &Call) -> Result<OperationPolicy, FacadeError> {
+        Ok(test_policy(call))
+    }
     fn authorize(&self, _: &Call) -> Result<(), FacadeError> {
         Ok(())
     }
@@ -426,6 +429,9 @@ fn shared_task_sessions_require_the_exact_immutable_client_owner() {
         dispatches: std::rc::Rc<Cell<usize>>,
     }
     impl CodexHost for SessionHost {
+        fn operation_policy(&self, call: &Call) -> Result<OperationPolicy, FacadeError> {
+            Ok(test_policy(call))
+        }
         fn authorize(&self, _: &Call) -> Result<(), FacadeError> {
             Ok(())
         }
@@ -488,6 +494,9 @@ fn shared_task_sessions_require_the_exact_immutable_client_owner() {
 fn reference_records_from_another_client_session_fail_before_projection() {
     struct ForeignHost;
     impl CodexHost for ForeignHost {
+        fn operation_policy(&self, call: &Call) -> Result<OperationPolicy, FacadeError> {
+            Ok(test_policy(call))
+        }
         fn authorize(&self, _: &Call) -> Result<(), FacadeError> {
             Ok(())
         }
@@ -531,6 +540,9 @@ fn reference_records_from_another_client_session_fail_before_projection() {
 fn resource_adapter_cannot_substitute_a_different_pinned_identity() {
     struct SubstitutionHost;
     impl CodexHost for SubstitutionHost {
+        fn operation_policy(&self, call: &Call) -> Result<OperationPolicy, FacadeError> {
+            Ok(test_policy(call))
+        }
         fn authorize(&self, _: &Call) -> Result<(), FacadeError> {
             Ok(())
         }
@@ -570,4 +582,429 @@ fn resource_adapter_cannot_substitute_a_different_pinned_identity() {
         ),
         Err(FacadeError::StaleRevision)
     );
+}
+
+fn test_policy(call: &Call) -> OperationPolicy {
+    use gateway_domain::{CapabilityDefinition, PolicyDefinition, PolicyId};
+    use gateway_policy::{Approval, PolicyAuthority, ProcessReadiness, StepFacts};
+    let id = operation_capability(&call.operation).unwrap();
+    let capability = CapabilityDefinition::new(
+        id.clone(),
+        operation_class(&call.operation).unwrap().capability_class(),
+    );
+    OperationPolicy {
+        authority: PolicyAuthority {
+            policies: vec![
+                PolicyDefinition::new(
+                    PolicyId::new("test-policy").unwrap(),
+                    "Explicit test admission",
+                    [id.clone()],
+                )
+                .unwrap(),
+            ],
+            capabilities: [(id.clone(), capability)].into(),
+            ..Default::default()
+        },
+        facts: StepFacts {
+            authorizations: [(id.clone(), Approval::Granted)].into(),
+            consents: [(id, Approval::Granted)].into(),
+            ..Default::default()
+        },
+        process: ProcessReadiness::NotApplicable,
+        operating_mode: call.operating_mode,
+        execution_profile: call.execution_profile,
+        mutations_enabled: true,
+    }
+}
+
+mod policy_gates {
+    use super::*;
+    use gateway_policy::{Approval, PolicyDecision, PolicyReason, StepPolicyReport};
+    use std::rc::Rc;
+
+    #[derive(Clone, Copy)]
+    enum Case {
+        Allow,
+        NoPolicy,
+        UnknownCapability,
+        NoAuthorization,
+        NoConsent,
+        ConsentDenied,
+        Disabled,
+        WrongClass,
+        WrongMode,
+        Evidence,
+        Blocked,
+        ReadOnly,
+        ExplicitDeny,
+    }
+    struct PolicyHost {
+        case: Case,
+        dispatches: Rc<Cell<usize>>,
+        reports: Rc<std::cell::RefCell<Vec<StepPolicyReport>>>,
+    }
+    impl CodexHost for PolicyHost {
+        // A permissive availability/disclosure hook must never bypass policy.
+        fn authorize(&self, _: &Call) -> Result<(), FacadeError> {
+            Ok(())
+        }
+        fn operation_policy(&self, call: &Call) -> Result<OperationPolicy, FacadeError> {
+            let mut policy = test_policy(call);
+            let id = operation_capability(&call.operation)?;
+            match self.case {
+                Case::Allow => {}
+                Case::NoPolicy => policy.authority.policies.clear(),
+                Case::UnknownCapability => policy.authority.capabilities.clear(),
+                Case::NoAuthorization => policy.facts.authorizations.clear(),
+                Case::NoConsent => policy.facts.consents.clear(),
+                Case::ConsentDenied => {
+                    policy.facts.consents.insert(id, Approval::Denied);
+                }
+                Case::Disabled => policy.mutations_enabled = false,
+                Case::WrongClass => {
+                    policy.authority.capabilities.insert(
+                        id.clone(),
+                        gateway_domain::CapabilityDefinition::new(
+                            id,
+                            if operation_class(&call.operation)?.capability_class()
+                                == gateway_domain::CapabilityClass::Inspect
+                            {
+                                gateway_domain::CapabilityClass::Mutate
+                            } else {
+                                gateway_domain::CapabilityClass::Inspect
+                            },
+                        ),
+                    );
+                }
+                Case::WrongMode => policy.operating_mode = gateway_domain::OperatingMode::Hardening,
+                Case::Evidence => {
+                    policy
+                        .authority
+                        .required_evidence
+                        .insert(id, ["review".into()].into());
+                }
+                Case::Blocked => policy.process = gateway_policy::ProcessReadiness::Blocked,
+                Case::ReadOnly => {
+                    let capability = policy.authority.capabilities[&id]
+                        .clone()
+                        .with_constraints(["read-only"])
+                        .unwrap();
+                    policy.authority.capabilities.insert(id, capability);
+                    policy
+                        .facts
+                        .satisfied_constraints
+                        .insert("read-only".into());
+                }
+                Case::ExplicitDeny => {
+                    policy.authority.policies.push(
+                        gateway_domain::PolicyDefinition::with_denied_capabilities(
+                            gateway_domain::PolicyId::new("deny").unwrap(),
+                            "Explicit deny",
+                            [],
+                            [id],
+                        )
+                        .unwrap(),
+                    );
+                }
+            }
+            Ok(policy)
+        }
+        fn policy_decision(&self, _: &Call, report: &StepPolicyReport) {
+            self.reports.borrow_mut().push(report.clone());
+        }
+        fn session_owner(&self, call: &Call, _: &str) -> Result<ScopeBinding, FacadeError> {
+            Ok(call.binding.clone())
+        }
+        fn session(&self, _: &Call) -> Result<Value, FacadeError> {
+            self.dispatches.set(self.dispatches.get() + 1);
+            Ok(
+                json!({"kind":"session","session_id":"session-example","revision":1,"status":"running","pending":[],"verified_final_result":null}),
+            )
+        }
+        fn resource_reference(
+            &self,
+            _: &Call,
+            _: &str,
+            _: &str,
+            _: &str,
+        ) -> Result<Value, FacadeError> {
+            self.dispatches.set(self.dispatches.get() + 1);
+            Err(FacadeError::ReferenceUnavailable)
+        }
+    }
+    type PolicyFixture = (
+        CodexFacade<PolicyHost>,
+        Rc<Cell<usize>>,
+        Rc<std::cell::RefCell<Vec<StepPolicyReport>>>,
+    );
+    fn policy_app(case: Case) -> PolicyFixture {
+        let dispatches = Rc::new(Cell::new(0));
+        let reports = Rc::new(std::cell::RefCell::new(vec![]));
+        let binding = security_cases::binding();
+        (
+            CodexFacade::with_binding(
+                binding,
+                PolicyHost {
+                    case,
+                    dispatches: dispatches.clone(),
+                    reports: reports.clone(),
+                },
+            )
+            .unwrap(),
+            dispatches,
+            reports,
+        )
+    }
+    #[test]
+    fn mutation_requires_current_policy_enablement_consent_and_evidence() {
+        for operation in [
+            "session.start",
+            "session.approve",
+            "session.cancel",
+            "session.clarify",
+            "session.continue",
+        ] {
+            let request = fixture(&format!("{operation}.request"));
+            for (case, expected, reason) in [
+                (
+                    Case::NoPolicy,
+                    "CG_POLICY_DENIED",
+                    PolicyReason::NotAllowlisted,
+                ),
+                (
+                    Case::UnknownCapability,
+                    "CG_POLICY_DENIED",
+                    PolicyReason::UnknownCapability,
+                ),
+                (
+                    Case::NoAuthorization,
+                    "CG_CONSENT_REQUIRED",
+                    PolicyReason::AuthorizationMissing,
+                ),
+                (
+                    Case::NoConsent,
+                    "CG_CONSENT_REQUIRED",
+                    PolicyReason::ConsentMissing,
+                ),
+                (
+                    Case::ConsentDenied,
+                    "CG_POLICY_DENIED",
+                    PolicyReason::ConsentDenied,
+                ),
+                (
+                    Case::Disabled,
+                    "CG_POLICY_DENIED",
+                    PolicyReason::AuthorizationDenied,
+                ),
+                (
+                    Case::WrongClass,
+                    "CG_POLICY_DENIED",
+                    PolicyReason::ContractMismatch,
+                ),
+                (
+                    Case::WrongMode,
+                    "CG_POLICY_DENIED",
+                    PolicyReason::InvalidExecutionProfile,
+                ),
+                (
+                    Case::Evidence,
+                    "CG_EVIDENCE_REQUIRED",
+                    PolicyReason::EvidenceMissing,
+                ),
+                (
+                    Case::Blocked,
+                    "CG_POLICY_DENIED",
+                    PolicyReason::ProcessBlocked,
+                ),
+                (
+                    Case::ReadOnly,
+                    "CG_POLICY_DENIED",
+                    PolicyReason::ConstraintViolation,
+                ),
+                (
+                    Case::ExplicitDeny,
+                    "CG_POLICY_DENIED",
+                    PolicyReason::ExplicitDeny,
+                ),
+            ] {
+                let (app, dispatches, reports) = policy_app(case);
+                let first = app.execute(operation, &request);
+                assert_eq!(code(&first), expected, "{operation}");
+                assert_eq!(first, app.execute(operation, &request));
+                assert_eq!(dispatches.get(), 0);
+                let reports = reports.borrow();
+                assert_eq!(reports[0], reports[1]);
+                assert!(reports[0].findings.iter().any(|f| f.reason == reason));
+                assert!(contracts::valid(
+                    &first,
+                    &contracts::artifact("response.schema.json").unwrap(),
+                    &contracts::artifact("common.schema.json").unwrap()
+                ));
+            }
+            let (app, dispatches, reports) = policy_app(Case::Allow);
+            assert_eq!(app.execute(operation, &request)["status"], "ok");
+            assert_eq!(dispatches.get(), 1);
+            assert_eq!(reports.borrow()[0].decision, PolicyDecision::Allow);
+        }
+    }
+
+    #[test]
+    fn consent_is_rechecked_for_each_invocation() {
+        struct RevokingHost {
+            host: PolicyHost,
+            evaluations: Cell<usize>,
+        }
+        impl CodexHost for RevokingHost {
+            fn authorize(&self, _: &Call) -> Result<(), FacadeError> {
+                Ok(())
+            }
+            fn operation_policy(&self, call: &Call) -> Result<OperationPolicy, FacadeError> {
+                let mut policy = test_policy(call);
+                if self.evaluations.replace(self.evaluations.get() + 1) > 0 {
+                    policy.facts.consents.clear();
+                }
+                Ok(policy)
+            }
+            fn session_owner(&self, call: &Call, task: &str) -> Result<ScopeBinding, FacadeError> {
+                self.host.session_owner(call, task)
+            }
+            fn session(&self, call: &Call) -> Result<Value, FacadeError> {
+                self.host.session(call)
+            }
+        }
+        let dispatches = Rc::new(Cell::new(0));
+        let app = CodexFacade::with_binding(
+            security_cases::binding(),
+            RevokingHost {
+                host: PolicyHost {
+                    case: Case::Allow,
+                    dispatches: dispatches.clone(),
+                    reports: Rc::new(std::cell::RefCell::new(vec![])),
+                },
+                evaluations: Cell::new(0),
+            },
+        )
+        .unwrap();
+        let request = fixture("session.approve.request");
+        assert_eq!(app.execute("session.approve", &request)["status"], "ok");
+        assert_eq!(
+            code(&app.execute("session.approve", &request)),
+            "CG_CONSENT_REQUIRED"
+        );
+        assert_eq!(dispatches.get(), 1);
+    }
+
+    #[test]
+    fn inspection_class_cannot_be_substituted_with_mutation() {
+        let (app, dispatches, reports) = policy_app(Case::WrongClass);
+        let request = fixture("session.inspect.request");
+        assert_eq!(
+            code(&app.execute("session.inspect", &request)),
+            "CG_POLICY_DENIED"
+        );
+        assert_eq!(dispatches.get(), 0);
+        assert!(
+            reports.borrow()[0]
+                .findings
+                .iter()
+                .any(|f| f.reason == PolicyReason::ContractMismatch)
+        );
+        assert_eq!(
+            OperationClass::Read.capability_class(),
+            gateway_domain::CapabilityClass::Inspect
+        );
+        assert_eq!(
+            OperationClass::Search.capability_class(),
+            gateway_domain::CapabilityClass::Inspect
+        );
+        assert_eq!(
+            OperationClass::Admin.capability_class(),
+            gateway_domain::CapabilityClass::Mutate
+        );
+    }
+    #[test]
+    fn discovery_and_permissive_host_do_not_supply_policy() {
+        struct Permissive;
+        impl CodexHost for Permissive {
+            fn authorize(&self, _: &Call) -> Result<(), FacadeError> {
+                Ok(())
+            }
+        }
+        let app = CodexFacade::with_binding(security_cases::binding(), Permissive).unwrap();
+        for tool in contracts::artifact("catalog").unwrap()["tools"]
+            .as_array()
+            .unwrap()
+        {
+            let operation = tool["operation"].as_str().unwrap();
+            let request = fixture(&format!("{operation}.request"));
+            assert_eq!(code(&app.execute(operation, &request)), "CG_POLICY_DENIED");
+            assert_eq!(
+                operation_class(operation)
+                    .unwrap()
+                    .capability_class()
+                    .as_str()
+                    .to_lowercase(),
+                tool["classification"]
+            );
+        }
+        assert_eq!(
+            app.read_resource(
+                &fixture("situation.inspect.request")["scope"],
+                "example",
+                "1",
+                "sha256:0000"
+            ),
+            Err(FacadeError::PolicyDenied)
+        );
+        for operation in [
+            "policy.alter",
+            "capabilities.grant",
+            "process.advance",
+            "registry.search",
+            "admin",
+        ] {
+            assert_eq!(
+                operation_class(operation),
+                Err(FacadeError::UnsupportedCapability)
+            );
+        }
+    }
+    #[test]
+    fn read_and_inspect_never_accept_forged_authority_or_commands() {
+        let (app, dispatches, reports) = policy_app(Case::Allow);
+        for operation in ["situation.inspect", "registry.inspect", "session.inspect"] {
+            for field in [
+                "capabilities",
+                "permissions",
+                "consent",
+                "policy",
+                "event",
+                "transition",
+                "operation",
+                "classification",
+                "mutations_enabled",
+            ] {
+                let mut request = fixture(&format!("{operation}.request"));
+                request["input"][field] = json!("grant-and-advance");
+                assert_eq!(
+                    code(&app.execute(operation, &request)),
+                    "CG_INVALID_REQUEST"
+                );
+            }
+        }
+        assert_eq!(dispatches.get(), 0);
+        assert!(reports.borrow().is_empty());
+        let (app, dispatches, reports) = policy_app(Case::NoPolicy);
+        assert_eq!(
+            app.read_resource(
+                &fixture("situation.inspect.request")["scope"],
+                "example",
+                "1",
+                "sha256:0000"
+            ),
+            Err(FacadeError::PolicyDenied)
+        );
+        assert_eq!(dispatches.get(), 0);
+        assert_eq!(reports.borrow()[0].decision, PolicyDecision::Deny);
+    }
 }
