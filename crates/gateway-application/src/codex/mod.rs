@@ -5,6 +5,8 @@ pub use authorization::*;
 pub mod contracts;
 pub mod isolation;
 pub mod ports;
+pub mod runtime;
+pub use runtime::RequestContext;
 pub mod security;
 use crate::{
     DeclarativeSituationApplication,
@@ -122,6 +124,7 @@ pub struct Call {
     pub input: Value,
     pub correlation: Value,
     pub binding: ScopeBinding,
+    pub runtime: Option<RequestContext>,
     source_provenance: RefCell<Vec<Value>>,
 }
 pub struct CodexFacade<H> {
@@ -129,6 +132,7 @@ pub struct CodexFacade<H> {
     canonical_scope: ContextScopeId,
     host: H,
     binding: ScopeBinding,
+    runtime: RefCell<Option<RequestContext>>,
 }
 impl<H: CodexHost> CodexFacade<H> {
     pub fn with_binding(binding: ScopeBinding, host: H) -> Result<Self, FacadeError> {
@@ -138,14 +142,21 @@ impl<H: CodexHost> CodexFacade<H> {
             canonical_scope: binding.canonical_scope.clone(),
             host,
             binding,
+            runtime: RefCell::new(None),
         })
     }
     fn authorize(&self, call: &Call) -> Result<(), FacadeError> {
         // Service availability and disclosure checks cannot replace policy.
+        if let Some(context) = &call.runtime {
+            context.check()?;
+        }
         self.host.authorize(call)?;
         let policy = self.host.operation_policy(call)?;
         let report = policy.evaluate(call)?;
         self.host.policy_decision(call, &report);
+        if let Some(context) = &call.runtime {
+            context.check()?;
+        }
         decision_result(&report)
     }
     fn source(&self, call: &Call, source: &Value) -> Result<Value, FacadeError> {
@@ -437,6 +448,7 @@ impl<H: CodexHost> CodexFacade<H> {
             input: request["input"].clone(),
             correlation: request["correlation"].clone(),
             binding: self.binding.clone(),
+            runtime: self.runtime.borrow().clone(),
             source_provenance: RefCell::new(vec![]),
         };
         self.authorize(&call).map_err(FacadeError::code)?;
@@ -445,6 +457,9 @@ impl<H: CodexHost> CodexFacade<H> {
                 if let Some(task_id) = call.input["session_id"].as_str() {
                     self.check_session_owner(&call, task_id)
                         .map_err(FacadeError::code)?;
+                }
+                if let Some(context) = &call.runtime {
+                    context.check().map_err(FacadeError::code)?;
                 }
                 let session = self.host.session(&call).map_err(FacadeError::code)?;
                 if !security::inline_allowed(&session) {
@@ -457,6 +472,9 @@ impl<H: CodexHost> CodexFacade<H> {
                     .map_err(FacadeError::code)?;
                 (session, vec![], vec![], vec![])
             } else {
+                if let Some(context) = &call.runtime {
+                    context.check().map_err(FacadeError::code)?;
+                }
                 let (contract, document) = self.dispatch(&call).map_err(FacadeError::code)?;
                 let projection = self
                     .host
@@ -515,6 +533,34 @@ impl<H: CodexHost> CodexFacade<H> {
     }
 }
 impl<H: CodexHost> CodexApplicationPort for CodexFacade<H> {
+    fn execute_with_context(
+        &self,
+        operation: &str,
+        request: &Value,
+        context: &RequestContext,
+    ) -> Value {
+        if let Err(error) = context.check() {
+            return contracts::failure(error.code());
+        }
+        *self.runtime.borrow_mut() = Some(context.clone());
+        let response = self.execute(operation, request);
+        *self.runtime.borrow_mut() = None;
+        response
+    }
+    fn read_with_context(
+        &self,
+        scope: &Value,
+        id: &str,
+        revision: &str,
+        digest: &str,
+        context: &RequestContext,
+    ) -> Result<Value, FacadeError> {
+        context.check()?;
+        *self.runtime.borrow_mut() = Some(context.clone());
+        let response = self.read_resource(scope, id, revision, digest);
+        *self.runtime.borrow_mut() = None;
+        response
+    }
     fn read_resource(
         &self,
         scope: &Value,
@@ -540,6 +586,7 @@ impl<H: CodexHost> CodexApplicationPort for CodexFacade<H> {
             input: json!({}),
             correlation: json!({"request_id":"resource-read"}),
             binding: self.binding.clone(),
+            runtime: self.runtime.borrow().clone(),
             source_provenance: RefCell::new(vec![]),
         };
         self.authorize(&call)?;

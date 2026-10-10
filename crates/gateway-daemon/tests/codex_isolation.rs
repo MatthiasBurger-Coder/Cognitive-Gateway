@@ -3,7 +3,7 @@ use gateway_daemon::codex_workspace::LocalWorkspaceResolver;
 use serde_json::{Value, json};
 use sha2::{Digest, Sha256};
 use std::{
-    io::Write,
+    io::{BufRead, BufReader, Write},
     path::PathBuf,
     process::{Command, Stdio},
 };
@@ -414,17 +414,19 @@ fn real_stdio_admitted_launch_queries_and_resources_preserve_isolation() {
         .spawn()
         .unwrap();
     let mut stdin = child.stdin.take().unwrap();
+    let mut stdout = BufReader::new(child.stdout.take().unwrap());
+    let mut responses: Vec<Value> = vec![];
     for frame in frames {
         writeln!(stdin, "{frame}").unwrap();
+        if frame.get("id").is_some() {
+            let mut line = String::new();
+            stdout.read_line(&mut line).unwrap();
+            responses.push(serde_json::from_str(&line).unwrap());
+        }
     }
     drop(stdin);
     let output = child.wait_with_output().unwrap();
     assert!(output.status.success(), "{:?}", output.stderr);
-    let responses: Vec<Value> = String::from_utf8(output.stdout)
-        .unwrap()
-        .lines()
-        .map(|line| serde_json::from_str(line).unwrap())
-        .collect();
     assert_eq!(
         responses[1]["result"]["structuredContent"]["status"], "ok",
         "{}",
@@ -438,7 +440,11 @@ fn real_stdio_admitted_launch_queries_and_resources_preserve_isolation() {
     .unwrap();
     assert_eq!(actual, *resource);
     assert_eq!(responses[3]["error"]["data"]["code"], "CG_SCOPE_DENIED");
-    assert!(output.stderr.is_empty());
+    for line in String::from_utf8(output.stderr).unwrap().lines() {
+        let event: Value = serde_json::from_str(line).unwrap();
+        assert_eq!(event["event"], "local_call_finished");
+        assert!(event.get("payload").is_none());
+    }
 }
 
 #[test]
@@ -543,6 +549,21 @@ fn launch_admission_denials_do_not_emit_protocol_or_configuration_content() {
             command.env("LLVM_PROFILE_FILE", profile);
         }
         let output = command.args(&bad).stdin(Stdio::null()).output().unwrap();
+        assert_eq!(output.status.code(), Some(2));
+        assert!(output.stdout.is_empty());
+        assert_eq!(
+            String::from_utf8(output.stderr).unwrap(),
+            "Invalid local MCP launch binding; use cg-mcp --help.\n"
+        );
+    }
+    for contents in [b"\xff".as_slice(), b"{".as_slice()] {
+        std::fs::write(&config_file, contents).unwrap();
+        let mut command = Command::new(env!("CARGO_BIN_EXE_cg-mcp"));
+        command.env_clear();
+        if let Some(profile) = std::env::var_os("LLVM_PROFILE_FILE") {
+            command.env("LLVM_PROFILE_FILE", profile);
+        }
+        let output = command.args(&args).stdin(Stdio::null()).output().unwrap();
         assert_eq!(output.status.code(), Some(2));
         assert!(output.stdout.is_empty());
         assert_eq!(

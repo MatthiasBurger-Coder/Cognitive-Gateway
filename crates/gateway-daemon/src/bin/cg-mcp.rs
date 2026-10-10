@@ -2,18 +2,46 @@
 use gateway_application::codex::{CodexFacade, WorkspaceReference, WorkspaceResolver};
 use gateway_daemon::codex_workspace::LocalWorkspaceResolver;
 use gateway_daemon::local_mcp::{
-    LaunchBinding, MAX_FRAME_BYTES, Server, environment_allowed, transport::StdioTransport,
+    LaunchBinding, MAX_FRAME_BYTES, RuntimeLimits, Server, environment_allowed,
+    transport::StdioTransport,
 };
 use std::io::Read;
 use std::time::Duration;
 
 fn main() {
-    let args: Vec<String> = std::env::args().skip(1).collect();
+    std::panic::set_hook(Box::new(|_| {
+        eprintln!("CG_INTERNAL_ERROR: local worker failed")
+    }));
+    let mut args: Vec<String> = std::env::args().skip(1).collect();
     if args == ["--help"] {
         eprintln!(
-            "cg-mcp --client-name NAME --client-version VERSION --principal ID --workspace ID --project ID --binding ID\nPrivate stdio MCP; trusted launcher arguments required. No provider credentials. Optional admission: --admission FILE --cwd ABSOLUTE_PATH --repository ABSOLUTE_PATH --session ID."
+            "cg-mcp --client-name NAME --client-version VERSION --principal ID --workspace ID --project ID --binding ID\nPrivate stdio MCP; trusted launcher arguments required. No provider credentials. Optional --runtime-limits FILE (bounded JSON); --diagnostics prints default limits. Optional admission: --admission FILE --cwd ABSOLUTE_PATH --repository ABSOLUTE_PATH --session ID."
         );
         return;
+    }
+    if args == ["--diagnostics"] {
+        eprintln!(
+            "{}",
+            serde_json::json!({"limits":RuntimeLimits::default(),"max_in_flight":1,"queue_capacity":0,"automatic_retry":false})
+        );
+        return;
+    }
+    let mut limits = RuntimeLimits::default();
+    if let Some(index) = args.iter().position(|arg| arg == "--runtime-limits") {
+        if index % 2 != 0 || index + 1 >= args.len() {
+            fail();
+        }
+        let file = std::fs::File::open(&args[index + 1]).unwrap_or_else(|_| fail());
+        let mut text = String::new();
+        file.take(4097)
+            .read_to_string(&mut text)
+            .unwrap_or_else(|_| fail());
+        if text.len() > 4096 {
+            fail();
+        }
+        limits = serde_json::from_str(&text).unwrap_or_else(|_| fail());
+        limits.validate().unwrap_or_else(|_| fail());
+        args.drain(index..index + 2);
     }
     if !environment_allowed(std::env::vars_os().map(|(name, _)| name)) {
         eprintln!("Local MCP credential environment denied; launch with a clean environment.");
@@ -46,7 +74,11 @@ fn main() {
     ) else {
         fail();
     };
-    let mut transport = StdioTransport::new(std::io::stdin(), std::io::stdout(), MAX_FRAME_BYTES);
+    let mut transport = StdioTransport::new(
+        std::io::stdin(),
+        std::io::stdout(),
+        limits.input_bytes.max(limits.output_bytes),
+    );
     let mut server = if args.len() == 20 {
         let mut admission_values = Vec::new();
         for key in ["--admission", "--cwd", "--repository", "--session"] {
@@ -81,12 +113,11 @@ fn main() {
     } else {
         Server::new(binding)
     };
+    let read_timeout = Duration::from_millis(limits.idle_timeout_ms);
+    let write_timeout = Duration::from_millis(limits.write_timeout_ms);
+    server = server.with_limits(limits).unwrap_or_else(|_| fail());
     if server
-        .serve(
-            &mut transport,
-            Duration::from_secs(300),
-            Duration::from_secs(2),
-        )
+        .serve(&mut transport, read_timeout, write_timeout)
         .is_err()
     {
         eprintln!("Local MCP transport terminated.");

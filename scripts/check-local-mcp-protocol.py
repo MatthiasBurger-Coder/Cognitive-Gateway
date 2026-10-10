@@ -4,6 +4,8 @@ import argparse
 import json
 from pathlib import Path
 import subprocess
+import queue
+import threading
 
 from jsonschema import Draft202012Validator
 from referencing import Registry, Resource
@@ -38,12 +40,46 @@ def main():
     command = [str(binary.resolve()), "--client-name", "codex", "--client-version", "1.0",
                "--principal", "operator", "--workspace", "workspace-example",
                "--project", "project-example", "--binding", "binding-example"]
-    output = subprocess.run(command, input="".join(json.dumps(frame) + "\n" for frame in frames),
-                            text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                            env={}, check=True, timeout=10)
-    if output.stderr:
-        raise ValueError("Unexpected MCP diagnostics")
-    messages = [json.loads(line) for line in output.stdout.splitlines()]
+    process = subprocess.Popen(command, text=True, stdin=subprocess.PIPE,
+                               stdout=subprocess.PIPE, stderr=subprocess.PIPE, env={})
+    replies = queue.Queue()
+    def read_replies():
+        for line in process.stdout:
+            replies.put(line)
+        replies.put(None)
+    reader = threading.Thread(target=read_replies, daemon=True)
+    reader.start()
+    messages = []
+    try:
+        for frame in frames:
+            process.stdin.write(json.dumps(frame) + "\n")
+            process.stdin.flush()
+            if "id" in frame:
+                line = replies.get(timeout=10)
+                if line is None:
+                    raise ValueError("MCP closed before responding")
+                messages.append(json.loads(line))
+        process.stdin.close()
+        if process.wait(timeout=10) != 0:
+            raise ValueError("MCP process failed")
+        reader.join(timeout=10)
+        if replies.get(timeout=10) is not None:
+            raise ValueError("Unexpected extra MCP response")
+        diagnostics = process.stderr.read()
+    finally:
+        if process.poll() is None:
+            process.kill()
+            process.wait(timeout=10)
+        process.stdout.close()
+        process.stderr.close()
+        if not process.stdin.closed:
+            process.stdin.close()
+    for line in diagnostics.splitlines():
+        event = json.loads(line)
+        if set(event) != {"event", "correlation_id", "failure_class", "elapsed_ms"}:
+            raise ValueError("Unexpected MCP diagnostic fields")
+        if event["event"] != "local_call_finished":
+            raise ValueError("Unexpected MCP diagnostic event")
     if len(messages) != 6 + len(calls):
         raise ValueError("Unexpected MCP response count")
     results = {str(message["id"]): message["result"] for message in messages}
