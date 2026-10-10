@@ -1,0 +1,118 @@
+{
+  "contract": "cg.evidence",
+  "contract_version": "2.0",
+  "document": {
+    "contract": "cg.evidence",
+    "contract_version": "2.0",
+    "evidence": [
+      "artifact-verification"
+    ],
+    "facts": [
+      "artifact-verified"
+    ],
+    "goal_outcome": "SATISFIED",
+    "verification": {
+      "artifact": {
+        "digest": "sha256:225a47351c1798abd0138c672e56460a6783bc5ef18d11d22d80be211ca6ea28",
+        "id": "compile-run-97ac49558f9bcfd96e9d0c17399c9fc0dab146be7611e3a37c3032dc5dee1442-3",
+        "revision": "1"
+      },
+      "basis": {
+        "plan": {
+          "digest": "sha256:21c48ed09cb4a4ffb52e6cee711c99c7ee1f23bf0b7137e04f5def130009b266",
+          "id": "plan",
+          "revision": "1"
+        },
+        "projection": {
+          "digest": "sha256:7170028a9d4ef403af160b7b8a824182094593fa15b69a8ab3e054ec345b11e0",
+          "id": "projection",
+          "revision": "1"
+        },
+        "scope": "session-project-d794ed1d435a4beab4cabaf9a9d6ff7e",
+        "sources": [
+          {
+            "digest": "sha256:69a934b9c1356c8172a788df5168563a9f90018a27fa302f7dce0266cd6fc282",
+            "id": "source-a",
+            "revision": "1"
+          },
+          {
+            "digest": "sha256:66cc968ad2c3ea339f9320a21ce0dafec5aa6c2e47b8eb7ae6c4fad278ae37e5",
+            "id": "source-b",
+            "revision": "1"
+          }
+        ],
+        "step": "step-condition.0"
+      },
+      "checks": [
+        "canonical_bytes",
+        "digest",
+        "domain_ir",
+        "catalog",
+        "scope",
+        "step",
+        "pinned_inputs",
+        "provenance",
+        "disclosure",
+        "current_policy"
+      ],
+      "contract": "cg.artifact-verification",
+      "contract_version": "2.0",
+      "current_basis": {
+        "admission": null,
+        "plan": "plan-delta-747ec95a56539949224ae7c4bba9a2262efd77d1f228ccba2891138d455a729d",
+        "plan_fingerprint": "cabdec603b9787b9b9e3000c20177175ff4b7120381310dc08e98ca059544b89",
+        "process_catalog_fingerprint": "d42b9de5837ee08a2cebc5c713e5f280baae9f9393d7a4659d47c9236e57ad52",
+        "process_state_fingerprint": "986fb472ed53b38d07e62f754fd866b8240792d9b7a28c604b5115a74406290f",
+        "registry_fingerprint": "0fc85602f4c6da1163a5bf50dc9723a066bd04d2a8716dd4e5d8775dfcc2a3e3",
+        "rule_version": "1.0",
+        "scope": "session-project-d794ed1d435a4beab4cabaf9a9d6ff7e",
+        "situation": "external-situation",
+        "situation_fingerprint": "aedc9ca2e31bb9e0ee2d919a7c571bffdf8e4bb3a26a20f94a878afbceb5fcef"
+      },
+      "dispatch": "compile-run-97ac49558f9bcfd96e9d0c17399c9fc0dab146be7611e3a37c3032dc5dee1442-3",
+      "goal": {
+        "digest": "sha256:bf81205edb430a9d1b641e51211bd54e27049fb74abcca8db9632ce2fc6e11d7",
+        "id": "supported-goal",
+        "revision": "1"
+      },
+      "owner": {
+        "binding": "binding-example",
+        "client_owner": "owner-ba80dd3ef09540ae8865fe65b8b55ac9",
+        "principal": "operator",
+        "project": "project-example",
+        "workspace": "workspace-example"
+      },
+      "policy": {
+        "capability_classes": {
+          "architecture.dependency-analysis": "INSPECT"
+        },
+        "decision": "ALLOW",
+        "findings": [
+          {
+            "decision": "ALLOW",
+            "reason": "ALLOWED",
+            "subject": "step-condition.0"
+          }
+        ],
+        "policies": [
+          "inspect-policy"
+        ],
+        "schema_version": 1,
+        "step": "step-condition.0"
+      },
+      "run": "run-97ac49558f9bcfd96e9d0c17399c9fc0dab146be7611e3a37c3032dc5dee1442",
+      "session": "session-97ac49558f9bcfd96e9d0c17399c9fc0dab146be7611e3a37c3032dc5dee1442"
+    }
+  },
+  "reference": {
+    "digest": "sha256:b0c7beb6a64e8615533a198a8623298c810b29ae5f583bde759076c8c8965119",
+    "id": "evidence-run-97ac49558f9bcfd96e9d0c17399c9fc0dab146be7611e3a37c3032dc5dee1442",
+    "revision": "1"
+  },
+  "schema_version": "2.0",
+  "scope": {
+    "binding_id": "binding-example",
+    "project_id": "project-example",
+    "workspace_id": "workspace-example"
+  }
+}
