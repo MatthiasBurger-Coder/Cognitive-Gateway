@@ -33,6 +33,14 @@ contract, acceptance gate and sequencing. CLOSED is insufficient when the
 service is absent. OPEN is insufficient reason to block when the required
 implementation is actually present and evidenced.
 
+Use an explicit ledger, separate from issue status:
+
+| Dependency / owner / issue | Inspected implementation and revision | Actual state | Required contract and acceptance gate | Consumer / ordering | Included effort |
+| --- | --- | --- | --- | --- | --- |
+
+Each missing prerequisite needs an implementation owner and a gate before its
+consumer starts. Record cycles or unresolved ownership as refinement work.
+
 Distinguish external prerequisites from implementation work authorized by the
 user. Do not ask permission again for necessary in-scope foundations. If scope
 would include a new product plane, explicitly identify the minimum shared

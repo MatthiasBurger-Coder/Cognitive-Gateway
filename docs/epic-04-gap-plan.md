@@ -93,6 +93,9 @@ claimed by the completed canonical and client work.
   Parent acceptance remains separate; the report retains EPIC-04 NOT_COMPLETE.
 - #297: adapted skill created and structurally validated. [Scenario review](three-amigos-skill-validation.md)
   records decisions on real failures without inventing independent reviewers.
+  The bounded local candidate now includes repository authority/quality-path
+  navigation, an explicit prerequisite ledger and candidate-bound evidence rules;
+  all six #297 criteria are traced in that report. This does not qualify parent Done.
 - #293: [shared contracts](shared-session-contract.md) specified with accepted
   ADR-021, explicit artifact verification and the seven-row requirement matrix.
   This completes contract definition only; #272 types and #273/#275/#276/#277

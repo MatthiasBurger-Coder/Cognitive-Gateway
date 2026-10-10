@@ -17,6 +17,9 @@ source/contracts, shipped launchers and verified build/quality commands.
 Use repository equivalents rather than requiring another project's paths,
 framework, roles or workflow engine. Distinguish normative authority from
 implemented behavior. Closed issues and merged PRs are status, not proof.
+For Cognitive Gateway, read [repository-checks.md](references/repository-checks.md)
+to locate governance, composition roots and qualification commands. For another
+target, resolve its equivalents rather than carrying CG paths across.
 
 The gate reviews and refines requirements; production implementation follows
 only after the affected slice is ready. Use available workflow tooling when
@@ -61,6 +64,9 @@ Capture explicit and implicit behaviors and all named commands, services,
 ports/contracts and evidence paths. Use OPEN, BLOCKED, PARTIAL or VERIFIED;
 do not treat planned tests as executed evidence. Reconcile child issue criteria
 with the complete parent, including later architecture-review additions.
+Record the inspected revision and local changes, required evidence level per
+criterion, and report revision/source bindings. Historical evidence retains its
+original scope; it cannot qualify a changed candidate merely because it is green.
 
 ## Plan the actual work
 
