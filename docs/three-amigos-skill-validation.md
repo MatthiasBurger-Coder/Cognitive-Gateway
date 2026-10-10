@@ -33,3 +33,79 @@ See [delivery plan](epic-04-gap-plan.md) for historical facts, hypotheses,
 prerequisite effort and issue ordering. Skill instructions prevent recurrence by
 requiring composition-root tracing, actual prerequisite state, precise baseline
 success, evidence labels and report/closure reconciliation before DONE claims.
+
+## #297 candidate review
+
+Rechecked on 2026-10-10 against base revision
+`c69c1d169048bdf6a86ec6cab1a3cd534bef05c2` plus this skill/reference/report
+change. This is a bounded planning improvement, with no production runtime
+change. The original scenarios above retain their historical baseline; shared
+services are now implemented, rather than absent in the current candidate.
+
+Four sequential role passes by one agent produced these findings:
+
+- Requirements: #297's six criteria are traced below. Parent #126 still has
+  nineteen original criteria and five architecture additions; neither this
+  skill nor closed children qualify them.
+- Architecture: current `cg-local`/`cg-mcp` launchers use admitted local
+  application wiring; `local_sessions.rs` constructs the PostgreSQL store and
+  delegates lifecycle to application services. Historical missing-service
+  findings must not be presented as the current dependency state.
+- Automation: `references/repository-checks.md` now resolves CG governance,
+  composition roots and actual Rust/Python qualification commands. The installed
+  skill symlink resolves to this repository copy, with implicit discovery enabled.
+- Testing/evidence: retained installed-client evidence names an older revision
+  and declares EPIC-04 NOT_COMPLETE. The skill now explicitly requires candidate
+  source bindings and required evidence levels per criterion. Missing reports
+  deny closure; structural validation alone does not prove review behavior.
+
+### Acceptance trace
+
+| ID | #297 criterion | Implementation / evidence | Status |
+| --- | --- | --- | --- |
+| TA-01 | Demonstrated causes distinct from hypotheses | `epic-04-gap-plan.md`, "Why the gaps arose"; original source hash rechecked; #291 PR and latest #126 reread | VERIFIED |
+| TA-02 | Four perspectives and target governance/toolchain | Skill review perspectives; `references/repository-checks.md`; role passes above | VERIFIED |
+| TA-03 | Delivered path, prerequisite ledger, evidence matrix, parent reconciliation and foundation effort | Skill delivery/plan sections; explicit ledger in `references/delivery-gaps.md`; historical GAP-01..14 and 21–38 engineer-day plan including foundations | VERIFIED |
+| TA-04 | Scope-consistent closure and NOT_COMPLETE blocking | Skill completion rule; candidate/source-binding rule; missing-evidence acceptance command below | VERIFIED |
+| TA-05 | Realistic counterexamples, ready slice and honest provenance | Historical scenarios above and current boundary cases below; sequential role passes, no independent-review claim | VERIFIED |
+| TA-06 | Structure/references, discoverable install and unchanged origin | Validator and relative-link check below; existing local symlink; `references/source.md` and unchanged original SHA-256 | VERIFIED |
+
+### Current boundary cases
+
+| Case reviewed | Decision and reason |
+| --- | --- |
+| Offer historical injected-host or synthetic `codex / 1.0` results to close shipped integration | REQUIRES_REFINEMENT: COMPONENT/EXECUTABLE evidence cannot replace required installed-client or shared-service proof |
+| Declare a currently delivered foundation absent because its historical intake row is BLOCKED | Inspect current source and gate evidence; the historical row does not block independently ready planning work or prove current runtime qualification |
+| Offer retained green installed-client report for the latest full-parent candidate | REQUIRES_REFINEMENT: older revision/source binding and explicit NOT_COMPLETE block the broader completion claim |
+| Approve #297's bounded skill/documentation slice while full-parent qualification is incomplete | READY_FOR_WORKFLOW: scope, ownership, files and applicable checks are known, with no production service prerequisite; downstream parent completion remains separate |
+| Treat all 24 parent requirements as satisfied when mandatory reports are missing | Closure denied by the actual runner: NOT_COMPLETE, `closure_allowed: false`, 24 BLOCKED requirements |
+
+The prerequisite ledger for this bounded slice has no production foundations:
+
+| Dependency / owner | Actual state | Required gate | Ordering / effort |
+| --- | --- | --- | --- |
+| Existing source skill / local skill maintainer | Present, original hash unchanged | Origin/hash check | Before adapting; included in the existing 1–2 engineer-day estimate |
+| Repository authority and package / repository maintainer | Present, DEVELOPMENT / FULL_PATH; local discovery symlink resolves | Structure, links, applicable architecture/evidence regressions | Before acceptance of #297; qualification included in estimate |
+| Shared-service and installed-client production qualification / #294–#296 owners | Retained evidence has scoped/historical boundaries | Full-parent candidate qualification | Not a dependency of the skill change; still required for parent Done |
+
+### Executed checks
+
+- `python3 /home/micro/.codex/skills/.system/skill-creator/scripts/quick_validate.py .agents/skills/three-amigos-requirement-gatekeeper`:
+  PASS (`Skill is valid!`).
+- Relative Markdown references in the skill package, repository paths in the
+  new navigation reference, discovery symlink and original-source hash: PASS.
+- `python3 -m unittest discover -s tests/architecture -p 'test_*.py'`:
+  PASS, 31 tests. These test architecture and qualification invariants, not model
+  compliance with the skill. Printed FAIL results belong to expected negative
+  test fixtures; the suite result is OK.
+- `bash scripts/check-architecture.sh`: PASS.
+- `python3 scripts/qualify-epic04.py --output target/epic04-297-missing-evidence`:
+  expected exit 1; NOT_COMPLETE, closure denied, all 24 requirements BLOCKED.
+  This exercised the missing-input refusal, not runtime qualification.
+- `git diff --check`: PASS.
+
+No full production qualification was rerun for this skill/documentation change.
+The scenario cases remain manual role-pass reviews, not automated skill-execution
+tests. #297's bounded candidate is complete locally; merge and external issue
+state are separate. Parent #126 remains NOT_COMPLETE. Rollback reverts this
+skill/reference/report change without affecting runtime state or schemas.
