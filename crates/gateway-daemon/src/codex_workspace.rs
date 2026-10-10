@@ -40,6 +40,9 @@ impl LocalWorkspaceResolver {
         }
         let value = crate::local_mcp::decode::decode(text.as_bytes())
             .map_err(|_| FacadeError::InvalidInput)?;
+        if !gateway_application::codex::security::credential_free(&value) {
+            return Err(FacadeError::SensitivityDenied);
+        }
         let mut config: Admission =
             serde_json::from_value(value).map_err(|_| FacadeError::InvalidInput)?;
         if config.schema_version != 1 {

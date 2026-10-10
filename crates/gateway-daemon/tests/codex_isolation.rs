@@ -338,6 +338,30 @@ fn admission_rejects_bad_versions_duplicate_keys_digests_and_provenance() {
         .is_err()
     );
 }
+
+#[test]
+fn admission_credentials_are_refused_before_retention() {
+    let f = Fixture::new();
+    for field in ["credentials", "document", "metadata", "principal"] {
+        let mut config = f.config.clone();
+        match field {
+            "credentials" => config["credentials"] = json!({"api_key":"OPAQUE_FAKE_CREDENTIAL"}),
+            "document" => {
+                config["mappings"][0]["resources"][0]["document"]["note"] =
+                    json!("Bearer FAKE_CREDENTIAL")
+            }
+            "metadata" => {
+                config["mappings"][0]["resources"][0]["provenance"][0]["source_id"] =
+                    json!("sk-proj-FAKE_CREDENTIAL_0123456789")
+            }
+            _ => config["mappings"][0]["principal"] = json!("sk-proj-FAKE_CREDENTIAL_0123456789"),
+        }
+        assert!(matches!(
+            LocalWorkspaceResolver::from_json(&config.to_string()),
+            Err(FacadeError::SensitivityDenied)
+        ));
+    }
+}
 #[test]
 fn real_stdio_admitted_launch_queries_and_resources_preserve_isolation() {
     let f = Fixture::new();

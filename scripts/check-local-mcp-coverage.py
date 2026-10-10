@@ -6,6 +6,7 @@ import sys
 EXPECTED = (
     "crates/gateway-application/src/codex/contracts.rs",
     "crates/gateway-application/src/codex/isolation.rs",
+    "crates/gateway-application/src/codex/security.rs",
     "crates/gateway-daemon/src/codex_workspace.rs",
     "crates/gateway-daemon/src/bin/cg-mcp.rs",
     "crates/gateway-daemon/src/local_mcp/mod.rs",

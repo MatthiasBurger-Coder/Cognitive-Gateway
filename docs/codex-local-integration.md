@@ -102,7 +102,8 @@ Implementation obligations:
   local admission fails.
 - Launch CG with an explicit environment allowlist excluding provider credentials.
   CG does not read Codex auth stores, home-directory auth files or inherited
-  provider credential variables. Local identity/scope is independent of Codex login.
+  provider credential values. Credential-bearing environment names are refused
+  at startup. Local identity/scope is independent of Codex login.
 - Reject credential-bearing configuration and declared credential fields before
   application handoff. Never log raw rejected frames or environment dumps. Secrets
   must not enter canonical state, responses, audit records, traces, cache keys or
@@ -114,8 +115,10 @@ Implementation obligations:
 Arbitrary text may contain an unsolicited secret; no interface can prevent a
 hostile client writing secret bytes to a pipe. Such input is outside the accepted
 contract and must not be forwarded or retained as an authorized credential.
-Bounded handling and secret-isolation qualification belong to #241/#245. This
-slice defines obligations, not a completed runtime credential guarantee.
+The [#241 credential-isolation implementation](codex-secret-isolation.md) enforces
+these boundaries with bounded checks, fixed diagnostics and regression fixtures.
+Full live-client qualification remains #245; source classification is still
+required for arbitrary opaque text.
 
 ## Operation classes and default authority
 

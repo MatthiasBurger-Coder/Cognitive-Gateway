@@ -33,6 +33,120 @@ fn ready() -> Server {
     );
     server
 }
+
+#[test]
+fn credential_injection_never_echoes_ids_metadata_or_authentication_failures() {
+    let mut server = ready();
+    for frame in [
+        json!({"jsonrpc":"2.0","id":"sk-proj-FAKE_CREDENTIAL_0123456789","method":"ping"}),
+        json!({"jsonrpc":"2.0","id":20,"method":"ping","params":{"_meta":{"api_key":"OPAQUE_FAKE_CREDENTIAL"}}}),
+        json!({"jsonrpc":"2.0","id":21,"method":"initialize","params":{"clientInfo":{"name":"Bearer FAKE_CREDENTIAL"}}}),
+        json!({"jsonrpc":"2.0","id":22,"method":"resources/read","params":{"uri":"cg://sk-proj-FAKE_CREDENTIAL_0123456789"}}),
+    ] {
+        let response = handle(&mut server, frame);
+        assert_eq!(response["id"], Value::Null);
+        assert_eq!(response["error"]["message"], "Invalid Request");
+        assert!(!response.to_string().contains("FAKE_CREDENTIAL"));
+    }
+    assert!(
+        server
+            .handle(
+                json!({"jsonrpc":"2.0","method":"notifications/cancelled",
+        "params":{"reason":"Bearer FAKE_CREDENTIAL"}})
+                .to_string()
+                .as_bytes()
+            )
+            .is_none()
+    );
+    assert!(
+        LaunchBinding::new(
+            "codex",
+            "1",
+            "sk-proj-FAKE_CREDENTIAL_0123456789",
+            "w",
+            "p",
+            "b"
+        )
+        .is_none()
+    );
+    assert!(environment_allowed([std::ffi::OsString::from("PATH")]));
+    assert!(!environment_allowed([std::ffi::OsString::from(
+        "OPENAI_API_KEY"
+    )]));
+    #[cfg(unix)]
+    {
+        use std::os::unix::ffi::OsStringExt;
+        assert!(environment_allowed([std::ffi::OsString::from_vec(vec![
+            255
+        ])]));
+    }
+}
+
+#[test]
+fn untrusted_application_outputs_cannot_bypass_transport_disclosure() {
+    struct PoisonedPort {
+        secret: bool,
+    }
+    impl CodexApplicationPort for PoisonedPort {
+        fn execute(&self, _: &str, _: &Value) -> Value {
+            if self.secret {
+                json!({"status":"ok","result":{"canonical_result":{"kind":"document","document":{"reference_only":true,"content":"OPAQUE_FAKE_CREDENTIAL"}}}})
+            } else {
+                json!({"status":"ok","diagnostics":[{"message":"Bearer FAKE_CREDENTIAL"}]})
+            }
+        }
+        fn read_resource(
+            &self,
+            _: &Value,
+            _: &str,
+            _: &str,
+            _: &str,
+        ) -> Result<Value, gateway_application::codex::FacadeError> {
+            Ok(if self.secret {
+                json!({"document":{},"provenance":[{"sensitivity":"SECRET"}]})
+            } else {
+                json!({"document":{"api_key":"OPAQUE_FAKE_CREDENTIAL"}})
+            })
+        }
+    }
+    for secret in [false, true] {
+        let mut server = Server::with_application(binding(), Box::new(PoisonedPort { secret }));
+        handle(&mut server, initialize());
+        server.handle(br#"{"jsonrpc":"2.0","method":"notifications/initialized"}"#);
+        let arguments: Value = serde_json::from_str(include_str!(
+            "../../../../tests/fixtures/codex-v1/situation.inspect.request.json"
+        ))
+        .unwrap();
+        let response = handle(
+            &mut server,
+            request(
+                2,
+                "tools/call",
+                json!({"name":"cg_situation_inspect_v1","arguments":arguments}),
+            ),
+        );
+        assert_eq!(
+            response["result"]["structuredContent"]["diagnostics"][0]["code"],
+            "CG_SENSITIVITY_DENIED"
+        );
+        assert!(!response.to_string().contains("FAKE_CREDENTIAL"));
+        let response = handle(
+            &mut server,
+            request(
+                3,
+                "resources/read",
+                json!({"uri":format!("cg://workspaces/workspace-example/projects/project-example/bindings/binding-example/references/resource/1/sha256:{}","0".repeat(64))}),
+            ),
+        );
+        assert_eq!(response["error"]["message"], "Resource unavailable");
+        let unavailable = handle(
+            &mut server,
+            request(4, "resources/read", json!({"uri":"cg://unavailable"})),
+        );
+        assert_eq!(response["error"], unavailable["error"]);
+        assert!(!response.to_string().contains("FAKE_CREDENTIAL"));
+    }
+}
 fn request(id: u64, method: &str, params: Value) -> Value {
     json!({"jsonrpc":"2.0","id":id,"method":method,"params":params})
 }
@@ -300,10 +414,16 @@ fn every_frozen_request_returns_contract_failure_without_dispatch() {
             ),
         );
         id += 1;
-        assert_eq!(
-            response["result"]["structuredContent"]["diagnostics"][0]["code"],
-            code
-        );
+        if field == "input" {
+            // Credential injection is rejected before request ID correlation.
+            assert!(response["id"].is_null());
+            assert_eq!(response["error"]["message"], "Invalid Request");
+        } else {
+            assert_eq!(
+                response["result"]["structuredContent"]["diagnostics"][0]["code"],
+                code
+            );
+        }
         assert!(!response.to_string().contains("secret"));
     }
     for params in [
