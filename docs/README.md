@@ -12,6 +12,13 @@ See [diagram conventions](diagram-conventions.md) for the normative Mermaid-firs
 
 See [`arc42/`](arc42/) for the living architecture documentation.
 
+## Shared session contracts
+
+[Shared session contracts and Codex binding](shared-session-contract.md) and
+[ADR-021](adr/ADR-021-shared-structured-session-ownership.md) define the accepted
+structured artifact goal, typed API, trusted interactions, version boundary and
+prerequisite/evidence gates. Contract definition does not implement session services.
+
 ## Architecture Decisions
 
 See [`adr/`](adr/) for accepted architecture decisions.

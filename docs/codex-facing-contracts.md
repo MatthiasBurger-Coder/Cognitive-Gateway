@@ -81,6 +81,13 @@ rejected input is never copied into these fields. Failure responses use version
 
 ## Session projections (#272)
 
+ADR-021 and the [shared session specification](shared-session-contract.md)
+now define the application-owned artifact-task baseline. The table below remains
+frozen v1, with every session operation unsupported. Richer lifecycle/uncertainty,
+command-outcome queries and separate pending-request/verified-consent payloads
+require the explicitly specified v2 session boundary; no v1 field or payload is
+reinterpreted. #272 owns shared types and #294 publishes v2 only after service gates.
+
 | Operation | Input addition | Classification | Current availability |
 | --- | --- | --- | --- |
 | `session.start` | Command ID, existing intent document/reference | Mutate | Unsupported |
