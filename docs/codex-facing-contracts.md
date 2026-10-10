@@ -123,7 +123,8 @@ MCP task-augmented execution is forbidden in v1; CG SessionId is not an MCP task
 ## MCP projection and resources
 
 The selected local transport is private stdio; the initial protocol allowlist is
-`2025-11-25`, independently negotiated through MCP initialization. The normative
+`2025-11-25` (preferred) and `2025-06-18`, explicitly accepted through MCP initialization.
+The server returns the accepted client-offered version; unknown versions fail closed. The normative
 projection follows the official [tools specification](https://modelcontextprotocol.io/specification/2025-11-25/server/tools),
 [resources specification](https://modelcontextprotocol.io/specification/2025-11-25/server/resources)
 and [lifecycle specification](https://modelcontextprotocol.io/specification/2025-11-25/basic/lifecycle).
@@ -200,7 +201,7 @@ never permission to replay a mutation or skip reauthorization.
 
 | Client / server condition | Required behavior |
 | --- | --- |
-| MCP `2025-11-25`, envelope `1.0`, supported payload versions, admitted client | Compatible subject to scope and policy |
+| MCP `2025-11-25` or `2025-06-18`, envelope `1.0`, supported payload versions, admitted client | Compatible subject to scope and policy |
 | Other MCP protocol date | No application access; initialization selects only the allowlist; incompatible client disconnects |
 | Missing/unknown envelope version, including `1.1` or `2.0` | `CG_UNSUPPORTED_VERSION`; no guessed downgrade |
 | Unknown field in envelope or adapter-owned nested object | `CG_INVALID_REQUEST`; strict `additionalProperties: false` |

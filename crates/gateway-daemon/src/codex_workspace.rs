@@ -23,6 +23,8 @@ struct Mapping {
     session_id: String,
     revision: String,
     resources: Vec<Value>,
+    #[serde(default)]
+    canonical: Option<crate::codex_canonical::CanonicalAdmission>,
 }
 
 pub struct LocalWorkspaceResolver {
@@ -81,6 +83,29 @@ impl LocalWorkspaceResolver {
                     return Err(FacadeError::StaleRevision);
                 }
             }
+            if let Some(canonical) = &mut mapping.canonical {
+                if mapping
+                    .resources
+                    .iter()
+                    .any(|r| r["reference"]["id"] == "local-resolution")
+                {
+                    return Err(FacadeError::InvalidInput);
+                }
+                canonical.catalog = canonical_directory(&canonical.catalog)?;
+                if !canonical.catalog.starts_with(&mapping.repository) {
+                    return Err(FacadeError::ScopeDenied);
+                }
+                for (reference, contract) in [
+                    (&canonical.plan, "cg.plan"),
+                    (&canonical.rules, "cg.composition-rules"),
+                    (&canonical.process, "cg.process-snapshot"),
+                ] {
+                    if reference["contract"] != contract {
+                        return Err(FacadeError::InvalidInput);
+                    }
+                }
+                canonical.documents(&mapping.resources)?;
+            }
         }
         for (index, mapping) in config.mappings.iter().enumerate() {
             if config.mappings[..index].iter().any(|previous| {
@@ -115,6 +140,7 @@ impl LocalWorkspaceResolver {
         Ok(LocalCodexHost {
             binding: binding.clone(),
             resources: mappings[0].resources.clone(),
+            canonical: mappings[0].canonical.clone(),
         })
     }
 }
@@ -156,8 +182,46 @@ impl WorkspaceResolver for LocalWorkspaceResolver {
 pub struct LocalCodexHost {
     binding: ScopeBinding,
     resources: Vec<Value>,
+    canonical: Option<crate::codex_canonical::CanonicalAdmission>,
 }
 impl LocalCodexHost {
+    fn canonical_provenance(&self, reference: &Value) -> Result<Vec<Value>, FacadeError> {
+        let canonical = self
+            .canonical
+            .as_ref()
+            .ok_or(FacadeError::UnsupportedCapability)?;
+        let mut provenance = vec![];
+        for source in [&canonical.plan, &canonical.rules, &canonical.process] {
+            let resource = self
+                .resources
+                .iter()
+                .find(|r| r["reference"] == *source)
+                .ok_or(FacadeError::ReferenceUnavailable)?;
+            for p in resource["provenance"].as_array().unwrap() {
+                if p["sensitivity"] == "SECRET" {
+                    return Err(FacadeError::SensitivityDenied);
+                }
+                if !provenance.contains(p) {
+                    provenance.push(p.clone());
+                }
+            }
+        }
+        // Generated identity exposes the exact immutable result and its source lineage.
+        let sensitivity = provenance
+            .iter()
+            .map(|p| p["sensitivity"].as_str().unwrap())
+            .max_by_key(|s| match *s {
+                "CONFIDENTIAL" => 4,
+                "INTERNAL" => 3,
+                "NORMAL" => 2,
+                _ => 1,
+            })
+            .unwrap_or("NORMAL");
+        provenance.push(json!({"reference":reference,"source_id":self.binding.session.connection_id,
+            "source_revision":self.binding.mapping_revision,"freshness":"current","sensitivity":sensitivity,
+            "lineage":[canonical.plan.clone(),canonical.rules.clone(),canonical.process.clone()]}));
+        Ok(provenance)
+    }
     fn check(&self, call: &Call) -> Result<(), FacadeError> {
         if call.scope != self.binding.scope
             || call.canonical_scope != self.binding.canonical_scope
@@ -174,7 +238,11 @@ impl CodexHost for LocalCodexHost {
         self.check(call)?;
         // The immutable workspace admission grants only these local inspections.
         // Discovery, execution depth and input documents cannot enlarge this list.
-        let ids: Vec<_> = ["situation.inspect", "situation.assess", "resource.read"]
+        let mut operations = vec!["situation.inspect", "situation.assess", "resource.read"];
+        if self.canonical.is_some() {
+            operations.extend(["capabilities.resolve", "state.explain", "context.compile"]);
+        }
+        let ids: Vec<_> = operations
             .into_iter()
             .map(operation_capability)
             .collect::<Result<_, _>>()?;
@@ -221,6 +289,8 @@ impl CodexHost for LocalCodexHost {
         self.check(call)?;
         match call.operation.as_str() {
             "situation.inspect" | "situation.assess" | "resource.read" => {}
+            "capabilities.resolve" | "state.explain" | "context.compile"
+                if self.canonical.is_some() => {}
             _ => return Err(FacadeError::UnsupportedCapability),
         }
         // Inline content is allowed only when it matches an admitted, classified
@@ -250,6 +320,28 @@ impl CodexHost for LocalCodexHost {
     }
     fn reference(&self, call: &Call, reference: &Value) -> Result<ReferenceRecord, FacadeError> {
         self.check(call)?;
+        if reference["id"] == "local-resolution" && self.canonical.is_some() {
+            let canonical = self
+                .canonical
+                .as_ref()
+                .ok_or(FacadeError::UnsupportedCapability)?;
+            let document = canonical.artifact(&self.resources, call)?;
+            if *reference
+                != crate::codex_canonical::resolution_reference(
+                    &document,
+                    &self.binding.mapping_revision,
+                )
+            {
+                return Err(FacadeError::StaleRevision);
+            }
+            return Ok(ReferenceRecord {
+                scope: self.binding.scope.clone(),
+                session: self.binding.session.clone(),
+                reference: reference.clone(),
+                document: document.to_string(),
+                provenance: self.canonical_provenance(reference)?,
+            });
+        }
         let resource = self
             .resources
             .iter()
@@ -275,6 +367,21 @@ impl CodexHost for LocalCodexHost {
         digest: &str,
     ) -> Result<Value, FacadeError> {
         self.check(call)?;
+        if id == "local-resolution" && self.canonical.is_some() {
+            let canonical = self
+                .canonical
+                .as_ref()
+                .ok_or(FacadeError::UnsupportedCapability)?;
+            let document = canonical.artifact(&self.resources, call)?;
+            let reference = crate::codex_canonical::resolution_reference(
+                &document,
+                &self.binding.mapping_revision,
+            );
+            if reference["revision"] != revision || reference["digest"] != digest {
+                return Err(FacadeError::StaleRevision);
+            }
+            return Ok(reference);
+        }
         let matches: Vec<_> = self
             .resources
             .iter()
@@ -288,6 +395,45 @@ impl CodexHost for LocalCodexHost {
             return Err(FacadeError::ReferenceUnavailable);
         }
         Ok(matches[0]["reference"].clone())
+    }
+    fn resolution(
+        &self,
+        call: &Call,
+        documents: &[Value],
+    ) -> Result<
+        (
+            gateway_application::resolution_snapshot::ResolutionSnapshotInput,
+            gateway_application::resolution_composition::CompositionRules,
+        ),
+        FacadeError,
+    > {
+        self.check(call)?;
+        let canonical = self
+            .canonical
+            .as_ref()
+            .ok_or(FacadeError::UnsupportedCapability)?;
+        if canonical.documents(&self.resources)? != documents {
+            return Err(FacadeError::StaleRevision);
+        }
+        canonical.capture(&self.resources, call)
+    }
+    fn resolved(
+        &self,
+        call: &Call,
+        _document: &Value,
+    ) -> Result<gateway_application::resolution_application::ResolvedPlan, FacadeError> {
+        self.check(call)?;
+        self.canonical
+            .as_ref()
+            .ok_or(FacadeError::UnsupportedCapability)?
+            .resolve(&self.resources, call)
+    }
+    fn compile(&self, call: &Call, documents: &[Value]) -> Result<CompileCommand, FacadeError> {
+        self.check(call)?;
+        self.canonical
+            .as_ref()
+            .ok_or(FacadeError::UnsupportedCapability)?
+            .compile(&self.resources, call, documents)
     }
     fn project(
         &self,
@@ -310,6 +456,13 @@ impl CodexHost for LocalCodexHost {
                     }
                 }
             }
+        }
+        if contract == "cg.resolution" && self.canonical.is_some() {
+            let reference = crate::codex_canonical::resolution_reference(
+                &document,
+                &self.binding.mapping_revision,
+            );
+            provenance.extend(self.canonical_provenance(&reference)?);
         }
         // Reference inputs are propagated independently by the facade.
         Ok(Projection {

@@ -152,6 +152,83 @@ fn request(id: u64, method: &str, params: Value) -> Value {
 }
 
 #[test]
+fn explicitly_supported_protocols_preserve_discovery_and_client_admission() {
+    for version in SUPPORTED_PROTOCOL_VERSIONS {
+        let mut server = Server::new(binding());
+        let mut init = initialize();
+        init["params"]["protocolVersion"] = json!(version);
+        assert_eq!(
+            handle(&mut server, init)["result"]["protocolVersion"],
+            *version
+        );
+        assert!(
+            server
+                .handle(br#"{"jsonrpc":"2.0","method":"notifications/initialized"}"#)
+                .is_none()
+        );
+        assert_eq!(
+            handle(&mut server, request(2, "tools/list", json!({})))["result"]["tools"]
+                .as_array()
+                .unwrap()
+                .len(),
+            13
+        );
+        assert_eq!(
+            handle(
+                &mut server,
+                request(3, "tools/list", json!({"_meta":{"progressToken":1}}))
+            )["result"]["tools"]
+                .as_array()
+                .unwrap()
+                .len(),
+            13
+        );
+        assert!(
+            handle(
+                &mut server,
+                request(4, "resources/list", json!({"_meta":{}}))
+            )["result"]["resources"]
+                .is_array()
+        );
+        assert!(
+            handle(
+                &mut server,
+                request(5, "resources/templates/list", json!({"_meta":{}}))
+            )["result"]["resourceTemplates"]
+                .is_array()
+        );
+        for (id, method) in [
+            (6, "tools/list"),
+            (7, "resources/list"),
+            (8, "resources/templates/list"),
+        ] {
+            assert_eq!(
+                handle(&mut server, request(id, method, json!({"_meta":false})))["error"]["code"],
+                -32602
+            );
+        }
+        let mut denied = Server::new(binding());
+        let mut init = initialize();
+        init["params"]["protocolVersion"] = json!(version);
+        init["params"]["clientInfo"]["name"] = json!("other-client");
+        assert_eq!(
+            handle(&mut denied, init)["error"]["message"],
+            "Client admission denied"
+        );
+    }
+    for version in [json!("2099-01-01"), json!(null), json!(18)] {
+        let mut server = Server::new(binding());
+        let mut init = initialize();
+        init["params"]["protocolVersion"] = version;
+        assert_eq!(
+            handle(&mut server, init)["error"]["message"],
+            "Unsupported protocol version"
+        );
+        assert_eq!(server.phase, Phase::Closed);
+    }
+}
+
+#[test]
 fn lifecycle_and_admission_fail_closed() {
     assert!(LaunchBinding::new("", "1", "p", "w", "p", "b").is_none());
     assert!(LaunchBinding::new("x", "1", "p", "../w", "p", "b").is_none());

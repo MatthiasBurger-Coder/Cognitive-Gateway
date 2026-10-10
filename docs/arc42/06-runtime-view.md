@@ -161,3 +161,21 @@ are covered by [complete acceptance](../epic-03-complete-acceptance.md).
 The CG-27.01 reference deployment, provider-neutral port and qualification lifecycle
 are implemented; see [the operator guide](../local-model-runtime.md). Full
 SemanticTaskIR interpretation remains EPIC-05.11 work.
+
+## Inbound canonical and session delivery
+
+The admitted local `cg-mcp`/`cg-local` composition root optionally maps pinned
+plan/rules/process records through the shared strict CLI input mapper into
+canonical resolution, explanation and context compilation. Existing application
+services own computation and Process/Policy checks; trusted admission owns the
+source classification and operation grant. Generated resolution references are
+checked against the current canonical artifact before explain, compile or read.
+See [canonical host](../codex-canonical-host.md).
+
+The actual installed Codex client has exercised these paths with neutral admitted
+fixture snapshots and full CLI envelope parity, separately from synthetic
+protocol/component tests. See [installed-client qualification](../codex-installed-client-qualification.md).
+Session service delivery remains pending. [Proposed ADR-021](../adr/ADR-021-shared-structured-session-ownership.md)
+preserves one application-owned coordinator and defines the prerequisite task,
+interaction, persistence and verification boundaries; no session lifecycle is
+claimed by the standalone host or this runtime diagram.

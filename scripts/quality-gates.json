@@ -25,7 +25,7 @@
   },
   {
     "name": "EPIC-04 local MCP adapter/runtime conformance and coverage",
-    "command": "python3 scripts/check-local-mcp-protocol.py\ncargo llvm-cov -p gateway-application -p gateway-daemon --lib --bin cg-mcp --bin cg-local --test local_mcp --test codex_facade --test codex_isolation --test codex_local_cli --test codex_qualification --locked --json --output-path \"$EVIDENCE_DIR/local-mcp-coverage.json\"\npython3 scripts/check-local-mcp-coverage.py --self-test\npython3 scripts/check-local-mcp-coverage.py \"$EVIDENCE_DIR/local-mcp-coverage.json\""
+    "command": "python3 scripts/check-local-mcp-protocol.py\ncargo llvm-cov -p gateway-application -p gateway-daemon --lib --bin cg --bin cg-mcp --bin cg-local --test local_mcp --test codex_facade --test codex_isolation --test codex_local_cli --test codex_qualification --test codex_canonical --test declarative_cli --locked --json --output-path \"$EVIDENCE_DIR/local-mcp-coverage.json\"\npython3 scripts/check-local-mcp-coverage.py --self-test\npython3 scripts/check-local-mcp-coverage.py \"$EVIDENCE_DIR/local-mcp-coverage.json\""
   },
   {
     "name": "EPIC-04.10 inbound no-key component qualification",
