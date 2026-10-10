@@ -7,7 +7,7 @@ The accepted decision is [ADR-020](adr/ADR-020-codex-local-trust-no-key-contract
 The [versioned wire contract](codex-facing-contracts.md) is defined by EPIC-04.02 #237.
 This is the normative trust and ownership contract. The
 [local MCP server](local-mcp-server.md) implements private stdio lifecycle and
-discovery. The [application facade](codex-application-facade.md) (#239) and [workspace/session admission](codex-scope-isolation.md) (#240) are implemented. Live client qualification remains #245.
+discovery. The [application facade](codex-application-facade.md) (#239) and [workspace/session admission](codex-scope-isolation.md) (#240) are implemented. The [operator setup and CLI fallback](codex-local-setup.md) (#244) provide reproducible configuration and diagnostics. Live client qualification remains #245.
 
 ## Direction and ownership
 

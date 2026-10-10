@@ -130,7 +130,7 @@ nonsecret semantic command, and recheck authorization and disclosure at use time
 ## Reproducible isolation evidence
 
 ```sh
-cargo test -p gateway-daemon --test codex_isolation --locked
+cargo test -p gateway-daemon --test codex_isolation --test codex_local_cli --locked
 cargo test -p gateway-application --test codex_facade --locked
 cargo test -p gateway-daemon --lib local_mcp --test local_mcp --locked
 cargo clippy --workspace --all-targets --locked -- -D warnings
@@ -138,8 +138,8 @@ python3 -m unittest discover -s tests/contracts
 python3 -m unittest discover -s tests/architecture
 bash scripts/check-architecture.sh
 python3 scripts/check-local-mcp-protocol.py
-cargo llvm-cov -p gateway-application -p gateway-daemon --lib --bin cg-mcp \
-  --test local_mcp --test codex_facade --test codex_isolation --locked \
+cargo llvm-cov -p gateway-application -p gateway-daemon --lib --bin cg-mcp --bin cg-local \
+  --test local_mcp --test codex_facade --test codex_isolation --test codex_local_cli --locked \
   --json --output-path target/codex-isolation-coverage.json
 python3 scripts/check-local-mcp-coverage.py target/codex-isolation-coverage.json
 ```

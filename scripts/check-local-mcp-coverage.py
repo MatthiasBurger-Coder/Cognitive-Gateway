@@ -12,6 +12,7 @@ EXPECTED = (
     "crates/gateway-application/src/codex/security.rs",
     "crates/gateway-daemon/src/codex_workspace.rs",
     "crates/gateway-daemon/src/bin/cg-mcp.rs",
+    "crates/gateway-daemon/src/bin/cg-local.rs",
     "crates/gateway-daemon/src/local_mcp/mod.rs",
     "crates/gateway-daemon/src/local_mcp/contracts.rs",
     "crates/gateway-daemon/src/local_mcp/decode.rs",

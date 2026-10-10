@@ -137,6 +137,7 @@ Canonical entry points:
 - [`docs/current-architecture-state.md`](docs/current-architecture-state.md) — current implementation/plan status matrix
 - [`docs/semantic-language-and-interpretation.md`](docs/semantic-language-and-interpretation.md) — planned CGSL / SemanticTaskIR boundary
 - [`docs/codex-local-integration.md`](docs/codex-local-integration.md) — Codex -> CG local no-key MCP trust contract
+- [Codex local setup and operator runbook](docs/codex-local-setup.md) — bootstrap, secret-free configuration, CLI fallback and reproducible smoke tests (#244).
 - [`docs/codex-scope-isolation.md`](docs/codex-scope-isolation.md) — explicit workspace/session admission, provenance and isolation (#240)
 - [`docs/codex-secret-isolation.md`](docs/codex-secret-isolation.md) — no-key credential admission, sensitive-data disclosure and fixed diagnostics (#241)
 - [`docs/local-mcp-server.md`](docs/local-mcp-server.md) — implemented stdio MCP lifecycle/discovery and injectable application facade

@@ -1,0 +1,245 @@
+{
+  "schema_version": "1.0",
+  "scope": {
+    "workspace_id": "workspace-example",
+    "project_id": "project-example",
+    "binding_id": "binding-example"
+  },
+  "operation": "situation.inspect",
+  "input": {
+    "situation": {
+      "kind": "document",
+      "contract": "cg.situation",
+      "contract_version": "1.0",
+      "document": {
+        "context": {
+          "id": "external-context",
+          "schema_version": "1.0"
+        },
+        "intent": null,
+        "observed_state": {
+          "diagnostics": [],
+          "entries": [
+            {
+              "claims": [
+                {
+                  "challenging_evidence": [],
+                  "fact": "fact-architecture",
+                  "observations": [
+                    "observation-architecture"
+                  ],
+                  "polarity": "AFFIRMED",
+                  "provenances": [
+                    "source-architecture"
+                  ],
+                  "supporting_evidence": [
+                    "evidence-architecture"
+                  ],
+                  "value": {
+                    "kind": "BOOLEAN",
+                    "value": true
+                  }
+                }
+              ],
+              "diagnostics": [],
+              "lineage": {
+                "evidence": [
+                  "evidence-architecture"
+                ],
+                "facts": [
+                  "fact-architecture"
+                ],
+                "observations": [
+                  "observation-architecture"
+                ],
+                "provenances": [
+                  "source-architecture"
+                ]
+              },
+              "metadata": null,
+              "polarity": "AFFIRMED",
+              "status": "KNOWN",
+              "subject": "architecture.dependency",
+              "value": {
+                "kind": "BOOLEAN",
+                "value": true
+              }
+            },
+            {
+              "claims": [
+                {
+                  "challenging_evidence": [],
+                  "fact": "fact-coverage",
+                  "observations": [
+                    "observation-coverage"
+                  ],
+                  "polarity": "AFFIRMED",
+                  "provenances": [
+                    "source-coverage"
+                  ],
+                  "supporting_evidence": [
+                    "evidence-coverage"
+                  ],
+                  "value": {
+                    "kind": "INTEGER",
+                    "value": 92
+                  }
+                }
+              ],
+              "diagnostics": [],
+              "lineage": {
+                "evidence": [
+                  "evidence-coverage"
+                ],
+                "facts": [
+                  "fact-coverage"
+                ],
+                "observations": [
+                  "observation-coverage"
+                ],
+                "provenances": [
+                  "source-coverage"
+                ]
+              },
+              "metadata": null,
+              "polarity": "AFFIRMED",
+              "status": "KNOWN",
+              "subject": "coverage.percent",
+              "value": {
+                "kind": "INTEGER",
+                "value": 92
+              }
+            }
+          ],
+          "id": "external-state",
+          "schema_version": "1.0"
+        },
+        "records": {
+          "evidence": [
+            {
+              "content": {
+                "kind": "INLINE",
+                "value": "Synthetic operator smoke evidence"
+              },
+              "id": "evidence-architecture",
+              "kind": "REPORT",
+              "links": [
+                {
+                  "fact": "fact-architecture",
+                  "relation": "SUPPORTS"
+                }
+              ],
+              "occurred_at": null,
+              "provenance": "source-architecture",
+              "summary": "External architecture report"
+            },
+            {
+              "content": {
+                "kind": "INLINE",
+                "value": "Synthetic operator smoke evidence"
+              },
+              "id": "evidence-coverage",
+              "kind": "REPORT",
+              "links": [
+                {
+                  "fact": "fact-coverage",
+                  "relation": "SUPPORTS"
+                }
+              ],
+              "occurred_at": null,
+              "provenance": "source-coverage",
+              "summary": "External coverage report"
+            }
+          ],
+          "facts": [
+            {
+              "id": "fact-architecture",
+              "observations": [
+                "observation-architecture"
+              ],
+              "polarity": "AFFIRMED",
+              "subject": "architecture.dependency",
+              "value": {
+                "kind": "BOOLEAN",
+                "value": true
+              }
+            },
+            {
+              "id": "fact-coverage",
+              "observations": [
+                "observation-coverage"
+              ],
+              "polarity": "AFFIRMED",
+              "subject": "coverage.percent",
+              "value": {
+                "kind": "INTEGER",
+                "value": 92
+              }
+            }
+          ],
+          "observations": [
+            {
+              "id": "observation-architecture",
+              "occurred_at": null,
+              "provenance": "source-architecture",
+              "subject": "architecture.dependency",
+              "value": {
+                "kind": "BOOLEAN",
+                "value": true
+              }
+            },
+            {
+              "id": "observation-coverage",
+              "occurred_at": null,
+              "provenance": "source-coverage",
+              "subject": "coverage.percent",
+              "value": {
+                "kind": "INTEGER",
+                "value": 92
+              }
+            }
+          ],
+          "provenances": [
+            {
+              "acquired_at": null,
+              "id": "source-architecture",
+              "parent_provenance": [],
+              "producer": null,
+              "source_id": "external-architecture",
+              "source_kind": "TOOL",
+              "source_reference": "external://reports/architecture",
+              "source_timestamp": null
+            },
+            {
+              "acquired_at": null,
+              "id": "source-coverage",
+              "parent_provenance": [],
+              "producer": null,
+              "source_id": "external-coverage",
+              "source_kind": "TOOL",
+              "source_reference": "external://reports/coverage",
+              "source_timestamp": null
+            }
+          ]
+        },
+        "schema_version": "1.0",
+        "situation": {
+          "assessments": [],
+          "diagnostics": [],
+          "id": "external-situation",
+          "observed_state_id": "external-state",
+          "references": [],
+          "risks": [],
+          "schema_version": "1.0"
+        }
+      }
+    }
+  },
+  "execution": {
+    "operating_mode": "DEVELOPMENT",
+    "execution_profile": "FULL_PATH"
+  },
+  "correlation": {
+    "request_id": "request-example"
+  }
+}
