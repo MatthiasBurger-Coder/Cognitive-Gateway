@@ -3,14 +3,15 @@
 
 Current full-parent acceptance is governed by [EPIC-04 acceptance](epic-04-acceptance.md).
 Shared structured services and installed-client lifecycle proof are delivered;
-older evidence below retains its historical scope. Parent #126 remains NOT_COMPLETE.
+older evidence below retains its historical scope. Fresh full reconciliation
+determines the current parent acceptance state.
 
-Date: 2026-10-10. Inspected baseline: `4d28315` (merged #291).
+Historical intake date: 2026-10-10. Inspected baseline: `4d28315` (merged #291).
 Parent: [EPIC-04 #126](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/issues/126).
 This plan extends the existing inbound integration; it does not replace EPIC-08
 or qualify its complete model/connector runtime.
 
-## Current #294 runtime delivery
+## Current delivery and 2026-10-11 acceptance correction
 
 The registered structured context-artifact baseline is **QUALIFIED**. The shared
 application coordinator and real clarification/consent services, required
@@ -27,6 +28,10 @@ They do not describe missing structured services in the current delivery.
 Installed Codex-client session qualification (#295) now has its own
 [installed-client evidence](codex-installed-client-qualification.md). Parent
 reconciliation (#296) and complete EPIC-08/model/connector acceptance remain separate.
+The 2026-10-11 correction removes the producers' fixed parent-incomplete claim:
+successful scoped evidence records `NOT_ASSESSED` with `closure_allowed: false`;
+failures retain `NOT_COMPLETE`. Only fresh full reconciliation of all 24 criteria
+can establish the broad #126/#245 completion. No historical report is upgraded.
 
 ## Three Amigos intake gate (historical baseline)
 

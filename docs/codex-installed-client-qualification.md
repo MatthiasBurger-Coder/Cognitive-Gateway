@@ -92,8 +92,12 @@ not establish the unrelated desired state used to construct the admitted plan.
 Crash/commit ambiguity, competing ownership, expiry and storage corruption have
 separate shared-runtime evidence in #294; this probe qualifies installed-client
 interoperability, normal EOF/restart and the exercised refusal paths.
-All modes retain `epic_04_status: NOT_COMPLETE`: parent reconciliation #296 and
-complete EPIC-08 model/connector/system acceptance remain separate. Discovery
+Successful modes now retain `epic_04_status: NOT_ASSESSED` and
+`closure_allowed: false`; unsuccessful modes retain `NOT_COMPLETE`. This
+2026-10-11 producer-contract correction leaves historical reports unchanged.
+Parent reconciliation #296 alone may assess all 24 EPIC-04 criteria; a fresh
+full run is required after the correction. Complete EPIC-08 model/connector/system
+acceptance #279 remains separate. Discovery
 alone is never model/tool-proposal or full-runtime evidence.
 
 Validation for this candidate: 23 architecture tests (including four runner

@@ -25,6 +25,8 @@ class InstalledQualificationGuardrails(unittest.TestCase):
             self.assertNotEqual(result.returncode, 0)
             report = json.loads((output / 'report.json').read_text())
             self.assertEqual(report['status'], 'NOT_RUN')
+            self.assertEqual(report['epic_04_status'], 'NOT_COMPLETE')
+            self.assertIs(report['closure_allowed'], False)
             self.assertFalse(report['inference_started'])
 
     def test_shared_mode_without_database_is_blocked(self):
@@ -37,6 +39,8 @@ class InstalledQualificationGuardrails(unittest.TestCase):
             self.assertNotEqual(result.returncode, 0)
             report = json.loads((output / 'report.json').read_text())
             self.assertEqual(report['status'], 'BLOCKED')
+            self.assertEqual(report['epic_04_status'], 'NOT_COMPLETE')
+            self.assertIs(report['closure_allowed'], False)
             self.assertNotIn('installed_client', report)
 
     def test_equal_count_catalog_replacement_and_wrong_operation_fail(self):

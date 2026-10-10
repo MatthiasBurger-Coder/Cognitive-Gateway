@@ -3,7 +3,8 @@
 
 Current full-parent acceptance is governed by [EPIC-04 acceptance](epic-04-acceptance.md).
 Shared structured services and installed-client lifecycle proof are delivered;
-older evidence below retains its historical scope. Parent #126 remains NOT_COMPLETE.
+older evidence below retains its historical scope. Fresh full reconciliation
+determines the current parent acceptance state.
 
 This guide builds and verifies the private Codex → CG stdio connection from a
 clean checkout. CG requires no OpenAI API key, Codex token, model service,
@@ -54,7 +55,8 @@ does not establish that wire pair. Verify it in a controlled, non-sensitive clie
 qualification session. There is no wildcard, guessed version or silent downgrade.
 The installed `codex-cli 0.162.1` has been exercised with wire identity
 `codex-mcp-client / 0.162.1` and MCP `2025-06-18`. This result applies to
-inspection and the optional canonical host, not shared sessions. Re-run the
+inspection, the optional canonical host and the registered v2 context-artifact
+shared sessions; see the separately retained lifecycle evidence. Re-run the
 [installed-client qualification](codex-installed-client-qualification.md) for your candidate and client version.
 
 Generate a new setup using that verified pair, then copy its server table into
@@ -119,8 +121,10 @@ path, resource contents or credential values. `ready` means local admission
 passed; it does not claim a live Codex handshake or permission for every operation.
 The version field is the server's supported version, not a negotiated CLI protocol.
 
-`--operation OP --request FILE` reads one bounded, duplicate-key-free JSON v1
-envelope and returns the canonical facade response as JSON. The successful smoke
+`--operation OP --request FILE` reads one bounded, duplicate-key-free JSON
+envelope and returns the canonical facade response as JSON. One-shot canonical
+operations use frozen v1 envelopes; the explicitly enabled shared-session path
+uses separate v2 envelopes. The successful smoke
 response has `status: "ok"`, `operation: "situation.inspect"`, the admitted scope,
 PUBLIC source provenance and a scope trace in `explainability`. Exit codes:
 0 success/check, 1 canonical facade failure, 2 setup/input failure. Diagnostics are
@@ -133,10 +137,18 @@ hard preemption of arbitrary injected hosts or blocked CLI output pipes.
 Both paths construct `CodexFacade::with_binding` through the same `admit_local`
 function. Validation, sensitivity, references, scope, provenance, policy and
 canonical use cases are shared. CLI fallback grants no extra authority and makes
-no automatic retries. The local host enables situation inspect/assess and scoped
-resource reads; other operations return `CG_UNSUPPORTED_CAPABILITY`. The CLI
-operation interface accepts frozen canonical tool operations; resource reads
-remain available through MCP. The unrelated `cg` declarative CLI is not this
+no automatic retries. The default immutable admission enables situation
+inspect/assess and scoped resource reads. Optional [canonical admission](codex-canonical-host.md)
+also enables resolve/explain/context through existing application services.
+Explicit [shared-session admission](shared-session-implementation.md) adds the
+six separate v2 start/inspect/clarify/approve/continue/cancel tools to the frozen
+thirteen-tool catalog (nineteen tools total). Frozen v1 session operations keep
+their unsupported behavior. Shared sessions support only the registered verified
+context-artifact goal; other capabilities return `CG_UNSUPPORTED_CAPABILITY`.
+Trusted [consent issuance](shared-session-implementation.md) remains a separate
+operator authority path; discovery and client approval cannot grant CG authority.
+The CLI operation interface accepts corresponding canonical/v2 tool operations;
+resource reads remain available through MCP. The unrelated `cg` declarative CLI is not this
 fallback and does not establish Codex admission.
 
 ## Workspace scoping
@@ -163,11 +175,11 @@ smoke test pass. See [scope isolation](codex-scope-isolation.md) and
 | Layer | Supported contract |
 | --- | --- |
 | Transport | Private newline-delimited JSON-RPC 2.0 stdio; stdout protocol only |
-| MCP | Exactly `2025-11-25`; initialize then `notifications/initialized` |
-| Application envelopes/resources | Frozen `schema_version: "1.0"`; canonical contract version `1.0` |
+| MCP | Explicit `2025-11-25` or `2025-06-18`; initialize then `notifications/initialized`; other versions fail closed |
+| Application envelopes/resources | Frozen v1 canonical contracts; separate `schema_version: "2.0"` shared-session contracts when explicitly enabled |
 | Admission file | Integer `schema_version: 1`; strict fields and unique scope mapping |
-| Client | Exact trusted name/version pair must match initialize claims; live qualification #245 |
-| Discovery | 13 contracts; discoverability does not authorize or imply implementation availability |
+| Client | Exact trusted name/version pair must match initialize claims; installed-client qualification #295 |
+| Discovery | 13 frozen v1 tools; six additional v2 session tools when enabled (19 total); discovery grants no authority |
 
 | Symptom | Diagnostic/action |
 | --- | --- |
@@ -179,7 +191,7 @@ smoke test pass. See [scope isolation](codex-scope-isolation.md) and
 | Invalid configuration/request | `CG_INVALID_INPUT`: check strict fields, bounded JSON, duplicate keys, operation and frozen request shape |
 | Client/protocol initialization rejection | Check exact wire identity and MCP version; restart with a newly admitted connection after correction |
 | Resource stale/unavailable | Check revision/digest/provenance in trusted admission; unavailable/foreign/SECRET resources deliberately share sanitized errors |
-| Unsupported capability | Local host lacks that service; use supported inspection operations; installing a shared host is separate work |
+| Unsupported capability | Check trusted canonical/session admission; the shipped shared host supports the registered verified context-artifact task. Other intents and semantic/model/connector paths remain unsupported |
 | Policy/sensitivity/consent/evidence denial | Preserve the canonical denial; correct trusted authority or disclosure classification, never change client claims to bypass it |
 | Timeout/cancellation/lost response | Do not retry mutations; consult durable session state and reconcile uncertain dispatch through shared services |
 | Transport closes | Check bounded frames, deadlines and credential-free sanitized stderr; keep stdout free of banners and shell diagnostics |
@@ -223,7 +235,7 @@ CLI/MCP canonical response equality in empty environments. It uses no Codex
 account or provider. Automated tests cover setup diagnostics, foreign scope,
 policy and classification denial, credential/duplicate input rejection and
 bootstrap configuration. This evidence establishes local reproducibility; it
-does not claim live Codex qualification, which remains #245.
+does not claim live Codex qualification, which is provided separately by #295.
 
 | #244 acceptance criterion | Evidence |
 | --- | --- |

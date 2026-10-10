@@ -1,14 +1,17 @@
 # Full EPIC-04 acceptance — #296
 
-EPIC-04 #126 and the broad #245 definition remain **NOT_COMPLETE**. A green
+Full acceptance of EPIC-04 #126 and the broad #245 definition requires a fresh
+complete qualification after the 2026-10-11 evidence-contract correction. A green
 component, shared-runtime or installed-client result does not authorize their
 closure. #296 adds enforcement and reconciliation; it does not remove any
 parent requirement or claim #279 whole-runtime acceptance.
 
 ## Review and delivered boundary
 
-Four sequential role passes were performed by one agent; no independent
-reviewer or approval is claimed. Repository mode is DEVELOPMENT / FULL_PATH.
+The original enforcement review used four sequential role passes by one agent.
+The 2026-10-11 correction uses independent delegated requirements, architecture
+and evidence reviews; neither review constitutes a product acceptance approval.
+Repository mode is DEVELOPMENT / FULL_PATH.
 Requirements: preserve all nineteen original criteria and five 2026-10-04
 additions. Architecture: `cg-mcp` and `cg-local` use the existing canonical host,
 facade and EPIC-08 shared coordinator, trusted interaction authority and
@@ -21,12 +24,16 @@ The exact registered context-artifact task is delivered; semantic interpretation
 model invocation and external connector effects remain explicitly unsupported.
 These are capability boundaries, not proof of the separate #279 system scope.
 #292/#294/#295 are implemented and have retained scoped evidence. Their closed
-issue states are not inputs to acceptance. The current retained reports are
-historical candidate evidence; full current-revision qualification is absent and
-the installed/component producers explicitly retain `epic_04_status: NOT_COMPLETE`.
+issue states are not inputs to acceptance. At the acceptance-enforcement intake,
+the retained reports were historical candidate evidence and fresh full-scope
+qualification was absent. The old installed/component producers explicitly retained
+`epic_04_status: NOT_COMPLETE`, blocking aggregation even when scoped gates passed.
+Corrected producers record `epic_04_status: NOT_ASSESSED` and
+`closure_allowed: false` only after their scoped checks succeed. Failed or blocked
+checks retain `NOT_COMPLETE`. A scoped report never declares parent completion.
 
-Decision: READY_FOR_WORKFLOW for the acceptance enforcement slice; parent
-completion remains BLOCKED on fresh, consistent full-scope evidence. No extra
+Intake decision: READY_FOR_WORKFLOW for the acceptance enforcement slice; parent
+completion was BLOCKED on fresh, consistent full-scope evidence. No extra
 production plane or second coordinator is added.
 
 ## Reproduce and interpret
@@ -57,8 +64,12 @@ artifacts and required executable identities to the candidate. All current
 quality commands, changed-file coverage and actual shared transitions are required;
 inspection-only/canonical-only client runs are insufficient. Any mandatory report
 retaining EPIC-04 NOT_COMPLETE blocks closure even when its scoped tests pass.
-This is intentionally stricter than the component runner: current producers must
-undergo a separate full-scope review before any completion declaration changes.
+Successful scoped inputs must declare `NOT_ASSESSED` and deny their own closure
+authority; they do not assess the parent. Only this reconciler may emit parent
+`COMPLETE`, after validating all mandatory evidence and all 24 criteria.
+The separate #279 acceptance is linked explicitly and remains outside this
+registered context-artifact scope. Required EPIC-04 capabilities must execute;
+unsupported semantic/model/connector goals must instead fail closed.
 Do not edit a report's status to work around this gate. Source-bound proof must
 be regenerated when qualifying sources change.
 
@@ -108,9 +119,18 @@ runner fills VERIFIED/BLOCKED from actual input validation, never child states.
 #245 is currently closed, but its complete text includes later shared-session
 acceptance and a full-parent evidence requirement. The retained component report
 proves its named narrower scope; it does not prove that broad definition of done.
-#126 is open and remains NOT_COMPLETE. Preserve both original and added criteria;
+#126 is open; its final state and #245's broad completion require the fresh
+full report. If that report fails, #245 must be reopened rather than treating
+its earlier component closure as broad proof. Preserve original and added criteria;
 this local review does not silently narrow #245 or change external issue status.
 The closure guard covers both broad acceptance scopes. #279 remains separate.
+
+The first corrected 2026-10-11 worktree qualification is retained locally at
+`target/epic126-three-amigos-20261011/report.json`: `QUALIFIED_EPIC_04`, all 24
+criteria VERIFIED and all 38 quality gates PASS, including actual installed
+Codex shared-session proof. It qualifies its hash-bound uncommitted candidate,
+not a merged release. Subsequent documentation corrections require their own
+fresh qualification; no earlier report is edited to qualify changed sources.
 
 Rollback removes the acceptance runner/manifest and closure workflow; runtime
 state and storage schemas are unaffected. Such removal also removes closure

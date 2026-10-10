@@ -1,5 +1,9 @@
 # Shared structured-session implementation — #294
 
+Delivery state reviewed 2026-10-11. Retained reports below keep their original
+candidate/source bindings; current full EPIC-04 acceptance requires a fresh
+[full qualification](epic-04-acceptance.md), separate from #279.
+
 The structured context-artifact runtime is implemented under its EPIC-08 owners
 and bound to both shipped local executables. The registered structured baseline
 is **QUALIFIED**: seven application runtime tests, five real PostgreSQL repository

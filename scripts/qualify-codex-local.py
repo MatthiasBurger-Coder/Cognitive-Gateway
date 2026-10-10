@@ -57,7 +57,7 @@ def main():
     output = args.output.resolve()
     output.mkdir(parents=True, exist_ok=False)
     report = {'schema_version': 1, 'scope': 'EPIC-04 inbound no-key component', 'status': 'RUNNING',
-              'epic_04_status': 'NOT_COMPLETE', 'full_runtime_issue': 279,
+              'epic_04_status': 'NOT_COMPLETE', 'closure_allowed': False, 'full_runtime_issue': 279,
               'client': {'kind': 'synthetic protocol-conformant fixture', 'name': 'codex', 'version': '1.0'},
               'protocol_version': '2025-11-25', 'application_schema_version': '1.0',
               'revision': subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip(),
@@ -99,6 +99,7 @@ def main():
         report['coverage'] = COVERAGE.check(json.loads(coverage.read_text()))
         validate(report)
         report['status'] = 'QUALIFIED_COMPONENT_SCOPE'
+        report['epic_04_status'] = 'NOT_ASSESSED'
     except (OSError, ValueError, KeyError, TypeError, subprocess.SubprocessError) as error:
         report['status'] = 'FAIL'
         report['error'] = str(error)

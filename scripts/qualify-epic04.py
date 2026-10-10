@@ -54,6 +54,10 @@ def validate_binding(report, path, candidate):
 def inspect(kind, path, candidate):
     report = json.loads(path.read_text())
     validate_binding(report, path, candidate)
+    if kind in ('component', 'installed') and (
+            report.get('epic_04_status') != 'NOT_ASSESSED'
+            or report.get('closure_allowed') is not False):
+        raise ValueError('Scoped evidence must defer EPIC-04 acceptance and prohibit closure')
     required_sources = {str(p.relative_to(ROOT)) for p in (ROOT / 'crates').rglob('*.rs')}
     required_sources.update(('Cargo.toml', 'Cargo.lock'))
     if not required_sources.issubset(report['source_sha256']):
@@ -191,6 +195,9 @@ def main():
     paths = {kind: getattr(args, kind) or output / f'missing-{kind}.json'
              for kind in ('component', 'quality', 'installed')}
     report = reconcile(paths)
+    report['worktree_status'] = subprocess.check_output(
+        ['git', 'status', '--porcelain'], cwd=ROOT, text=True)
+    report['candidate_source_state'] = 'WORKTREE' if report['worktree_status'] else 'COMMITTED'
     report['requested_closure'] = sorted(claims or [])
     (output / 'report.json').write_text(json.dumps(report, indent=2) + '\n')
     print(f"{report['status']}: {output / 'report.json'}")
