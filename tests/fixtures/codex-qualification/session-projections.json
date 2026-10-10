@@ -1,0 +1,81 @@
+[
+  {
+    "operation": "session.start",
+    "projection": {
+      "kind": "session",
+      "session_id": "session-example",
+      "revision": 1,
+      "status": "running",
+      "pending": [],
+      "verified_final_result": null
+    }
+  },
+  {
+    "operation": "session.inspect",
+    "projection": {
+      "kind": "session",
+      "session_id": "session-example",
+      "revision": 1,
+      "status": "running",
+      "pending": [],
+      "verified_final_result": null
+    }
+  },
+  {
+    "operation": "session.inspect",
+    "projection": {
+      "kind": "session",
+      "session_id": "session-example",
+      "revision": 1,
+      "status": "pending_clarification",
+      "pending": [
+        {
+          "id": "pending-example",
+          "kind": "clarification",
+          "reference": {
+            "id": "pending-example",
+            "contract": "cg.clarification",
+            "contract_version": "1.0",
+            "revision": "1",
+            "digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+          }
+        }
+      ],
+      "verified_final_result": null
+    }
+  },
+  {
+    "operation": "session.inspect",
+    "projection": {
+      "kind": "session",
+      "session_id": "session-example",
+      "revision": 1,
+      "status": "pending_consent",
+      "pending": [
+        {
+          "id": "pending-example",
+          "kind": "consent",
+          "reference": {
+            "id": "pending-example",
+            "contract": "cg.consent-record",
+            "contract_version": "1.0",
+            "revision": "1",
+            "digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+          }
+        }
+      ],
+      "verified_final_result": null
+    }
+  },
+  {
+    "operation": "session.cancel",
+    "projection": {
+      "kind": "session",
+      "session_id": "session-example",
+      "revision": 1,
+      "status": "cancelled",
+      "pending": [],
+      "verified_final_result": null
+    }
+  }
+]
