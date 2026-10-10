@@ -104,7 +104,7 @@ impl LocalWorkspaceResolver {
                         return Err(FacadeError::InvalidInput);
                     }
                 }
-                canonical.documents(&mapping.resources)?;
+                canonical.pin(&mapping.resources)?;
             }
         }
         for (index, mapping) in config.mappings.iter().enumerate() {
@@ -292,6 +292,24 @@ impl CodexHost for LocalCodexHost {
             "capabilities.resolve" | "state.explain" | "context.compile"
                 if self.canonical.is_some() => {}
             _ => return Err(FacadeError::UnsupportedCapability),
+        }
+        if let Some(canonical) = &self.canonical {
+            if call.operation == "capabilities.resolve"
+                && [
+                    ("plan", &canonical.plan),
+                    ("rules", &canonical.rules),
+                    ("process", &canonical.process),
+                ]
+                .iter()
+                .any(|(key, reference)| call.input[*key] != **reference)
+            {
+                return Err(FacadeError::ReferenceUnavailable);
+            }
+            if matches!(call.operation.as_str(), "state.explain" | "context.compile")
+                && call.input["resolution"]["id"] != "local-resolution"
+            {
+                return Err(FacadeError::ReferenceUnavailable);
+            }
         }
         // Inline content is allowed only when it matches an admitted, classified
         // immutable source. Caller content cannot choose its own classification.

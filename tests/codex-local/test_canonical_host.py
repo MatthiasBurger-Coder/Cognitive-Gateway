@@ -95,15 +95,29 @@ class CanonicalHost(unittest.TestCase):
         explanation = client.call(explain)
         self.assertEqual(explanation['status'], 'ok', explanation)
         self.assertEqual(explanation, self.cli_envelope('state.explain', explain))
+        self.assertEqual(explanation['result']['canonical_result']['document'], self.canonical('explain',
+            '--plan', json.dumps(self.plan), '--catalog', str(self.catalog), '--rules', str(FIXTURE / 'rules.json'),
+            '--process', str(FIXTURE / 'process.json'))['explanation'])
         compile_request = self.request_for('context.compile', {'resolution': reference, 'projection': self.references['projection'],
                                                               'step_id': 'step-condition.0', 'candidates': []})
         compiled = client.call(compile_request)
         self.assertEqual(compiled['status'], 'ok', compiled)
         self.assertEqual(compiled, self.cli_envelope('context.compile', compile_request))
-        self.assertEqual(compiled['result']['canonical_result']['document']['basis'],
-                         self.canonical('compile', '--plan', json.dumps(self.plan), '--catalog', str(self.catalog),
-                                        '--rules', str(FIXTURE / 'rules.json'), '--process', str(FIXTURE / 'process.json'),
-                                        '--policy', str(FIXTURE / 'policy.json'), '--projection', str(FIXTURE / 'projection.json'))['basis'])
+        expected = self.canonical('compile', '--plan', json.dumps(self.plan), '--catalog', str(self.catalog),
+                                  '--rules', str(FIXTURE / 'rules.json'), '--process', str(FIXTURE / 'process.json'),
+                                  '--policy', str(FIXTURE / 'policy.json'), '--projection', str(FIXTURE / 'projection.json'))
+        # Compare the complete canonical artifact under the documented host disclosure policy.
+        expected['execution_context'] = {'id': expected['execution_context']['id'], 'representation': 'redacted'}
+        if expected['user_input'] is not None:
+            expected['user_input'] = {'kind': 'user_input', 'trust': 'CALLER_INPUT',
+                                      'representation': 'redacted', 'content': '[REDACTED]'}
+        for field in ['task', 'output_contract', 'constraints']:
+            expected['gateway'][field] = {'representation': 'redacted'}
+        for fragment in expected['dynamic']:
+            fragment.update(content='[REDACTED]', representation='redacted',
+                            provenance={'source': '[REDACTED]', 'revision': None}, evidence=[],
+                            rationale='[REDACTED]', validation=None)
+        self.assertEqual(compiled['result']['canonical_result']['document'], expected)
         stale = copy.deepcopy(explain)
         stale['input']['resolution']['digest'] = 'sha256:' + '0' * 64
         self.assertEqual(client.call(stale)['diagnostics'][0]['code'], 'CG_STALE_REVISION')
@@ -191,3 +205,35 @@ class CanonicalHost(unittest.TestCase):
         response = client.exchange('resources/read', {'uri': uri})
         self.assertNotIn('error', response, response)
         self.assertEqual(json.loads(response['result']['contents'][0]['text'])['document'], resource['document'])
+
+    def test_catalog_drift_invalidates_resolve_explain_and_compile(self):
+        self.prepare()
+        client = self.client()
+        resolve = self.request_for('capabilities.resolve', {n: self.references[n] for n in ['plan', 'rules', 'process']})
+        result = client.call(resolve)
+        self.assertEqual(result['status'], 'ok', result)
+        reference = next(p['reference'] for p in result['provenance'] if p['reference']['id'] == 'local-resolution')
+        skill_path = next((self.catalog / 'skills').glob('*.json'))
+        skill = json.loads(skill_path.read_text())
+        skill['description'] += ' changed after admission'
+        skill_path.write_text(json.dumps(skill))
+        for request in [resolve,
+                        self.request_for('state.explain', {'resolution': reference}),
+                        self.request_for('context.compile', {'resolution': reference, 'projection': self.references['projection'],
+                                                            'step_id': 'step-condition.0', 'candidates': []})]:
+            self.assertEqual(client.call(request)['diagnostics'][0]['code'], 'CG_STALE_REVISION')
+
+    def test_identical_documents_cannot_substitute_pinned_reference_identity(self):
+        self.prepare()
+        mapping = self.admission['mappings'][0]
+        alias = copy.deepcopy(next(r for r in mapping['resources'] if r['reference'] == self.references['plan']))
+        alias['reference']['id'] = 'plan-alias'
+        alias['provenance'][0]['reference'] = copy.deepcopy(alias['reference'])
+        mapping['resources'].append(alias)
+        self.admission_path.write_text(json.dumps(self.admission))
+        client = self.client()
+        request = self.request_for('capabilities.resolve', {n: self.references[n] for n in ['plan', 'rules', 'process']})
+        request['input']['plan'] = alias['reference']
+        self.assertEqual(client.call(request)['diagnostics'][0]['code'], 'CG_REFERENCE_UNAVAILABLE')
+        request = self.request_for('state.explain', {'resolution': {**self.references['plan'], 'contract': 'cg.resolution'}})
+        self.assertEqual(client.call(request)['diagnostics'][0]['code'], 'CG_REFERENCE_UNAVAILABLE')

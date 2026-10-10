@@ -4,7 +4,7 @@ use gateway_application::{
     codex::{Call, CompileCommand, FacadeError},
     resolution_application::{DeclarativeResolutionApplication, ResolvedPlan},
     resolution_composition::CompositionRules,
-    resolution_snapshot::ResolutionSnapshotInput,
+    resolution_snapshot::{ResolutionSnapshot, ResolutionSnapshotInput},
 };
 use serde::Deserialize;
 use serde_json::{Value, json};
@@ -19,8 +19,16 @@ pub(crate) struct CanonicalAdmission {
     pub rules: Value,
     pub process: Value,
     pub policy: Value,
+    #[serde(skip)]
+    pub pinned_basis: Option<gateway_application::resolution::ResolutionBasis>,
 }
 impl CanonicalAdmission {
+    pub(crate) fn pin(&mut self, resources: &[Value]) -> Result<(), FacadeError> {
+        let (snapshot, rules) = host_mapping::capture(&self.catalog, &self.documents(resources)?)?;
+        let resolved = DeclarativeResolutionApplication.resolve_plan(&snapshot, &rules)?;
+        self.pinned_basis = Some(resolved.report.basis.clone());
+        Ok(())
+    }
     pub(crate) fn documents(&self, resources: &[Value]) -> Result<Vec<Value>, FacadeError> {
         [&self.plan, &self.rules, &self.process]
             .into_iter()
@@ -54,6 +62,12 @@ impl CanonicalAdmission {
             || snapshot.execution_profile != call.execution_profile
         {
             return Err(FacadeError::InvalidInput);
+        }
+        let captured = ResolutionSnapshot::capture(&snapshot).map_err(
+            gateway_application::resolution_application::ResolutionApplicationError::Snapshot,
+        )?;
+        if self.pinned_basis.as_ref() != Some(captured.request().basis()) {
+            return Err(FacadeError::StaleRevision);
         }
         Ok((snapshot, rules))
     }
