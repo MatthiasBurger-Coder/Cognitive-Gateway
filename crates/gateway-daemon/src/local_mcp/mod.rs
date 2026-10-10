@@ -13,6 +13,8 @@ use std::time::Duration;
 use transport::{Transport, TransportError};
 
 pub const PROTOCOL_VERSION: &str = "2025-11-25";
+/// Explicitly qualified transport versions; application contracts remain at v1.
+pub const SUPPORTED_PROTOCOL_VERSIONS: &[&str] = &[PROTOCOL_VERSION, "2025-06-18"];
 pub const MAX_FRAME_BYTES: usize = 1_048_576;
 const MAX_REQUESTS: usize = 10_000;
 
@@ -207,12 +209,16 @@ impl Server {
         }
         let response = match method {
             "tools/list"
-                if params_object(&params, &["cursor"], &[]) && params.get("cursor").is_none() =>
+                if params_object(&params, &["cursor", "_meta"], &[])
+                    && params.get("cursor").is_none()
+                    && params.get("_meta").is_none_or(Value::is_object) =>
             {
                 result(id, json!({"tools":contracts::tools()}))
             }
             "resources/list"
-                if params_object(&params, &["cursor"], &[]) && params.get("cursor").is_none() =>
+                if params_object(&params, &["cursor", "_meta"], &[])
+                    && params.get("cursor").is_none()
+                    && params.get("_meta").is_none_or(Value::is_object) =>
             {
                 let resources: Vec<Value> = ["catalog", "common.schema.json", "request.schema.json", "response.schema.json", "resource.schema.json", "catalog.schema.json"].iter()
                     .map(|name| json!({"uri":format!("cg://contracts/1.0/{name}"),"name":name,"mimeType":"application/json"})).collect();
@@ -220,11 +226,16 @@ impl Server {
                 resources.push(json!({"uri":"cg://runtime/health","name":"Local runtime health","mimeType":"application/json"}));
                 result(id, json!({"resources":resources}))
             }
-            "resources/templates/list" if params_object(&params, &[], &[]) => result(
-                id,
-                json!({"resourceTemplates":contracts::artifact("catalog").unwrap()["resources"].as_array().unwrap().iter()
+            "resources/templates/list"
+                if params_object(&params, &["_meta"], &[])
+                    && params.get("_meta").is_none_or(Value::is_object) =>
+            {
+                result(
+                    id,
+                    json!({"resourceTemplates":contracts::artifact("catalog").unwrap()["resources"].as_array().unwrap().iter()
                 .filter(|resource| resource["kind"] == "template").map(|resource| json!({"uriTemplate":resource["uri"],"name":resource["uri"],"mimeType":"application/json"})).collect::<Vec<_>>() }),
-            ),
+                )
+            }
             "tools/call" => self.call(id, &params),
             "resources/read" => self.read(id, &params),
             "tools/list" | "resources/list" | "resources/templates/list" => {
@@ -249,10 +260,13 @@ impl Server {
             self.phase = Phase::Closed;
             return rpc_error(id, -32602, "Invalid params");
         }
-        if params["protocolVersion"] != PROTOCOL_VERSION {
+        let Some(protocol) = params["protocolVersion"]
+            .as_str()
+            .filter(|version| SUPPORTED_PROTOCOL_VERSIONS.contains(version))
+        else {
             self.phase = Phase::Closed;
             return rpc_error(id, -32602, "Unsupported protocol version");
-        }
+        };
         if params["clientInfo"]["name"] != self.binding.client_name
             || params["clientInfo"]["version"] != self.binding.client_version
             || self.binding.principal.is_empty()
@@ -263,7 +277,7 @@ impl Server {
         self.phase = Phase::Initializing;
         result(
             id,
-            json!({"protocolVersion":PROTOCOL_VERSION,"capabilities":{"tools":{},"resources":{}},
+            json!({"protocolVersion":protocol,"capabilities":{"tools":{},"resources":{}},
             "serverInfo":{"name":"cognitive-gateway","version":env!("CARGO_PKG_VERSION")},
             "instructions":"Contract discovery is available. Application tools delegate to the shared CG facade and require admitted host services; scoped resources require an admitted workspace host."}),
         )

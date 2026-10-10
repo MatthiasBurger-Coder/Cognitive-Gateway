@@ -8,9 +8,10 @@ Codex account, network listener, connector, model service or database.
 
 The component result is distinct from EPIC-04 completion and the full runtime
 qualification in #279. The standalone immutable host supports situation
-inspect/assess and scoped resources. Canonical inspect/resolve/explain/context also
-cross MCP and the facade using injected Rust hosts and existing canonical service
-fixtures. Shared session projections are
+inspect/assess and scoped resources. Its optional [canonical admission](codex-canonical-host.md)
+now provides resolve/explain/context through the shipped executables and existing
+Rust services, exercised by `tests/codex-local/test_canonical_host.py`. The older
+injected-host fixtures remain component evidence. Shared session projections are
 qualified through `Server -> CodexFacade -> CodexHost`, with current CG policy and
 consent checks. The projection fixture supplies running, clarification pause,
 consent pause and cancelled results; it implements no task coordinator. Shared
@@ -28,7 +29,7 @@ python3 scripts/qualify-codex-local.py --output target/epic04-qualification
 
 The output directory must be new. The harness builds binaries, runs canonical,
 security, bridge, failure, executable golden, protocol/schema and architecture
-checks, formatting and workspace Clippy. It measures the established thirteen-file
+checks, formatting and workspace Clippy. It measures the extended sixteen-file
 MCP coverage gate at >=95% per file. Any gate failure, missing/low coverage, or
 source change during execution returns nonzero and records `FAIL`. A successful
 run records `QUALIFIED_COMPONENT_SCOPE` and `epic_04_status: NOT_COMPLETE`.
@@ -44,8 +45,9 @@ Neither mode substitutes for the repository's complete release quality gate.
 
 ## Requirement-to-evidence matrix
 
-All paths below are relative to the checkout root. No installed Codex client
-version is qualified by the fixture identity.
+All paths below are relative to the checkout root. The fixture identity supplies no installed-client proof. A separate
+[installed-client run](codex-installed-client-qualification.md) exercises actual
+Codex discovery and inspect/resolve/explain/compile; shared sessions remain absent.
 
 | #245 criterion | Objective evidence | Qualification boundary |
 | --- | --- | --- |
@@ -56,10 +58,10 @@ version is qualified by the fixture identity.
 | Policy/mutation denial and consent | Executable denied profile/unsupported mutations; `codex_facade.rs::policy_gates`; `codex_qualification.rs::client_approval_cannot_replace_trusted_consent_or_dispatch_session_mutations` | Current trusted policy/consent; discovery supplies no grant |
 | Unsupported protocol/schema versions | Executable wrong-version/malformed/duplicate scenario; `codex_facade.rs::validation_precedence_scope_versions_and_pins_fail_closed` | Fail closed; no downgrade |
 | Timeout/cancel/disconnect | Executable idle deadline, EOF and reconnect; `local_mcp::runtime::tests::active_cancel_disconnect_errors_and_deadline_are_bounded`, overload/panic/write/frame-budget faults | Active faults use injected ports/transports; no durable rollback claim |
-| Resolve/explain/context/provenance | `codex_qualification.rs::canonical_inspect_resolve_explain_and_context_are_deterministic_through_mcp`; facade stale-step/policy/lineage regressions | MCP bridge to canonical Rust services through fixture hosts; standalone operations remain unsupported |
+| Resolve/explain/context/provenance | `codex_qualification.rs::canonical_inspect_resolve_explain_and_context_are_deterministic_through_mcp`; facade stale-step/policy/lineage regressions | Shipped host and CLI parity with admitted fixture snapshots; additional injected-host component proof |
 | No provider dependency in inner authority | `scripts/check-architecture.sh`, `test_dependencies.py`, `test_local_mcp_boundary.py` | Cargo dependency mutations plus framing/module guards |
 | Architecture remains green | `architecture.log`, `architecture-regressions.log`, workspace Clippy | Existing gates unchanged |
-| >=95% materially changed production coverage | `local-mcp-coverage.json`, per-file coverage in report | No production Rust changed; existing gate still required |
+| >=95% materially changed production coverage | `local-mcp-coverage.json`, per-file coverage in report | Canonical host/mapping and changed pipeline added to measured gate; >=95% for each required file |
 | Session start/status, pauses and cancellation projections | `codex_qualification.rs::shared_host_start_status_pause_and_cancellation_projections_cross_the_bridge`; `session-projections.json` | Shared host contract projection proof; durable service lifecycle remains pending |
 | All EPIC-04 criteria have objective evidence | This matrix and slice mapping below | Component evidence complete; full EPIC-04 acceptance remains pending shared service integration |
 | Distinguish inbound from #279 full runtime | Machine report scope/status/limitations | No connector/model completion or full runtime release claim |
@@ -89,7 +91,7 @@ explicit even when the listed regression tests pass.
 | No duplicate EPIC-07 connectors | Dependency/module guards; bridge host has no external dispatch; frozen thirteen-tool catalog test |
 | CLI and MCP share facade | Full canonical response equality against the executable golden |
 | Architecture dependency checks green | Required architecture guard and nineteen architecture regression tests |
-| Applicable >=95% production coverage | Required thirteen-file measured local MCP coverage gate |
+| Applicable >=95% production coverage | Required sixteen-file measured local MCP coverage gate |
 | Every criterion has reproducible evidence | This matrix, required runner gates and source/artifact hashes in `report.json` |
 
 | Slice | Contract and evidence |
@@ -114,7 +116,7 @@ shared services rather than supplied projections. Installed-client interoperabil
 also requires a controlled run with its exact initialize name/version pair. #279
 must independently qualify connector/model and durable runtime behavior.
 
-Verification on 2026-10-10: the standalone component harness returned
+Prior EPIC-04.10 verification on 2026-10-10: the standalone component harness returned
 `QUALIFIED_COMPONENT_SCOPE`; all ten required gates passed, including nineteen
 architecture tests, twelve independent contract tests, seven operator/executable
 tests and three canonical/session bridge tests. All thirteen coverage files
@@ -124,3 +126,25 @@ passed its dedicated test target. Local evidence is retained under
 `target/epic04-qualification-245-final/`, with the workspace log at
 `target/epic04-245-workspace-tests.log`. This is component evidence, not execution
 of the separate complete release gate or qualification of an installed client.
+
+## Delivery-gap candidate verification — 2026-10-10
+
+The extended standalone runner completed all ten gates and its own coverage
+measurement with `QUALIFIED_COMPONENT_SCOPE` / `NOT_COMPLETE`. All sixteen
+required production files exceed 95%; the minimum is 95.93% in the shared CLI
+pipeline. Five canonical executable scenarios now include legacy inspect-only
+resource-ID compatibility as well as parity and admission/policy negatives.
+Evidence is retained in `target/epic04-gap-component-current/`.
+
+The independent installed-client runner returned `QUALIFIED_INSTALLED_CANONICAL`
+for actual Codex 0.162.1, wire identity `codex-mcp-client / 0.162.1`, protocol
+`2025-06-18`, complete inspection/resolve/explain/compile parity and scope/stale
+refusal. Evidence is in `target/epic04-installed-codex-current/`. The workspace
+regression run passed 786 tests with three existing optional tests ignored,
+retained in `target/epic04-gap-workspace-tests.log`; the subsequent compatibility
+fix also passed the dedicated canonical target and complete component gates.
+
+These are locally executed candidate checks, not a merged release or full
+repository release-gate run. Shared session services remain absent; both reports
+retain EPIC-04 NOT_COMPLETE. The final documentation candidate is checked again
+with the unchanged measured Rust coverage in `target/epic04-gap-review/`.

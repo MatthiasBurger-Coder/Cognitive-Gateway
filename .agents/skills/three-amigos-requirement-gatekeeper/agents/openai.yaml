@@ -1,0 +1,4 @@
+interface:
+  display_name: "Three Amigos Delivery Review"
+  short_description: "Plan integration work from real delivery paths and evidence"
+  default_prompt: "Use $three-amigos-requirement-gatekeeper to review requirements, actual runtime wiring, prerequisites, effort and acceptance evidence before implementing this integration."

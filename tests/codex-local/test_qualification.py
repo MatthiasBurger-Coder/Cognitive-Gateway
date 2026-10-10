@@ -15,9 +15,9 @@ GOLDEN = ROOT / 'tests/fixtures/codex-qualification'
 
 
 class Client:
-    def __init__(self, launch, extra=()):
+    def __init__(self, launch, extra=(), environment=None):
         self.process = subprocess.Popen([str((BIN / 'cg-mcp').resolve()), *launch, *extra],
-                                        env={}, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                                        env={} if environment is None else environment, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                                         stderr=subprocess.PIPE, text=True)
         self.replies = queue.Queue()
         self.errors = []

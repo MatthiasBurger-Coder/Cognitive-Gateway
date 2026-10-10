@@ -4,6 +4,9 @@ import json
 import sys
 
 EXPECTED = (
+    "crates/gateway-daemon/src/codex_canonical.rs",
+    "crates/gateway-daemon/src/declarative_cli/host_mapping.rs",
+    "crates/gateway-daemon/src/declarative_cli/pipeline.rs",
     "crates/gateway-application/src/codex/runtime.rs",
     "crates/gateway-daemon/src/local_mcp/runtime.rs",
     "crates/gateway-application/src/codex/authorization.rs",

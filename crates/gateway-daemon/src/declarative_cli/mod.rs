@@ -1,4 +1,5 @@
 //! CG-11 driving adapter. Semantic decisions remain in the application APIs.
+pub(crate) mod host_mapping;
 mod inputs;
 mod json_input;
 mod patterns_cli;

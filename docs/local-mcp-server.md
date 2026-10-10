@@ -38,7 +38,8 @@ explicit admission file. See [credential and sensitive-data isolation](codex-sec
 
 ## Surface and application availability
 
-Initialization supports exactly MCP `2025-11-25`; a mismatch or failed client
+Initialization accepts the explicit MCP versions `2025-11-25` and `2025-06-18`
+and returns the supported version requested by the client. An unknown version or failed client
 admission returns a sanitized JSON-RPC error and closes the connection. The
 server requires `notifications/initialized` before tool/resource access. Ping is
 available during initialization. Capabilities advertise only tools and resources.
@@ -51,8 +52,9 @@ its immutable `defined`/`unsupported` contract markers; tool descriptions and
 initialization instructions state current application availability.
 
 The [shared application facade](codex-application-facade.md) (#239) is implemented
-and injectable through `Server::with_application`. The standalone launcher accepts an explicit #240 admission file, cwd, repository and client session; its local host admits situation queries and scoped resource reads. A discovery-only launch uses the unavailable host and returns `CG_UNSUPPORTED_CAPABILITY`. Session commands delegate
-only to shared application services when installed. Scoped resources require the admitted workspace host. No canonical use case is bypassed or reimplemented.
+and injectable through `Server::with_application`. The standalone launcher accepts an explicit #240 admission file, cwd, repository and client session; its local host admits situation queries and scoped resource reads. Optional
+[canonical admission](codex-canonical-host.md) also wires resolve, explain and
+context compilation to the existing Rust services. A discovery-only launch uses the unavailable host and returns `CG_UNSUPPORTED_CAPABILITY`. Session commands remain unsupported until the shared application services are implemented and installed. Scoped resources require the admitted workspace host. No canonical use case is bypassed or reimplemented.
 
 Credential-bearing frames are rejected anonymously before correlation or dispatch.
 Other recognized tool calls validate envelope version, operation/name agreement,
@@ -95,8 +97,8 @@ python3 -m unittest discover -s tests/contracts
 python3 scripts/check-local-mcp-protocol.py
 bash scripts/check-architecture.sh
 python3 -m unittest discover -s tests/architecture
-cargo llvm-cov -p gateway-application -p gateway-daemon --lib --bin cg-mcp --bin cg-local \
-  --test local_mcp --test codex_facade --test codex_isolation --test codex_local_cli \
+cargo llvm-cov -p gateway-application -p gateway-daemon --lib --bin cg --bin cg-mcp --bin cg-local \
+  --test local_mcp --test codex_facade --test codex_isolation --test codex_local_cli --test codex_qualification --test codex_canonical --test declarative_cli \
   --json --output-path target/local-mcp-coverage.json
 python3 scripts/check-local-mcp-coverage.py target/local-mcp-coverage.json
 ```

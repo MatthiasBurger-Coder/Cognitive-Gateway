@@ -15,11 +15,11 @@ COVERAGE = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(COVERAGE)
 
 GATES = [
-    ('build', ['cargo', 'build', '-p', 'gateway-daemon', '--bin', 'cg-mcp', '--bin', 'cg-local', '--locked']),
+    ('build', ['cargo', 'build', '-p', 'gateway-daemon', '--bin', 'cg', '--bin', 'cg-mcp', '--bin', 'cg-local', '--locked']),
     ('canonical-security', ['cargo', 'test', '-p', 'gateway-application', '--test', 'codex_facade', '--locked']),
     ('bridge-isolation-faults', ['cargo', 'test', '-p', 'gateway-daemon', '--lib', '--test', 'local_mcp',
                                  '--test', 'codex_isolation', '--test', 'codex_local_cli',
-                                 '--test', 'codex_qualification', '--locked']),
+                                 '--test', 'codex_canonical', '--test', 'declarative_cli', '--test', 'codex_qualification', '--locked']),
     ('executable-goldens', ['python3', '-m', 'unittest', 'discover', '-s', 'tests/codex-local', '-v']),
     ('protocol-schemas', ['python3', 'scripts/check-local-mcp-protocol.py']),
     ('contract-goldens', ['python3', '-m', 'unittest', 'discover', '-s', 'tests/contracts', '-v']),
@@ -66,7 +66,7 @@ def main():
               'started_at': datetime.datetime.now(datetime.timezone.utc).isoformat(),
               'limitations': [
                   'No installed Codex client/account or provider authentication is qualified.',
-                  'Standalone host supports inspect/assess/resources. Resolve/explain/context use canonical Rust fixture hosts.',
+                  'Standalone host supports admitted inspect/assess/resources and canonical resolve/explain/context; shared sessions remain unsupported.',
                   'Session projections cross MCP/facade/shared host contracts; shared durable services #272/#273/#275 are absent.',
                   'No connector/model completion, durable session lifecycle, #279 runtime or whole release gate is claimed.'],
               'requirement_matrix': 'docs/codex-release-qualification.md'}
@@ -89,12 +89,12 @@ def main():
             coverage.write_bytes(args.coverage_report.read_bytes())
         else:
             command = ['cargo', 'llvm-cov', '-p', 'gateway-application', '-p', 'gateway-daemon', '--lib',
-                       '--bin', 'cg-mcp', '--bin', 'cg-local', '--test', 'local_mcp', '--test', 'codex_facade',
+                       '--bin', 'cg', '--bin', 'cg-mcp', '--bin', 'cg-local', '--test', 'local_mcp', '--test', 'codex_facade',
                        '--test', 'codex_isolation', '--test', 'codex_local_cli', '--test', 'codex_qualification',
-                       '--locked', '--json', '--output-path', str(coverage)]
+                       '--test', 'codex_canonical', '--test', 'declarative_cli', '--locked', '--json', '--output-path', str(coverage)]
             with (output / 'coverage.log').open('w') as stream:
                 subprocess.run(command, cwd=ROOT, stdout=stream, stderr=subprocess.STDOUT, timeout=900, check=True)
-        report['coverage_source'] = 'supplied release gate' if args.coverage_report else 'measured by this run'
+        report['coverage_source'] = 'supplied existing measurement' if args.coverage_report else 'measured by this run'
         report['coverage'] = COVERAGE.check(json.loads(coverage.read_text()))
         validate(report)
         report['status'] = 'QUALIFIED_COMPONENT_SCOPE'

@@ -47,7 +47,10 @@ Identify the installed client with `codex --version`. Pin the exact name and
 version it sends in MCP `initialize.clientInfo`; the displayed CLI version alone
 does not establish that wire pair. Verify it in a controlled, non-sensitive client
 qualification session. There is no wildcard, guessed version or silent downgrade.
-Live client interoperability and its precise supported pair remain #245.
+The installed `codex-cli 0.162.1` has been exercised with wire identity
+`codex-mcp-client / 0.162.1` and MCP `2025-06-18`. This result applies to
+inspection and the optional canonical host, not shared sessions. Re-run the
+[installed-client qualification](codex-installed-client-qualification.md) for your candidate and client version.
 
 Generate a new setup using that verified pair, then copy its server table into
 `~/.codex/config.toml` or a trusted project's `.codex/config.toml`. Merge the table
@@ -60,7 +63,7 @@ available. The generated table follows
 [mcp_servers.cognitive_gateway]
 command = "/usr/bin/env"
 args = ["-i", "/absolute/path/to/cg-mcp",
-  "--client-name", "codex", "--client-version", "VERIFIED_WIRE_VERSION",
+  "--client-name", "codex-mcp-client", "--client-version", "VERIFIED_WIRE_VERSION",
   "--principal", "operator", "--workspace", "workspace-example",
   "--project", "project-example", "--binding", "binding-example",
   "--admission", "/absolute/path/to/admission.json",
@@ -226,7 +229,7 @@ does not claim live Codex qualification, which remains #245.
 | Example configuration has no secrets | Empty admission and TOML templates; PUBLIC synthetic sample; inherited fake key never enters artifacts |
 | Effective workspace/protocol visible | `cg-local --check` reports the bound identities and supported protocol/schema versions |
 
-Verification on 2026-10-10: workspace tests passed 780 tests with three existing
+Prior EPIC-04.09 verification on 2026-10-10: workspace tests passed 780 tests with three existing
 optional tests ignored. Formatting, workspace Clippy, architecture guard and 17
 architecture tests, 11 contract tests, independent 13-tool MCP conformance and
 operator bootstrap/parity tests passed. All 13 files in the local MCP coverage

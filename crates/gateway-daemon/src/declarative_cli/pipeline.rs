@@ -197,7 +197,16 @@ fn planning(options: &Options) -> Result<(Value, i32), CliError> {
         0,
     ))
 }
-fn resolve(options: &Options) -> Result<(ResolvedPlan, Value), CliError> {
+pub(super) fn capture_resolution(
+    options: &Options,
+) -> Result<
+    (
+        ResolutionSnapshotInput,
+        gateway_application::resolution_composition::CompositionRules,
+        Value,
+    ),
+    CliError,
+> {
     let document: PlanDocument = decode(options.input("plan")?)?;
     version(document.schema_version)?;
     version(document.assessment.schema_version)?;
@@ -278,12 +287,16 @@ fn resolve(options: &Options) -> Result<(ResolvedPlan, Value), CliError> {
         rule_version: SchemaVersion::V1,
         alternatives: vec![],
     };
+    Ok((input, rules.resolution.build()?, process_json))
+}
+fn resolve(options: &Options) -> Result<(ResolvedPlan, Value), CliError> {
+    let (input, rules, process) = capture_resolution(options)?;
     let resolved = checked(
-        DeclarativeResolutionApplication.resolve_plan(&input, &rules.resolution.build()?),
+        DeclarativeResolutionApplication.resolve_plan(&input, &rules),
         6,
         "RESOLUTION_FAILED",
     )?;
-    Ok((resolved, process_json))
+    Ok((resolved, process))
 }
 fn basis_check(claimed: &Value, actual: &Value, exit: i32) -> Result<(), CliError> {
     if claimed != actual {
@@ -412,68 +425,22 @@ fn downstream(options: &Options) -> Result<(Value, i32), CliError> {
                 8,
             ));
         }
-        let input: ProjectionInput = decode(read_json(options.required("projection")?, true)?)?;
-        version(input.schema_version)?;
-        basis_check(&input.basis, &artifact["basis"], 9)?;
-        let catalog = checked(
-            DefinitionCatalog::new(
-                resolved
-                    .snapshot
-                    .input()
-                    .registry
-                    .agents()
-                    .iter()
-                    .map(|a| a.to_domain())
-                    .collect(),
-                resolved
-                    .snapshot
-                    .input()
-                    .registry
-                    .skills()
-                    .iter()
-                    .map(|s| s.to_domain())
-                    .collect(),
-                input
-                    .workflows
-                    .into_iter()
-                    .map(WorkflowInput::build)
-                    .collect::<Result<_, _>>()?,
-                authority.policies.clone(),
-            ),
-            9,
-            "INVALID_PROJECTION_CATALOG",
+        let command = map_compile(
+            read_json(options.required("projection")?, true)?,
+            resolved,
+            authority,
+            context,
+            &artifact["basis"],
         )?;
-        let projection = ContextProjection {
-            mapping: WorkflowProjectionMapping {
-                basis: resolved.report.basis.clone(),
-                step: input.step,
-                task: input.task.id().clone(),
-                process: input.process,
-                workflow: input.workflow,
-                decision_reference: input.decision_reference,
-            },
-            id: input.id,
-            task: input.task,
-            state: input.state,
-            state_basis: resolved.report.basis.clone(),
-            state_decision: input.state_decision,
-            target_runtime: input.target_runtime,
-            knowledge_queries: input.knowledge_queries,
-        };
-        let candidates = input
-            .fragments
-            .into_iter()
-            .map(|fragment| fragment.build(resolved.snapshot.input().situation.records()))
-            .collect::<Result<Vec<_>, _>>()?;
         let compiled = checked(
             ContextApplication.compile_step(CompileStepInput {
-                resolved: &resolved,
-                authority: &authority,
-                policy_context: &context,
-                catalog: &catalog,
-                projection: &projection,
-                candidates: &candidates,
-                selected: &input.selected,
+                resolved: &command.resolved,
+                authority: &command.authority,
+                policy_context: &command.policy_context,
+                catalog: &command.catalog,
+                projection: &command.projection,
+                candidates: &command.candidates,
+                selected: &command.selected,
             }),
             9,
             "COMPILATION_FAILED",
@@ -493,4 +460,80 @@ fn downstream(options: &Options) -> Result<(Value, i32), CliError> {
         "process":process,"policy":evaluated.map(|(_,_,report,_)| report)}),
         exit,
     ))
+}
+
+pub(super) fn map_compile(
+    document: Value,
+    resolved: ResolvedPlan,
+    authority: PolicyAuthority,
+    context: PolicyContext,
+    basis: &Value,
+) -> Result<gateway_application::codex::CompileCommand, CliError> {
+    let input: ProjectionInput = decode(document)?;
+    version(input.schema_version)?;
+    basis_check(&input.basis, basis, 9)?;
+    let catalog = checked(
+        DefinitionCatalog::new(
+            resolved
+                .snapshot
+                .input()
+                .registry
+                .agents()
+                .iter()
+                .map(|a| a.to_domain())
+                .collect(),
+            resolved
+                .snapshot
+                .input()
+                .registry
+                .skills()
+                .iter()
+                .map(|s| s.to_domain())
+                .collect(),
+            input
+                .workflows
+                .into_iter()
+                .map(WorkflowInput::build)
+                .collect::<Result<_, _>>()?,
+            authority.policies.clone(),
+        ),
+        9,
+        "INVALID_PROJECTION_CATALOG",
+    )?;
+    let projection = ContextProjection {
+        mapping: WorkflowProjectionMapping {
+            basis: resolved.report.basis.clone(),
+            step: input.step,
+            task: input.task.id().clone(),
+            process: input.process,
+            workflow: input.workflow,
+            decision_reference: input.decision_reference,
+        },
+        id: input.id,
+        task: input.task,
+        state: input.state,
+        state_basis: resolved.report.basis.clone(),
+        state_decision: input.state_decision,
+        target_runtime: input.target_runtime,
+        knowledge_queries: input.knowledge_queries,
+    };
+    let candidates = input
+        .fragments
+        .into_iter()
+        .map(|fragment| fragment.build(resolved.snapshot.input().situation.records()))
+        .collect::<Result<Vec<_>, _>>()?;
+    Ok(gateway_application::codex::CompileCommand {
+        resolved,
+        authority,
+        policy_context: context,
+        catalog,
+        projection,
+        candidates,
+        selected: input.selected,
+        disclosure: gateway_context::ContextDisclosurePolicy {
+            maximum_sensitivity: SensitivityClass::Normal,
+            include_caller_input: false,
+            include_external_content: false,
+        },
+    })
 }

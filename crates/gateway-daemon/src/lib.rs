@@ -1,5 +1,7 @@
 #![forbid(unsafe_code)]
 
+mod codex_canonical;
+
 pub mod declarative_cli;
 pub mod experience_patterns;
 pub mod graph_retrieval;
