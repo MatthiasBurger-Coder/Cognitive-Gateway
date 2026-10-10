@@ -3,7 +3,7 @@ use std::io::{self, Cursor, Read, Write};
 use std::sync::{Arc, Mutex};
 use transport::{StdioTransport, read_frame};
 
-fn binding() -> LaunchBinding {
+pub(super) fn binding() -> LaunchBinding {
     LaunchBinding::new(
         "codex",
         "1.0",
@@ -20,7 +20,7 @@ fn initialize() -> Value {
 fn handle(server: &mut Server, request: Value) -> Value {
     server.handle(request.to_string().as_bytes()).unwrap()
 }
-fn ready() -> Server {
+pub(super) fn ready() -> Server {
     let mut server = Server::new(binding());
     assert_eq!(
         handle(&mut server, initialize())["result"]["protocolVersion"],
@@ -736,7 +736,11 @@ fn admitted_facade_runs_through_deterministic_transport() {
         outgoing: Vec<Value>,
     }
     impl Transport for FakeTransport {
-        fn receive(&mut self, _: Duration) -> Result<Option<Vec<u8>>, TransportError> {
+        fn receive(&mut self, timeout: Duration) -> Result<Option<Vec<u8>>, TransportError> {
+            if self.incoming.is_empty() && self.outgoing.len() < 2 {
+                std::thread::sleep(timeout);
+                return Err(TransportError::Timeout);
+            }
             Ok(self.incoming.pop_front())
         }
         fn send(&mut self, frame: Vec<u8>, _: Duration) -> Result<(), TransportError> {

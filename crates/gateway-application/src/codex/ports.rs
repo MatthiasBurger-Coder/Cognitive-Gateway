@@ -121,6 +121,28 @@ impl CodexHost for UnavailableHost {}
 /// Driving port used by adapters; no domain crate access is required.
 pub trait CodexApplicationPort {
     fn execute(&self, operation: &str, request: &Value) -> Value;
+    fn execute_with_context(
+        &self,
+        operation: &str,
+        request: &Value,
+        context: &RequestContext,
+    ) -> Value {
+        match context.check() {
+            Ok(()) => self.execute(operation, request),
+            Err(error) => contracts::failure(error.code()),
+        }
+    }
+    fn read_with_context(
+        &self,
+        scope: &Value,
+        id: &str,
+        revision: &str,
+        digest: &str,
+        context: &RequestContext,
+    ) -> Result<Value, FacadeError> {
+        context.check()?;
+        self.read_resource(scope, id, revision, digest)
+    }
     fn read_resource(
         &self,
         _scope: &Value,

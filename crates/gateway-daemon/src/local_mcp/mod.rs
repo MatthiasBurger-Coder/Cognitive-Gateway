@@ -1,7 +1,9 @@
 //! EPIC-04.03 inbound local MCP infrastructure. No provider SDK or domain mutation.
 mod contracts;
 pub(crate) mod decode;
+pub mod runtime;
 pub mod transport;
+pub use runtime::RuntimeLimits;
 
 use gateway_application::codex::security;
 use gateway_application::codex::{CodexApplicationPort, CodexFacade};
@@ -73,11 +75,21 @@ pub struct Server {
     binding: LaunchBinding,
     phase: Phase,
     seen: BTreeSet<String>,
-    application: Box<dyn CodexApplicationPort>,
+    application: Box<dyn CodexApplicationPort + Send>,
+    limits: RuntimeLimits,
+    metrics: runtime::Metrics,
+    context: Option<gateway_application::codex::RequestContext>,
 }
 
 fn rpc_error(id: Value, code: i32, message: &str) -> Value {
-    json!({"jsonrpc":"2.0","id":id,"error":{"code":code,"message":message}})
+    let diagnostic = match code {
+        -32700 => "CG_PARSE_ERROR",
+        -32600 => "CG_INVALID_REQUEST",
+        -32601 => "CG_UNKNOWN_METHOD",
+        -32602 => "CG_INVALID_PARAMS",
+        _ => "CG_SESSION_UNAVAILABLE",
+    };
+    json!({"jsonrpc":"2.0","id":id,"error":{"code":code,"message":message,"data":{"code":diagnostic,"class":"validation"}}})
 }
 fn result(id: Value, result: Value) -> Value {
     json!({"jsonrpc":"2.0","id":id,"result":result})
@@ -105,19 +117,25 @@ impl Server {
     /// Inject the shared application facade. Launch admission still owns identity.
     pub fn with_application(
         binding: LaunchBinding,
-        application: Box<dyn CodexApplicationPort>,
+        application: Box<dyn CodexApplicationPort + Send>,
     ) -> Self {
         Self {
             binding,
             phase: Phase::New,
             seen: BTreeSet::new(),
             application,
+            limits: RuntimeLimits::default(),
+            metrics: runtime::Metrics::default(),
+            context: None,
         }
     }
 
-    /// All supported operations finish inline; cancellation of completed/unknown
-    /// IDs is ignored. No task session is cancelled and no mutation is retried.
+    /// Synchronous protocol entrypoint for fixtures. Production uses `serve` to
+    /// bound dispatch and observe cancellation. No mutation is retried.
     pub fn handle(&mut self, frame: &[u8]) -> Option<Value> {
+        if frame.len().saturating_add(1) > self.limits.input_bytes {
+            return Some(rpc_error(Value::Null, -32000, "Request limit exceeded"));
+        }
         let value = match decode::decode(frame) {
             Ok(value) => value,
             Err(_) => return Some(rpc_error(Value::Null, -32700, "Parse error")),
@@ -158,7 +176,7 @@ impl Server {
         if self.phase == Phase::Closed {
             return None;
         }
-        if self.seen.len() >= MAX_REQUESTS {
+        if self.seen.len() >= self.limits.requests {
             self.phase = Phase::Closed;
             return Some(rpc_error(id, -32000, "Request limit exceeded"));
         }
@@ -189,6 +207,8 @@ impl Server {
             {
                 let resources: Vec<Value> = ["catalog", "common.schema.json", "request.schema.json", "response.schema.json", "resource.schema.json", "catalog.schema.json"].iter()
                     .map(|name| json!({"uri":format!("cg://contracts/1.0/{name}"),"name":name,"mimeType":"application/json"})).collect();
+                let mut resources = resources;
+                resources.push(json!({"uri":"cg://runtime/health","name":"Local runtime health","mimeType":"application/json"}));
                 result(id, json!({"resources":resources}))
             }
             "resources/templates/list" if params_object(&params, &[], &[]) => result(
@@ -272,10 +292,20 @@ impl Server {
         {
             contracts::failure("CG_SCOPE_DENIED")
         } else {
-            self.application
-                .execute(tool["operation"].as_str().unwrap(), request)
+            match &self.context {
+                Some(context) => self.application.execute_with_context(
+                    tool["operation"].as_str().unwrap(),
+                    request,
+                    context,
+                ),
+                None => self
+                    .application
+                    .execute(tool["operation"].as_str().unwrap(), request),
+            }
         };
-        let envelope = if security::credential_free(&envelope)
+        let envelope = if runtime::bounded_json(&envelope, self.limits.output_bytes / 2).is_err() {
+            contracts::failure("CG_LIMIT_EXCEEDED")
+        } else if security::credential_free(&envelope)
             && (envelope["result"]["canonical_result"]["kind"] != "document"
                 || (security::inline_allowed(&envelope["result"]["canonical_result"]["document"])
                     && !envelope["provenance"].as_array().is_some_and(|entries| {
@@ -298,6 +328,12 @@ impl Server {
             return rpc_error(id, -32602, "Invalid params");
         }
         let uri = params["uri"].as_str().unwrap();
+        if uri == "cg://runtime/health" {
+            return result(
+                id,
+                json!({"contents":[{"uri":uri,"mimeType":"application/json","text":self.health().to_string()}]}),
+            );
+        }
         if let Some(artifact) = uri
             .strip_prefix("cg://contracts/1.0/")
             .and_then(contracts::artifact)
@@ -320,11 +356,17 @@ impl Server {
             let scope =
                 json!({"workspace_id":parts[3],"project_id":parts[5],"binding_id":parts[7]});
             if scope == self.binding.scope {
-                if let Ok(resource) = self
-                    .application
-                    .read_resource(&scope, parts[9], parts[10], parts[11])
-                {
-                    if security::credential_free(&resource)
+                let resource = match &self.context {
+                    Some(context) => self
+                        .application
+                        .read_with_context(&scope, parts[9], parts[10], parts[11], context),
+                    None => self
+                        .application
+                        .read_resource(&scope, parts[9], parts[10], parts[11]),
+                };
+                if let Ok(resource) = resource {
+                    if runtime::bounded_json(&resource, self.limits.output_bytes / 2).is_ok()
+                        && security::credential_free(&resource)
                         && security::inline_allowed(&resource["document"])
                         && !resource["provenance"].as_array().is_some_and(|entries| {
                             entries.iter().any(|p| p["sensitivity"] == "SECRET")
@@ -350,21 +392,14 @@ impl Server {
         read_timeout: Duration,
         write_timeout: Duration,
     ) -> Result<(), TransportError> {
-        let outcome = (|| {
-            while self.phase != Phase::Closed {
-                let Some(frame) = transport.receive(read_timeout)? else {
-                    break;
-                };
-                if frame.len() >= MAX_FRAME_BYTES {
-                    return Err(TransportError::Limit);
-                }
-                if let Some(response) = self.handle(&frame) {
-                    transport.send(response.to_string().into_bytes(), write_timeout)?;
-                }
-            }
-            Ok(())
-        })();
+        let outcome = self.bounded_serve(transport, read_timeout, write_timeout);
         self.phase = Phase::Closed;
+        if let Err(error) = &outcome {
+            eprintln!(
+                "{}",
+                json!({"event":"local_transport_closed","code":error.code(),"failure_class":"transport"})
+            );
+        }
         outcome
     }
 }

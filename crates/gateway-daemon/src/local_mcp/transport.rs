@@ -11,6 +11,17 @@ pub enum TransportError {
     Timeout,
 }
 
+impl TransportError {
+    pub fn code(self) -> &'static str {
+        match self {
+            Self::Io => "CG_TRANSPORT_IO",
+            Self::Frame => "CG_TRANSPORT_FRAME",
+            Self::Limit => "CG_LIMIT_EXCEEDED",
+            Self::Timeout => "CG_TRANSPORT_TIMEOUT",
+        }
+    }
+}
+
 /// Replaceable transport boundary; implementations must honor the supplied deadline.
 pub trait Transport {
     fn receive(&mut self, timeout: Duration) -> Result<Option<Vec<u8>>, TransportError>;

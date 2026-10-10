@@ -68,23 +68,22 @@ schema engine and cannot authorize or validate canonical domain documents.
 by a fixture transport. `StdioTransport` implements newline-delimited UTF-8 JSON
 using bounded worker channels. Input and output frames have a 1 MiB ceiling,
 JSON nesting is limited to 64, and duplicate keys are rejected at every level.
-Stdout carries protocol frames; stderr carries fixed sanitized diagnostics.
+Stdout carries protocol frames; stderr carries structured sanitized diagnostics.
 
 JSON-RPC IDs are correlated exactly, restricted to bounded strings or safe
-integers, and unique for a connection. At most 10,000 requests are processed.
-The executable uses a five-minute input inactivity/partial-frame deadline and a
-two-second output deadline. Worker threads are detached so a blocked OS pipe
-cannot hold process termination; alternative library transports must honor the
-supplied deadlines. These bounds are an initial adapter baseline; extended
-execution and uncertain mutation outcomes remain #243.
+integers, and unique for a connection. At most 10,000 inbound frames are processed.
+The default input inactivity/partial-frame deadline is five minutes; writes have
+at most two seconds and application invocations thirty seconds. Trusted JSON
+runtime configuration may lower or adjust bounds within fixed ceilings. Every
+frame consumes the 10,000-frame connection budget. Worker threads cannot hold
+process exit; alternative transports must honor supplied deadlines.
 
-All current requests finish inline. Cancellation notifications for completed or
-unknown request IDs are ignored without retaining reasons, cancelling CG task
-sessions or granting authority. There is no in-flight application work in this
-slice. Closing stdin signals shutdown; EOF, framing/transport failure, handshake
-failure, limits and timeout close the session. There is no invented MCP shutdown
-method. Future asynchronous application dispatch requires bounded cancellation
-at the shared facade boundary before being exposed.
+[EPIC-04.08 runtime behavior](codex-runtime.md) defines the single-worker/zero-queue
+concurrency model, active invocation cancellation, EOF shutdown, uncertain-effect
+semantics, generated correlation metadata, structured stderr traces, counters and
+`cg://runtime/health`. Disconnect requests invocation cancellation and detaches
+durable task observation. Reconnect never restarts work. Existing application
+policy, consent, scope, provenance and verification checks remain mandatory.
 
 ## Evidence
 
