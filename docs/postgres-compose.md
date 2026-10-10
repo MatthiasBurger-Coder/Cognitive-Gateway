@@ -52,6 +52,28 @@ removes the volume and its data; use it only when intentionally deleting the
 database. Changing the image to another PostgreSQL major version requires a
 database upgrade, not just a tag change.
 
+## Direct Compose and IDE launches
+
+Compose interpolates `POSTGRES_PASSWORD` even for `start`. A direct invocation
+must pass the same credential file used by the scripts:
+
+```bash
+docker compose --env-file ~/.config/cognitive-gateway/postgres.env -f compose.yaml -p cognitive-gateway up -d --wait postgres
+```
+
+Configure the IDE's Compose environment file to this path. For a WSL Docker
+launcher, use the WSL path. Alternatively, in a WSL checkout, link the existing
+credential file as the Git-ignored project `.env` so the default Compose lookup
+finds it without copying the password:
+
+```bash
+ln -s ~/.config/cognitive-gateway/postgres.env .env
+```
+
+If Docker reports that an existing Compose network does not exist, recreate
+the project network with `./scripts/postgres-compose.sh down`, then run
+`./scripts/start-postgres.sh`. The named data volume is retained by `down`.
+
 ## Backup
 
 Before upgrades or volume changes, make a logical backup to a protected

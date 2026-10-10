@@ -1,124 +1,144 @@
-# Shared session implementation — #294 prerequisite record
+# Shared structured-session implementation — #294
 
-Scope: the typed #272 prerequisite of [#294](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/issues/294).
-Runtime status: **NOT_IMPLEMENTED**. #294 is **NOT_COMPLETE**. The binding gate
-remains blocked on shared service, verification, interaction and recovery evidence.
+The structured context-artifact runtime is implemented under its EPIC-08 owners
+and bound to both shipped local executables. The registered structured baseline
+is **QUALIFIED**: seven application runtime tests, five real PostgreSQL repository
+tests and eight actual CLI/MCP scenarios pass. All 14 applicable changed production
+files exceed 95% measured line coverage (minimum 95.17%).
+See the retained [runtime report](evidence/EPIC-04.13-shared-runtime.json),
+[coverage counts](evidence/EPIC-04.13-shared-runtime-coverage.json),
+[actual transitions](evidence/EPIC-04.13-shared-runtime-transitions.jsonl),
+[verified evidence](evidence/EPIC-04.13-shared-runtime-evidence.json) and
+[qualification log](evidence/EPIC-04.13-shared-runtime.log).
+The earlier [contract-only report](evidence/EPIC-04.13-shared-contracts.json)
+records the previous delivery and remains historical evidence.
 
-The accepted [contract](shared-session-contract.md) and
-[ADR-021](adr/ADR-021-shared-structured-session-ownership.md) require shared
-application ownership before consumer implementation. Issue #294 includes the
-minimum foundations under #272/#273/#275/#276/#277; their absence is implementation
-work within the issue's scope. This record preserves that scope and does not
-substitute a contract gate for the requested production runtime.
+## Production ownership
 
-## Requirement gate
+`gateway-application::sessions::SessionCoordinator` owns start, inspect, clarify,
+approve, continue, cancel and explicit recovery. It composes the existing
+resolver, Process/Policy application, canonical context compiler and CG-14 goal
+assessment. `boundary` translates the exact v2 envelope; `local_mcp` owns JSON-RPC
+and transport lifetime. `cg-local` and `cg-mcp` instantiate the same coordinator
+and PostgreSQL repository through `local_sessions::LocalApplication`.
 
-The requirement, architecture, automation and evidence perspectives were applied
-as sequential passes by one agent. They are not independent reviewer approvals.
-The explicit verified context-artifact goal and provider-neutral ownership are
-settled by ADR-021. The shipped host's default session hook remains unsupported.
-The canonical compilation path exists; it provides neither independent stored
-artifact verification nor durable lifecycle services.
+`PostgresSessionStore` persists the full typed goal, immutable owner/run,
+actual initial CG-14 assessment and pinned authority, selected input, pending
+payload, consumed consent, authority decisions,
+cumulative budget, lease, fence, command ledger and immutable artifact/evidence
+bytes. It uses the existing scoped PostgreSQL journal with row locks. Conditional
+append commits state, budget reservations, command acceptance, fencing and
+released records together. Failed validation or storage operations roll back;
+an ambiguous commit returns `CG_OUTCOME_UNKNOWN` and requires inspection.
 
-| ID | Requirement/source | Production owner/path | Dependencies and actual state | Implementation evidence | Verification level | Status |
-| --- | --- | --- | --- | --- | --- | --- |
-| SI-01 | #272 distinct identity, ownership, typed API | `gateway-application::sessions` | No transport dependency; domain enums and Intent reused | `contracts.rs`, `SessionApplicationPort` | CONTRACT tests | PARTIAL: typed API exists; no application provider |
-| SI-02 | #272 revision, replay, stale, terminal and pending admission | Shared coordinator consumes pure admission gate | Atomic ledger acceptance belongs to #276; not implemented | `admission.rs`, `PendingRef`, `JournalAppend` | CONTRACT tests; no concurrent durable command acceptance | PARTIAL |
-| SI-03 | #273 explicit artifact goal and independent final verification | Shared application coordinator/verifier | Current resolve/context services exist; verifier/evidence capture absent | Supported-goal validator only | CONTRACT; verified compilation/completion NOT_RUN | OPEN |
-| SI-04 | #275 structured answers and exact consent | Shared interaction authority | Issuer/store and live revocation absent | `SourceQuestion`, exact `ActionBinding`, distinct `VerifiedConsent` | CONTRACT; real pause/denial/withdrawal NOT_RUN | PARTIAL |
-| SI-05 | #276 durable restart, fencing and command outcomes | Outer journal implements shared port | PostgreSQL adapter and recovery/reconciliation absent | `SessionCheckpoint`, `SessionJournalPort`, conditional append validator | CONTRACT; crash/restart/concurrency NOT_RUN | PARTIAL |
-| SI-06 | #277 retained aggregate limits | Shared service owns journaled counters | Enforcement at dispatch/nested adapters absent | Validated baseline action/retry/deadline budget | CONTRACT; runtime budget reservation NOT_RUN | PARTIAL |
-| SI-07 | #294 actual CLI/MCP v2 binding and frozen v1 | Daemon composition root / inbound projection | Waits for SI-02..06 service gates | No launcher or v1 schema changes | EXECUTABLE session evidence NOT_RUN | BLOCKED |
+## Acceptance evidence
 
-## Implemented contract details
+| Requirement | Production behavior | Meaningful verification |
+| --- | --- | --- |
+| Shared start/inspect and verified result | A registered domain Intent requests `cg.context.<projection>.verified`; the verifier independently reads the committed canonical artifact, checks digest/IR/current inputs and captures actual observations. CG-14 must report the exact goal satisfied before immutable evidence is committed. | Actual CLI/MCP baseline, restart and evidence resource; component corruption and current-input tests |
+| Real clarification and consent | Source alternatives require one exact selection, which becomes an actual compiler input. Separate consent binds owner/task/run/nonce/revision/dispatch/step/action/arguments/basis/current authority/expiry. Only the trusted operator issuer writes grant records. | Actual source selection followed by a separate consent pause; replay, wrong nonce/reference, expiry and restart |
+| Current authority and revocation | Fresh admission, resolution, Process/Policy and exact live grant checks run before reservation and verification. Clarification supplies no authorization. Denial/withdrawal are persisted authority events. | Actual changed-action/current-policy denial and withdrawal; component changes during dispatch and live revocation |
+| Bounded explicit cancellation | Atomic fence replacement stops all later result commits by an outstanding pure compiler. Cancellation is terminal and inspectable; EOF and transport timeout never issue a session cancel. | Actual cancellation, EOF/reconnect; application/transport tests and PostgreSQL stale-fence rollback |
+| Recovery, replay and budgets | Owner-wide command IDs, expected revisions and database row locks prevent duplicate dispatch. A live lease refuses takeover. Recovery reads committed artifacts, or fences an absent result and stops the pure task without retry. Absolute deadline and spent counters never reset. | Competing actual host processes, restart, real completion-commit failure/read-back, deferred commit ambiguity, corruption and rollback |
+| Explicit capability boundary | Other desired states, semantic interpretation, model invocation and external connectors remain unsupported. Frozen v1 session tools retain their previous unsupported behavior; enabled v2 tools are separate names. | Actual unrelated-goal rejection and strict discovery/version tests; frozen v1 regressions |
 
-Opaque identities enforce the frozen ASCII token alphabet and 128-byte bound.
-Revisions reject values above the JSON safe-integer maximum and refuse overflow.
-Immutable ownership includes principal, workspace, project, binding and stable
-client owner; transport connection and authority mapping revision do not enter
-the owner identity. Each mutation contains one command ID and expected revision.
-Command-outcome inspection has a separate query target from session inspection.
+Evidence levels are explicit: `session_contracts.rs` tests contracts;
+`session_runtime.rs` tests the real application with controlled port failures and
+a test clock; `session_store_tests.rs` tests real PostgreSQL transactions;
+`test_sessions.py` tests actual shipped executables with a synthetic stdio client.
+There is no prebuilt session projection supplying the runtime acceptance result.
+These checks do not claim installed Codex-client qualification (#295), full
+EPIC-04 reconciliation (#296), or the complete EPIC-08/model/connector runtime.
 
-The supported goal validator preserves the domain Intent and registers this
-initial shape: one `EQUALS true` Boolean condition named `context-verified`, with
-subject `cg.context.<projection-record-id>.verified`, and the corresponding single
-condition expression. Other desired states, acceptance criteria and constraints
-are unsupported by this initial validator. The trusted registration separately
-pins canonical scope, plan, step, projection and up to 256 unique source records.
-The verifier-owned subject must eventually denote all the verification checks
-required by the accepted contract. A client-authored observation of that subject
-cannot become a completion observation. The typed shape does not implement that
-verifier or weaken those required checks.
+## Enable a registered task
 
-Clarification answers can select only an exact pinned record from a stored
-structured question. They cannot carry consent or replace the goal. Consent
-requests and verified store records are different types. Verified consent binds
-owner/task/run/pending/issued revision, reserved dispatch, step, canonical action
-and arguments, artifact basis, current authority and expiry. Approval retains
-the issuance revision; its own revision increment is allowed for dispatch.
-Changed binding, stale revision, expiry or live revocation refuses the grant.
-`from_trusted_record` belongs exclusively to trusted issuer/store adapters;
-client DTO parsing must never call it. There is no issuer/store implementation.
+Existing admissions remain valid. Sessions are opt-in: add a strict `sessions`
+object to an existing canonical mapping, alongside its admitted plan/rules/
+process/projection resources. Supply:
 
-`Prepared` dispatch knowledge denotes an identity reserved for exact consent
-before invocation. `Reserved` denotes outstanding invocation intent and `Unknown`
-denotes an unresolved outcome. Pending/runnable snapshots cannot conceal an
-outstanding invocation. Terminal snapshots cannot conceal uncertainty or retain
-an unconsumed prepared reservation; completed snapshots require an evidence
-reference. These shape checks are not evidence verification.
+- `enabled: true`, an absolute `store_file` path, and `issuers` containing the
+  authenticated launcher principal permitted to issue CG consent.
+- The exact supported domain `intent`, and `basis` containing canonical `scope`,
+  pinned `plan` and `projection` references, `step`, and `sources` alternatives.
+  Session references contain exactly `id`, `revision`, `digest`. Source documents
+  use the existing `cg.context-fragment` contract and strict fragment parser.
+- `execution: {"mode":"DEVELOPMENT","profile":"FULL_PATH"}` matching the
+  current canonical plan/policy, bounded `max_actions`/`max_retries`, absolute-run
+  TTL configuration `ttl_ms` (1..86400000), and `consent_required`.
 
-Typed checkpoints retain pending payload, accepted consent and denial/withdrawal
-history alongside goal/owner/run and cumulative baseline budgets. The conditional
-append validator refuses owner/goal/run/mode/profile changes, stale fences or
-revisions, history erasure, limit/deadline changes, usage rollback and inconsistent
-command outcomes. The journal adapter must additionally enforce global owner
-command uniqueness, atomicity, durable commit and ambiguity handling. A pure
-validator cannot prove those storage properties. No checkpoint serializer,
-PostgreSQL session adapter, migration or recovery engine is implemented.
+The registered Intent has exactly one Boolean `EQUALS true` condition named
+`context-verified`, subject `cg.context.<projection-id>.verified`, a corresponding
+single-condition expression, and empty acceptance criteria/constraints. Its
+meaning is successful **verification of that context artifact**. It does not
+execute or satisfy the unrelated desired state used to produce the pinned plan.
+When source alternatives are registered, the action requires one chosen source;
+unanswered selection produces the persisted structured input question.
 
-## Required continuation order
+The credential file contains a PostgreSQL connection string, for example
+`host=127.0.0.1 port=55432 user=cognitive_gateway dbname=cognitive_gateway password=...`.
+Keep that file outside the checkout with owner-only permissions; only the trusted
+storage adapter reads it. The worker environment remains free of provider keys
+and client authentication state. Start PostgreSQL as described in
+[postgres-compose.md](postgres-compose.md).
 
-1. Complete the #272 gate with actual owner-scoped command-ledger acceptance,
-   concurrent-start evidence and the typed authority/input/verification contracts
-   needed by the coordinator.
-2. Implement #273's canonical coordinator and independent stored-artifact verifier,
-   then produce admitted observations and immutable evidence through CG-14. Reject
-   absent semantic/model/connector behavior before creating sessions.
-3. Implement #275's real structured questions and trusted consent issuer/store,
-   live denial/withdrawal, one-use consumption and changed-basis revalidation.
-4. Implement the required #276/#277 persistence, fencing, lost-response recovery,
-   cancellation and cumulative reservation gates. Keep uncertain effects blocked.
-5. Publish exact v2 schemas, fixtures and routing, then bind both shipped launchers
-   to this one shared service. Preserve frozen v1 unsupported session behavior.
-6. Retain positive and denied SHARED_SERVICE/EXECUTABLE evidence and >=95% changed
-   production-file coverage before claiming #294 completion.
+`--session` identifies the stable admitted client owner across CLI processes and
+MCP reconnects; it is distinct from the task's returned `session` and `run` IDs.
+Both executables use the same launch options and admission. `cg-local --check`
+reports `session_schema_version: "2.0"` and enabled mutations only for an enabled
+session mapping. Unconfigured hosts advertise the original 13 tools; configured
+hosts add the six `cg_session_*_v2` tools and v2 contract resources.
 
-Rollback removes the unused typed module and its contract tests. There is no
-runtime/storage migration. The original 10–18 engineer-day issue estimate includes
-the missing foundations; this contract prerequisite does not remove that effort.
+## Operator authority and recovery
 
-## Verification
+The operator uses the same authenticated launch binding, with an allowed issuer
+that equals its authenticated principal. This operation is intentionally absent
+from the MCP tool catalog and accepts exactly these fields:
 
-`session_contracts.rs` exercises shared application admission and typed checkpoint
-validation directly. It never injects a ProjectionHost. These are CONTRACT checks,
-not real lifecycle, interaction, durable recovery or shipped-host acceptance.
-
-Coverage command:
-
-```sh
-cargo llvm-cov -p gateway-application --test session_contracts --locked --json --output-path /tmp/cg-session-contract-coverage.json
-python3 scripts/check-session-contract-coverage.py /tmp/cg-session-contract-coverage.json
+```json
+{"session_id":"<returned-task-id>","issuer":"<admitted-principal>","decision":"approve"}
 ```
 
-The separate per-file >=95% checker reuses the existing coverage gate's validated
-count rules and self-tests. It does not lower or replace the local MCP/runtime
-gate. The retained candidate report records executed checks and source digests;
-source changes require a new measurement. Runtime evidence remains NOT_RUN.
+Pass that file through `cg-local --operation session.authority --request FILE`
+and the existing required launch options. `approve` returns a persisted reference;
+the v2 `session.approve` command consumes that reference for the current pending
+nonce/revision. Raw client approval flags never create a grant. The operator can
+also use `deny`, `withdraw`, or `recover`. Withdrawal works before or after grant
+consumption, including after completion: terminal withdrawal updates the
+authority audit while preserving the task revision, result and spent budget.
+Rejected decisions do not advance state. `recover` is an explicit
+trusted action; `session.inspect` never resumes, expires or retries a task.
 
-Retained [candidate report](evidence/EPIC-04.13-shared-contracts.json) and
-[coverage counts](evidence/EPIC-04.13-shared-contract-coverage.json): all ten shared
-contract tests pass, with 100% measured line coverage in each of the four new
-production files. The full application suite, frozen v1 contract regressions,
-architecture guards, format check and workspace Clippy pass. These results
-qualify only the implemented contract prerequisite; SI-02..07 runtime gates
-remain open or blocked as shown above.
+On restart, inspect the session or the committed command ID first. For a reserved
+compiler, wait for its persisted 30-second lease to expire before trusted recovery.
+A committed artifact is independently verified against current authority; an
+absent artifact is fenced and the pure task fails without releasing another
+result. Expired questions are renewed only by explicit recovery when the run's
+absolute deadline still permits it. Expired runs stop with retained usage.
+
+Completed evidence is read through the existing owner-scoped reference URI:
+`cg://workspaces/<w>/projects/<p>/bindings/<b>/references/<id>/<revision>/<digest>`.
+The response uses the v2 evidence resource contract. Artifact bytes themselves
+are not exposed through that resource path; the evidence receipt links their
+immutable digest, exact goal/basis, current policy and verification checks.
+
+## Qualification and rollback
+
+```bash
+python3 scripts/cognitive-test-host.py bash scripts/qualify-shared-sessions.sh /tmp/cg-session-evidence
+```
+
+This runs against a disposable loopback PostgreSQL host, requires the database
+for the mandatory gate, tests contracts/shared services/actual executables,
+uses distinct canonical project scopes per scenario so repeated full-gate runs
+share the database without exhausting another scenario's bounded journal,
+independently validates public responses, retains transition transcripts and
+verified evidence, and enforces measured >=95% coverage for every applicable
+changed executable production file. The same gate is registered in
+`scripts/quality-gates.json`. Architecture, frozen contracts, format, Clippy and
+workspace tests remain separate checks.
+
+Storage uses journal kind `task-sessions-v2`, schema version 2, alongside existing
+cognitive journal kinds. Rollback disables the mapping's session capability and
+restores unsupported discovery; it does not delete PostgreSQL data. Terminal
+sessions and owner-wide command ledgers are retained together. No owner transfer,
+external-effect retry, semantic fallback or provider invocation is implemented.

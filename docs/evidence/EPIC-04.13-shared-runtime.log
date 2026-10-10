@@ -1,0 +1,273 @@
+info: cargo-llvm-cov currently setting cfg(coverage); you can opt-out it by passing --no-cfg-coverage
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.64s
+     Running unittests src/lib.rs (target/session-coverage/debug/deps/gateway_application-c1adbf75ddb4b55e)
+
+running 43 tests
+test codex::runtime::tests::deadline_and_cancellation_are_shared_without_reset ... ok
+test codex::runtime::tests::facade_propagates_context_before_policy_and_blocks_cancelled_work ... ok
+test codex::security::tests::credentials_in_fields_free_text_keys_and_encoded_json_fail_closed ... ok
+test codex::security::tests::scans_are_bounded_and_classified_documents_remain_opaque ... ok
+test context::tests::keeps_project_configuration_outside_the_domain_request_values ... ok
+test context::tests::rejects_empty_opaque_configuration_fields ... ok
+test external_context::tests::cache_is_scoped_invalidatable_and_preserves_metadata ... ok
+test external_context::tests::cache_rejects_unsupported_versions_and_conflicts_without_raw_data ... ok
+test external_context::tests::error_projection_is_non_sensitive_and_covers_boundary_failures ... ok
+test external_context::tests::intent_and_lifecycle_boundaries_reject_conflicting_or_stale_input ... ok
+test external_context::tests::scope_lifecycle_is_explicit_and_no_profile_is_required ... ok
+test external_context::tests::scopes_are_isolated_and_retries_are_idempotent ... ok
+test external_context::tests::source_metadata_and_ids_are_explicit_without_provider_specific_types ... ok
+test external_context::tests::synthetic_source_preserves_scope_and_snapshot_contract ... ok
+test graph_retrieval::tests::cross_scope_is_explicit_and_retains_original_scope ... ok
+test graph_retrieval::tests::cycle_terminates_with_stable_paths_and_lineage ... ok
+test graph_retrieval::tests::each_budget_has_a_stable_stop_reason ... ok
+test planning_application::tests::application_errors_are_stable_and_serialization_errors_are_projected ... ok
+test planning_application::tests::rejects_invalid_snapshot_and_keeps_missing_capabilities_explicit ... ok
+test planning_application::tests::runs_the_complete_provider_neutral_planning_sequence ... ok
+test planning_application::tests::situation_scope_is_checked_without_becoming_planning_state ... ok
+test ports::tests::execution_requests_carry_project_context_only_at_the_application_boundary ... ok
+test ports::tests::keeps_project_scope_explicit_and_retrieval_results_provenanced ... ok
+test recursive_retrieval::tests::absent_or_invalid_refinement_and_terminal_budget_are_explicit ... ok
+test recursive_retrieval::tests::duplicate_evidence_and_repeated_queries_cannot_claim_sufficiency ... ok
+test recursive_retrieval::tests::failures_consume_attempts_and_stop_without_a_second_dispatch ... ok
+test recursive_retrieval::tests::terminal_and_misidentified_batches_never_start_another_round ... ok
+test recursive_retrieval::tests::two_rounds_satisfy_without_resetting_usage_or_scope ... ok
+test recursive_retrieval::tests::unverified_links_cannot_advance_a_claim ... ok
+test recursive_retrieval::tests::zero_and_overflowed_token_reservations_never_dispatch ... ok
+test resolution_explain::tests::every_stable_diagnostic_projection_uses_typed_references_without_raw_text ... ok
+test resolution_explain::tests::explicit_rule_encoding_covers_all_semantics_and_normalizes_conjunctions ... ok
+test resolution_skills::tests::comparison_projection_keeps_conflict_and_unsupported_distinct ... ok
+test retrieval_pipeline::tests::duplicate_fusion_retains_every_inspectable_graph_path ... ok
+test retrieval_pipeline::tests::exact_identifier_hit_survives_semantic_score_and_duplicate_merge ... ok
+test retrieval_pipeline::tests::federation_reports_partial_failures_and_rejects_mislabelled_results ... ok
+test retrieval_pipeline::tests::fusion_uses_stable_ties_and_never_merges_across_scopes ... ok
+test retrieval_pipeline::tests::invalid_fusion_policy_fails_closed ... ok
+test retrieval_pipeline::tests::reranker_keeps_scores_and_model_lineage_or_explicit_fallback ... ok
+test situation_application::tests::facade_delegates_domain_operations_and_keeps_process_data_read_only ... ok
+test situation_application::tests::inspection_reuses_cg02_types_and_captures_cg04_identity_and_state ... ok
+test situation_application::tests::invalid_document_is_reported_at_the_application_boundary ... ok
+test situation_application::tests::process_identity_and_revision_mismatches_fail_closed_without_mutation ... ok
+
+test result: ok. 43 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.68s
+
+     Running tests/codex_facade.rs (target/session-coverage/debug/deps/codex_facade-d65fae6626144775)
+
+running 19 tests
+test assessment_uses_shared_normalization_and_cg02_semantics ... ok
+test canonical_situation_validation_and_lineage_projection ... ok
+test context_compilation_rechecks_policy_and_rejects_stale_steps ... ok
+test frozen_responses_and_sanitized_failures_match_complete_schema ... ok
+test policy_gates::consent_is_rechecked_for_each_invocation ... ok
+test policy_gates::discovery_and_permissive_host_do_not_supply_policy ... ok
+test policy_gates::inspection_class_cannot_be_substituted_with_mutation ... ok
+test policy_gates::mutation_requires_current_policy_enablement_consent_and_evidence ... ok
+test policy_gates::read_and_inspect_never_accept_forged_authority_or_commands ... ok
+test reference_records_from_another_client_session_fail_before_projection ... ok
+test registry_resolver_explain_and_evidence_use_existing_owners ... ok
+test resource_adapter_cannot_substitute_a_different_pinned_identity ... ok
+test security_cases::host_projection_credentials_and_classified_payloads_are_refused ... ok
+test security_cases::injected_credentials_never_reach_authorization_or_correlated_errors ... ok
+test security_cases::reference_credentials_are_refused_before_canonical_parsing ... ok
+test sessions_remain_unsupported_without_shared_service ... ok
+test shared_task_sessions_require_the_exact_immutable_client_owner ... ok
+test unavailable_host_and_adapter_defaults_never_enable_services_or_authority ... ok
+test validation_precedence_scope_versions_and_pins_fail_closed ... ok
+
+test result: ok. 19 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 10.43s
+
+     Running tests/session_contracts.rs (target/session-coverage/debug/deps/session_contracts-d12e7e1f1bbd22db)
+
+running 10 tests
+test checkpoints_preserve_full_pending_identity_and_trusted_authority_history ... ok
+test clarification_checks_exact_identity_revision_expiry_and_admitted_answer ... ok
+test conditional_append_refuses_fencing_scope_goal_and_budget_drift ... ok
+test consent_binds_every_authority_input_and_survives_only_its_own_approval_revision ... ok
+test cumulative_budgets_cannot_reset_on_decode_and_rejections_do_not_consume_usage ... ok
+test diagnostic_mapping_is_sanitized_stable_and_unique ... ok
+test every_mutation_has_one_command_and_the_expected_lifecycle_gate ... ok
+test identities_and_checkpoint_decode_are_bounded_and_distinct ... ok
+test projections_refuse_fabricated_terminal_success_and_concealed_uncertainty ... ok
+test supported_goal_preserves_domain_intent_and_refuses_unrelated_success_conditions ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/session_runtime.rs (target/session-coverage/debug/deps/session_runtime-0c2912ac2adeec8f)
+
+running 7 tests
+test accepted_consent_is_checked_live_and_again_after_current_authority_changes ... ok
+test current_inputs_policy_authority_and_deadline_are_checked_after_reservation ... ok
+test expired_questions_are_renewed_only_by_explicit_recovery ... ok
+test failure_before_and_after_artifact_commit_is_reconciled_without_budget_reset ... ok
+test initial_goal_assessment_is_real_retained_and_cannot_claim_observed_success ... ok
+test real_coordinator_verifies_goal_and_rejects_corrupt_stored_artifacts ... ok
+test v2_boundary_refuses_wrong_versions_claims_and_invalid_projections ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 20.61s
+
+     Running unittests src/lib.rs (target/session-coverage/debug/deps/gateway_daemon-0d7deab0e37e176c)
+
+running 35 tests
+test declarative_cli::host_mapping::tests::incomplete_snapshot_records_are_refused_before_catalog_access ... ok
+test declarative_cli::json_input::tests::rejects_non_json_bytes_instead_of_coercing_them ... ok
+test local_mcp::decode::tests::local_mcp_decoder_rejects_non_json_serde_values ... ok
+test local_mcp::runtime::tests::active_cancel_disconnect_errors_and_deadline_are_bounded ... ok
+test local_mcp::runtime::tests::host_cancellation_is_distinguished_and_error_response_is_always_bounded ... ok
+test local_mcp::runtime::tests::limits_health_output_and_failure_classes_are_explicit ... ok
+test local_mcp::runtime::tests::overload_and_unknown_cancellation_do_not_restart_work ... ok
+test local_mcp::runtime::tests::panic_write_failure_and_frame_budget_close_without_retry ... ok
+test local_mcp::tests::admitted_facade_runs_through_deterministic_transport ... ok
+test local_mcp::tests::credential_injection_never_echoes_ids_metadata_or_authentication_failures ... ok
+test local_mcp::tests::decode_and_rpc_errors_are_sanitized ... ok
+test local_mcp::tests::direct_dispatch_enforces_input_limit_before_parsing_and_keeps_phase ... ok
+test local_mcp::tests::discovery_bundles_local_references_and_exposes_static_resources ... ok
+test local_mcp::tests::every_frozen_request_returns_contract_failure_without_dispatch ... ok
+test local_mcp::tests::explicitly_supported_protocols_preserve_discovery_and_client_admission ... ok
+test local_mcp::tests::frozen_schema_validator_rejects_invalid_boundary_inputs ... ok
+test local_mcp::tests::lifecycle_and_admission_fail_closed ... ok
+test local_mcp::tests::oversized_application_output_is_replaced_by_a_bounded_failure ... ok
+test local_mcp::tests::stdio_framing_io_limits_and_blocked_pipes_are_bounded ... ok
+test local_mcp::tests::transport_replacement_eof_and_failures_close_session ... ok
+test local_mcp::tests::untrusted_application_outputs_cannot_bypass_transport_disclosure ... ok
+test registry_cli::tests::builds_every_supported_report_from_one_catalog_snapshot ... ok
+test registry_cli::tests::covers_all_selector_serializations_and_human_scalar_shapes ... ok
+test registry_cli::tests::covers_identifier_failures_catalog_failures_and_run_format_branches ... ok
+test registry_cli::tests::covers_owned_skill_and_invalid_combined_registry_paths ... ok
+test registry_cli::tests::emits_human_labels_for_nested_machine_reports ... ok
+test registry_cli::tests::parses_all_supported_commands_and_options ... ok
+test registry_cli::tests::rejects_malformed_commands_and_options ... ok
+test registry_cli::tests::reports_errors_with_stable_codes_and_exit_statuses ... ok
+test registry_cli::tests::serializes_selector_and_capability_contract_values ... ok
+test session_store::tests::corrupted_journal_versions_links_and_digest_fail_closed ... ok
+test session_store::tests::postgres_atomic_append_rejects_invalid_records_and_keeps_predecessor ... ok
+test session_store::tests::postgres_commit_ambiguity_and_checksum_damage_are_explicit ... ok
+test session_store::tests::postgres_trusted_grants_preserve_denial_withdrawal_and_consumed_history ... ok
+test session_store::tests::terminal_revocation_updates_authority_audit_without_revising_the_task ... ok
+
+test result: ok. 35 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.94s
+
+     Running unittests src/bin/cg.rs (target/session-coverage/debug/deps/cg-34b620aeb28afbc7)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/bin/cg-local.rs (target/session-coverage/debug/deps/cg_local-9d891575476cf3aa)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/bin/cg-mcp.rs (target/session-coverage/debug/deps/cg_mcp-8b48f749d63caff0)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/codex_canonical.rs (target/session-coverage/debug/deps/codex_canonical-3f40edfec6bbab12)
+
+running 1 test
+test shipped_host_canonical_operations_and_authority_negatives ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 8.52s
+
+     Running tests/codex_isolation.rs (target/session-coverage/debug/deps/codex_isolation-46c9496fa7f33e25)
+
+running 12 tests
+test admission_credentials_are_refused_before_retention ... ok
+test admission_rejects_bad_versions_duplicate_keys_digests_and_provenance ... ok
+test cache_partition_changes_for_session_scope_revision_and_source_metadata ... ok
+test immutable_reference_provenance_survives_inline_and_reference_mapping ... ok
+test launch_admission_denials_do_not_emit_protocol_or_configuration_content ... ok
+test local_policy_rejects_execution_authority_changes_and_session_mutations ... ok
+test real_stdio_admitted_launch_queries_and_resources_preserve_isolation ... ok
+test resolver_rejects_unmapped_ambiguous_relative_and_wrong_repository_claims ... ok
+test secrets_and_unclassified_inline_content_are_refused_without_echo ... ok
+test session_principal_connection_and_project_cannot_broaden_authority ... ok
+test symlink_escape_cannot_reuse_project_scope ... ok
+test two_admitted_projects_with_overlapping_source_ids_cannot_share_context ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.18s
+
+     Running tests/codex_local_cli.rs (target/session-coverage/debug/deps/codex_local_cli-a19ff8ed5c6ef6df)
+
+running 3 tests
+test bootstrap_check_and_headless_protocol_parity ... ok
+test cli_keeps_facade_scope_policy_and_classification_gates ... ok
+test cli_rejects_bad_setup_and_credentials_without_echo ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.15s
+
+     Running tests/codex_qualification.rs (target/session-coverage/debug/deps/codex_qualification-9552272eb9ccf59a)
+
+running 3 tests
+test canonical_inspect_resolve_explain_and_context_are_deterministic_through_mcp ... ok
+test client_approval_cannot_replace_trusted_consent_or_dispatch_session_mutations ... ok
+test shared_host_start_status_pause_and_cancellation_projections_cross_the_bridge ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 7.20s
+
+     Running tests/declarative_cli.rs (target/session-coverage/debug/deps/declarative_cli-a5128d4ebed4ada3)
+
+running 19 tests
+test cg12::changed_external_evidence_invalidates_approval_and_unknown_state_is_not_guessed ... ok
+test cg12::desired_state_and_evidence_cannot_authorize_or_unblock_execution ... ok
+test cg12::missing_and_unknown_requirements_remain_explicit ... ok
+test cg12::observed_quality_goals_reach_compilation_with_lineage_and_minimal_context ... ok
+test checked_in_walkthrough_compiles_without_project_configuration ... ok
+test context_selection_preserves_trust_original_input_and_minimality ... ok
+test duplicate_keys_are_rejected_before_authority_or_domain_parsing ... ok
+test evidence_context_uses_captured_provenance_and_omits_raw_evidence ... ok
+test explicit_rules_and_policy_facts_preserve_their_meaning ... ok
+test external_project_chain_is_deterministic_and_compiles_authorized_context ... ok
+test file_inline_and_stdin_inputs_agree ... ok
+test invalid_aggregate_relationships_fail_at_the_owning_boundary ... ok
+test json_output_is_identical_across_processes_and_human_trace_is_unescaped ... ok
+test maximum_length_desired_state_id_can_produce_valid_derived_ids ... ok
+test parser_and_input_errors_are_structured ... ok
+test planning_missing_bindings_catalog_errors_and_explanation ... ok
+test policy_denial_and_stale_inputs_never_compile ... ok
+test satisfied_goal_is_noop_and_inspect_capability_cannot_authorize_change ... ok
+test unresolved_and_blocked_results_keep_diagnostics_and_fail_closed ... ok
+
+test result: ok. 19 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 22.33s
+
+     Running tests/local_mcp.rs (target/session-coverage/debug/deps/local_mcp-161e98ce868ea394)
+
+running 5 tests
+test inherited_credential_environment_is_denied_without_echoing_values ... ok
+test local_mcp_launch_errors_help_and_truncated_transport_are_sanitized ... ok
+test local_mcp_subprocess_conformance_without_provider_credentials ... ok
+test real_stdio_credentials_in_requests_and_auth_failures_never_reach_output ... ok
+test runtime_configuration_and_diagnostics_are_bounded ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.68s
+
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.27s
+test_baseline_cli_mcp_restart_verified_evidence_and_replay (test_sessions.SharedSessions.test_baseline_cli_mcp_restart_verified_evidence_and_replay) ... ok
+test_changed_action_invalidates_consent_and_expired_reply_cannot_resume (test_sessions.SharedSessions.test_changed_action_invalidates_consent_and_expired_reply_cannot_resume) ... ok
+test_clarification_is_a_real_input_choice_and_never_consent (test_sessions.SharedSessions.test_clarification_is_a_real_input_choice_and_never_consent) ... ok
+test_competing_processes_cancel_eof_scope_and_budget (test_sessions.SharedSessions.test_competing_processes_cancel_eof_scope_and_budget) ... ok
+test_denial_withdrawal_current_policy_and_unrelated_goal (test_sessions.SharedSessions.test_denial_withdrawal_current_policy_and_unrelated_goal) ... ok
+test_persisted_consent_restart_exact_reference_and_single_use (test_sessions.SharedSessions.test_persisted_consent_restart_exact_reference_and_single_use) ... ok
+test_postgres_failure_after_artifact_commit_recovery_fences_without_redispatch (test_sessions.SharedSessions.test_postgres_failure_after_artifact_commit_recovery_fences_without_redispatch) ... ok
+test_v2_discovery_strict_wire_and_current_host_denials (test_sessions.SharedSessions.test_v2_discovery_strict_wire_and_current_host_denials) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 70.351s
+
+OK
+
+    Finished report saved to /tmp/cg-shared-session-isolated/coverage.json
+crates/gateway-application/src/sessions/contracts.rs: 157/157 lines (100.00%)
+crates/gateway-application/src/sessions/admission.rs: 79/79 lines (100.00%)
+crates/gateway-application/src/sessions/authority.rs: 90/90 lines (100.00%)
+crates/gateway-application/src/sessions/journal.rs: 120/121 lines (99.17%)
+crates/gateway-application/src/sessions/coordinator.rs: 538/562 lines (95.73%)
+crates/gateway-application/src/sessions/verification.rs: 179/185 lines (96.76%)
+crates/gateway-application/src/sessions/boundary.rs: 109/111 lines (98.20%)
+crates/gateway-application/src/codex/ports.rs: 89/89 lines (100.00%)
+crates/gateway-daemon/src/session_store.rs: 519/532 lines (97.56%)
+crates/gateway-daemon/src/local_sessions.rs: 414/435 lines (95.17%)
+crates/gateway-daemon/src/cognitive_store.rs: 68/70 lines (97.14%)
+crates/gateway-daemon/src/codex_workspace.rs: 450/457 lines (98.47%)
+crates/gateway-daemon/src/local_mcp/mod.rs: 361/379 lines (95.25%)
+crates/gateway-daemon/src/bin/cg-local.rs: 117/122 lines (95.90%)

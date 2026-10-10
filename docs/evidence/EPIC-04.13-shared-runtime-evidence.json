@@ -1,0 +1,107 @@
+{
+  "contract": "cg.evidence",
+  "contract_version": "2.0",
+  "document": {
+    "contract": "cg.evidence",
+    "contract_version": "2.0",
+    "evidence": [
+      "artifact-verification"
+    ],
+    "facts": [
+      "artifact-verified"
+    ],
+    "goal_outcome": "SATISFIED",
+    "verification": {
+      "artifact": {
+        "digest": "sha256:095899d3a4b9a0d8329d250603bfd11dc8ee53e019318722c37d196e53e63155",
+        "id": "compile-run-5065461fb2e90c8bc54a2c918ddb8f4eec38bee08b40cf811bab5f9ffaeada53-2",
+        "revision": "1"
+      },
+      "basis": {
+        "plan": {
+          "digest": "sha256:78816ad203e5955022d973a0d3f114224607e4365a2487510bf475e8ba68e652",
+          "id": "plan",
+          "revision": "1"
+        },
+        "projection": {
+          "digest": "sha256:87ea1a26be7e4e33797fcbd68afaa901ebb4fc7b53c93847055cdce3d7eab0f9",
+          "id": "projection",
+          "revision": "1"
+        },
+        "scope": "session-project-66e6ff8f1d5843709d31af6333ee4159",
+        "sources": [],
+        "step": "step-condition.0"
+      },
+      "checks": [
+        "canonical_bytes",
+        "digest",
+        "domain_ir",
+        "catalog",
+        "scope",
+        "step",
+        "pinned_inputs",
+        "provenance",
+        "disclosure",
+        "current_policy"
+      ],
+      "contract": "cg.artifact-verification",
+      "contract_version": "2.0",
+      "current_basis": {
+        "admission": null,
+        "plan": "plan-delta-747ec95a56539949224ae7c4bba9a2262efd77d1f228ccba2891138d455a729d",
+        "plan_fingerprint": "cabdec603b9787b9b9e3000c20177175ff4b7120381310dc08e98ca059544b89",
+        "process_catalog_fingerprint": "d42b9de5837ee08a2cebc5c713e5f280baae9f9393d7a4659d47c9236e57ad52",
+        "process_state_fingerprint": "986fb472ed53b38d07e62f754fd866b8240792d9b7a28c604b5115a74406290f",
+        "registry_fingerprint": "0fc85602f4c6da1163a5bf50dc9723a066bd04d2a8716dd4e5d8775dfcc2a3e3",
+        "rule_version": "1.0",
+        "scope": "session-project-66e6ff8f1d5843709d31af6333ee4159",
+        "situation": "external-situation",
+        "situation_fingerprint": "aedc9ca2e31bb9e0ee2d919a7c571bffdf8e4bb3a26a20f94a878afbceb5fcef"
+      },
+      "dispatch": "compile-run-5065461fb2e90c8bc54a2c918ddb8f4eec38bee08b40cf811bab5f9ffaeada53-2",
+      "goal": {
+        "digest": "sha256:bf81205edb430a9d1b641e51211bd54e27049fb74abcca8db9632ce2fc6e11d7",
+        "id": "supported-goal",
+        "revision": "1"
+      },
+      "owner": {
+        "binding": "binding-example",
+        "client_owner": "owner-421cec4d4cde4e5dbfd411e8493a8fef",
+        "principal": "operator",
+        "project": "project-example",
+        "workspace": "workspace-example"
+      },
+      "policy": {
+        "capability_classes": {
+          "architecture.dependency-analysis": "INSPECT"
+        },
+        "decision": "ALLOW",
+        "findings": [
+          {
+            "decision": "ALLOW",
+            "reason": "ALLOWED",
+            "subject": "step-condition.0"
+          }
+        ],
+        "policies": [
+          "inspect-policy"
+        ],
+        "schema_version": 1,
+        "step": "step-condition.0"
+      },
+      "run": "run-5065461fb2e90c8bc54a2c918ddb8f4eec38bee08b40cf811bab5f9ffaeada53",
+      "session": "session-5065461fb2e90c8bc54a2c918ddb8f4eec38bee08b40cf811bab5f9ffaeada53"
+    }
+  },
+  "reference": {
+    "digest": "sha256:9d0fd2635a50597990c32b3146dc55158d58b1c23d613138d910c452752e2678",
+    "id": "evidence-run-5065461fb2e90c8bc54a2c918ddb8f4eec38bee08b40cf811bab5f9ffaeada53",
+    "revision": "1"
+  },
+  "schema_version": "2.0",
+  "scope": {
+    "binding_id": "binding-example",
+    "project_id": "project-example",
+    "workspace_id": "workspace-example"
+  }
+}

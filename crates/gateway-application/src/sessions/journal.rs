@@ -24,6 +24,16 @@ pub enum PendingInteraction {
     Consent(Box<ActionBinding>),
 }
 
+/// CG-14's initial exact-goal verdict and the trusted input authority it assessed.
+/// It is retained history, never an authorization or completed-result receipt.
+#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct InitialAssessment {
+    pub goal: RecordRef,
+    pub authority: RecordRef,
+    pub outcome: String,
+}
+
 /// The recovery adapter persists each field in its own bounded/versioned format.
 /// Rebuilding this typed checkpoint requires the supported-goal validator, full
 /// pending payload and consumed budgets, not the redacted CG-14 diagnostic JSON.
@@ -37,6 +47,10 @@ pub struct SessionCheckpoint {
     pub pending: Option<PendingInteraction>,
     pub accepted_consent: Option<VerifiedConsent>,
     pub authority_events: Vec<AuthorityEvent>,
+    pub selected_source: Option<RecordRef>,
+    pub artifact: Option<RecordRef>,
+    pub lease_until_ms: Option<u64>,
+    pub initial_assessment: Option<InitialAssessment>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -55,6 +69,19 @@ impl SessionCheckpoint {
     pub fn validate(&self) -> Result<(), SessionError> {
         self.snapshot.validate()?;
         self.budget.validate()?;
+        if let Some(assessment) = &self.initial_assessment {
+            if assessment.goal
+                != content_reference(
+                    "supported-goal",
+                    &serde_json::to_vec(self.goal.intent())
+                        .map_err(|_| SessionError::InvalidInput)?,
+                )?
+                || !["UNKNOWN", "INSUFFICIENT_EVIDENCE", "UNRESOLVED_INPUT"]
+                    .contains(&assessment.outcome.as_str())
+            {
+                return Err(SessionError::InvalidState);
+            }
+        }
         if self.authority_events.len() > 4096 {
             return Err(SessionError::LimitExceeded);
         }
@@ -139,6 +166,28 @@ pub struct JournalAppend {
     pub fence: FenceToken,
     pub command: Option<CommandId>,
     pub next: SessionCheckpoint,
+    pub records: Vec<RecordWrite>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct RecordWrite {
+    pub reference: RecordRef,
+    pub kind: RecordKind,
+    pub bytes: Vec<u8>,
+}
+#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum RecordKind {
+    Artifact,
+    Evidence,
+}
+
+pub trait SessionRepositoryPort: SessionJournalPort + ArtifactStoragePort {
+    fn record_kind(
+        &self,
+        owner: &OwnerBinding,
+        reference: &RecordRef,
+    ) -> Result<RecordKind, SessionError>;
 }
 impl JournalAppend {
     /// The adapter additionally checks the current fence and ledger while locked.
@@ -160,6 +209,7 @@ impl JournalAppend {
         self.next.validate()?;
         let old = &current.checkpoint;
         if self.next.goal != old.goal
+            || self.next.initial_assessment != old.initial_assessment
             || self.next.execution != old.execution
             || self.next.snapshot.session != old.snapshot.session
             || self.next.snapshot.run != old.snapshot.run

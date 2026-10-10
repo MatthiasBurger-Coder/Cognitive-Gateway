@@ -1,6 +1,6 @@
 # ADR-021 — Shared structured-session ownership and interaction authority
 
-- **Status:** Accepted (contract decision; runtime not implemented)
+- **Status:** Accepted (structured runtime implemented in #294; see separate qualification evidence)
 - **Date:** 2026-10-10
 - **Scope:** #272/#273/#275 and EPIC-04.12 #293; extends ADR-008/ADR-009/ADR-020
 - **Product decision:** User selected a verified context artifact as the explicit goal on 2026-10-10

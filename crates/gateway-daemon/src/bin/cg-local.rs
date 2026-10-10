@@ -100,10 +100,11 @@ fn main() {
         )
     });
     if check {
-        println!(
-            "{}",
-            json!({"status":"ready","mcp_protocol_version":local_mcp::PROTOCOL_VERSION,"schema_version":"1.0","admission_schema_version":1,"scope":binding.scope,"canonical_scope":binding.canonical_scope,"principal":binding.session.principal,"session_id":binding.session.session_id,"mapping_revision":binding.mapping_revision,"client_name":options["--client-name"],"client_version":options["--client-version"],"mutations_enabled":false,"limits":local_mcp::RuntimeLimits::default()})
-        );
+        let mut report = json!({"status":"ready","mcp_protocol_version":local_mcp::PROTOCOL_VERSION,"schema_version":"1.0","admission_schema_version":1,"scope":binding.scope,"canonical_scope":binding.canonical_scope,"principal":binding.session.principal,"session_id":binding.session.session_id,"mapping_revision":binding.mapping_revision,"client_name":options["--client-name"],"client_version":options["--client-version"],"mutations_enabled":facade.session_v2_enabled(),"limits":local_mcp::RuntimeLimits::default()});
+        if facade.session_v2_enabled() {
+            report["session_schema_version"] = json!("2.0");
+        }
+        println!("{}", report);
         return;
     }
     let file = std::fs::File::open(options["--request"])
@@ -122,7 +123,24 @@ fn main() {
         "local-cli-1".into(),
         Instant::now() + Duration::from_secs(30),
     );
-    let response = facade.execute_with_context(options["--operation"], &request, &context);
+    let response = if options["--operation"] == "session.authority" {
+        #[derive(serde::Deserialize)]
+        #[serde(deny_unknown_fields)]
+        struct AuthorityRequest {
+            session_id: gateway_application::sessions::SessionId,
+            issuer: gateway_application::sessions::PrincipalId,
+            decision: String,
+        }
+        match serde_json::from_value::<AuthorityRequest>(request) {
+            Ok(input) => match facade.operator(&input.session_id, &input.issuer, &input.decision) {
+                Ok(result) => json!({"schema_version":"2.0","status":"ok","result":result}),
+                Err(error) => gateway_application::sessions::boundary::failure(error.code()),
+            },
+            Err(_) => gateway_application::sessions::boundary::failure("CG_INVALID_INPUT"),
+        }
+    } else {
+        facade.execute_with_context(options["--operation"], &request, &context)
+    };
     let output = response.to_string();
     if output.len() >= local_mcp::MAX_FRAME_BYTES {
         fail("CG_LIMIT_EXCEEDED", "reduce the admitted resource size");

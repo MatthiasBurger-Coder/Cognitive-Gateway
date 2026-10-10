@@ -1,0 +1,109 @@
+{
+  "schema_version": "2.0",
+  "tools": [
+    {
+      "name": "cg_session_start_v2",
+      "operation": "session.start",
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "cg_session_inspect_v2",
+      "operation": "session.inspect",
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "cg_session_clarify_v2",
+      "operation": "session.clarify",
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "cg_session_approve_v2",
+      "operation": "session.approve",
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "cg_session_continue_v2",
+      "operation": "session.continue",
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "cg_session_cancel_v2",
+      "operation": "session.cancel",
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    }
+  ],
+  "resources": [
+    {
+      "uri": "cg://contracts/2.0/catalog",
+      "kind": "static"
+    },
+    {
+      "uri": "cg://contracts/2.0/common.schema.json",
+      "kind": "static"
+    },
+    {
+      "uri": "cg://contracts/2.0/request.schema.json",
+      "kind": "static"
+    },
+    {
+      "uri": "cg://contracts/2.0/response.schema.json",
+      "kind": "static"
+    },
+    {
+      "uri": "cg://contracts/2.0/resource.schema.json",
+      "kind": "static"
+    },
+    {
+      "uri": "cg://contracts/2.0/catalog.schema.json",
+      "kind": "static"
+    }
+  ]
+}

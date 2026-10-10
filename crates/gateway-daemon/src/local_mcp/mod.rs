@@ -213,7 +213,14 @@ impl Server {
                     && params.get("cursor").is_none()
                     && params.get("_meta").is_none_or(Value::is_object) =>
             {
-                result(id, json!({"tools":contracts::tools()}))
+                let mut tools = contracts::tools();
+                if self.application.session_v2_enabled() {
+                    tools
+                        .as_array_mut()
+                        .unwrap()
+                        .extend(gateway_application::sessions::boundary::tools());
+                }
+                result(id, json!({"tools":tools}))
             }
             "resources/list"
                 if params_object(&params, &["cursor", "_meta"], &[])
@@ -223,6 +230,10 @@ impl Server {
                 let resources: Vec<Value> = ["catalog", "common.schema.json", "request.schema.json", "response.schema.json", "resource.schema.json", "catalog.schema.json"].iter()
                     .map(|name| json!({"uri":format!("cg://contracts/1.0/{name}"),"name":name,"mimeType":"application/json"})).collect();
                 let mut resources = resources;
+                if self.application.session_v2_enabled() {
+                    resources.extend(["catalog", "common.schema.json", "request.schema.json", "response.schema.json", "resource.schema.json", "catalog.schema.json"].iter()
+                    .map(|name|json!({"uri":format!("cg://contracts/2.0/{name}"),"name":name,"mimeType":"application/json"})));
+                }
                 resources.push(json!({"uri":"cg://runtime/health","name":"Local runtime health","mimeType":"application/json"}));
                 result(id, json!({"resources":resources}))
             }
@@ -293,7 +304,16 @@ impl Server {
         {
             return rpc_error(id, -32602, "Invalid params");
         }
-        let catalog = contracts::artifact("catalog").unwrap();
+        let mut catalog = contracts::artifact("catalog").unwrap();
+        if self.application.session_v2_enabled() {
+            catalog["tools"].as_array_mut().unwrap().extend(
+                gateway_application::sessions::boundary::artifact("catalog").unwrap()["tools"]
+                    .as_array()
+                    .unwrap()
+                    .iter()
+                    .cloned(),
+            );
+        }
         let Some(tool) = catalog["tools"]
             .as_array()
             .unwrap()
@@ -303,8 +323,18 @@ impl Server {
             return rpc_error(id, -32602, "Invalid params");
         };
         let request = &params["arguments"];
+        let v2 = tool["name"].as_str().unwrap().ends_with("_v2");
+        let failure = |code| {
+            if v2 {
+                gateway_application::sessions::boundary::failure(code)
+            } else {
+                contracts::failure(code)
+            }
+        };
         let common = contracts::artifact("common.schema.json").unwrap();
-        let envelope = if request["schema_version"] == "1.0"
+        let envelope = if request["schema_version"] != if v2 { "2.0" } else { "1.0" } {
+            failure("CG_UNSUPPORTED_VERSION")
+        } else if request["schema_version"] == "1.0"
             && request["operation"] == tool["operation"]
             && contracts::valid(
                 request,
@@ -327,7 +357,7 @@ impl Server {
             }
         };
         let envelope = if runtime::bounded_json(&envelope, self.limits.output_bytes / 2).is_err() {
-            contracts::failure("CG_LIMIT_EXCEEDED")
+            failure("CG_LIMIT_EXCEEDED")
         } else if security::credential_free(&envelope)
             && (envelope["result"]["canonical_result"]["kind"] != "document"
                 || (security::inline_allowed(&envelope["result"]["canonical_result"]["document"])
@@ -338,7 +368,7 @@ impl Server {
         {
             envelope
         } else {
-            contracts::failure("CG_SENSITIVITY_DENIED")
+            failure("CG_SENSITIVITY_DENIED")
         };
         result(
             id,
@@ -365,6 +395,17 @@ impl Server {
                 id,
                 json!({"contents":[{"uri":uri,"mimeType":"application/json","text":artifact.to_string()}]}),
             );
+        }
+        if self.application.session_v2_enabled() {
+            if let Some(artifact) = uri
+                .strip_prefix("cg://contracts/2.0/")
+                .and_then(gateway_application::sessions::boundary::artifact)
+            {
+                return result(
+                    id,
+                    json!({"contents":[{"uri":uri,"mimeType":"application/json","text":artifact.to_string()}]}),
+                );
+            }
         }
         let parts: Vec<_> = uri.split('/').collect();
         if parts.len() == 12

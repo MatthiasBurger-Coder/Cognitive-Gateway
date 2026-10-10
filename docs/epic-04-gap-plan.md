@@ -5,7 +5,24 @@ Parent: [EPIC-04 #126](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway
 This plan extends the existing inbound integration; it does not replace EPIC-08
 or qualify its complete model/connector runtime.
 
-## Three Amigos gate
+## Current #294 runtime delivery
+
+The registered structured context-artifact baseline is **QUALIFIED**. The shared
+application coordinator and real clarification/consent services, required
+PostgreSQL journal/recovery and cumulative budgets are implemented under their
+existing EPIC-08 owners and used by both shipped local executables. GAP-04 through
+GAP-09 have shared-service, actual PostgreSQL and executable evidence for this
+baseline: seven application runtime tests, five database tests and eight actual
+CLI/MCP scenarios pass, with >=95% coverage for all 14 changed executable
+production files. See [runtime evidence](evidence/EPIC-04.13-shared-runtime.json)
+and [configuration/recovery](shared-session-implementation.md).
+
+The intake assessments and matrix below retain the inspected historical baseline.
+They do not describe missing structured services in the current delivery.
+Installed Codex-client session qualification (#295), parent reconciliation (#296)
+and complete EPIC-08/model/connector acceptance remain separate.
+
+## Three Amigos intake gate (historical baseline)
 
 The user explicitly requested gap closure, a prior Three Amigos review, issues
 before multi-step implementation and an improved skill. The original named skill
@@ -40,7 +57,7 @@ No workflow engine or Python-specific product architecture is imposed on CG.
   and foundation gates. Run file-mutating slices sequentially. #279 system proof
   remains separate. Scope/policy/consent cannot come from client/model content.
 
-Current gate: #293 contract definition is **READY_FOR_WORKFLOW** with the
+Intake gate at the inspected baseline: #293 contract definition is **READY_FOR_WORKFLOW** with the
 user-selected artifact goal. #294 runtime binding is **BLOCKED** until #272
 typed contracts and executable #273/#275/#276/#277 foundations qualify.
 This is authorized prerequisite work, not a request for repeated implementation
@@ -72,7 +89,7 @@ claimed by the completed canonical and client work.
   This completes contract definition only; #272 types and #273/#275/#276/#277
   runtime gates remain required before #294 can expose versioned session operations.
 
-## Requirement and evidence matrix
+## Historical intake requirement and evidence matrix
 
 This supplements all nineteen parent rows in `codex-release-qualification.md`;
 their component evidence is retained, not upgraded to product evidence.

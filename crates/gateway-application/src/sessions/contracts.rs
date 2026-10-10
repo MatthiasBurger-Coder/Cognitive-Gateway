@@ -337,7 +337,8 @@ impl PendingRef {
 }
 
 /// Disclosure-only snapshot; the service retains ownership internally.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct SessionSnapshot {
     pub session: SessionId,
     pub run: RunId,

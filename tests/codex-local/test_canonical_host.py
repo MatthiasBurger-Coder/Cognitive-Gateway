@@ -24,7 +24,7 @@ class CanonicalHost(unittest.TestCase):
         self.assertIn('result', client.initialize())
         return client
 
-    def prepare(self):
+    def prepare(self, scope="external-project"):
         repository = Path(self.launch[15])
         catalog = repository / 'catalog'
         shutil.copytree(FIXTURE / 'catalog', catalog)
@@ -32,16 +32,25 @@ class CanonicalHost(unittest.TestCase):
             result = subprocess.run([str((BIN / 'cg').resolve()), command, *options, '--json'],
                                     env=CHILD_ENV, capture_output=True, text=True, timeout=15, check=True)
             return json.loads(result.stdout)
-        assessment = canonical('assess', '--context', str(FIXTURE / 'context.json'))
+        context = json.loads((FIXTURE / 'context.json').read_text())
+        context['scope'] = scope
+        assessment = canonical('assess', '--context', json.dumps(context))
         plan = canonical('plan', '--context', json.dumps(assessment), '--intent', str(FIXTURE / 'intent.json'),
                          '--catalog', str(catalog), '--rules', str(FIXTURE / 'rules.json'))
         admission_path = Path(self.launch[13])
         admission = json.loads(admission_path.read_text())
         mapping = admission['mappings'][0]
-        mapping['canonical_scope'] = 'external-project'
+        mapping['canonical_scope'] = scope
+        projection = json.loads((FIXTURE / 'projection.json').read_text())
+        policy = json.loads((FIXTURE / 'policy.json').read_text())
+        if scope != 'external-project':
+            resolved = canonical('resolve', '--plan', json.dumps(plan), '--catalog', str(catalog),
+                                 '--rules', str(FIXTURE / 'rules.json'), '--process', str(FIXTURE / 'process.json'))
+            projection['basis'] = copy.deepcopy(resolved['resolution']['basis'])
+            policy['basis'] = copy.deepcopy(resolved['resolution']['basis'])
         documents = [('plan', 'cg.plan', plan), ('rules', 'cg.composition-rules', json.loads((FIXTURE / 'rules.json').read_text())),
                      ('process', 'cg.process-snapshot', json.loads((FIXTURE / 'process.json').read_text())),
-                     ('projection', 'cg.context-projection', json.loads((FIXTURE / 'projection.json').read_text()))]
+                     ('projection', 'cg.context-projection', projection)]
         references = {}
         for name, contract, document in documents:
             encoded = json.dumps(document, sort_keys=True, separators=(',', ':'), ensure_ascii=False)
@@ -52,7 +61,7 @@ class CanonicalHost(unittest.TestCase):
                                          'document': document, 'provenance': [{'reference': ref, 'source_id': name,
                                          'source_revision': '1', 'freshness': 'current', 'sensitivity': 'NORMAL', 'lineage': []}]})
         mapping['canonical'] = {'catalog': str(catalog), **{name: copy.deepcopy(references[name]) for name in ['plan', 'rules', 'process']},
-                                'policy': json.loads((FIXTURE / 'policy.json').read_text())}
+                                'policy': policy}
         admission_path.write_text(json.dumps(admission))
         self.admission_path, self.admission, self.references = admission_path, admission, references
         self.canonical = canonical

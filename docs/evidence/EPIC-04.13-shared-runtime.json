@@ -1,0 +1,261 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-10-10T17:05:26.497697+00:00",
+  "candidate_base_revision": "02511990698c30230241ce069c3b9413765f68de",
+  "issue": 294,
+  "issue_status": "COMPLETE",
+  "status": "QUALIFIED_STRUCTURED_CONTEXT_ARTIFACT_RUNTIME",
+  "evidence_levels": [
+    "CONTRACT",
+    "SHARED_APPLICATION_SERVICE",
+    "REAL_POSTGRESQL",
+    "SHIPPED_EXECUTABLE_SYNTHETIC_CLIENT"
+  ],
+  "source_sha256": {
+    "Cargo.lock": "830ff7a906bb01c857bd2da04cf6c66609152a402ce2c9961a171a12e49f5203",
+    "Cargo.toml": "6d7440b575b7240194ba4c55cfa1e9770c10b656bb1d335f23f404386b0de81e",
+    "crates/gateway-application/src/codex/authorization.rs": "a75253f4a25f57cb228e1eec3578eb281a7b75cbbb2ea504dece1f93019d13e8",
+    "crates/gateway-application/src/codex/contracts.rs": "fe2feff9b089652761ddbf8899f6b7a4f520e2775fdf46737aeacded6e28936d",
+    "crates/gateway-application/src/codex/isolation.rs": "2c963cfa7f16141a533787cabd86e0f172fbd1aae4ff8c8903463995bf009802",
+    "crates/gateway-application/src/codex/ports.rs": "0bd8ce9ed9a9af3b259fc36528195f09e24db8493ac8e4a4a22b7d0ea7dcd8a8",
+    "crates/gateway-application/src/codex/runtime.rs": "37ec68d5384c07bfafc9d5c4f6d0d8be280af4692ae9702c9d6247a0dffa8c8d",
+    "crates/gateway-application/src/codex/security.rs": "c00a79373e0a9a4af0f2600387e67e360d9606631b941fb42145dc0729375a99",
+    "crates/gateway-application/src/sessions/admission.rs": "63b5f40936fbf7a34c9a976bbd805661e7d13165d5a5d3b18c886db3f482f74b",
+    "crates/gateway-application/src/sessions/authority.rs": "5919b827212f238dc70104765bb7f6776c089de68715edfaf266ffdc360d5d83",
+    "crates/gateway-application/src/sessions/boundary.rs": "7d0f5b2f2c8d785a665b48c9ec16820763283d2027b7e676ec9c811c22579b46",
+    "crates/gateway-application/src/sessions/contracts.rs": "8bcd8c9a0b52c59ab14552823a7da0719d1c32ec690188b801aced84bef2d93a",
+    "crates/gateway-application/src/sessions/coordinator.rs": "47ab445ad39b4cb9a0d77be39905fe3fb4eeb8cc83d44dc3fdad32091ee9f0b7",
+    "crates/gateway-application/src/sessions/journal.rs": "80b9b960a35ed46b5513bd7aec5101cf32dabcfd2d4a5e4c1622251530c3f246",
+    "crates/gateway-application/src/sessions/verification.rs": "8e0d14b07cb75185053157d5e898289d74119c52eee4ba3a6072fe2a49e6048c",
+    "crates/gateway-daemon/src/bin/cg-local.rs": "708955cb29cd0790ca70a1d74591a7f1c4d486fbdc78afed8f444d86405fc7d6",
+    "crates/gateway-daemon/src/bin/cg-mcp.rs": "5b3388a623928487e52d1b949cf189e1561c8f55869bcf5a2b3999ac3f5236d9",
+    "crates/gateway-daemon/src/codex_canonical.rs": "0072c55e25e228c3b59c7d7517c554caaf2766003f83beb29e2f1112247bbae5",
+    "crates/gateway-daemon/src/codex_workspace.rs": "885495874811e07a45b62f776c9fbad104840a19a8b57af93236d81688ba0ffc",
+    "crates/gateway-daemon/src/cognitive_store.rs": "83a5eec4bce182143db0ff7e4500452a134e6e415638a6f2e2968eeb4857ae0f",
+    "crates/gateway-daemon/src/declarative_cli/host_mapping.rs": "f4278084b14ed06d350f37acb1aa6fd9ea00bb78fcc2d82b493642c0ce69bfdb",
+    "crates/gateway-daemon/src/declarative_cli/pipeline.rs": "52f54226bd3ef46103fc23d1ae87dc58f67f77c3a0a2aaeadfc61aa2b781c1b0",
+    "crates/gateway-daemon/src/local_mcp/contracts.rs": "a3cb65ea07a174692154c6fa24737bc8891027ff69399f30ee69a633a6305c0e",
+    "crates/gateway-daemon/src/local_mcp/decode.rs": "8e18eeafd79451b1508e5e5ff3470fbcd2c49db7d8a904fc09007e9a06661f13",
+    "crates/gateway-daemon/src/local_mcp/mod.rs": "952fb8efe540bdd57598de335d24223a4b444818a13e97ae305a16ffa281d598",
+    "crates/gateway-daemon/src/local_mcp/runtime.rs": "e35733968cc6cd795a49ef903b85c2ee9de08e9a6aed1c1b7ab02526a9d53afc",
+    "crates/gateway-daemon/src/local_mcp/transport.rs": "d2a0a4b049256409a7942b2eb4cc70b3ff14384105c5465ee7026ad940f72303",
+    "crates/gateway-daemon/src/local_sessions.rs": "2e1d3416a2edbf3ec8fca392f7e0fbcb122b654fdb14207ca1f020abab407dc1",
+    "crates/gateway-daemon/src/session_store.rs": "93558c98d7ef3ee318c6f9010e0a030825b53557377b31224a3947e42596ce92",
+    "scripts/check-local-mcp-coverage.py": "b92deffac18408b80e13fe7e4c246a72f643f97caf358c319c3f7d6c5b61e0a0",
+    "tests/codex-local/test_canonical_host.py": "493489b10f56ad0120dfa7568655b7a17273d2289cd105de2e4f41d3f8c016ea",
+    "tests/codex-local/test_sessions.py": "3bb539661328cefae54401c734600c4a27d7f6a484f7f2cfce71f4d725058043"
+  },
+  "binary_sha256": {
+    "cg": "b774fdfaa9de1f01b3c74ce0c88146968a53c2747db14891c67ed8e32849628a",
+    "cg-local": "ef0e084b9b1b51a58bc8983c133e21881eabb6234b509bb726fda7ca3d4d5be9",
+    "cg-mcp": "0207a1e8b1c010b66cce3072d0c992c69520364b4373e8faa4971d4ea3816a2f"
+  },
+  "toolchain": {
+    "rustc": "rustc 1.98.0 (88d9e12ae 2026-08-18)",
+    "cargo": "cargo 1.98.0 (797e8a9bc 2026-08-05)",
+    "llvm_cov": "cargo-llvm-cov 0.9.0",
+    "python": "Python 3.14.4"
+  },
+  "reproduce": "python3 scripts/cognitive-test-host.py bash scripts/qualify-shared-sessions.sh /tmp/cg-session-evidence",
+  "database": "Disposable loopback PostgreSQL 16; actual transactions and commit failure injection; credentials withheld from executable workers",
+  "tests": {
+    "session_contracts": 10,
+    "application_runtime": 7,
+    "real_postgresql_repository": 5,
+    "actual_cli_mcp_scenarios": 8,
+    "retained_transitions": 81,
+    "frozen_v1_contracts": 12,
+    "architecture_regressions": 19
+  },
+  "checks": {
+    "shared_runtime_and_changed_file_coverage": "PASS",
+    "legacy_mcp_changed_file_coverage": "PASS",
+    "workspace_tests_with_real_postgresql": "PASS",
+    "architecture_guard": "PASS",
+    "architecture_regressions": "PASS",
+    "frozen_v1_contracts": "PASS",
+    "independent_protocol_conformance": "PASS",
+    "format": "PASS",
+    "clippy_warnings_denied": "PASS",
+    "retained_public_response_resource_validation": "PASS",
+    "retained_evidence_digest": "PASS"
+  },
+  "coverage": {
+    "format": "Verbatim per-file summary counts extracted from the LLVM export; executable details remain in generated CI artifacts",
+    "threshold_percent": 95,
+    "changed_production_files": [
+      "crates/gateway-application/src/sessions/contracts.rs",
+      "crates/gateway-application/src/sessions/admission.rs",
+      "crates/gateway-application/src/sessions/authority.rs",
+      "crates/gateway-application/src/sessions/journal.rs",
+      "crates/gateway-application/src/sessions/coordinator.rs",
+      "crates/gateway-application/src/sessions/verification.rs",
+      "crates/gateway-application/src/sessions/boundary.rs",
+      "crates/gateway-application/src/codex/ports.rs",
+      "crates/gateway-daemon/src/session_store.rs",
+      "crates/gateway-daemon/src/local_sessions.rs",
+      "crates/gateway-daemon/src/cognitive_store.rs",
+      "crates/gateway-daemon/src/codex_workspace.rs",
+      "crates/gateway-daemon/src/local_mcp/mod.rs",
+      "crates/gateway-daemon/src/bin/cg-local.rs"
+    ],
+    "files": {
+      "crates/gateway-application/src/codex/authorization.rs": {
+        "count": 90,
+        "covered": 90,
+        "percent": 100.0
+      },
+      "crates/gateway-application/src/codex/contracts.rs": {
+        "count": 200,
+        "covered": 200,
+        "percent": 100.0
+      },
+      "crates/gateway-application/src/codex/isolation.rs": {
+        "count": 103,
+        "covered": 101,
+        "percent": 98.05825242718448
+      },
+      "crates/gateway-application/src/codex/ports.rs": {
+        "count": 89,
+        "covered": 89,
+        "percent": 100.0
+      },
+      "crates/gateway-application/src/codex/runtime.rs": {
+        "count": 76,
+        "covered": 76,
+        "percent": 100.0
+      },
+      "crates/gateway-application/src/codex/security.rs": {
+        "count": 205,
+        "covered": 205,
+        "percent": 100.0
+      },
+      "crates/gateway-application/src/sessions/admission.rs": {
+        "count": 79,
+        "covered": 79,
+        "percent": 100.0
+      },
+      "crates/gateway-application/src/sessions/authority.rs": {
+        "count": 90,
+        "covered": 90,
+        "percent": 100.0
+      },
+      "crates/gateway-application/src/sessions/boundary.rs": {
+        "count": 111,
+        "covered": 109,
+        "percent": 98.1981981981982
+      },
+      "crates/gateway-application/src/sessions/contracts.rs": {
+        "count": 157,
+        "covered": 157,
+        "percent": 100.0
+      },
+      "crates/gateway-application/src/sessions/coordinator.rs": {
+        "count": 562,
+        "covered": 538,
+        "percent": 95.72953736654804
+      },
+      "crates/gateway-application/src/sessions/journal.rs": {
+        "count": 121,
+        "covered": 120,
+        "percent": 99.17355371900827
+      },
+      "crates/gateway-application/src/sessions/verification.rs": {
+        "count": 185,
+        "covered": 179,
+        "percent": 96.75675675675676
+      },
+      "crates/gateway-daemon/src/bin/cg-local.rs": {
+        "count": 122,
+        "covered": 117,
+        "percent": 95.90163934426229
+      },
+      "crates/gateway-daemon/src/bin/cg-mcp.rs": {
+        "count": 103,
+        "covered": 99,
+        "percent": 96.11650485436894
+      },
+      "crates/gateway-daemon/src/codex_canonical.rs": {
+        "count": 83,
+        "covered": 80,
+        "percent": 96.3855421686747
+      },
+      "crates/gateway-daemon/src/codex_workspace.rs": {
+        "count": 457,
+        "covered": 450,
+        "percent": 98.46827133479214
+      },
+      "crates/gateway-daemon/src/cognitive_store.rs": {
+        "count": 70,
+        "covered": 68,
+        "percent": 97.14285714285714
+      },
+      "crates/gateway-daemon/src/declarative_cli/host_mapping.rs": {
+        "count": 76,
+        "covered": 74,
+        "percent": 97.36842105263156
+      },
+      "crates/gateway-daemon/src/declarative_cli/pipeline.rs": {
+        "count": 442,
+        "covered": 424,
+        "percent": 95.92760180995475
+      },
+      "crates/gateway-daemon/src/local_mcp/contracts.rs": {
+        "count": 10,
+        "covered": 10,
+        "percent": 100.0
+      },
+      "crates/gateway-daemon/src/local_mcp/decode.rs": {
+        "count": 62,
+        "covered": 62,
+        "percent": 100.0
+      },
+      "crates/gateway-daemon/src/local_mcp/mod.rs": {
+        "count": 379,
+        "covered": 361,
+        "percent": 95.25065963060686
+      },
+      "crates/gateway-daemon/src/local_mcp/runtime.rs": {
+        "count": 561,
+        "covered": 546,
+        "percent": 97.32620320855614
+      },
+      "crates/gateway-daemon/src/local_mcp/transport.rs": {
+        "count": 84,
+        "covered": 83,
+        "percent": 98.8095238095238
+      },
+      "crates/gateway-daemon/src/local_sessions.rs": {
+        "count": 435,
+        "covered": 414,
+        "percent": 95.17241379310344
+      },
+      "crates/gateway-daemon/src/session_store.rs": {
+        "count": 532,
+        "covered": 519,
+        "percent": 97.55639097744361
+      }
+    },
+    "raw_llvm_export_sha256": "0260e96461e90cd9878574b7c7f17f916ff8d9db20337a11d875ad16c051e869"
+  },
+  "artifact_sha256": {
+    "docs/evidence/EPIC-04.13-shared-runtime-coverage.json": "0d1d8d04d59113df98cce2966a18cda7a7fb0f6547ed88931cfa09892dd9e068",
+    "docs/evidence/EPIC-04.13-shared-runtime-transitions.jsonl": "54a66ca43c4ed78d756a43b738c8e3f20708d2cf764d7918cbb0cbb10cc54849",
+    "docs/evidence/EPIC-04.13-shared-runtime-evidence.json": "f9daf7ddd3b5a004a89aa1b9604d9385d55c9c341313c9e9dee2222c291bcbe7",
+    "docs/evidence/EPIC-04.13-shared-runtime.log": "bf4bff09a64cc2572e81a7e5c74cd0ee7edd614fd7977c15e1d6b586f766d3e5"
+  },
+  "scope": {
+    "supported": "Registered exact structured context-artifact goal; shared coordinator, clarification, trusted consent, persisted budgets, fencing, cancellation and explicit recovery",
+    "unsupported": [
+      "semantic interpretation",
+      "model/provider invocation",
+      "external connector effects"
+    ],
+    "separate_acceptance": [
+      "#295 installed Codex-client session qualification",
+      "#296 full EPIC-04 reconciliation",
+      "complete EPIC-08 runtime"
+    ]
+  },
+  "review": "Sequential requirement/architecture/automation/evidence review by one agent; no independent reviewer or complete parent acceptance claimed"
+}

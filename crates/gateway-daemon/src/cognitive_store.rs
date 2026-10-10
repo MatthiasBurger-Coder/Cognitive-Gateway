@@ -4,7 +4,7 @@ use gateway_domain::ContextScopeId;
 use postgres::{Client, NoTls};
 use serde::{Serialize, de::DeserializeOwned};
 use sha2::{Digest, Sha256};
-use std::sync::Mutex;
+use std::{sync::Mutex, time::Duration};
 
 pub struct CognitiveStore {
     client: Mutex<Client>,
@@ -15,10 +15,22 @@ pub enum StoreError {
     Storage,
     InvalidJournal,
     Limit,
+    CommitUnknown,
 }
 impl CognitiveStore {
     pub fn connect(connection: &str, scope: ContextScopeId) -> Result<Self, StoreError> {
-        let mut client = Client::connect(connection, NoTls).map_err(|_| StoreError::Storage)?;
+        let mut configuration = connection
+            .parse::<postgres::Config>()
+            .map_err(|_| StoreError::Storage)?;
+        configuration
+            .connect_timeout(Duration::from_secs(3))
+            .tcp_user_timeout(Duration::from_secs(5));
+        let mut client = configuration
+            .connect(NoTls)
+            .map_err(|_| StoreError::Storage)?;
+        client
+            .batch_execute("SET statement_timeout = '5s'; SET lock_timeout = '5s'")
+            .map_err(|_| StoreError::Storage)?;
         client
             .batch_execute(
                 "CREATE TABLE IF NOT EXISTS cg_cognitive_journals (
@@ -78,7 +90,7 @@ impl CognitiveStore {
             tx.execute("UPDATE cg_cognitive_journals SET payload=$3,digest=$4,revision=$5 WHERE scope=$1 AND kind=$2",
                 &[&self.scope.as_str(), &kind, &next, &hash, &revision]).map_err(|_| StoreError::Storage)?;
         }
-        tx.commit().map_err(|_| StoreError::Storage)?;
+        tx.commit().map_err(|_| StoreError::CommitUnknown)?;
         Ok(result)
     }
 }

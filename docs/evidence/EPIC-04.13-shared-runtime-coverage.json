@@ -1,0 +1,1036 @@
+{
+  "type": "llvm.coverage.json.export",
+  "version": "3.1.0",
+  "data": [
+    {
+      "files": [
+        {
+          "filename": "crates/gateway-application/src/codex/authorization.rs",
+          "summary": {
+            "branches": {
+              "count": 0,
+              "covered": 0,
+              "notcovered": 0,
+              "percent": 0.0
+            },
+            "mcdc": {
+              "count": 0,
+              "covered": 0,
+              "notcovered": 0,
+              "percent": 0.0
+            },
+            "functions": {
+              "count": 8,
+              "covered": 8,
+              "percent": 100.0
+            },
+            "instantiations": {
+              "count": 16,
+              "covered": 8,
+              "percent": 50.0
+            },
+            "lines": {
+              "count": 90,
+              "covered": 90,
+              "percent": 100.0
+            },
+            "regions": {
+              "count": 116,
+              "covered": 112,
+              "notcovered": 4,
+              "percent": 96.55172413793105
+            }
+          }
+        },
+        {
+          "filename": "crates/gateway-application/src/codex/contracts.rs",
+          "summary": {
+            "branches": {
+              "count": 0,
+              "covered": 0,
+              "notcovered": 0,
+              "percent": 0.0
+            },
+            "mcdc": {
+              "count": 0,
+              "covered": 0,
+              "notcovered": 0,
+              "percent": 0.0
+            },
+            "functions": {
+              "count": 19,
+              "covered": 19,
+              "percent": 100.0
+            },
+            "instantiations": {
+              "count": 38,
+              "covered": 28,
+              "percent": 73.68421052631578
+            },
+            "lines": {
+              "count": 200,
+              "covered": 200,
+              "percent": 100.0
+            },
+            "regions": {
+              "count": 354,
+              "covered": 353,
+              "notcovered": 1,
+              "percent": 99.71751412429379
+            }
+          }
+        },
+        {
+          "filename": "crates/gateway-application/src/codex/isolation.rs",
+          "summary": {
+            "branches": {
+              "count": 0,
+              "covered": 0,
+              "notcovered": 0,
+              "percent": 0.0
+            },
+            "mcdc": {
+              "count": 0,
+              "covered": 0,
+              "notcovered": 0,
+              "percent": 0.0
+            },
+            "functions": {
+              "count": 12,
+              "covered": 12,
+              "percent": 100.0
+            },
+            "instantiations": {
+              "count": 24,
+              "covered": 15,
+              "percent": 62.5
+            },
+            "lines": {
+              "count": 103,
+              "covered": 101,
+              "percent": 98.05825242718448
+            },
+            "regions": {
+              "count": 140,
+              "covered": 137,
+              "notcovered": 3,
+              "percent": 97.85714285714285
+            }
+          }
+        },
+        {
+          "filename": "crates/gateway-application/src/codex/ports.rs",
+          "summary": {
+            "branches": {
+              "count": 0,
+              "covered": 0,
+              "notcovered": 0,
+              "percent": 0.0
+            },
+            "mcdc": {
+              "count": 0,
+              "covered": 0,
+              "notcovered": 0,
+              "percent": 0.0
+            },
+            "functions": {
+              "count": 17,
+              "covered": 17,
+              "percent": 100.0
+            },
+            "instantiations": {
+              "count": 189,
+              "covered": 43,
+              "percent": 22.75132275132275
+            },
+            "lines": {
+              "count": 89,
+              "covered": 89,
+              "percent": 100.0
+            },
+            "regions": {
+              "count": 65,
+              "covered": 65,
+              "notcovered": 0,
+              "percent": 100.0
+            }
+          }
+        },
+        {
+          "filename": "crates/gateway-application/src/codex/runtime.rs",
+          "summary": {
+            "branches": {
+              "count": 0,
+              "covered": 0,
+              "notcovered": 0,
+              "percent": 0.0
+            },
+            "mcdc": {
+              "count": 0,
+              "covered": 0,
+              "notcovered": 0,
+              "percent": 0.0
+            },
+            "functions": {
+              "count": 7,
+              "covered": 7,
+              "percent": 100.0
+            },
+            "instantiations": {
+              "count": 10,
+              "covered": 10,
+              "percent": 100.0
+            },
+            "lines": {
+              "count": 76,
+              "covered": 76,
+              "percent": 100.0
+            },
+            "regions": {
+              "count": 148,
+              "covered": 147,
+              "notcovered": 1,
+              "percent": 99.32432432432432
+            }
+          }
+        },
+        {
+          "filename": "crates/gateway-application/src/codex/security.rs",
+          "summary": {
+            "branches": {
+              "count": 0,
+              "covered": 0,
+              "notcovered": 0,
+              "percent": 0.0
+            },
+            "mcdc": {
+              "count": 0,
+              "covered": 0,
+              "notcovered": 0,
+              "percent": 0.0
+            },
+            "functions": {
+              "count": 26,
+              "covered": 26,
+              "percent": 100.0
+            },
+            "instantiations": {
+              "count": 50,
+              "covered": 49,
+              "percent": 98.0
+            },
+            "lines": {
+              "count": 205,
+              "covered": 205,
+              "percent": 100.0
+            },
+            "regions": {
+              "count": 363,
+              "covered": 362,
+              "notcovered": 1,
+              "percent": 99.72451790633609
+            }
+          }
+        },
+        {
+          "filename": "crates/gateway-application/src/sessions/admission.rs",
+          "summary": {
+            "branches": {
+              "count": 0,
+              "covered": 0,
+              "notcovered": 0,
+              "percent": 0.0
+            },
+            "mcdc": {
+              "count": 0,
+              "covered": 0,
+              "notcovered": 0,
+              "percent": 0.0
+            },
+            "functions": {
+              "count": 4,
+              "covered": 4,
+              "percent": 100.0
+            },
+            "instantiations": {
+              "count": 8,
+              "covered": 4,
+              "percent": 50.0
+            },
+            "lines": {
+              "count": 79,
+              "covered": 79,
+              "percent": 100.0
+            },
+            "regions": {
+              "count": 107,
+              "covered": 105,
+              "notcovered": 2,
+              "percent": 98.13084112149532
+            }
+          }
+        },
+        {
+          "filename": "crates/gateway-application/src/sessions/authority.rs",
+          "summary": {
+            "branches": {
+              "count": 0,
+              "covered": 0,
+              "notcovered": 0,
+              "percent": 0.0
+            },
+            "mcdc": {
+              "count": 0,
+              "covered": 0,
+              "notcovered": 0,
+              "percent": 0.0
+            },
+            "functions": {
+              "count": 9,
+              "covered": 9,
+              "percent": 100.0
+            },
+            "instantiations": {
+              "count": 18,
+              "covered": 9,
+              "percent": 50.0
+            },
+            "lines": {
+              "count": 90,
+              "covered": 90,
+              "percent": 100.0
+            },
+            "regions": {
+              "count": 85,
+              "covered": 85,
+              "notcovered": 0,
+              "percent": 100.0
+            }
+          }
+        },
+        {
+          "filename": "crates/gateway-application/src/sessions/boundary.rs",
+          "summary": {
+            "branches": {
+              "count": 0,
+              "covered": 0,
+              "notcovered": 0,
+              "percent": 0.0
+            },
+            "mcdc": {
+              "count": 0,
+              "covered": 0,
+              "notcovered": 0,
+              "percent": 0.0
+            },
+            "functions": {
+              "count": 10,
+              "covered": 9,
+              "percent": 90.0
+            },
+            "instantiations": {
+              "count": 20,
+              "covered": 9,
+              "percent": 45.0
+            },
+            "lines": {
+              "count": 111,
+              "covered": 109,
+              "percent": 98.1981981981982
+            },
+            "regions": {
+              "count": 242,
+              "covered": 220,
+              "notcovered": 22,
+              "percent": 90.9090909090909
+            }
+          }
+        },
+        {
+          "filename": "crates/gateway-application/src/sessions/contracts.rs",
+          "summary": {
+            "branches": {
+              "count": 0,
+              "covered": 0,
+              "notcovered": 0,
+              "percent": 0.0
+            },
+            "mcdc": {
+              "count": 0,
+              "covered": 0,
+              "notcovered": 0,
+              "percent": 0.0
+            },
+            "functions": {
+              "count": 28,
+              "covered": 28,
+              "percent": 100.0
+            },
+            "instantiations": {
+              "count": 284,
+              "covered": 154,
+              "percent": 54.22535211267606
+            },
+            "lines": {
+              "count": 157,
+              "covered": 157,
+              "percent": 100.0
+            },
+            "regions": {
+              "count": 214,
+              "covered": 211,
+              "notcovered": 3,
+              "percent": 98.5981308411215
+            }
+          }
+        },
+        {
+          "filename": "crates/gateway-application/src/sessions/coordinator.rs",
+          "summary": {
+            "branches": {
+              "count": 0,
+              "covered": 0,
+              "notcovered": 0,
+              "percent": 0.0
+            },
+            "mcdc": {
+              "count": 0,
+              "covered": 0,
+              "notcovered": 0,
+              "percent": 0.0
+            },
+            "functions": {
+              "count": 23,
+              "covered": 23,
+              "percent": 100.0
+            },
+            "instantiations": {
+              "count": 90,
+              "covered": 47,
+              "percent": 52.22222222222223
+            },
+            "lines": {
+              "count": 562,
+              "covered": 538,
+              "percent": 95.72953736654804
+            },
+            "regions": {
+              "count": 951,
+              "covered": 843,
+              "notcovered": 108,
+              "percent": 88.64353312302839
+            }
+          }
+        },
+        {
+          "filename": "crates/gateway-application/src/sessions/journal.rs",
+          "summary": {
+            "branches": {
+              "count": 0,
+              "covered": 0,
+              "notcovered": 0,
+              "percent": 0.0
+            },
+            "mcdc": {
+              "count": 0,
+              "covered": 0,
+              "notcovered": 0,
+              "percent": 0.0
+            },
+            "functions": {
+              "count": 7,
+              "covered": 7,
+              "percent": 100.0
+            },
+            "instantiations": {
+              "count": 14,
+              "covered": 7,
+              "percent": 50.0
+            },
+            "lines": {
+              "count": 121,
+              "covered": 120,
+              "percent": 99.17355371900827
+            },
+            "regions": {
+              "count": 152,
+              "covered": 149,
+              "notcovered": 3,
+              "percent": 98.02631578947368
+            }
+          }
+        },
+        {
+          "filename": "crates/gateway-application/src/sessions/verification.rs",
+          "summary": {
+            "branches": {
+              "count": 0,
+              "covered": 0,
+              "notcovered": 0,
+              "percent": 0.0
+            },
+            "mcdc": {
+              "count": 0,
+              "covered": 0,
+              "notcovered": 0,
+              "percent": 0.0
+            },
+            "functions": {
+              "count": 3,
+              "covered": 3,
+              "percent": 100.0
+            },
+            "instantiations": {
+              "count": 8,
+              "covered": 4,
+              "percent": 50.0
+            },
+            "lines": {
+              "count": 185,
+              "covered": 179,
+              "percent": 96.75675675675676
+            },
+            "regions": {
+              "count": 339,
+              "covered": 294,
+              "notcovered": 45,
+              "percent": 86.72566371681415
+            }
+          }
+        },
+        {
+          "filename": "crates/gateway-daemon/src/bin/cg-local.rs",
+          "summary": {
+            "branches": {
+              "count": 0,
+              "covered": 0,
+              "notcovered": 0,
+              "percent": 0.0
+            },
+            "mcdc": {
+              "count": 0,
+              "covered": 0,
+              "notcovered": 0,
+              "percent": 0.0
+            },
+            "functions": {
+              "count": 10,
+              "covered": 9,
+              "percent": 90.0
+            },
+            "instantiations": {
+              "count": 20,
+              "covered": 9,
+              "percent": 45.0
+            },
+            "lines": {
+              "count": 122,
+              "covered": 117,
+              "percent": 95.90163934426229
+            },
+            "regions": {
+              "count": 212,
+              "covered": 206,
+              "notcovered": 6,
+              "percent": 97.16981132075472
+            }
+          }
+        },
+        {
+          "filename": "crates/gateway-daemon/src/bin/cg-mcp.rs",
+          "summary": {
+            "branches": {
+              "count": 0,
+              "covered": 0,
+              "notcovered": 0,
+              "percent": 0.0
+            },
+            "mcdc": {
+              "count": 0,
+              "covered": 0,
+              "notcovered": 0,
+              "percent": 0.0
+            },
+            "functions": {
+              "count": 13,
+              "covered": 11,
+              "percent": 84.61538461538461
+            },
+            "instantiations": {
+              "count": 26,
+              "covered": 11,
+              "percent": 42.30769230769231
+            },
+            "lines": {
+              "count": 103,
+              "covered": 99,
+              "percent": 96.11650485436894
+            },
+            "regions": {
+              "count": 184,
+              "covered": 180,
+              "notcovered": 4,
+              "percent": 97.82608695652173
+            }
+          }
+        },
+        {
+          "filename": "crates/gateway-daemon/src/codex_canonical.rs",
+          "summary": {
+            "branches": {
+              "count": 0,
+              "covered": 0,
+              "notcovered": 0,
+              "percent": 0.0
+            },
+            "mcdc": {
+              "count": 0,
+              "covered": 0,
+              "notcovered": 0,
+              "percent": 0.0
+            },
+            "functions": {
+              "count": 10,
+              "covered": 10,
+              "percent": 100.0
+            },
+            "instantiations": {
+              "count": 20,
+              "covered": 10,
+              "percent": 50.0
+            },
+            "lines": {
+              "count": 83,
+              "covered": 80,
+              "percent": 96.3855421686747
+            },
+            "regions": {
+              "count": 129,
+              "covered": 120,
+              "notcovered": 9,
+              "percent": 93.02325581395348
+            }
+          }
+        },
+        {
+          "filename": "crates/gateway-daemon/src/codex_workspace.rs",
+          "summary": {
+            "branches": {
+              "count": 0,
+              "covered": 0,
+              "notcovered": 0,
+              "percent": 0.0
+            },
+            "mcdc": {
+              "count": 0,
+              "covered": 0,
+              "notcovered": 0,
+              "percent": 0.0
+            },
+            "functions": {
+              "count": 34,
+              "covered": 34,
+              "percent": 100.0
+            },
+            "instantiations": {
+              "count": 68,
+              "covered": 34,
+              "percent": 50.0
+            },
+            "lines": {
+              "count": 457,
+              "covered": 450,
+              "percent": 98.46827133479214
+            },
+            "regions": {
+              "count": 666,
+              "covered": 626,
+              "notcovered": 40,
+              "percent": 93.993993993994
+            }
+          }
+        },
+        {
+          "filename": "crates/gateway-daemon/src/cognitive_store.rs",
+          "summary": {
+            "branches": {
+              "count": 0,
+              "covered": 0,
+              "notcovered": 0,
+              "percent": 0.0
+            },
+            "mcdc": {
+              "count": 0,
+              "covered": 0,
+              "notcovered": 0,
+              "percent": 0.0
+            },
+            "functions": {
+              "count": 3,
+              "covered": 3,
+              "percent": 100.0
+            },
+            "instantiations": {
+              "count": 29,
+              "covered": 23,
+              "percent": 79.3103448275862
+            },
+            "lines": {
+              "count": 70,
+              "covered": 68,
+              "percent": 97.14285714285714
+            },
+            "regions": {
+              "count": 130,
+              "covered": 115,
+              "notcovered": 15,
+              "percent": 88.46153846153845
+            }
+          }
+        },
+        {
+          "filename": "crates/gateway-daemon/src/declarative_cli/host_mapping.rs",
+          "summary": {
+            "branches": {
+              "count": 0,
+              "covered": 0,
+              "notcovered": 0,
+              "percent": 0.0
+            },
+            "mcdc": {
+              "count": 0,
+              "covered": 0,
+              "notcovered": 0,
+              "percent": 0.0
+            },
+            "functions": {
+              "count": 6,
+              "covered": 6,
+              "percent": 100.0
+            },
+            "instantiations": {
+              "count": 11,
+              "covered": 8,
+              "percent": 72.72727272727273
+            },
+            "lines": {
+              "count": 76,
+              "covered": 74,
+              "percent": 97.36842105263156
+            },
+            "regions": {
+              "count": 114,
+              "covered": 105,
+              "notcovered": 9,
+              "percent": 92.10526315789474
+            }
+          }
+        },
+        {
+          "filename": "crates/gateway-daemon/src/declarative_cli/pipeline.rs",
+          "summary": {
+            "branches": {
+              "count": 0,
+              "covered": 0,
+              "notcovered": 0,
+              "percent": 0.0
+            },
+            "mcdc": {
+              "count": 0,
+              "covered": 0,
+              "notcovered": 0,
+              "percent": 0.0
+            },
+            "functions": {
+              "count": 25,
+              "covered": 25,
+              "percent": 100.0
+            },
+            "instantiations": {
+              "count": 50,
+              "covered": 26,
+              "percent": 52.0
+            },
+            "lines": {
+              "count": 442,
+              "covered": 424,
+              "percent": 95.92760180995475
+            },
+            "regions": {
+              "count": 707,
+              "covered": 636,
+              "notcovered": 71,
+              "percent": 89.95756718528996
+            }
+          }
+        },
+        {
+          "filename": "crates/gateway-daemon/src/local_mcp/contracts.rs",
+          "summary": {
+            "branches": {
+              "count": 0,
+              "covered": 0,
+              "notcovered": 0,
+              "percent": 0.0
+            },
+            "mcdc": {
+              "count": 0,
+              "covered": 0,
+              "notcovered": 0,
+              "percent": 0.0
+            },
+            "functions": {
+              "count": 2,
+              "covered": 2,
+              "percent": 100.0
+            },
+            "instantiations": {
+              "count": 4,
+              "covered": 4,
+              "percent": 100.0
+            },
+            "lines": {
+              "count": 10,
+              "covered": 10,
+              "percent": 100.0
+            },
+            "regions": {
+              "count": 30,
+              "covered": 30,
+              "notcovered": 0,
+              "percent": 100.0
+            }
+          }
+        },
+        {
+          "filename": "crates/gateway-daemon/src/local_mcp/decode.rs",
+          "summary": {
+            "branches": {
+              "count": 0,
+              "covered": 0,
+              "notcovered": 0,
+              "percent": 0.0
+            },
+            "mcdc": {
+              "count": 0,
+              "covered": 0,
+              "notcovered": 0,
+              "percent": 0.0
+            },
+            "functions": {
+              "count": 13,
+              "covered": 13,
+              "percent": 100.0
+            },
+            "instantiations": {
+              "count": 25,
+              "covered": 21,
+              "percent": 84.0
+            },
+            "lines": {
+              "count": 62,
+              "covered": 62,
+              "percent": 100.0
+            },
+            "regions": {
+              "count": 94,
+              "covered": 93,
+              "notcovered": 1,
+              "percent": 98.93617021276596
+            }
+          }
+        },
+        {
+          "filename": "crates/gateway-daemon/src/local_mcp/mod.rs",
+          "summary": {
+            "branches": {
+              "count": 0,
+              "covered": 0,
+              "notcovered": 0,
+              "percent": 0.0
+            },
+            "mcdc": {
+              "count": 0,
+              "covered": 0,
+              "notcovered": 0,
+              "percent": 0.0
+            },
+            "functions": {
+              "count": 39,
+              "covered": 39,
+              "percent": 100.0
+            },
+            "instantiations": {
+              "count": 87,
+              "covered": 76,
+              "percent": 87.35632183908046
+            },
+            "lines": {
+              "count": 379,
+              "covered": 361,
+              "percent": 95.25065963060686
+            },
+            "regions": {
+              "count": 656,
+              "covered": 621,
+              "notcovered": 35,
+              "percent": 94.66463414634148
+            }
+          }
+        },
+        {
+          "filename": "crates/gateway-daemon/src/local_mcp/runtime.rs",
+          "summary": {
+            "branches": {
+              "count": 0,
+              "covered": 0,
+              "notcovered": 0,
+              "percent": 0.0
+            },
+            "mcdc": {
+              "count": 0,
+              "covered": 0,
+              "notcovered": 0,
+              "percent": 0.0
+            },
+            "functions": {
+              "count": 30,
+              "covered": 29,
+              "percent": 96.66666666666667
+            },
+            "instantiations": {
+              "count": 66,
+              "covered": 48,
+              "percent": 72.72727272727273
+            },
+            "lines": {
+              "count": 561,
+              "covered": 546,
+              "percent": 97.32620320855614
+            },
+            "regions": {
+              "count": 853,
+              "covered": 824,
+              "notcovered": 29,
+              "percent": 96.60023446658849
+            }
+          }
+        },
+        {
+          "filename": "crates/gateway-daemon/src/local_mcp/transport.rs",
+          "summary": {
+            "branches": {
+              "count": 0,
+              "covered": 0,
+              "notcovered": 0,
+              "percent": 0.0
+            },
+            "mcdc": {
+              "count": 0,
+              "covered": 0,
+              "notcovered": 0,
+              "percent": 0.0
+            },
+            "functions": {
+              "count": 10,
+              "covered": 10,
+              "percent": 100.0
+            },
+            "instantiations": {
+              "count": 42,
+              "covered": 32,
+              "percent": 76.19047619047619
+            },
+            "lines": {
+              "count": 84,
+              "covered": 83,
+              "percent": 98.8095238095238
+            },
+            "regions": {
+              "count": 120,
+              "covered": 118,
+              "notcovered": 2,
+              "percent": 98.33333333333333
+            }
+          }
+        },
+        {
+          "filename": "crates/gateway-daemon/src/local_sessions.rs",
+          "summary": {
+            "branches": {
+              "count": 0,
+              "covered": 0,
+              "notcovered": 0,
+              "percent": 0.0
+            },
+            "mcdc": {
+              "count": 0,
+              "covered": 0,
+              "notcovered": 0,
+              "percent": 0.0
+            },
+            "functions": {
+              "count": 29,
+              "covered": 28,
+              "percent": 96.55172413793105
+            },
+            "instantiations": {
+              "count": 58,
+              "covered": 28,
+              "percent": 48.27586206896552
+            },
+            "lines": {
+              "count": 435,
+              "covered": 414,
+              "percent": 95.17241379310344
+            },
+            "regions": {
+              "count": 733,
+              "covered": 635,
+              "notcovered": 98,
+              "percent": 86.63028649386084
+            }
+          }
+        },
+        {
+          "filename": "crates/gateway-daemon/src/session_store.rs",
+          "summary": {
+            "branches": {
+              "count": 0,
+              "covered": 0,
+              "notcovered": 0,
+              "percent": 0.0
+            },
+            "mcdc": {
+              "count": 0,
+              "covered": 0,
+              "notcovered": 0,
+              "percent": 0.0
+            },
+            "functions": {
+              "count": 57,
+              "covered": 57,
+              "percent": 100.0
+            },
+            "instantiations": {
+              "count": 144,
+              "covered": 136,
+              "percent": 94.44444444444444
+            },
+            "lines": {
+              "count": 532,
+              "covered": 519,
+              "percent": 97.55639097744361
+            },
+            "regions": {
+              "count": 687,
+              "covered": 649,
+              "notcovered": 38,
+              "percent": 94.46870451237264
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
