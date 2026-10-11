@@ -113,7 +113,9 @@ It does not define process execution or provider prompts.
 
 ## SemanticTaskIR
 
-The planned versioned, typed canonical result of CGSL semantic compilation.
+The versioned, typed canonical result of CGSL semantic compilation. The
+[IR v1 contract](../semantic-task-ir-v1.md) is implemented; compilation and
+runtime handoff remain planned.
 Only validated, uniquely resolved mandatory semantics may enter an executable
 task representation. It reuses CG-06/07/08 contracts and is distinct from
 ExecutionContextIR, Plan IR and Process IR.

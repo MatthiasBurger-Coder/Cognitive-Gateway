@@ -135,7 +135,7 @@ Canonical entry points:
 - [`docs/arc42/`](docs/arc42/) — arc42 architecture documentation
 - [`docs/README.md`](docs/README.md) — complete technical documentation index
 - [`docs/current-architecture-state.md`](docs/current-architecture-state.md) — current implementation/plan status matrix
-- [`docs/semantic-language-and-interpretation.md`](docs/semantic-language-and-interpretation.md) — planned CGSL / SemanticTaskIR boundary
+- [`docs/semantic-language-and-interpretation.md`](docs/semantic-language-and-interpretation.md) — CGSL / SemanticTaskIR boundary; IR v1 contract implemented, compiler planned
 - [`docs/codex-local-integration.md`](docs/codex-local-integration.md) — Codex -> CG local no-key MCP trust contract
 - [Codex local setup and operator runbook](docs/codex-local-setup.md) — bootstrap, secret-free configuration, CLI fallback and reproducible smoke tests (#244).
 - [`docs/codex-scope-isolation.md`](docs/codex-scope-isolation.md) — explicit workspace/session admission, provenance and isolation (#240)
@@ -171,7 +171,7 @@ The GitHub Wiki is intended for simplified end-user documentation, tutorials and
   as catalog membership or execution authority
 - MCP/tool adapters as controlled capabilities; EPIC-07 defines the external connector/plugin runtime while EPIC-04 separately defines Codex as an inbound local client
 - execution runtimes remain replaceable
-- CGSL/SemanticTaskIR is the planned formal boundary from natural language into deterministic task semantics
+- CGSL/SemanticTaskIR is the formal boundary from natural language into deterministic task semantics; the [IR v1 contract](docs/semantic-task-ir-v1.md) is implemented, while compilation and runtime handoff remain planned
 - learned procedures are governed, immutable/versioned artifacts and never create policy authority
 
 See [`docs/current-architecture-state.md`](docs/current-architecture-state.md) for the authoritative dated status and the relevant Epic/issue anchors.

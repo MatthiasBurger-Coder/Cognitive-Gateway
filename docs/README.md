@@ -241,3 +241,5 @@ Run `python3 scripts/quality-gate.py` for the complete CG-13 gate. See [the rele
 - [Complete EPIC-03 acceptance](epic-03-complete-acceptance.md) — original criteria plus ML lifecycle, concrete CPU training/inference, PostgreSQL restart/rollback and isolated workers.
 
 - [Full EPIC-04 acceptance](epic-04-acceptance.md) — all 24 parent criteria and fail-closed closure enforcement.
+
+- [SemanticTaskIR v1 and versioning](semantic-task-ir-v1.md) — implemented Rust/wire contract, invariants, pinned references and compatibility; compiler and runtime handoff remain planned.

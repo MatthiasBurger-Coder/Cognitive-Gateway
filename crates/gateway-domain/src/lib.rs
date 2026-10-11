@@ -39,6 +39,7 @@ pub mod reasoning_strategy;
 pub mod relationships;
 pub mod retrieval;
 pub mod retrieval_plane;
+pub mod semantic_task;
 pub mod serialization;
 pub mod situation;
 pub mod skill;
@@ -157,3 +158,11 @@ pub use validation::{NonEmptyText, ValidationError};
 pub use version::SchemaVersion;
 
 pub mod worker_fabric;
+
+pub use semantic_task::{
+    ResolvedReference, SEMANTIC_TASK_IR_VERSION, SemanticAssumption, SemanticGoal,
+    SemanticInputValue, SemanticOutputContract, SemanticReferenceBinding,
+    SemanticReferenceValidator, SemanticTarget, SemanticTaskData, SemanticTaskIR,
+    SemanticTaskInput, SemanticTaskType, SemanticVerificationCheck, SemanticVerificationContract,
+    TargetKind,
+};
