@@ -30,6 +30,10 @@ EPIC-05.01 task semantics, the finite formal-core vocabulary and boundaries
 to existing domains. The [semantic interpretation architecture](semantic-language-and-interpretation.md)
 distinguishes this specification from planned compiler/runtime capabilities.
 
+See [Interpretation Context, precedence and lifecycle](interpretation-context.md)
+for EPIC-05.03 request-scoped meaning, typed focus/history, isolation, conflict
+rules and reference decision vectors. Production assembly/resolution remains planned.
+
 See [`retrieval-plane.md`](retrieval-plane.md) for CG-15 versioned retrieval,
 embedding lineage, token estimation, reservations and bounded execution contracts.
 See [`retrieval-pipeline.md`](retrieval-pipeline.md) for CG-16 federated source

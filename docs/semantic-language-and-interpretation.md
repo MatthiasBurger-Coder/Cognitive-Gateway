@@ -13,6 +13,9 @@ defines the EPIC-05.01 semantic baseline, construct ownership, validation
 responsibilities and domain boundaries. Grammar and runtime implementation
 remain separate planned slices. The [SemanticTaskIR v1 contract](semantic-task-ir-v1.md)
 now supplies Rust types, canonical JSON, invariants and versioning under #180.
+The [Interpretation Context specification](interpretation-context.md) defines
+request identity, typed relevance, seven-tier precedence, conflicts and lifecycle
+under #181. Its production assembly/resolution remains planned.
 
 CGSL and `SemanticTaskIR` form the semantic boundary between ambiguous human language and deterministic planning/execution.
 
@@ -86,6 +89,7 @@ As of 2026-10-11:
 
 - the architecture and work breakdown are defined in EPIC-05;
 - the [SemanticTaskIR v1 Rust/wire contract](semantic-task-ir-v1.md), invariants, versioning and reference fixtures are implemented under #180;
+- the [Interpretation Context contract](interpretation-context.md), deterministic precedence and lifecycle are specified under #181; runtime resolution remains planned;
 - Rust parser/compiler work is planned under EPIC-05.08 #186;
 - integration with CG-06/07/08 is planned under EPIC-05.12 #190;
 - the Process IR boundary is planned under EPIC-05.13 #191;

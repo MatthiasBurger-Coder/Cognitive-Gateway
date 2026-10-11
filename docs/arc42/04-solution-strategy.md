@@ -63,6 +63,9 @@ compatibility rules are defined in [`../execution-context-ir.md`](../execution-c
 and [`../ir-serialization.md`](../ir-serialization.md). The planned semantic
 frontend is documented in
 [`../semantic-language-and-interpretation.md`](../semantic-language-and-interpretation.md).
+The [Interpretation Context specification](../interpretation-context.md) now
+defines the request-scoped snapshot, resolution precedence, conflict rules and
+invalidation lifecycle. This definition does not implement the semantic frontend.
 
 ### Local cognitive services
 
