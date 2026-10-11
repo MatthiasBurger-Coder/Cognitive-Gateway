@@ -122,9 +122,12 @@ ExecutionContextIR, Plan IR and Process IR.
 
 ## Interpretation Context
 
-Relevant request-scoped knowledge used to resolve what a user means. It is
-separate from runtime context compilation and does not replay whole conversation
-history or create policy authority.
+An immutable snapshot of relevant request-scoped knowledge used to resolve what
+a user means. The [contract](../interpretation-context.md) defines typed focus,
+history and aliases, deterministic precedence, scope isolation and lifecycle.
+It is separate from ExecutionContextIR/runtime compilation, does not replay
+whole conversation history and cannot create policy authority. Runtime context
+assembly and semantic resolution remain planned.
 
 ## Knowledge Gap
 
