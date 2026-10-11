@@ -74,7 +74,7 @@ flowchart LR
 | Learned procedure domain contracts | IMPLEMENTED | CG-21 foundation added on 2026-10-03. |
 | Experience normalization and pattern inspection | IMPLEMENTED | CG-22 correlates governed, verified outcomes and supports PostgreSQL backed inspection; it creates candidates without executable authority. |
 | Learned procedure discovery/promotion/reflex runtime | IMPLEMENTED (governed reference runtime) | CG-21 through CG-25 and CG-30 demonstrate experience → detected pattern → evaluated procedure → governed promotion → reflex, fallback and rollback. |
-| CGSL / SemanticTaskIR | PLANNED (scope specified) | EPIC-05.01 #179 defines the [scope and canonical vocabulary](cgsl-scope-and-vocabulary.md). SemanticTaskIR schema, compiler and integration remain planned under EPIC-05 #177. |
+| CGSL / SemanticTaskIR | PARTIAL (scope and IR contract implemented) | EPIC-05.01 #179 defines the [scope and canonical vocabulary](cgsl-scope-and-vocabulary.md). EPIC-05.02 #180 implements the [SemanticTaskIR v1 Rust/wire contract](semantic-task-ir-v1.md). Compiler, production reference resolution and integration remain planned under EPIC-05 #177. |
 | Natural-language-to-IR compiler | PLANNED | Rust parser/compiler work is under EPIC-05, including #186 and related items. |
 | Optional SLM semantic interpreter | PLANNED | EPIC-05.11 consumes model adapters; model output is never authoritative. |
 | Local SLM/LxM runtime | IMPLEMENTED (reference service) | CG-27.01: separate CPU-first Ollama/Python containers, Rust port/adapter, immutable profiles, qualification, promotion and rollback. Full SemanticTaskIR interpretation remains separate EPIC-05.11 work. |

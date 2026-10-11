@@ -49,7 +49,7 @@
   },
   {
     "name": "Domain coverage gate",
-    "command": "cargo llvm-cov clean --workspace\ncargo llvm-cov -p gateway-domain --all-targets --fail-under-lines 95 --json --output-path \"$EVIDENCE_DIR/domain-coverage.json\""
+    "command": "cargo llvm-cov clean --workspace\ncargo llvm-cov -p gateway-domain --all-targets --fail-under-lines 95 --json --output-path \"$EVIDENCE_DIR/domain-coverage.json\"\npython3 scripts/check-semantic-task-coverage.py --self-test\npython3 scripts/check-semantic-task-coverage.py \"$EVIDENCE_DIR/domain-coverage.json\""
   },
   {
     "name": "CG-03 registry coverage gate",

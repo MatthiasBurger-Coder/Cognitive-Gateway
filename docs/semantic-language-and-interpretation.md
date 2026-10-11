@@ -11,7 +11,8 @@ The current deterministic core can consume structured task/context contracts, bu
 The normative [CGSL scope and canonical vocabulary](cgsl-scope-and-vocabulary.md)
 defines the EPIC-05.01 semantic baseline, construct ownership, validation
 responsibilities and domain boundaries. Grammar and runtime implementation
-remain separate planned slices.
+remain separate planned slices. The [SemanticTaskIR v1 contract](semantic-task-ir-v1.md)
+now supplies Rust types, canonical JSON, invariants and versioning under #180.
 
 CGSL and `SemanticTaskIR` form the semantic boundary between ambiguous human language and deterministic planning/execution.
 
@@ -81,9 +82,10 @@ A hypothesis cannot silently become a fact, and a model-generated value cannot s
 
 ## Current implementation boundary
 
-As of 2026-10-03:
+As of 2026-10-11:
 
 - the architecture and work breakdown are defined in EPIC-05;
+- the [SemanticTaskIR v1 Rust/wire contract](semantic-task-ir-v1.md), invariants, versioning and reference fixtures are implemented under #180;
 - Rust parser/compiler work is planned under EPIC-05.08 #186;
 - integration with CG-06/07/08 is planned under EPIC-05.12 #190;
 - the Process IR boundary is planned under EPIC-05.13 #191;

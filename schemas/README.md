@@ -82,3 +82,5 @@ The [Codex-facing v1 schemas](codex/v1/) define EPIC-04.02 request, response,
 resource and diagnostic envelopes plus the tool/resource catalog. Existing Rust
 payload parsers remain authoritative; session commands are explicitly unsupported
 until the shared session API exists. See [the versioned contract](../docs/codex-facing-contracts.md).
+
+[`semantic-task.schema.json`](semantic-task.schema.json) defines EPIC-05.02 SemanticTaskIR 1.0. Rust admission adds scope, identity and CG-06 invariants; external reference validation remains mandatory before handoff. See [the versioning contract](../docs/semantic-task-ir-v1.md) and [fixtures](../tests/fixtures/semantic-task-v1/).
