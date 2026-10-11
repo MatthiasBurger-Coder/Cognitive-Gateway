@@ -137,6 +137,7 @@ Canonical entry points:
 - [`docs/current-architecture-state.md`](docs/current-architecture-state.md) — current implementation/plan status matrix
 - [`docs/semantic-language-and-interpretation.md`](docs/semantic-language-and-interpretation.md) — CGSL / SemanticTaskIR boundary; IR v1 contract implemented, compiler planned
 - [Interpretation Context](docs/interpretation-context.md) — request-scoped contract, resolution precedence, conflict and lifecycle specification (#181); runtime resolution planned
+- [Ambiguity, conflict and knowledge-gap contracts](docs/semantic-resolution-contracts.md) — EPIC-05.04 domain types, stable diagnostics and mandatory compilation blockers.
 - [`docs/codex-local-integration.md`](docs/codex-local-integration.md) — Codex -> CG local no-key MCP trust contract
 - [Codex local setup and operator runbook](docs/codex-local-setup.md) — bootstrap, secret-free configuration, CLI fallback and reproducible smoke tests (#244).
 - [`docs/codex-scope-isolation.md`](docs/codex-scope-isolation.md) — explicit workspace/session admission, provenance and isolation (#240)

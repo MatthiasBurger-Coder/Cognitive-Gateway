@@ -180,8 +180,10 @@ Replay MUST use captured acquisition results and basis; new retrieval, clock
 or source revisions constitute a new capture. Diagnostics MUST retain queried
 field, status (resolved/unresolved/ambiguous/conflicting/invalid), considered
 tiers, selected binding if any, candidates, exclusions and source lineage.
-Sensitive diagnostics follow host disclosure rules. #182/#188 define detailed
-epistemic/clarification payloads; #187 defines executable diagnostic encoding.
+Sensitive diagnostics follow host disclosure rules.
+[#182 resolution and knowledge-gap contracts](semantic-resolution-contracts.md)
+define the uncertainty types; #188 defines clarification plans; #187 defines
+executable diagnostic encoding.
 
 ## Conflict-resolution matrix
 
