@@ -39,6 +39,7 @@ pub mod reasoning_strategy;
 pub mod relationships;
 pub mod retrieval;
 pub mod retrieval_plane;
+pub mod semantic_resolution;
 pub mod semantic_task;
 pub mod serialization;
 pub mod situation;
@@ -165,4 +166,10 @@ pub use semantic_task::{
     SemanticReferenceValidator, SemanticTarget, SemanticTaskData, SemanticTaskIR,
     SemanticTaskInput, SemanticTaskType, SemanticVerificationCheck, SemanticVerificationContract,
     TargetKind,
+};
+
+pub use semantic_resolution::{
+    KnowledgeGap, KnowledgeGapSubject, KnowledgeResolutionClass, ResolutionCandidate,
+    ResolutionCandidates, ResolutionFailure, SemanticFieldRequirement, SemanticGapReason,
+    SemanticResolution, SemanticResolutionState,
 };

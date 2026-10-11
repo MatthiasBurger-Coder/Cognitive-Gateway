@@ -34,6 +34,9 @@ See [Interpretation Context, precedence and lifecycle](interpretation-context.md
 for EPIC-05.03 request-scoped meaning, typed focus/history, isolation, conflict
 rules and reference decision vectors. Production assembly/resolution remains planned.
 
+See [Ambiguity, conflict and knowledge-gap contracts](semantic-resolution-contracts.md)
+for EPIC-05.04 domain types, stable diagnostics and mandatory compilation blockers.
+
 See [`retrieval-plane.md`](retrieval-plane.md) for CG-15 versioned retrieval,
 embedding lineage, token estimation, reservations and bounded execution contracts.
 See [`retrieval-pipeline.md`](retrieval-pipeline.md) for CG-16 federated source
