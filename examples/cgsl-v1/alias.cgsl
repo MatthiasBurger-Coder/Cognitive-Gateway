@@ -1,0 +1,51 @@
+{
+  "ambiguity": [],
+  "assumption": [],
+  "cgsl": "1.0",
+  "confidence": [],
+  "constraint": [],
+  "context": [],
+  "desired_state": null,
+  "evidence": [],
+  "history": [],
+  "id": "task-inspect",
+  "input": [],
+  "knowledge_gap": [],
+  "objective": {
+    "description": "Report the artifact properties",
+    "outcome": "inspect-artifact"
+  },
+  "observation": [],
+  "output": {
+    "schema": {
+      "contract": "cg.output-schema",
+      "contract_version": "1.0",
+      "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "id": "ArtifactInspection",
+      "revision": "7",
+      "scope": "project-x"
+    }
+  },
+  "policy": [],
+  "process": null,
+  "requires": [],
+  "state": null,
+  "target": {
+    "kind": "ARTIFACT",
+    "reference": {
+      "contract": "cg.artifact",
+      "contract_version": "1.0",
+      "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "id": "artifact-1",
+      "revision": "7",
+      "scope": "project-x"
+    }
+  },
+  "task": "INSPECT",
+  "verification": {
+    "checks": [
+      "OUTPUT_SCHEMA_VALID",
+      "NO_UNRESOLVED_REFERENCE"
+    ]
+  }
+}
