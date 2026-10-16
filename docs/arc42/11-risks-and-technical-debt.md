@@ -41,3 +41,27 @@ Mitigation: explicit schema versioning and contract tests.
 Risk: a local SLM provides inconsistent semantic classification.
 
 Mitigation: confidence reporting, deterministic validation, escalation/fallback and no authority delegation to the SLM.
+
+## 11.8 Semantic shape mistaken for executable admission
+
+Risk: a successful CGSL parse, JSON Schema check or `task_shape()` is treated as
+proof of reference truth, mandatory completeness or execution permission.
+
+Mitigation: trusted captured-basis reference/source validation and host-derived
+requirement manifests precede handoff; Process/Policy gates remain authoritative.
+[Reference walkthroughs](../cgsl-reference-examples.md) distinguish each evidence
+level and show denied paths. Persisted clarification hosting (#275) and full
+runtime proof (#279) remain integration obligations.
+
+## 11.9 Semantic loss and conformance drift
+
+Risk: exporting Plan alone drops task output/evidence/verification obligations;
+source formatting is confused with IR normalization; fixtures drift with code.
+
+Mitigation: preserve the immutable semantic envelope, retain interpretation
+sidecars when saving source, and compare against frozen cross-implementation
+bytes/digests. [Migration](../cgsl-migration.md) requires explicit versioned,
+validated transformations. Canonical context/example producers (#285/#286) and
+production invocation admission (#263) must qualify their integration against the
+[Prompt IR boundary](../prompt-ir-handoff-boundary.md); illustrative renderings
+are not sufficient runtime evidence.

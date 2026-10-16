@@ -29,3 +29,13 @@ Current decisions:
 - [ADR-021 — Shared Structured-Session Ownership (Proposed)](../adr/ADR-021-shared-structured-session-ownership.md)
 
 ADRs are append-only records of architectural intent. If a decision changes, a new ADR supersedes the old one rather than silently rewriting history.
+
+## ADR-015 implementation refinement (2026-10-17)
+
+[ADR-015](../adr/ADR-015-semantic-task-ir-boundary.md) remains the semantic boundary
+decision. CGSL 1.0 chooses strict JSON and a closed 20-construct registry, while
+SemanticTaskIR retains the existing typed domain model and canonical encoding.
+The offline frontend returns shapes; application hosts admit reference truth and
+completeness. These choices are specified in the [language contract](../cgsl-language-v1.md)
+and [implementer guide](../cgsl-implementer-guide.md), with portable conformance
+vectors. No new process DSL, authority model or competing Prompt IR is introduced.

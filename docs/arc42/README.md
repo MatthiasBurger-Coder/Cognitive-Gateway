@@ -35,3 +35,7 @@ Companion boundary documents:
 - [Local model runtime](../local-model-runtime.md)
 - [Learned procedures](../learned-procedures.md)
 - [Learned procedure evaluation](../procedure-evaluation.md)
+
+See the [CGSL implementer guide](../cgsl-implementer-guide.md),
+[reference walkthroughs](../cgsl-reference-examples.md) and
+[migration guide](../cgsl-migration.md) for the complete EPIC-05.16 documentation path.

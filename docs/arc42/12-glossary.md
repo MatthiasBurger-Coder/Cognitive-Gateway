@@ -114,8 +114,8 @@ It does not define process execution or provider prompts.
 ## SemanticTaskIR
 
 The versioned, typed canonical result of CGSL semantic compilation. The
-[IR v1 contract](../semantic-task-ir-v1.md) is implemented; compilation and
-runtime handoff remain planned.
+[IR v1 contract](../semantic-task-ir-v1.md), offline compilation and application
+handoff components are implemented; full hosted runtime integration remains partial.
 Only validated, uniquely resolved mandatory semantics may enter an executable
 task representation. It reuses CG-06/07/08 contracts and is distinct from
 ExecutionContextIR, Plan IR and Process IR.
@@ -127,7 +127,8 @@ a user means. The [contract](../interpretation-context.md) defines typed focus,
 history and aliases, deterministic precedence, scope isolation and lifecycle.
 It is separate from ExecutionContextIR/runtime compilation, does not replay
 whole conversation history and cannot create policy authority. Runtime context
-assembly and semantic resolution remain planned.
+assembly requires a trusted host; deterministic semantic resolution is implemented
+at component level.
 
 ## Knowledge Gap
 
@@ -153,3 +154,18 @@ The output contract defines the structured shape and meaning of the requested
 result. The verification contract defines checks for its acceptance. Declaring
 either contract does not establish that a result passed verification, a process
 gate passed, or execution was authorized.
+
+## Canonical semantic source and task shape
+
+Canonical semantic source is the CGSL serialization of admitted SemanticTaskIR;
+it cannot reconstruct interpretation sidecars. A task shape is a structurally
+valid task returned by the offline frontend, before trusted external-reference
+and completeness admission. See [CGSL 1.0](../cgsl-language-v1.md).
+
+## SemanticPlanHandoff and Prompt IR
+
+`SemanticPlanHandoff` retains the immutable task, source, Delta, Plan and
+capability snapshot for existing planning/resolution. Prompt IR names the
+provider-neutral consumer boundary specified in [the handoff contract](../prompt-ir-handoff-boundary.md);
+the current two renderers are offline examples, while production invocation IR
+belongs to #263.

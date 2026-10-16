@@ -43,7 +43,8 @@ The implemented deterministic pipeline consumes validated structured contracts
 and produces provider-independent execution context. Natural-language input is
 **not yet** a fully implemented direct compiler path.
 
-EPIC-05 defines the target semantic frontend:
+EPIC-05 supplies the offline semantic frontend and application components. The
+diagram includes the hosted natural-language composition that remains partial:
 
 ```mermaid
 flowchart LR
@@ -60,12 +61,13 @@ canonical result is validated deterministically.
 
 The current `ExecutionContextIR` field contract, invariants and JSON
 compatibility rules are defined in [`../execution-context-ir.md`](../execution-context-ir.md)
-and [`../ir-serialization.md`](../ir-serialization.md). The planned semantic
-frontend is documented in
-[`../semantic-language-and-interpretation.md`](../semantic-language-and-interpretation.md).
-The [Interpretation Context specification](../interpretation-context.md) now
-defines the request-scoped snapshot, resolution precedence, conflict rules and
-invalidation lifecycle. This definition does not implement the semantic frontend.
+and [`../ir-serialization.md`](../ir-serialization.md). The
+[CGSL implementer guide](../cgsl-implementer-guide.md) indexes the normative
+language, task, contextual and epistemic contracts. The shipped parser/compiler,
+resolver, completeness and planning adapter require trusted captured-basis
+admission. Production clarification hosting and prompt invocation remain separate.
+[Migration](../cgsl-migration.md) preserves structured callers and independent
+versioning; source formatting does not change canonical task identity.
 
 ### Local cognitive services
 

@@ -23,6 +23,15 @@ prerequisite/evidence gates. Contract definition does not implement session serv
 
 See [`adr/`](adr/) for accepted architecture decisions.
 
+## CGSL implementation documentation
+
+Start with the [CGSL implementer guide](cgsl-implementer-guide.md) for the complete
+normative reading path, compiler stages and current delivery boundary. Use the
+[reference walkthroughs](cgsl-reference-examples.md) to trace intent through task
+semantics, planning, Process IR and prompt layouts, and the
+[migration guide](cgsl-migration.md) for existing structured consumers and version
+evolution.
+
 ## Core domain contract
 
 See [CGSL scope and canonical vocabulary](cgsl-scope-and-vocabulary.md) for
@@ -203,7 +212,7 @@ The approved CG-02 v2 handoff extension is documented in
 7. Versioned Execution Context IR as the core runtime integration contract.
 8. Hexagonal Architecture with inward dependencies and replaceable ports/adapters.
 9. Git is authoritative for declarative Agent/Skill/Workflow/Policy definitions; runtime databases own mutable execution state, while SQL/graph/vector stores used for definition lookup are derived and rebuildable read models.
-10. CGSL/SemanticTaskIR is the planned semantic boundary between natural language and deterministic planning; unresolved mandatory semantics must not be guessed.
+10. CGSL/SemanticTaskIR supplies the implemented component semantic boundary between natural language and deterministic planning; unresolved mandatory semantics must not be guessed.
 11. MCP is an adapter protocol, never an authority source: inbound Codex integration (EPIC-04) and outbound connector integration (EPIC-07) are separate responsibilities.
 12. Local models are optional replaceable cognitive services behind stable ports; model identity/version/digest/quantization and qualification are explicit, and model output is non-authoritative.
 13. Learned procedures are versioned governed artifacts derived from eligible experience; history does not grant process or policy authority.
@@ -268,5 +277,5 @@ Run `python3 scripts/quality-gate.py` for the complete CG-13 gate. See [the rele
 
 - [Full EPIC-04 acceptance](epic-04-acceptance.md) — all 24 parent criteria and fail-closed closure enforcement.
 
-- [SemanticTaskIR v1 and versioning](semantic-task-ir-v1.md) — implemented Rust/wire contract, invariants, pinned references and compatibility; compiler and runtime handoff remain planned.
+- [SemanticTaskIR v1 and versioning](semantic-task-ir-v1.md) — implemented Rust/wire contract, invariants, pinned references and compatibility; see the implementer guide for delivered compiler components and remaining runtime integration.
 - [Optional interpretation adapters](interpretation-adapters.md) — deterministic-first classifier, embedding and SLM proposals, validation, provenance and fallback.

@@ -40,9 +40,9 @@ override an Agent or Skill definition. In the application contract this input
 is an opaque `ProjectContext` carried by `ExecutionRequest`; it is not part of
 the registry or `ExecutionContextIR`.
 
-## 6.3 Semantic interpretation flow (planned EPIC-05)
+## 6.3 Semantic interpretation flow (components implemented; host composition partial)
 
-The target natural-language frontend is:
+The semantic composition boundary is:
 
 ```mermaid
 flowchart LR
@@ -56,8 +56,14 @@ flowchart LR
 
 The SLM is optional. It proposes interpretation candidates; it does not define
 canonical semantics. Mandatory ambiguity or knowledge gaps remain explicit and
-may require retrieval or clarification. Until EPIC-05 is implemented, callers
-must use existing structured inputs for deterministic execution.
+may require retrieval or clarification. The offline CGSL frontend returns typed
+shapes/sidecars. Application resolution and completeness authenticate the captured
+basis and mandatory manifest before compilation and revalidate the emitted task.
+Clarification replies enter as fresh input through that same path; #275 owns
+persisted reply correlation and expiry. The semantic planning envelope delegates
+to CG-07/08 and retains output/verification/evidence alongside Plan. See the
+[executable reference walkthroughs](../cgsl-reference-examples.md). These component
+proofs do not establish the full #279 hosted runtime or #263 invocation path.
 
 ## 6.4 Retrieval flow
 
@@ -159,8 +165,9 @@ Process/Policy dispatch, budgets and post-execution verification. The complete E
 are covered by [complete acceptance](../epic-03-complete-acceptance.md).
 
 The CG-27.01 reference deployment, provider-neutral port and qualification lifecycle
-are implemented; see [the operator guide](../local-model-runtime.md). Full
-SemanticTaskIR interpretation remains EPIC-05.11 work.
+are implemented; see [the operator guide](../local-model-runtime.md).
+EPIC-05.11 supplies optional interpretation proposal adapters at component level;
+complete hosted interpretation and model invocation remain separate integration work.
 
 ## Inbound canonical and session delivery
 

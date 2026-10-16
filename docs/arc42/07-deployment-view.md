@@ -68,5 +68,6 @@ selected MCP transport and security profile. Connector admission is explicit
 and scope-isolated.
 
 The CG-27.01 reference deployment, provider-neutral port and qualification lifecycle
-are implemented; see [the operator guide](../local-model-runtime.md). Full
-SemanticTaskIR interpretation remains EPIC-05.11 work.
+are implemented; see [the operator guide](../local-model-runtime.md).
+EPIC-05.11 supplies optional interpretation proposal adapters at component level;
+complete hosted interpretation and model invocation remain separate integration work.

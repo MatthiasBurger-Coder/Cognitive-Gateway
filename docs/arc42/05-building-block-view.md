@@ -260,8 +260,9 @@ Process/Policy simulation capture in `gateway-application`, and evaluate/simulat
 commands in the CLI adapter. See [procedure evaluation](../procedure-evaluation.md).
 
 The CG-27.01 reference deployment, provider-neutral port and qualification lifecycle
-are implemented; see [the operator guide](../local-model-runtime.md). Full
-SemanticTaskIR interpretation remains EPIC-05.11 work.
+are implemented; see [the operator guide](../local-model-runtime.md).
+EPIC-05.11 supplies optional interpretation proposal adapters at component level;
+complete hosted interpretation and model invocation remain separate integration work.
 
 CG-27 adds an optional four-task cognitive signal adapter and standalone benchmark
 harness. Versioned datasets and exact invocation provenance bind CPU/GPU reports;
@@ -279,3 +280,17 @@ observations, activation and exact predecessor rollback with independent authori
 The daemon inference path does not call training. Concrete offline workers and
 atomic durable release/routing stores remain outer adapters. See
 [the CG-28 contract and operator procedure](../offline-learning.md).
+
+## Semantic component ownership detail
+
+| Module / port | Responsibility and boundary |
+| --- | --- |
+| `gateway-cgsl` | Offline parser, AST, typed compiler, formatter/serializer; depends inward on domain, not on application or a process/provider parser |
+| `gateway-domain` | SemanticTaskIR, output/verification, interpretation, gap and evidence types and canonical invariants |
+| `gateway-application::interpretation` / `completeness` | Deterministic resolution, host-authenticated mandatory manifest, clarification frontier and revalidated compiler callback |
+| `gateway-application::semantic_planning` | CG-06 mapping and immutable semantic envelope; invokes existing CG-07/08 without duplicate planners |
+| `gateway-process` / CG-09 | Process definition, lifecycle, gates and policy authority; CGSL carries a definition pin only |
+| CG-10 / outer invocation adapters | Context compilation; prompt layout references are test-only, production #263 remains downstream |
+
+See the [implementer guide](../cgsl-implementer-guide.md) for all contracts,
+source-to-IR stages and the remaining #285/#286 producer integration.
