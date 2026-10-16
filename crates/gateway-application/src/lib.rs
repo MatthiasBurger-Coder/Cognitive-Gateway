@@ -15,6 +15,7 @@ pub mod experience_patterns;
 pub mod external_context;
 pub mod graph_retrieval;
 pub mod interpretation;
+pub mod interpretation_adapters;
 pub mod memory;
 pub mod model_releases;
 pub mod offline_learning;

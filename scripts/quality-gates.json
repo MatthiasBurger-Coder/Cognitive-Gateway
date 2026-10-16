@@ -48,6 +48,10 @@
     "command": "set -euo pipefail\ncommand -v cg-registry\ncg-registry --help >/dev/null\ncg-registry agent list --json >/dev/null\ncg-registry agent show system-architect --json >/dev/null\ncg-registry skill list --json >/dev/null\ncg-registry skill show architecture-hexagonal --json >/dev/null\ncg-registry skill graph architecture-hexagonal --json >/dev/null\ncg-registry capability list --json >/dev/null\ncg-registry capability show architecture.dependency-analysis --json >/dev/null\ncg-registry capability resolve architecture.dependency-analysis --json >/dev/null\n"
   },
   {
+    "name": "EPIC-05.11 optional interpretation adapter conformance and coverage",
+    "command": "cargo llvm-cov -p gateway-application --test completeness --locked --json --output-path \"$EVIDENCE_DIR/interpretation-adapters-coverage.json\"\npython3 scripts/check-interpretation-adapters-coverage.py --self-test\npython3 scripts/check-interpretation-adapters-coverage.py \"$EVIDENCE_DIR/interpretation-adapters-coverage.json\""
+  },
+  {
     "name": "EPIC-05.10 completeness and clarification coverage",
     "command": "cargo llvm-cov -p gateway-application --test completeness --locked --json --output-path \"$EVIDENCE_DIR/completeness-coverage.json\"\npython3 scripts/check-completeness-coverage.py --self-test\npython3 scripts/check-completeness-coverage.py \"$EVIDENCE_DIR/completeness-coverage.json\""
   },

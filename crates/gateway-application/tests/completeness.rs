@@ -2,6 +2,9 @@ use gateway_application::interpretation::*;
 use gateway_domain::{interpretation::*, *};
 use std::cell::Cell;
 
+#[path = "support/interpretation_adapters.rs"]
+mod interpretation_adapters;
+
 fn id(s: &str) -> ReferenceId {
     ReferenceId::new(s).unwrap()
 }

@@ -1,0 +1,67 @@
+[
+  {
+    "name": "low-score",
+    "pointer": "/proposal/score",
+    "value": 0.79
+  },
+  {
+    "name": "invalid-score",
+    "pointer": "/proposal/score",
+    "value": 2
+  },
+  {
+    "name": "unknown-model",
+    "pointer": "/model_id",
+    "value": "unknown"
+  },
+  {
+    "name": "changed-version",
+    "pointer": "/provenance/model_version",
+    "value": "v2"
+  },
+  {
+    "name": "invalid-json-contract",
+    "pointer": "/proposal/task",
+    "value": {}
+  },
+  {
+    "name": "wrong-source",
+    "pointer": "/proposal/source",
+    "value": "classifier"
+  },
+  {
+    "name": "invalid-envelope",
+    "pointer": "/kind",
+    "value": "authority"
+  },
+  {
+    "name": "invalid-provenance",
+    "pointer": "/provenance/runtime",
+    "value": ""
+  },
+  {
+    "name": "wrong-contract",
+    "pointer": "/provenance/output_contract",
+    "value": "wrong"
+  },
+  {
+    "name": "invented-meaning",
+    "pointer": "/proposal/task/goal/description",
+    "value": "invented"
+  },
+  {
+    "name": "wrong-task",
+    "pointer": "/proposal/task/id",
+    "value": "other"
+  },
+  {
+    "name": "wrong-scope",
+    "pointer": "/proposal/task/target/reference/scope",
+    "value": "other"
+  },
+  {
+    "name": "invalid-payload",
+    "pointer": "/proposal",
+    "value": {}
+  }
+]
