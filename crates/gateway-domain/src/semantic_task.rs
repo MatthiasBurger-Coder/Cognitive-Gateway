@@ -83,8 +83,8 @@ pub struct SemanticTaskInput {
     pub value: SemanticInputValue,
 }
 
-/// Unverified premise, retained separately from all mandatory operands. Detailed
-/// epistemic lifecycle and attachment contracts remain EPIC-05.05 work.
+/// Unverified premise, retained separately from all mandatory operands. Lifecycle
+/// and interpretation attachments are defined in `semantic_epistemic`.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct SemanticAssumption {
