@@ -58,7 +58,7 @@ def inspect(kind, path, candidate):
             report.get('epic_04_status') != 'NOT_ASSESSED'
             or report.get('closure_allowed') is not False):
         raise ValueError('Scoped evidence must defer EPIC-04 acceptance and prohibit closure')
-    required_sources = {str(p.relative_to(ROOT)) for p in (ROOT / 'crates').rglob('*.rs')}
+    required_sources = {p.relative_to(ROOT).as_posix() for p in (ROOT / 'crates').rglob('*.rs')}
     required_sources.update(('Cargo.toml', 'Cargo.lock'))
     if not required_sources.issubset(report['source_sha256']):
         raise ValueError('Evidence omits production/test source bindings')

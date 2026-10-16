@@ -77,8 +77,9 @@ here would manufacture planning lineage. This contract instead reuses
 
 The process reference is reused from the domain because `gateway-process`
 depends on `gateway-domain`. Importing `DefinitionIdentity` into this crate
-would introduce a dependency cycle. #191 owns the mapping and applicability
-proof against the actual CG-04 definition, not a second process model.
+would introduce a dependency cycle. The [process boundary](semantic-process-boundary.md)
+defines and proves the mapping and applicability against the actual CG-04
+definition without a second process model (#191).
 
 These wire field names do not extend the 20-name CGSL source vocabulary.
 `current_state`, for example, is a wire field corresponding to CGSL `state`;

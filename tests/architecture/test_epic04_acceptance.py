@@ -60,7 +60,7 @@ class Epic04AcceptanceTests(unittest.TestCase):
             launcher, native = root / 'codex-launcher', root / 'codex-native'
             launcher.write_text('fixture launcher')
             native.write_text('fixture native client')
-            sources = {str(p.relative_to(root)): GATE.sha256(p)
+            sources = {p.relative_to(root).as_posix(): GATE.sha256(p)
                        for p in root.rglob('*') if p.is_file() and 'target' not in p.parts
                        and p not in (launcher, native)}
             paths, reports = {}, {}
@@ -106,7 +106,7 @@ class Epic04AcceptanceTests(unittest.TestCase):
                             for name in expected]}]}))
                     if kind == 'quality':
                         (directory / 'shared-sessions/transitions.jsonl').write_text('{"state":"completed"}\n')
-                    report['artifact_sha256'] = {str(p.relative_to(directory)): GATE.sha256(p)
+                    report['artifact_sha256'] = {p.relative_to(directory).as_posix(): GATE.sha256(p)
                         for p in directory.rglob('*') if p.is_file()}
                     reports[kind] = report
                     paths[kind].write_text(json.dumps(report))

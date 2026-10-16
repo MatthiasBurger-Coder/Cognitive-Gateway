@@ -5,7 +5,7 @@ import json
 import os
 from pathlib import Path
 import platform
-import resource
+from process_memory import peak_rss_bytes
 import sys
 import time
 
@@ -37,7 +37,7 @@ report = {'schema_version': 1, 'suite': 'EPIC03-ML-v1', 'status': evaluated['sta
           'drift': monitoring, 'task_metrics': {'regression': pipeline.regression([1, 2, 3], [1.1, 1.9, 3]),
                                              'ranking': pipeline.ranking({'a', 'b'}, ['a', 'c', 'b'], 3)},
           'performance': {'wall_ns': time.perf_counter_ns() - started, 'cpu_ns': time.process_time_ns() - cpu_start,
-                          'peak_process_rss_bytes': resource.getrusage(resource.RUSAGE_SELF).ru_maxrss * (1 if sys.platform == 'darwin' else 1024),
+                          'peak_process_rss_bytes': peak_rss_bytes(),
                           'hardware': platform.machine(), 'platform': platform.platform(), 'python': platform.python_version(),
                           'model_artifact_bytes': len(pipeline.canonical(artifact)), 'external_provider_calls': 0,
                           'gpu': {'status': 'NOT_USED', 'reason': 'CPU reference algorithm'},

@@ -288,7 +288,7 @@ impl CognitiveSchedulerPort for ReferenceScheduler {
         self.scoped(scope, id)?;
         self.recover(now)?;
         let entry = self.entries.get_mut(id).ok_or(FabricError::UnknownWork)?;
-        if !entry.lease.as_ref().is_some_and(|l| l.token == token) {
+        if entry.lease.as_ref().is_none_or(|l| l.token != token) {
             return Err(FabricError::StaleLease);
         }
         Self::retry(entry, reason, now);

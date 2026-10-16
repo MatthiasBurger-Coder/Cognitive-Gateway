@@ -54,12 +54,14 @@ impl BoundedProcess {
             std::process::id(),
             NEXT.fetch_add(1, Ordering::Relaxed)
         ));
-        let mut directory = fs::DirBuilder::new();
+        let directory = fs::DirBuilder::new();
         #[cfg(unix)]
-        {
+        let directory = {
             use std::os::unix::fs::DirBuilderExt;
+            let mut directory = directory;
             directory.mode(0o700);
-        }
+            directory
+        };
         directory
             .create(&path)
             .map_err(|_| ProcessError::Unavailable)?;

@@ -42,6 +42,26 @@ class DependencyTests(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, "dev-only"):
                     guard.check(self.metadata)
 
+    def test_process_and_semantic_frontend_remain_independent(self):
+        # #191: aliases, platform conditions and test/build edges cannot bridge
+        # the two languages or pull either implementation into the shared domain.
+        for source, target in [("gateway-cgsl", "gateway-process"),
+                               ("gateway-process", "gateway-cgsl"),
+                               ("gateway-domain", "gateway-process"),
+                               ("gateway-domain", "gateway-cgsl")]:
+            for kind in [None, "dev", "build"]:
+                for condition in [None, "cfg(windows)"]:
+                    with self.subTest(source=source, target=target,
+                                      kind=kind, condition=condition):
+                        invalid = copy.deepcopy(self.metadata)
+                        owner = next(p for p in invalid["packages"] if p["name"] == source)
+                        owner["dependencies"].append({
+                            "name": target, "rename": "semantic_contract",
+                            "kind": kind, "target": condition,
+                            "path": f"/repo/crates/{target}"})
+                        with self.assertRaisesRegex(ValueError, "Forbidden dependency"):
+                            guard.check(invalid)
+
     def test_outward_and_cross_component_dependencies(self):
         for source, target in [("gateway-domain", "gateway-application"),
                                ("gateway-application", "gateway-daemon"),
