@@ -1,0 +1,165 @@
+{
+  "issue": 193,
+  "date": "2026-10-17",
+  "base_revision": "e5a9140ea925ad24d72185b35f9ac3bae737f5ec",
+  "scope_status": "VERIFIED_COMPONENT_CONFORMANCE",
+  "full_integration_status": "DOWNSTREAM_275_279_NOT_CLAIMED",
+  "review": "Three Amigos role passes by one agent; no independent review claimed",
+  "environment": "Linux/WSL; existing shared target contains Windows artifacts, so LLVM coverage used an isolated target directory",
+  "production_changes": [
+    "Add canonical source formatter and semantic source serializer",
+    "Share existing root mapping with serializer; no domain contract or dependency changes"
+  ],
+  "source_hash_format": "SHA-256 of bytes with CRLF normalized to LF; invalid UTF-8 fixture remains raw bytes",
+  "source_sha256": {
+    "crates/gateway-application/tests/completeness.rs": "cf576a386b5807009a4cbf1401679e5a59c00e6b48fe7f3464dc110e3912453f",
+    "crates/gateway-application/tests/interpretation.rs": "65e19c21520ee27c6d2867c8b77ae9b361b7508c3111744db855165d6b900a42",
+    "crates/gateway-application/tests/support/semantic_conformance.rs": "4115756c37e1c2b5512dc6a4272311fd54df2d224a257adbf0d8d811fb45fb84",
+    "crates/gateway-cgsl/src/compiler.rs": "9de3a26311e38126fd276570a89869d35cb294676cb3b87f08d0574fcc7f0f23",
+    "crates/gateway-cgsl/src/lib.rs": "7bc9ed164af15484039ce8a282487d8c1b1a9b37bbaa925005fac13aacda620f",
+    "crates/gateway-cgsl/src/serialization.rs": "ce0a39b1f2ec56bf4f316b0035bbc0092f453824af2d3789fb2a3b7b5ebd64e5",
+    "crates/gateway-cgsl/tests/conformance.rs": "99ca296d5a540d7e734db16509495b9bc9bc59f9fe1e326f49c6b71661454db7",
+    "docs/README.md": "b65b88fd4a8dd55947a0cbc3b0960bf0582105778e8ffe228b4f91b1c90e6dcb",
+    "docs/cgsl-conformance.md": "5d14f459065f6acd64338512e73e5eb8ef6696664e79648e2a19c3a93feef611",
+    "docs/cgsl-frontend.md": "d62cf0906004b95cc4cd51e075bd8968ffa6f621b242518532bea617e78a4a29",
+    "scripts/check-cgsl-conformance-coverage.py": "7f28d224b6f6dc14639eb4cc63fc30bba5d77edee17537aec487ef291adb3ee3",
+    "scripts/quality-gates.json": "00421c1f91be7db518299cc239630e8571023dd40644422fb36978410d468020",
+    "tests/README.md": "107c24f024ec30965453d4bc47325cbf031150cb768cd527aacdd7aff0d21b2d",
+    "tests/fixtures/cgsl-conformance-v1/README.md": "66fb9a9d0f0b9ba1ec9db48825bd86a28887f8e20c92365897ebc009b0cbda9c",
+    "tests/fixtures/cgsl-conformance-v1/alias.cgsl": "4834f923c48f375996a12c4719ef95205ba2c91965b64f878fd347bfbde806e8",
+    "tests/fixtures/cgsl-conformance-v1/aliases.context.json": "bcb5a667c2c493e6a269752515cfeb8e82e8c516defcb0d163e4423cee670c8d",
+    "tests/fixtures/cgsl-conformance-v1/ambiguous-focus.context.json": "9aa1402636fc7a91a4d6883543ba926de3663b8fe64a849a7048f7923ae4ef62",
+    "tests/fixtures/cgsl-conformance-v1/conflicting-context.cgsl": "0dc2ea9b4074ec716c47363f71f430214c475a11149ff7d4d102b8b13c581b17",
+    "tests/fixtures/cgsl-conformance-v1/conflicting-task-state.context.json": "817cfd979ed8dfb29ed0dd48a7544106e6882cbcfa1eb7f05661cd107825cccb",
+    "tests/fixtures/cgsl-conformance-v1/duplicate-check.cgsl": "03ca788e92ffe7b0674cfb3a95cb2b87e90d2f2e58cd5f3509be488697bdceba",
+    "tests/fixtures/cgsl-conformance-v1/duplicate-decoded-key.cgsl": "e2d71d35ed70da70b9f9d30c8e8c00e297d7fea2a6f719679dc7c7a050a622c2",
+    "tests/fixtures/cgsl-conformance-v1/focus.context.json": "221b86994bdbd48a7fe9aadadbaf40d5e759998ff119db4eb90024e81232aef3",
+    "tests/fixtures/cgsl-conformance-v1/foreign-context.context.json": "8f7ac797b5681c1e8ea64b103ef1bc5215210839b31a32f57ae2dca12ff4707f",
+    "tests/fixtures/cgsl-conformance-v1/format.cgsl": "6cc43f31ce805b5cc001474a6493cede3dd18b9f6c84690dd3b71b6c756596bc",
+    "tests/fixtures/cgsl-conformance-v1/format.expected.cgsl": "81a0adc345f610ce14dae75748d147b96ec9d6a430ec74fed08704f13d4b6cb1",
+    "tests/fixtures/cgsl-conformance-v1/injected-context-text.context.json": "a38f343ed9224cba383ef049208efe4460c0f24ac5a452fa1761485b8df323d2",
+    "tests/fixtures/cgsl-conformance-v1/injection-data.canonical.cgsl": "010049a9c5a85f94ca9352189c5f2c35aad99c2f0e67b0f7f60d666a00d02aa0",
+    "tests/fixtures/cgsl-conformance-v1/injection-data.canonical.json": "b4f686451cbc731474136b572b52f502cb678ab0ca68524cfc7d71025e346943",
+    "tests/fixtures/cgsl-conformance-v1/injection-data.cgsl": "010049a9c5a85f94ca9352189c5f2c35aad99c2f0e67b0f7f60d666a00d02aa0",
+    "tests/fixtures/cgsl-conformance-v1/invalid-attachment.cgsl": "2e1f90efb2ba9a0e46610efe07060bdef1ee209f9316dec70d9a3bb3afbd28d3",
+    "tests/fixtures/cgsl-conformance-v1/invalid-encoding.cgsl": "a8100ae6aa1940d0b663bb31cd466142ebbdbd5187131b92d93818987832eb89",
+    "tests/fixtures/cgsl-conformance-v1/invalid-semantics.cgsl": "f96eb6a06c6b27652e058974b3c410b5e95cf7387760ad6454e2adbb6acfcae8",
+    "tests/fixtures/cgsl-conformance-v1/invalid-syntax.cgsl": "dde93f1100e4f08c4ded6dfc33ab6ce1ac1c0c3a353f8195ae02b683f4746586",
+    "tests/fixtures/cgsl-conformance-v1/invalid-token.cgsl": "c238cb6e9ac5407491b0988102620ab9445290d2ed7713c516a2b28bd2388968",
+    "tests/fixtures/cgsl-conformance-v1/manifest.json": "a4e43593e0061b3f80b39c45958bb896d1e29674820a312d4cbf7387a1ab7cbb",
+    "tests/fixtures/cgsl-conformance-v1/minimal.canonical.cgsl": "ec7012224605ab1a8ed4ca9a1e7fb67197987a072b853417d3516606d5c9d1d9",
+    "tests/fixtures/cgsl-conformance-v1/minimal.cgsl": "ec7012224605ab1a8ed4ca9a1e7fb67197987a072b853417d3516606d5c9d1d9",
+    "tests/fixtures/cgsl-conformance-v1/missing-explicit-entity.context.json": "221b86994bdbd48a7fe9aadadbaf40d5e759998ff119db4eb90024e81232aef3",
+    "tests/fixtures/cgsl-conformance-v1/missing-goal.cgsl": "1bc5b68c55c010fae7d29b735ab02d59b1b8e1c79c03be938031f310872bf325",
+    "tests/fixtures/cgsl-conformance-v1/negation.canonical.cgsl": "b809379d3f24edc1c6da8f00efe5cc84bba5bf322a710445a5587e8c061c3a54",
+    "tests/fixtures/cgsl-conformance-v1/negation.canonical.json": "b47695c499a3d50cfa56cb634639a84ccf9857d27c10b57407210c64f295b567",
+    "tests/fixtures/cgsl-conformance-v1/negation.cgsl": "b809379d3f24edc1c6da8f00efe5cc84bba5bf322a710445a5587e8c061c3a54",
+    "tests/fixtures/cgsl-conformance-v1/performance-analysis.canonical.cgsl": "b32a1999f04b8593d73d19faa6d8e67f58a40d470b0b1ba51a8e71825cd137aa",
+    "tests/fixtures/cgsl-conformance-v1/performance-analysis.cgsl": "b32a1999f04b8593d73d19faa6d8e67f58a40d470b0b1ba51a8e71825cd137aa",
+    "tests/fixtures/cgsl-conformance-v1/policy-denied.context.json": "221b86994bdbd48a7fe9aadadbaf40d5e759998ff119db4eb90024e81232aef3",
+    "tests/fixtures/cgsl-conformance-v1/prompt-injection-construct.cgsl": "ea285fac900ab75942c93b6b86bd9ed97dc4681e34ee186056787d40b70aba8f",
+    "tests/fixtures/cgsl-conformance-v1/resolution.json": "7bd064fb9c632ba5f15f9b2245f0f82f81719988988f9fbd006fade3efac4235",
+    "tests/fixtures/cgsl-conformance-v1/resource-depth.cgsl": "9ff874ccdf5dee19984010751fa94b24d80966f5c468f5902c6a4f1b1c40524b",
+    "tests/fixtures/cgsl-conformance-v1/scope-leak.cgsl": "2ed22722759d1b34a5d660af7176053226a7143b0b3cf7aa8b1a30648b4da18f",
+    "tests/fixtures/cgsl-conformance-v1/stale-evidence.context.json": "abe7626412a229462f9e5d891819de7d85cb915f769a9c5569d733b980ae5a97",
+    "tests/fixtures/cgsl-conformance-v1/trailing-content.cgsl": "2cec2bbf1a64ea5249e8a7ab9ecc782fa48be13f0b35ad5f52bdea741841a230",
+    "tests/fixtures/cgsl-conformance-v1/unknown.context.json": "b4f381a807e06ef2883afabca6bde7c54ed623f63b058bebcdda9258473e0e59",
+    "tests/fixtures/cgsl-conformance-v1/unresolved-sidecars.cgsl": "6649792897e706e6e7bcf56195185ce1e046f5669a1c2a168f58c0c022e6d488",
+    "tests/fixtures/cgsl-conformance-v1/version-major.cgsl": "08c97a77d09308e0391cc2cec41bb5564de5083087433be999d1c1ab9e6dabfd",
+    "tests/fixtures/cgsl-conformance-v1/version-malformed.cgsl": "ef27ba6e66293b3adf9e49fc44385f204f181deb6c779018738463bb78a50093",
+    "tests/fixtures/cgsl-conformance-v1/version-minor.cgsl": "f2cccb323e4f7a326b9695f4670d809df99ab17298203cea4e295e4eedbfd130",
+    "tests/fixtures/cgsl-conformance-v1/yesterday.context.json": "0d282e1d776f83a0c755da0255c73bc6718729adafe83d6788426fb237e415b6"
+  },
+  "artifacts": {
+    "docs/evidence/EPIC-05.15-conformance-validation.log.gz": {
+      "sha256": "4b30deed9cce05b35e2b6fca013804ad90f78d2efdac38bd5aec2e3c3acb220d"
+    },
+    "docs/evidence/EPIC-05.15-conformance-coverage.json.gz": {
+      "sha256": "9129f5319ef968238a8dffd119b99f224c4db31d888699bf19a7645b12ffeaea"
+    }
+  },
+  "coverage": {
+    "gateway-cgsl/src/compiler.rs": {
+      "count": 494,
+      "covered": 491,
+      "percent": 99.39271255060729
+    },
+    "gateway-cgsl/src/parser.rs": {
+      "count": 282,
+      "covered": 282,
+      "percent": 100.0
+    },
+    "gateway-cgsl/src/serialization.rs": {
+      "count": 55,
+      "covered": 55,
+      "percent": 100.0
+    }
+  },
+  "checks": [
+    {
+      "command": "CARGO_TARGET_DIR=target/epic05-15-coverage cargo llvm-cov -p gateway-cgsl --all-targets --locked --ignore-filename-regex gateway-domain --fail-under-lines 95 --json --output-path target/cgsl-conformance-coverage.json",
+      "status": "PASS",
+      "tests_passed": 20
+    },
+    {
+      "command": "python3 scripts/check-cgsl-conformance-coverage.py --self-test; python3 scripts/check-cgsl-conformance-coverage.py target/cgsl-conformance-coverage.json",
+      "status": "PASS"
+    },
+    {
+      "command": "cargo test -p gateway-application --test interpretation --test completeness --test semantic_planning -p gateway-domain --test semantic_task_v1 --test semantic_resolution --test semantic_output -p gateway-context --test prompt_handoff_reference --locked",
+      "status": "PASS",
+      "tests_passed": 61
+    },
+    {
+      "command": "cargo test -p gateway-application --test interpretation --locked",
+      "status": "PASS",
+      "tests_passed": 19,
+      "purpose": "Final frozen candidate/provenance expectations"
+    },
+    {
+      "command": "python3 -m unittest discover -s tests/architecture -p 'test_*.py'",
+      "status": "PASS",
+      "tests_run": 40,
+      "skipped": 1,
+      "skip_reason": "Existing Windows-only memory-error check on Linux"
+    },
+    {
+      "command": "python3 -m unittest discover -s tests/contracts -p 'test_*.py'",
+      "status": "PASS",
+      "tests_passed": 17
+    },
+    {
+      "command": "bash scripts/check-architecture.sh",
+      "status": "PASS"
+    },
+    {
+      "command": "cargo clippy -p gateway-cgsl -p gateway-application --all-targets --locked -- -D warnings",
+      "status": "PASS"
+    },
+    {
+      "command": "cargo build --workspace --locked",
+      "status": "PASS"
+    },
+    {
+      "command": "cargo fmt --check",
+      "status": "PASS"
+    },
+    {
+      "command": "git -c core.safecrlf=false diff --check",
+      "status": "PASS"
+    }
+  ],
+  "corpus": {
+    "frontend_cases": 22,
+    "resolution_cases": 11,
+    "frozen_semantic_roundtrips": 4,
+    "generated_semantic_tasks": 512,
+    "existing_parser_generated_cases": 2000
+  },
+  "limitations": [
+    "Component host authenticates test projections; no deployed authentication or independent implementation qualification",
+    "Persisted clarification reply correlation, expiry and duplicate refusal belong to #275; #279 owns runtime effects",
+    "Diagnostic classes are covered at actual emitting boundaries; specification-reserved integration codes have no new emitters",
+    "No full EPIC-05 acceptance or real tool execution claimed"
+  ]
+}

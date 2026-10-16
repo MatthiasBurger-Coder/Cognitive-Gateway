@@ -1,0 +1,135 @@
+{
+  "ambiguity": [
+    {
+      "candidates": [
+        {
+          "provenance": [
+            {
+              "acquired_at": null,
+              "id": "input-lineage",
+              "parent_provenance": [],
+              "producer": null,
+              "source_id": "captured-input",
+              "source_kind": "TOOL",
+              "source_reference": "request://request-185/input",
+              "source_timestamp": null
+            }
+          ],
+          "value": {
+            "kind": "ARTIFACT",
+            "reference": {
+              "contract": "cg.artifact",
+              "contract_version": "1.0",
+              "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "id": "artifact-1",
+              "revision": "7",
+              "scope": "project-x"
+            }
+          }
+        },
+        {
+          "provenance": [
+            {
+              "acquired_at": null,
+              "id": "input-lineage",
+              "parent_provenance": [],
+              "producer": null,
+              "source_id": "captured-input",
+              "source_kind": "TOOL",
+              "source_reference": "request://request-185/input",
+              "source_timestamp": null
+            }
+          ],
+          "value": {
+            "kind": "ARTIFACT",
+            "reference": {
+              "contract": "cg.artifact",
+              "contract_version": "1.0",
+              "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "id": "artifact-2",
+              "revision": "7",
+              "scope": "project-x"
+            }
+          }
+        }
+      ],
+      "field": "target",
+      "requirement": "MANDATORY"
+    }
+  ],
+  "assumption": [],
+  "cgsl": "1.0",
+  "confidence": [
+    {
+      "basis": {
+        "contract": "cg.knowledge",
+        "contract_version": "1.0",
+        "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "id": "workload-note",
+        "revision": "7",
+        "scope": "project-x"
+      },
+      "field": "goal",
+      "value": {
+        "kind": "UNKNOWN"
+      }
+    }
+  ],
+  "constraint": [],
+  "context": [],
+  "desired_state": null,
+  "evidence": [],
+  "goal": {
+    "description": "Report the artifact properties",
+    "outcome": "inspect-artifact"
+  },
+  "history": [],
+  "id": "task-inspect",
+  "input": [],
+  "knowledge_gap": [
+    {
+      "missing_field": "target",
+      "provenance": [
+        {
+          "acquired_at": null,
+          "id": "input-lineage",
+          "parent_provenance": [],
+          "producer": null,
+          "source_id": "captured-input",
+          "source_kind": "TOOL",
+          "source_reference": "request://request-185/input",
+          "source_timestamp": null
+        }
+      ],
+      "reason": "AMBIGUOUS_ENTITY",
+      "required_resolution_class": "HUMAN_CLARIFICATION",
+      "requirement": "MANDATORY",
+      "subject": {
+        "kind": "REQUEST",
+        "value": "request-185"
+      }
+    }
+  ],
+  "observation": [],
+  "output": {
+    "schema": {
+      "contract": "cg.output-schema",
+      "contract_version": "1.0",
+      "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "id": "ArtifactInspection",
+      "revision": "7",
+      "scope": "project-x"
+    }
+  },
+  "policy": [],
+  "process": null,
+  "requires": [],
+  "state": null,
+  "task": "INSPECT",
+  "verification": {
+    "checks": [
+      "OUTPUT_SCHEMA_VALID",
+      "NO_UNRESOLVED_REFERENCE"
+    ]
+  }
+}

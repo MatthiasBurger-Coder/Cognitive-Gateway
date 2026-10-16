@@ -1,0 +1,136 @@
+{
+  "version": "1.0",
+  "cases": [
+    {
+      "id": "minimal",
+      "source": "minimal.cgsl",
+      "canonical_ir": "../semantic-task-v1/minimal.canonical.json",
+      "sha256": "2612ef073b182746379628e6a43834e0ffcb2595ffbe182cdc727f5089babc50"
+    },
+    {
+      "id": "performance-analysis",
+      "source": "performance-analysis.cgsl",
+      "canonical_ir": "../semantic-task-v1/performance-analysis.canonical.json",
+      "sha256": "603091de95ea1ec1db2c2f1cec0b8da99f42db4167fd6b39bd8f4f822d15e49f"
+    },
+    {
+      "id": "invalid-encoding",
+      "source": "invalid-encoding.cgsl",
+      "code": "SYN_INVALID_ENCODING",
+      "phase": "LEX"
+    },
+    {
+      "id": "invalid-token",
+      "source": "invalid-token.cgsl",
+      "code": "SYN_INVALID_TOKEN",
+      "phase": "LEX"
+    },
+    {
+      "id": "invalid-syntax",
+      "source": "invalid-syntax.cgsl",
+      "code": "SYN_EXPECTED_TOKEN",
+      "phase": "PARSE"
+    },
+    {
+      "id": "duplicate-decoded-key",
+      "source": "duplicate-decoded-key.cgsl",
+      "code": "SYN_DUPLICATE_MEMBER",
+      "phase": "PARSE"
+    },
+    {
+      "id": "trailing-content",
+      "source": "trailing-content.cgsl",
+      "code": "SYN_TRAILING_CONTENT",
+      "phase": "PARSE"
+    },
+    {
+      "id": "resource-depth",
+      "source": "resource-depth.cgsl",
+      "code": "CGSL_RESOURCE_LIMIT",
+      "phase": "LIMIT"
+    },
+    {
+      "id": "version-malformed",
+      "source": "version-malformed.cgsl",
+      "code": "VER_INVALID_VERSION",
+      "phase": "VERSION"
+    },
+    {
+      "id": "version-minor",
+      "source": "version-minor.cgsl",
+      "code": "VER_UNSUPPORTED_VERSION",
+      "phase": "VERSION"
+    },
+    {
+      "id": "version-major",
+      "source": "version-major.cgsl",
+      "code": "VER_UNSUPPORTED_VERSION",
+      "phase": "VERSION"
+    },
+    {
+      "id": "alias",
+      "source": "alias.cgsl",
+      "code": "SEM_UNSUPPORTED_CONSTRUCT",
+      "phase": "SEMANTIC"
+    },
+    {
+      "id": "invalid-semantics",
+      "source": "invalid-semantics.cgsl",
+      "code": "SEM_INVALID_OPERAND",
+      "phase": "SEMANTIC"
+    },
+    {
+      "id": "duplicate-check",
+      "source": "duplicate-check.cgsl",
+      "code": "SEM_DUPLICATE_IDENTITY",
+      "phase": "SEMANTIC"
+    },
+    {
+      "id": "scope-leak",
+      "source": "scope-leak.cgsl",
+      "code": "SEM_INVALID_OPERAND",
+      "phase": "SEMANTIC"
+    },
+    {
+      "id": "prompt-injection-construct",
+      "source": "prompt-injection-construct.cgsl",
+      "code": "SEM_UNSUPPORTED_CONSTRUCT",
+      "phase": "SEMANTIC"
+    },
+    {
+      "id": "missing-goal",
+      "source": "missing-goal.cgsl",
+      "code": "SEM_MISSING_REQUIRED_FIELD",
+      "phase": "SEMANTIC"
+    },
+    {
+      "id": "invalid-attachment",
+      "source": "invalid-attachment.cgsl",
+      "code": "SEM_INVALID_ATTACHMENT",
+      "phase": "SEMANTIC"
+    },
+    {
+      "id": "conflicting-context",
+      "source": "conflicting-context.cgsl",
+      "code": "SEM_CONFLICTING_CONTEXT",
+      "phase": "SEMANTIC"
+    },
+    {
+      "id": "unresolved-sidecars",
+      "source": "unresolved-sidecars.cgsl",
+      "inspection_only": true
+    },
+    {
+      "id": "negation",
+      "source": "negation.cgsl",
+      "canonical_ir": "negation.canonical.json",
+      "sha256": "b47695c499a3d50cfa56cb634639a84ccf9857d27c10b57407210c64f295b567"
+    },
+    {
+      "id": "injection-data",
+      "source": "injection-data.cgsl",
+      "canonical_ir": "injection-data.canonical.json",
+      "sha256": "b4f686451cbc731474136b572b52f502cb678ab0ca68524cfc7d71025e346943"
+    }
+  ]
+}

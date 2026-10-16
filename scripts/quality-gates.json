@@ -64,8 +64,12 @@
     "command": "cargo llvm-cov -p gateway-domain -p gateway-application --test interpretation --locked --json --output-path \"$EVIDENCE_DIR/interpretation-coverage.json\"\npython3 scripts/check-interpretation-coverage.py --self-test\npython3 scripts/check-interpretation-coverage.py \"$EVIDENCE_DIR/interpretation-coverage.json\""
   },
   {
+    "name": "EPIC-05.15 semantic conformance and adversarial component suite",
+    "command": "cargo test -p gateway-cgsl --all-targets --locked\ncargo test -p gateway-application --test interpretation --test completeness --test semantic_planning --locked\ncargo test -p gateway-domain --test semantic_task_v1 --test semantic_resolution --test semantic_output --locked\ncargo test -p gateway-context --test prompt_handoff_reference --locked"
+  },
+  {
     "name": "EPIC-05.08 offline CGSL frontend coverage",
-    "command": "cargo llvm-cov -p gateway-cgsl --all-targets --locked --ignore-filename-regex 'gateway-domain' --fail-under-lines 95 --json --output-path \"$EVIDENCE_DIR/cgsl-coverage.json\""
+    "command": "cargo llvm-cov -p gateway-cgsl --all-targets --locked --ignore-filename-regex 'gateway-domain' --fail-under-lines 95 --json --output-path \"$EVIDENCE_DIR/cgsl-coverage.json\"\npython3 scripts/check-cgsl-conformance-coverage.py --self-test\npython3 scripts/check-cgsl-conformance-coverage.py \"$EVIDENCE_DIR/cgsl-coverage.json\""
   },
   {
     "name": "Domain coverage gate",

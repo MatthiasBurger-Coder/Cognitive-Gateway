@@ -998,3 +998,6 @@ fn new_target_invalidates_old_task_facts_without_hiding_explicit_required_pins()
         SemanticResolutionState::Invalid
     );
 }
+
+#[path = "support/semantic_conformance.rs"]
+mod semantic_conformance;

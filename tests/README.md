@@ -94,3 +94,7 @@ additional gate admits the CPU ML experiment, separate held-out evaluation, seed
 Grid/Random search, calibration, drift/OOD, resource-limited processes and isolated
 container worker. Every new Rust module and the Python pipeline require at least
 95% measured line coverage. See [acceptance/reproduction](../docs/epic-03-complete-acceptance.md).
+
+The [CGSL conformance corpus](fixtures/cgsl-conformance-v1/README.md) and
+[component matrix](../docs/cgsl-conformance.md) cover canonical source/IR
+roundtrips, compatibility, adversarial context and clarification resumption.
