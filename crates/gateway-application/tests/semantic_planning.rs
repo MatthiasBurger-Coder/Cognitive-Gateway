@@ -347,3 +347,143 @@ fn resolution_revalidates_and_rejects_changed_snapshots() {
     r.processes.required_definition = Some(definition.clone());
     assert!(handoff.resolve(&host, &input, &r).is_ok());
 }
+
+// #191: compile each language through its own frontend, join only by an exact
+// definition identity, then leave transition legality with the CG-04 evaluator.
+#[test]
+fn process_boundary_reference_scenario_and_denied_handoffs() {
+    use gateway_application::resolution_process::ProcessSelectionOutcome;
+    use gateway_domain::learning::ProcessReference;
+    use gateway_process::*;
+    let mut input = support::fixture();
+    let source = include_str!("../../../tests/fixtures/semantic-process-boundary/review.feature");
+    input.processes =
+        ProcessRegistry::from_sources([ProcessSource::new("review.feature", source)]).unwrap();
+    let definition = input.processes.definitions().next().unwrap().clone();
+    let identity = definition.identity().clone();
+    let reference = ProcessReference::new(
+        ReferenceId::new(identity.id().as_str()).unwrap(),
+        identity.version().value(),
+        ContentDigest::new(identity.digest().as_str()).unwrap(),
+    )
+    .unwrap();
+    // The CGSL compiler transports the pin without importing a process parser.
+    let mut cgsl: serde_json::Value =
+        serde_json::from_str(include_str!("../../../examples/cgsl-v1/minimal.cgsl")).unwrap();
+    cgsl["process"] = serde_json::to_value(&reference).unwrap();
+    let compiled = gateway_cgsl::compile("pinned.cgsl", cgsl.to_string().as_bytes()).unwrap();
+    let mut data = mapped(&input).data().clone();
+    data.process = compiled.task_shape().unwrap().data().process.clone();
+    let task = SemanticTaskIR::new(data).unwrap();
+    let h = host(&task, &input);
+    let handoff = run(&task, &input, &h, &rules()).unwrap();
+    input.plan = handoff.plan().clone();
+    let mut selection = composition::rules();
+    selection.processes.required_definition = Some(identity.clone());
+    let resolved = handoff.resolve(&h, &input, &selection).unwrap();
+    assert_eq!(
+        resolved.report.processes.outcome,
+        ProcessSelectionOutcome::Unique
+    );
+    assert_eq!(
+        resolved.report.processes.candidates[0].binding.definition,
+        identity
+    );
+    assert_eq!(handoff.task(), &task);
+    assert_eq!(resolved, handoff.resolve(&h, &input, &selection).unwrap());
+
+    // A pin is mandatory even when the generic template preference is None.
+    assert_eq!(
+        handoff.resolve(&h, &input, &composition::rules()),
+        Err(SemanticPlanningError::ResolutionMismatch)
+    );
+    for field in ["id", "version", "digest"] {
+        let mut data = task.data().clone();
+        data.process = Some(
+            ProcessReference::new(
+                ReferenceId::new(if field == "id" {
+                    "other"
+                } else {
+                    identity.id().as_str()
+                })
+                .unwrap(),
+                if field == "version" {
+                    2
+                } else {
+                    identity.version().value()
+                },
+                ContentDigest::new(if field == "digest" {
+                    "b".repeat(64)
+                } else {
+                    identity.digest().as_str().to_owned()
+                })
+                .unwrap(),
+            )
+            .unwrap(),
+        );
+        let changed = SemanticTaskIR::new(data).unwrap();
+        let host = host(&changed, &input);
+        let changed = run(&changed, &input, &host, &rules()).unwrap();
+        assert_eq!(
+            changed.resolve(&host, &input, &selection),
+            Err(SemanticPlanningError::ResolutionMismatch),
+            "{field}"
+        );
+    }
+    let mut missing = input.clone();
+    missing.processes = ProcessRegistry::from_sources(Vec::<ProcessSource>::new()).unwrap();
+    let missing = handoff.resolve(&h, &missing, &selection).unwrap();
+    assert_eq!(
+        missing.report.processes.outcome,
+        ProcessSelectionOutcome::Missing
+    );
+    assert!(missing.report.processes.candidates.is_empty());
+    // Same ID/version with changed definition content must not satisfy the pin.
+    let mut stale = input.clone();
+    stale.processes = ProcessRegistry::from_sources([ProcessSource::new(
+        "review.feature",
+        source.replace("analysis-review", "changed-review"),
+    )])
+    .unwrap();
+    let stale = handoff.resolve(&h, &stale, &selection).unwrap();
+    assert_eq!(
+        stale.report.processes.outcome,
+        ProcessSelectionOutcome::Incompatible
+    );
+    assert!(stale.report.processes.candidates.is_empty());
+    let mut incompatible = selection.clone();
+    incompatible.processes.activities.insert(
+        input.plan.steps()[0].id().clone(),
+        ActivityId::new("absent").unwrap(),
+    );
+    let rejected = handoff.resolve(&h, &input, &incompatible).unwrap();
+    assert_eq!(
+        rejected.report.processes.outcome,
+        ProcessSelectionOutcome::Incompatible
+    );
+    assert!(rejected.report.processes.candidates.is_empty());
+
+    // Selection is not permission to transition. Only CG-04 inputs satisfy gates.
+    let instance = ProcessInstance::start(
+        &definition,
+        ProcessInstanceId::new("review-instance").unwrap(),
+    )
+    .unwrap();
+    let event = EventOccurrence::new(
+        EventOccurrenceId::new("accepted-1").unwrap(),
+        EventTypeId::new("review.accepted").unwrap(),
+        instance.id().clone(),
+        instance.revision(),
+    );
+    let denied =
+        TransitionEvaluator::evaluate(&definition, &instance, &event, &EvaluationInputs::default());
+    assert_ne!(denied.code(), TransitionDecisionCode::Accepted);
+    let allowed = EvaluationInputs::default()
+        .with_gate(GateId::new("analysis-review").unwrap(), GateStatus::Passed);
+    assert_eq!(
+        TransitionEvaluator::evaluate(&definition, &instance, &event, &allowed).code(),
+        TransitionDecisionCode::Accepted
+    );
+    assert_eq!(instance.current_state().as_str(), "REVIEW");
+    assert_eq!(handoff.task(), &task);
+}

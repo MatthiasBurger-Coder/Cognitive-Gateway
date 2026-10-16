@@ -541,10 +541,23 @@ mod tests {
         serve(&mut server, &mut wire).unwrap();
         assert_eq!(wire.output[0]["error"]["data"]["code"], "CG_TIMEOUT");
         assert_eq!(server.metrics.timed_out, 1);
-        assert_eq!(
-            wire.context.unwrap().check(),
-            Err(gateway_application::codex::FacadeError::Cancelled)
-        );
+        assert_eq!(server.phase, Phase::Closed);
+        // The deadline may expire before the observer polls the transport or
+        // before the worker dispatches at all. Observe the host channel directly
+        // instead of assuming receive() had time to populate wire.context.
+        let context = wire.context.or_else(|| {
+            match wire.started.recv_timeout(Duration::from_secs(1)) {
+                Ok(context) => Some(context),
+                Err(mpsc::RecvTimeoutError::Disconnected) => None, // No host dispatch.
+                Err(mpsc::RecvTimeoutError::Timeout) => panic!("worker did not finish admission"),
+            }
+        });
+        if let Some(context) = context {
+            assert_eq!(
+                context.check(),
+                Err(gateway_application::codex::FacadeError::Cancelled)
+            );
+        }
     }
     #[test]
     fn host_cancellation_is_distinguished_and_error_response_is_always_bounded() {

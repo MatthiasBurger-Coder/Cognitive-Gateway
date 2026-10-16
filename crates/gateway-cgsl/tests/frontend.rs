@@ -65,6 +65,67 @@ fn specification_rejections() {
 }
 
 #[test]
+fn process_boundary_rejects_lifecycle_semantics_in_source_and_task_ir() {
+    let task = compile("minimal", MINIMAL.as_bytes()).unwrap();
+    let canonical: Json =
+        serde_json::from_str(&task.task_shape().unwrap().to_canonical_json().unwrap()).unwrap();
+    let reference = json!({"id":"semantic-review", "version":1, "digest":"a".repeat(64)});
+    let mut source = minimal();
+    source["process"] = reference.clone();
+    assert!(
+        compile_json(&source)
+            .unwrap()
+            .task_shape()
+            .unwrap()
+            .data()
+            .process
+            .is_some()
+    );
+    for field in [
+        "transition",
+        "transitions",
+        "states",
+        "initial_state",
+        "event",
+        "activity",
+        "gate",
+        "guard",
+        "retry",
+        "blocker",
+        "instance",
+    ] {
+        for nested in [false, true] {
+            let mut source = minimal();
+            let mut ir = canonical.clone();
+            if nested {
+                source["process"] = reference.clone();
+                ir["process"] = reference.clone();
+                source["process"][field] = json!("COMPLETE");
+                ir["process"][field] = json!("COMPLETE");
+            } else {
+                source[field] = json!("COMPLETE");
+                ir[field] = json!("COMPLETE");
+            }
+            assert!(
+                compile_json(&source).is_err(),
+                "source accepted {field}, nested={nested}"
+            );
+            assert!(
+                gateway_domain::SemanticTaskIR::from_json(&ir.to_string()).is_err(),
+                "IR accepted {field}, nested={nested}"
+            );
+        }
+    }
+    assert!(
+        compile(
+            "gherkin",
+            include_bytes!("../../../tests/fixtures/semantic-process-boundary/review.feature")
+        )
+        .is_err()
+    );
+}
+
+#[test]
 fn sidecars_preserve_unresolved_meaning_and_block_projection() {
     let result = compile("incomplete", INCOMPLETE.as_bytes()).unwrap();
     assert!(result.task_shape().is_none());

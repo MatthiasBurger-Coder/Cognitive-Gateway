@@ -3,6 +3,7 @@ import copy
 import gzip
 import importlib.util
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -33,10 +34,15 @@ class InstalledQualificationGuardrails(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             output = Path(directory) / 'evidence'
             # Python is a present executable, but must never be launched as Codex here.
+            # The qualification runner still needs its toolchain (git/Python).
+            # Remove only the database prerequisite this test intends to withhold.
+            environment = {key: value for key, value in os.environ.items()
+                           if key.upper() != 'CG_COGNITIVE_TEST_DATABASE'}
             result = subprocess.run([sys.executable, str(SCRIPT), '--codex', sys.executable,
-                                     '--shared-session-fixture', '--output', str(output)], env={},
+                                     '--shared-session-fixture', '--output', str(output)], env=environment,
                                     capture_output=True, text=True, timeout=10)
-            self.assertNotEqual(result.returncode, 0)
+            self.assertNotEqual(result.returncode, 0, result.stderr)
+            self.assertTrue((output / 'report.json').is_file(), result.stderr)
             report = json.loads((output / 'report.json').read_text())
             self.assertEqual(report['status'], 'BLOCKED')
             self.assertEqual(report['epic_04_status'], 'NOT_COMPLETE')

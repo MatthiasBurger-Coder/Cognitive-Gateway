@@ -48,7 +48,7 @@ new domain semantics or a second process/runtime owner.
 | Task desired state | Existing comparison, Delta, capability derivation, planner | Missing predicates fail explicitly; no interpretation of goal prose |
 | Abstract capability declarations | Match against actual Delta-derived requirements | Never fabricate lineage. An unmatched declaration fails, including on an empty/no-work derivation |
 | Output, verification, evidence, constraints, policy, assumptions, history | Preserve complete immutable task in `SemanticPlanHandoff` | No flattening into Plan or conversion to policy/consent authority |
-| Process pin | Preserve task pin; require identical CG-08 `required_definition` | Existing CG-08 performs selection/applicability; detailed Process IR proof remains #191 |
+| Process pin | Preserve task pin; require identical CG-08 `required_definition` | Existing CG-08 performs selection/applicability; [Process IR boundary proof](semantic-process-boundary.md) defines exact mapping and denied paths |
 | Plan, Delta, desired state, situation | Exact-match against CG-08 snapshot inputs | No rewriting of caller snapshots, registry, Agent/Skill candidates or resolution rules |
 
 `map_cg06_inputs` accepts construction data, a complete CG-06 document and explicit

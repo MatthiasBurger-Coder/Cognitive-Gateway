@@ -1,0 +1,148 @@
+{
+  "issue": 191,
+  "date": "2026-10-17",
+  "base_revision": "492040bae2b039ef045d62ebd0160cb9e4683b6d",
+  "scope_status": "READY_FOR_COMPLETION",
+  "repository_qualification": "APPLICABLE_GATES_PASS",
+  "review": "Three Amigos role passes by one agent; no independent reviewer claimed",
+  "source_hash_format": "SHA-256 of UTF-8 bytes with CRLF normalized to LF",
+  "source_sha256": {
+    "crates/gateway-application/src/worker_fabric.rs": "0831dbf06a15621e4df23f377431bff4b33bdbe76e8c9192f4b836707a06746a",
+    "crates/gateway-application/tests/semantic_planning.rs": "1bdfeab14b15893bb624065929aed71c8c7b3843ae7789bc14acc7bb38eec4b4",
+    "crates/gateway-cgsl/tests/frontend.rs": "9c3ce5cdf5792e9357163243ffa0347e095142ee5414ff35d5628d5b105f4546",
+    "crates/gateway-daemon/src/bounded_process.rs": "baee9a4d09ca1724ddab0e4f91c1217d916a880ca4cd99d121caea29ca70cfbd",
+    "crates/gateway-daemon/src/local_mcp/runtime.rs": "4a25b30d2a09e6e3cd68840ba7168ed5e79b168354cd69307a110b773b35b0d0",
+    "docs/arc42/08-crosscutting-concepts.md": "d8e2211523855ca4d2705c3375b1b7ba65961c37ce490217ec902836a1261c47",
+    "docs/epic-05.13-three-amigos-review.md": "ed0e023ca526d1d4381722e127bcc3b6f129c71418684ec77e7351fd9caf1b92",
+    "docs/semantic-language-and-interpretation.md": "479d869ebd09a9c61d5449493d126d8fd316d7568c088af571956036a777996d",
+    "docs/semantic-planning-boundaries.md": "b8d0c99a520151abea489694588b123b945b651fe87b43082a7be778b3be1628",
+    "docs/semantic-process-boundary.md": "ceab7e378faa1ec9c85855303b2449961b19705bf206f8953c4368f40c4500e2",
+    "docs/semantic-task-ir-v1.md": "c9c8e27f9e3720c50f18163e7702fdcdca331aa7f2e2c92c37ed93feae139c5d",
+    "scripts/benchmark-offline-learning.py": "8efcedad16adf6f3ce60a62a1f86d1845d0c3ea8b840a29e67f2a807b54d3f7b",
+    "scripts/process_memory.py": "98e24de0ab775573fa351ef53fd2ad045ab426bc35a204d9f8d0f88b74cdad5b",
+    "scripts/qualify-epic04.py": "521c70594d548a1ad8a366d7bf7370017863ea93e6eae5373b2aa51c9acd21a3",
+    "scripts/qualify-installed-codex.py": "308ec68153a7f6e546c9723733973a9580f2e86b2456b751f77ed03a72df10a0",
+    "tests/architecture/test_dependencies.py": "180e0d2605e134a7e24554ec56392aecb4a7b6f1f47bc1ec99e932b3bb31f1c3",
+    "tests/architecture/test_epic04_acceptance.py": "45a89a736d84fdedc3ad6cfa5d76413a0fa58967cde7c94fa7dd6014b8b516ea",
+    "tests/architecture/test_installed_codex_qualification.py": "23f4937924c3cc3d3ff5cf0cc4991b6c89386796925dd4149a645c4858aa7cfd",
+    "tests/architecture/test_process_memory.py": "1eebc9fae52da0903095613e4f3b125a286e92cc31afacb9828b03bf0ccb98ae",
+    "tests/fixtures/semantic-process-boundary/review.feature": "8bc20eed6529e2e19b1daedf7ef295e07acf473f20771e17f89a58ab0ace690f"
+  },
+  "checks": [
+    {
+      "command": "CARGO_TARGET_DIR=/home/micro/.cache/cg191-target-20261017 CARGO_BUILD_JOBS=2 cargo test --workspace --locked",
+      "environment": "Ubuntu WSL",
+      "status": "PASS",
+      "passed": 884,
+      "failed": 0,
+      "ignored": 3
+    },
+    {
+      "command": "py -3 -m unittest discover -s tests/architecture -p 'test_*.py'",
+      "environment": "Windows Python 3.14",
+      "status": "PASS",
+      "tests": 40,
+      "skipped": 0
+    },
+    {
+      "command": "python3 -m unittest discover -s tests/architecture -p 'test_*.py'",
+      "environment": "Ubuntu WSL and physical Linux test host",
+      "status": "PASS",
+      "tests": 40,
+      "skipped": 1,
+      "skip": "Windows-native WinDLL failure test; passed on Windows"
+    },
+    {
+      "command": "python -m unittest discover -s tests/contracts -p 'test_*.py'",
+      "environment": "Windows task-local venv; physical Linux system Python",
+      "status": "PASS",
+      "tests": 17
+    },
+    {
+      "command": "cargo clippy --workspace --all-targets --locked -- -D warnings",
+      "environment": "Windows and Ubuntu WSL",
+      "status": "PASS"
+    },
+    {
+      "command": "bash scripts/check-architecture.sh",
+      "environment": "Ubuntu WSL",
+      "status": "PASS"
+    },
+    {
+      "command": "cargo fmt --check",
+      "status": "PASS"
+    },
+    {
+      "command": "git diff --check",
+      "status": "PASS"
+    },
+    {
+      "command": "cargo test -p gateway-daemon --lib active_cancel_disconnect_errors_and_deadline_are_bounded --locked --quiet",
+      "environment": "Windows",
+      "status": "PASS",
+      "repetitions": 20,
+      "failures": 0
+    },
+    {
+      "command": "cargo llvm-cov -p gateway-domain -p gateway-application -p gateway-daemon --test worker_fabric --locked --json --output-path target/epic0513-worker-coverage.json; python3 scripts/check-cg29-coverage.py target/epic0513-worker-coverage.json",
+      "environment": "Ubuntu WSL",
+      "status": "PASS"
+    },
+    {
+      "command": "target/epic0513-python/Scripts/python.exe -m coverage run --data-file=target/epic0513-memory.coverage --include='*/scripts/process_memory.py' -m unittest discover -s tests/architecture -p test_process_memory.py",
+      "environment": "Windows",
+      "status": "PASS"
+    }
+  ],
+  "coverage": {
+    "crates/gateway-domain/src/worker_fabric.rs": {
+      "covered": 57,
+      "lines": 57,
+      "percent": 100
+    },
+    "crates/gateway-application/src/worker_fabric.rs": {
+      "covered": 291,
+      "lines": 306,
+      "percent": 95.1
+    },
+    "crates/gateway-daemon/src/worker_fabric.rs": {
+      "covered": 98,
+      "lines": 99,
+      "percent": 98.99
+    },
+    "crates/gateway-daemon/src/bounded_process.rs": {
+      "covered": 81,
+      "lines": 81,
+      "percent": 100
+    },
+    "scripts/process_memory.py": {
+      "covered": 20,
+      "lines": 20,
+      "percent": 100
+    }
+  },
+  "limitations": [
+    "#191 is a component and architecture boundary proof; no new runtime invocation or authority is claimed.",
+    "The normal workspace suite explicitly ignores three existing PostgreSQL qualification tests; disposable database/installed-client/container release qualification is outside #191.",
+    "Linux skips the Windows-native memory-error test, which passes on Windows.",
+    "Qualification was performed on the local candidate before commit; publication and issue closure are separate subsequent actions."
+  ],
+  "review_document": "docs/epic-05.13-three-amigos-review.md",
+  "initial_failure_history": {
+    "status": "RESOLVED",
+    "details": "F01-F07 in the Three Amigos review; initial five architecture errors and Clippy failure were reproduced before repair. Broader checks exposed a second conditional lint and timeout-test race. Windows lacked the Linux integration environment; full Rust integration was rerun under Linux."
+  },
+  "remote_verification": {
+    "host": "192.168.178.33",
+    "snapshot_directory": "/home/matthias/cg-tests/epic0513-20261017",
+    "archive_sha256": "94a73de6db15c4e614e9c6bb7eec00e0421038b9e87831d21aa12e1cf08902dd",
+    "architecture_exit_code": 0,
+    "contracts_exit_code": 0,
+    "rust": "NOT_RUN: Rust toolchain absent; WSL evidence supplies Rust qualification",
+    "snapshot_note": "Snapshot predates final evidence/documentation reconciliation; executable sources are unchanged."
+  },
+  "artifact_sha256": {
+    "EPIC-05.13-validation.log.gz": "9f7750dc35083a9c585036c6502aff74f27f6365c79fd4b0530fd11c103ade4a"
+  },
+  "issue_state_at_qualification": "OPEN; no external issue changes performed"
+}

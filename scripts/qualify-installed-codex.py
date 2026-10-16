@@ -302,13 +302,13 @@ def main():
             raise ValueError('unknown installed client version')
         client_version = version.removeprefix('codex-cli ')
         report['installed_client'] = {'launcher_path': str(codex), 'launcher_sha256': sha256(codex), 'version': version}
-        report['source_sha256'] = {str(path.relative_to(ROOT)): sha256(path) for path in
+        report['source_sha256'] = {path.relative_to(ROOT).as_posix(): sha256(path) for path in
                                    sorted((ROOT / 'crates').rglob('*.rs'))}
-        report['source_sha256'].update({str(path.relative_to(ROOT)): sha256(path)
+        report['source_sha256'].update({path.relative_to(ROOT).as_posix(): sha256(path)
             for base in ['schemas/codex', 'tests/fixtures/declarative-cli', 'tests/codex-local', 'scripts']
             for path in sorted((ROOT / base).rglob('*'))
             if path.is_file() and path.suffix in ('.py', '.json', '.jsonl', '.toml')})
-        report['source_sha256'].update({str(path.relative_to(ROOT)): sha256(path)
+        report['source_sha256'].update({path.relative_to(ROOT).as_posix(): sha256(path)
             for path in [ROOT / 'Cargo.toml', ROOT / 'Cargo.lock', *(ROOT / 'crates').glob('*/Cargo.toml')]})
         if not all((args.bin_dir / name).is_file() for name in ['cg', 'cg-mcp', 'cg-local']):
             report['status'] = 'BLOCKED'

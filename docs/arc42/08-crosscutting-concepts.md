@@ -107,6 +107,14 @@ may nominate candidates but cannot silently fill required facts. CGSL describes
 task meaning and remains separate from Process IR execution semantics and
 provider-specific prompt rendering.
 
+The [normative task/process boundary](../semantic-process-boundary.md) defines
+the exact ID/version/digest mapping from the domain `ProcessReference` to CG-04
+`DefinitionIdentity`. CG-07 plans task meaning; CG-08 selects applicable process
+definitions using explicit rules; CG-04 alone evaluates process transitions.
+Task state predicates, verification obligations and history cannot mutate process
+state or satisfy gates. Dependency mutation tests, CGSL/IR lifecycle rejection
+tests and a dual-frontend reference scenario enforce this separation (#191).
+
 ## 8.13 Model provenance and qualification
 
 Local or remote model use must retain provider/model identity and the

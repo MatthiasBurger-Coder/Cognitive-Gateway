@@ -96,7 +96,8 @@ As of 2026-10-11:
 - the [Interpretation Context contract](interpretation-context.md), deterministic precedence and lifecycle are specified under #181; runtime resolution remains planned;
 - Rust parser/compiler work is planned under EPIC-05.08 #186;
 - integration with CG-06/07/08 is planned under EPIC-05.12 #190;
-- the Process IR boundary is planned under EPIC-05.13 #191;
+- the [Process IR boundary](semantic-process-boundary.md) is specified and proven
+  at component level under EPIC-05.13 #191;
 - Prompt IR handoff is planned under EPIC-05.14 #192;
 - conformance and adversarial qualification are planned under EPIC-05.15 #193;
 - complete language/arc42 documentation is planned under EPIC-05.16 #194.
