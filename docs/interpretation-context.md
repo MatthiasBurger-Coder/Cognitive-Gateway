@@ -10,9 +10,10 @@ based on the delivered [CGSL scope](cgsl-scope-and-vocabulary.md) (#179),
 and MAY have the meanings established by the CGSL scope specification.
 
 The contract baseline is **Interpretation Context 1.0**. This slice defines
-records and behavior; it does not ship Rust context types, a wire schema,
-conversation storage, a compiler or a production reference resolver.
-#186/#187 implement compilation/reference resolution; #188 defines clarification
+records and behavior. The [#187 implementation](deterministic-interpretation-resolution.md)
+now provides Rust snapshot types, canonical wire admission and an application
+resolver; the [#186 frontend](cgsl-frontend.md) provides compilation.
+Conversation storage and host integration remain separate. #188 defines clarification
 plans; #190 integrates the semantic handoff; #193 qualifies conformance.
 The record names below are context metadata, not new CGSL constructs.
 
@@ -329,8 +330,9 @@ status/index updates are local changes on that baseline.
 | Typed relevant history only | Fact/focus projection with provenance and relevance, transcript prohibition, IC-03/18 |
 | Lifecycle/invalidation documented | State diagram, transition table, time/basis/reply rules, IC-16/17/22 |
 
-This completes the definition scope of #181. Production resolution,
-clarification integration and complete EPIC-05 acceptance remain planned.
+This completes the definition scope of #181. The linked #187 application resolver
+implements component resolution. Clarification integration and complete EPIC-05
+acceptance remain planned.
 
 Validation on 2026-10-11: all 35 architecture regression tests passed;
 `bash scripts/check-architecture.sh` passed; local Markdown targets in the

@@ -32,14 +32,16 @@ distinguishes this specification from planned compiler/runtime capabilities.
 
 See [Rust CGSL frontend](cgsl-frontend.md) for the offline parser/compiler API,
 source locations, resource profile and verification commands.
+See [Deterministic interpretation resolution](deterministic-interpretation-resolution.md)
+for scoped entity/alias lookup, discourse and temporal resolution, source traces
+and the EPIC-05.09 component verification boundary.
 See [CGSL 1.0 grammar, serialization and diagnostics](cgsl-language-v1.md) for
 EPIC-05.07 normative syntax, source/IR roundtrip rules, diagnostic categories
 and [complete examples and counterexamples](../examples/cgsl-v1/README.md).
-The parser/compiler remains planned under #186.
 
 See [Interpretation Context, precedence and lifecycle](interpretation-context.md)
 for EPIC-05.03 request-scoped meaning, typed focus/history, isolation, conflict
-rules and reference decision vectors. Production assembly/resolution remains planned.
+rules and reference decision vectors. Host/runtime integration remains planned.
 
 See [Ambiguity, conflict and knowledge-gap contracts](semantic-resolution-contracts.md)
 for EPIC-05.04 domain types, stable diagnostics and mandatory compilation blockers.

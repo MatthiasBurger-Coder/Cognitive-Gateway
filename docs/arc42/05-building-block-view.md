@@ -210,8 +210,10 @@ optional tokenizer and compaction ports to outer adapters. See
 `gateway-cgsl` implements the offline parser, source AST and semantic compiler
 using the existing `gateway-domain` contracts. It preserves unresolved source
 sidecars and produces task shapes without granting execution authority. See the
-[frontend boundary and verification](../cgsl-frontend.md). Production reference
-resolution and completeness remain planned. Optional model interpretation produces proposals only; a
+[frontend boundary and verification](../cgsl-frontend.md). `gateway-application`
+provides [deterministic interpretation resolution](../deterministic-interpretation-resolution.md)
+with scoped lookup ports, typed context, precedence and decision traces.
+Host/runtime integration and completeness remain planned. Optional model interpretation produces proposals only; a
 deterministic compiler/validator owns canonical semantics. See
 [semantic language and interpretation](../semantic-language-and-interpretation.md).
 

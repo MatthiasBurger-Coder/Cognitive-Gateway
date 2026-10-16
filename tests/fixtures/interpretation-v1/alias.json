@@ -1,0 +1,299 @@
+{
+  "version": "1.0",
+  "id": "context",
+  "revision": "capture-1",
+  "binding": {
+    "scope": "project-p",
+    "request": "request",
+    "input": {
+      "id": "input",
+      "scope": "project-p",
+      "contract": "test-record",
+      "contract_version": "1.0",
+      "revision": "r1",
+      "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "conversation": {
+      "id": "conversation",
+      "scope": "project-p",
+      "contract": "test-record",
+      "contract_version": "1.0",
+      "revision": "r1",
+      "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "task": {
+      "id": "task",
+      "scope": "project-p",
+      "contract": "test-record",
+      "contract_version": "1.0",
+      "revision": "r1",
+      "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "host_basis": {
+      "id": "host",
+      "scope": "project-p",
+      "contract": "test-record",
+      "contract_version": "1.0",
+      "revision": "r1",
+      "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  },
+  "captured_at": 100,
+  "expires_at": 200,
+  "basis_refs": [
+    {
+      "id": "input",
+      "scope": "project-p",
+      "contract": "test-record",
+      "contract_version": "1.0",
+      "revision": "r1",
+      "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    {
+      "id": "host",
+      "scope": "project-p",
+      "contract": "test-record",
+      "contract_version": "1.0",
+      "revision": "r1",
+      "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    {
+      "id": "source",
+      "scope": "project-p",
+      "contract": "test-record",
+      "contract_version": "1.0",
+      "revision": "r1",
+      "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    {
+      "id": "conversation",
+      "scope": "project-p",
+      "contract": "test-record",
+      "contract_version": "1.0",
+      "revision": "r1",
+      "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    {
+      "id": "task",
+      "scope": "project-p",
+      "contract": "test-record",
+      "contract_version": "1.0",
+      "revision": "r1",
+      "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  ],
+  "permitted_sources": [
+    {
+      "source": {
+        "id": "source",
+        "scope": "project-p",
+        "contract": "test-record",
+        "contract_version": "1.0",
+        "revision": "r1",
+        "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "tier": "VERIFIED_MEMORY",
+      "sensitivity_ceiling": "NORMAL",
+      "trust": "CANONICAL_REFERENCE",
+      "max_results": 10
+    },
+    {
+      "source": {
+        "id": "source",
+        "scope": "project-p",
+        "contract": "test-record",
+        "contract_version": "1.0",
+        "revision": "r1",
+        "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "tier": "RETRIEVED_EVIDENCE",
+      "sensitivity_ceiling": "NORMAL",
+      "trust": "CANONICAL_REFERENCE",
+      "max_results": 10
+    }
+  ],
+  "relevant_facts": [
+    {
+      "id": "focus",
+      "field": "target",
+      "tier": "CONVERSATION_FOCUS",
+      "value": {
+        "kind": "TARGET",
+        "value": {
+          "kind": "SERVICE",
+          "reference": {
+            "id": "A",
+            "scope": "project-p",
+            "contract": "test-record",
+            "contract_version": "1.0",
+            "revision": "r1",
+            "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          }
+        }
+      },
+      "source": {
+        "id": "source",
+        "scope": "project-p",
+        "contract": "test-record",
+        "contract_version": "1.0",
+        "revision": "r1",
+        "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "provenance": {
+        "id": "focus",
+        "source_kind": "CALLER",
+        "source_id": "source",
+        "source_reference": "focus",
+        "producer": null,
+        "acquired_at": null,
+        "source_timestamp": null,
+        "parent_provenance": []
+      },
+      "quality": {
+        "trust": "CANONICAL_REFERENCE",
+        "sensitivity": "NORMAL",
+        "confidence": {
+          "kind": "UNKNOWN"
+        },
+        "freshness": "FRESH",
+        "uncertainty": "NONE",
+        "conflict": "NONE"
+      },
+      "valid_until": 200,
+      "relevance": "target binding",
+      "span": [
+        0,
+        10
+      ],
+      "subject": null,
+      "protected": false,
+      "required_pin": false,
+      "supersedes": null
+    }
+  ],
+  "aliases": [
+    {
+      "label": "payments",
+      "kind": "SERVICE",
+      "fact": {
+        "id": "alias-0",
+        "field": "target",
+        "tier": "VERIFIED_MEMORY",
+        "value": {
+          "kind": "TARGET",
+          "value": {
+            "kind": "SERVICE",
+            "reference": {
+              "id": "A",
+              "scope": "project-p",
+              "contract": "test-record",
+              "contract_version": "1.0",
+              "revision": "r1",
+              "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            }
+          }
+        },
+        "source": {
+          "id": "source",
+          "scope": "project-p",
+          "contract": "test-record",
+          "contract_version": "1.0",
+          "revision": "r1",
+          "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "provenance": {
+          "id": "alias-0",
+          "source_kind": "CALLER",
+          "source_id": "source",
+          "source_reference": "alias-0",
+          "producer": null,
+          "acquired_at": null,
+          "source_timestamp": null,
+          "parent_provenance": []
+        },
+        "quality": {
+          "trust": "CANONICAL_REFERENCE",
+          "sensitivity": "NORMAL",
+          "confidence": {
+            "kind": "UNKNOWN"
+          },
+          "freshness": "FRESH",
+          "uncertainty": "NONE",
+          "conflict": "NONE"
+        },
+        "valid_until": 200,
+        "relevance": "target binding",
+        "span": [
+          0,
+          10
+        ],
+        "subject": null,
+        "protected": false,
+        "required_pin": false,
+        "supersedes": null
+      }
+    },
+    {
+      "label": "payments",
+      "kind": "SERVICE",
+      "fact": {
+        "id": "alias-1",
+        "field": "target",
+        "tier": "VERIFIED_MEMORY",
+        "value": {
+          "kind": "TARGET",
+          "value": {
+            "kind": "SERVICE",
+            "reference": {
+              "id": "B",
+              "scope": "project-p",
+              "contract": "test-record",
+              "contract_version": "1.0",
+              "revision": "r1",
+              "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            }
+          }
+        },
+        "source": {
+          "id": "source",
+          "scope": "project-p",
+          "contract": "test-record",
+          "contract_version": "1.0",
+          "revision": "r1",
+          "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "provenance": {
+          "id": "alias-1",
+          "source_kind": "CALLER",
+          "source_id": "source",
+          "source_reference": "alias-1",
+          "producer": null,
+          "acquired_at": null,
+          "source_timestamp": null,
+          "parent_provenance": []
+        },
+        "quality": {
+          "trust": "CANONICAL_REFERENCE",
+          "sensitivity": "NORMAL",
+          "confidence": {
+            "kind": "UNKNOWN"
+          },
+          "freshness": "FRESH",
+          "uncertainty": "NONE",
+          "conflict": "NONE"
+        },
+        "valid_until": 200,
+        "relevance": "target binding",
+        "span": [
+          0,
+          10
+        ],
+        "subject": null,
+        "protected": false,
+        "required_pin": false,
+        "supersedes": null
+      }
+    }
+  ],
+  "temporal_anchors": []
+}
