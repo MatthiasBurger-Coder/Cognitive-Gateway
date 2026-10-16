@@ -48,6 +48,10 @@
     "command": "set -euo pipefail\ncommand -v cg-registry\ncg-registry --help >/dev/null\ncg-registry agent list --json >/dev/null\ncg-registry agent show system-architect --json >/dev/null\ncg-registry skill list --json >/dev/null\ncg-registry skill show architecture-hexagonal --json >/dev/null\ncg-registry skill graph architecture-hexagonal --json >/dev/null\ncg-registry capability list --json >/dev/null\ncg-registry capability show architecture.dependency-analysis --json >/dev/null\ncg-registry capability resolve architecture.dependency-analysis --json >/dev/null\n"
   },
   {
+    "name": "EPIC-05.08 offline CGSL frontend coverage",
+    "command": "cargo llvm-cov -p gateway-cgsl --all-targets --locked --ignore-filename-regex 'gateway-domain' --fail-under-lines 95 --json --output-path \"$EVIDENCE_DIR/cgsl-coverage.json\""
+  },
+  {
     "name": "Domain coverage gate",
     "command": "cargo llvm-cov clean --workspace\ncargo llvm-cov -p gateway-domain --all-targets --fail-under-lines 95 --json --output-path \"$EVIDENCE_DIR/domain-coverage.json\"\npython3 scripts/check-semantic-task-coverage.py --self-test\npython3 scripts/check-semantic-task-coverage.py \"$EVIDENCE_DIR/domain-coverage.json\""
   },

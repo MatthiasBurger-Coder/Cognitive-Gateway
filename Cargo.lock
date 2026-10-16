@@ -220,6 +220,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "gateway-cgsl"
+version = "0.1.0"
+dependencies = [
+ "gateway-domain",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "gateway-context"
 version = "0.1.0"
 dependencies = [

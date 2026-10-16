@@ -10,8 +10,9 @@ for the [20 canonical constructs](cgsl-scope-and-vocabulary.md), reusing
 [resolution](semantic-resolution-contracts.md), [epistemic](semantic-epistemic-contract.md)
 and [output/verification](semantic-output-contracts.md) contracts.
 
-This is a specification, not a shipped CGSL parser or compiler. #186 implements
-the frontend, #187 resolution, #188 completeness and #193 full conformance.
+This is the language specification. #186 implements the
+[offline Rust frontend](cgsl-frontend.md); #187 owns resolution, #188
+completeness and #193 full conformance.
 Existing task JSON readers MUST NOT be described as CGSL readers. Historical
 indentation-based examples in epic sketches are informative, not alternate syntax.
 

@@ -1,6 +1,7 @@
 [workspace]
 resolver = "2"
 members = [
+  "crates/gateway-cgsl",
   "crates/gateway-domain",
   "crates/gateway-application",
   "crates/gateway-process",
