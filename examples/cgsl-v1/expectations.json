@@ -1,0 +1,64 @@
+{
+  "incomplete": {
+    "executable": false,
+    "file": "incomplete.cgsl",
+    "required_code": "SEM_AMBIGUOUS_ENTITY"
+  },
+  "mapped": [
+    {
+      "file": "minimal.cgsl",
+      "ir_fixture": "../../tests/fixtures/semantic-task-v1/minimal.canonical.json"
+    },
+    {
+      "file": "performance-analysis.cgsl",
+      "ir_fixture": "../../tests/fixtures/semantic-task-v1/performance-analysis.canonical.json"
+    }
+  ],
+  "rejected": [
+    {
+      "code": "SEM_UNSUPPORTED_CONSTRUCT",
+      "file": "alias.cgsl",
+      "phase": "SEMANTIC"
+    },
+    {
+      "code": "VER_UNSUPPORTED_VERSION",
+      "file": "unsupported-version.cgsl",
+      "phase": "VERSION"
+    },
+    {
+      "code": "SEM_INVALID_OPERAND",
+      "file": "reference-shorthand.cgsl",
+      "phase": "SEMANTIC"
+    },
+    {
+      "code": "SEM_INVALID_OPERAND",
+      "file": "provider-member.cgsl",
+      "phase": "SEMANTIC"
+    },
+    {
+      "code": "SEM_MISSING_REQUIRED_FIELD",
+      "file": "missing-goal.cgsl",
+      "phase": "SEMANTIC"
+    },
+    {
+      "code": "SYN_DUPLICATE_MEMBER",
+      "file": "duplicate-key.cgsl",
+      "phase": "PARSE"
+    },
+    {
+      "code": "SYN_EXPECTED_TOKEN",
+      "file": "trailing-comma.cgsl",
+      "phase": "PARSE"
+    },
+    {
+      "code": "SYN_INVALID_TOKEN",
+      "file": "comment.cgsl",
+      "phase": "LEX"
+    },
+    {
+      "code": "SYN_INVALID_TOKEN",
+      "file": "lone-surrogate.cgsl",
+      "phase": "LEX"
+    }
+  ]
+}
