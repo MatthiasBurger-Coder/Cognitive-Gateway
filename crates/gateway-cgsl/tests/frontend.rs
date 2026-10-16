@@ -9,6 +9,23 @@ fn compile_json(value: &Json) -> Result<CompiledSource, Vec<Diagnostic>> {
 fn minimal() -> Json {
     serde_json::from_str(MINIMAL).unwrap()
 }
+
+#[test]
+fn provider_prompt_and_tuning_fields_are_not_cgsl_semantics() {
+    for field in [
+        "messages",
+        "system_prompt",
+        "provider",
+        "model",
+        "temperature",
+        "reasoning_effort",
+        "prompt_template",
+    ] {
+        let mut value = minimal();
+        value[field] = json!("provider-specific");
+        assert!(compile_json(&value).is_err(), "{field}");
+    }
+}
 fn incomplete() -> Json {
     serde_json::from_str(INCOMPLETE).unwrap()
 }

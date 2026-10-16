@@ -77,7 +77,8 @@ class DependencyTests(unittest.TestCase):
         for package in self.metadata["packages"]:
             if package["name"] == "gateway-daemon":
                 continue
-            for provider in ["codex", "codex-sdk", "async-openai", "openai", "rmcp", "mcp"]:
+            for provider in ["codex", "codex-sdk", "async-openai", "openai", "rmcp", "mcp",
+                             "anthropic", "anthropic-sdk", "ollama-rs", "llama-cpp-2"]:
                 for kind in [None, "dev", "build"]:
                     for target in [None, "cfg(windows)"]:
                         with self.subTest(crate=package["name"], provider=provider,

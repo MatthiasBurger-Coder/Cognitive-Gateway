@@ -230,6 +230,7 @@ The approved CG-02 v2 handoff extension is documented in
 
 ## Context compilation
 
+- [Prompt IR handoff boundary](prompt-ir-handoff-boundary.md) — #192 section ownership, admission, CG-26 attachment and two offline provider mappings; canonical planning/example integration remains pending.
 - [CG-10 Context Compiler, semantic TAG and ExecutionContext projection](context-compiler.md)
 - [CG-17 knowledge graph and graph retrieval](knowledge-graph.md)
 

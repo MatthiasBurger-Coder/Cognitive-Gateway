@@ -117,6 +117,18 @@ tests and a dual-frontend reference scenario enforce this separation (#191).
 
 ## 8.13 Model provenance and qualification
 
+The [Prompt IR handoff boundary](../prompt-ir-handoff-boundary.md) (#192) keeps
+task meaning, authenticated instructions, context, evidence, optional bounded
+examples and output/verification contracts separate. #285 owns canonical context
+requirements/source selection; #286 owns validated examples; CG-10 owns final
+context compilation. EPIC-06 #263 consumes their exact version/digest bindings
+and owns invocation admission. Renderers cannot infer requirements, acquire
+hidden context or promote examples to policy authority. Existing CG-26 routing
+attaches after admission and revalidates CG-10 before each dispatch. #266/#267
+verify outputs against the exact invocation independently of provider confidence.
+The boundary specification and two offline reference layouts are available;
+canonical #285/#286 integration and the #263 production envelope remain planned.
+
 Local or remote model use must retain provider/model identity and the
 configuration needed to reproduce material behavior where applicable. CG-27
 adds model revision/digest, runtime version, quantization and prompt/template
