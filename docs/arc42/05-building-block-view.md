@@ -213,7 +213,11 @@ sidecars and produces task shapes without granting execution authority. See the
 [frontend boundary and verification](../cgsl-frontend.md). `gateway-application`
 provides [deterministic interpretation resolution](../deterministic-interpretation-resolution.md)
 with scoped lookup ports, typed context, precedence and decision traces.
-Host/runtime integration and completeness remain planned. Optional model interpretation produces proposals only; a
+The [semantic planning boundary](../semantic-planning-boundaries.md) maps CG-06
+Intent/Context/Situation inputs into task compilation and delegates validated task
+planning and resolution to the existing CG-07/08 facades. Its immutable handoff
+retains output, verification and evidence contracts beside Plan. Host/runtime
+integration remains separate. Optional model interpretation produces proposals only; a
 deterministic compiler/validator owns canonical semantics. See
 [semantic language and interpretation](../semantic-language-and-interpretation.md).
 
