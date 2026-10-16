@@ -94,8 +94,8 @@ pub struct SemanticAssumption {
     pub confidence: Confidence,
 }
 
-/// Pin a provider-neutral output schema; inline schemas and result validation
-/// are owned by EPIC-05.06. No provider rendering options are carried here.
+/// Pin a provider-neutral output schema. `semantic_output` defines its shape
+/// and result validation. No provider rendering options are carried here.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct SemanticOutputContract {

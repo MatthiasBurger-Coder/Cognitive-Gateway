@@ -11,7 +11,8 @@ GATE = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(GATE)
 GATE.EXPECTED = ('crates/gateway-domain/src/semantic_task.rs',
                  'crates/gateway-domain/src/semantic_resolution.rs',
-                 'crates/gateway-domain/src/semantic_epistemic.rs')
+                 'crates/gateway-domain/src/semantic_epistemic.rs',
+                 'crates/gateway-domain/src/semantic_output.rs')
 
 if __name__ == '__main__':
     if sys.argv[1:] == ['--self-test']:

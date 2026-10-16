@@ -20,6 +20,10 @@ The [epistemic contract](semantic-epistemic-contract.md) defines interpretation
 attachments, evidence admissibility and assumption lifecycle without changing
 the task 1.0 wire format.
 
+The [output and verification contracts](semantic-output-contracts.md) elaborate
+the pinned output schema and verification checks into versioned definitions,
+JSON Schema projections and result assessment without changing task 1.0.
+
 ## Domain and wire fields
 
 `SemanticTaskData` is construction input. `SemanticTaskIR::new` validates and

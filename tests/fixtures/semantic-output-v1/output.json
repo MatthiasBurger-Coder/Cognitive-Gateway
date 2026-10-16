@@ -1,0 +1,37 @@
+{
+  "schema_version": "1.0",
+  "schema": {
+    "id": "ArtifactInspection",
+    "scope": "project-x",
+    "contract": "cg.output-schema",
+    "contract_version": "1.0",
+    "revision": "7",
+    "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  "shape": {
+    "type": "OBJECT",
+    "fields": {
+      "summary": {
+        "required": true,
+        "value_type": {
+          "type": "STRING"
+        }
+      },
+      "scores": {
+        "required": true,
+        "value_type": {
+          "type": "ARRAY",
+          "items": {
+            "type": "NUMBER"
+          }
+        }
+      },
+      "approved": {
+        "required": false,
+        "value_type": {
+          "type": "BOOLEAN"
+        }
+      }
+    }
+  }
+}

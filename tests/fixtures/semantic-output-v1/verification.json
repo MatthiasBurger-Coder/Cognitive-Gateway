@@ -1,0 +1,43 @@
+{
+  "schema_version": "1.0",
+  "rules": [
+    {
+      "check": "OUTPUT_SCHEMA_VALID",
+      "rule": {
+        "id": "rule.OUTPUT_SCHEMA_VALID",
+        "scope": "project-x",
+        "contract": "cg.verification-rule",
+        "contract_version": "1.0",
+        "revision": "7",
+        "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "verifier": {
+        "id": "verifier.OUTPUT_SCHEMA_VALID",
+        "scope": "project-x",
+        "contract": "cg.verifier",
+        "contract_version": "1.0",
+        "revision": "7",
+        "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      }
+    },
+    {
+      "check": "NO_UNRESOLVED_REFERENCE",
+      "rule": {
+        "id": "rule.NO_UNRESOLVED_REFERENCE",
+        "scope": "project-x",
+        "contract": "cg.verification-rule",
+        "contract_version": "1.0",
+        "revision": "7",
+        "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "verifier": {
+        "id": "verifier.NO_UNRESOLVED_REFERENCE",
+        "scope": "project-x",
+        "contract": "cg.verifier",
+        "contract_version": "1.0",
+        "revision": "7",
+        "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      }
+    }
+  ]
+}
