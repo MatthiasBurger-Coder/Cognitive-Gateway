@@ -1,0 +1,56 @@
+{
+  "schema_version": "1.0",
+  "issue": 187,
+  "baseline_revision": "59edfd2eae40a008afcd82d22160ced58b6f843f",
+  "candidate": "baseline plus source_sha256 working changes",
+  "evidence_level": "COMPONENT",
+  "component_status": "PASS",
+  "repository_qualification": "NOT_COMPLETE",
+  "source_sha256": {
+    "crates/gateway-application/src/interpretation.rs": "bb12dd950cb652fd2c924c605bd7f20577fb217230118b459d156f4154d1a000",
+    "crates/gateway-application/tests/interpretation.rs": "5254484f245bdbc8ba1e5b89a6352b0b4f0981bd5962f5438db3323043e6f70d",
+    "crates/gateway-domain/src/interpretation.rs": "57eff6743c06d652b9f91537d6125a52344c1deffc5bb50968b102b46b5551eb",
+    "scripts/check-interpretation-coverage.py": "99ea7ca7eddca78c49f18492ce81ef80a5e16124249e52b64d081ea3ee4a9456",
+    "scripts/quality-gates.json": "1bd9916f729480d017513ea2684b07dac7b36f6b8520ef6e67a1ac4836d2b437",
+    "tests/fixtures/interpretation-v1/alias.json": "33a18e61b58e574af5934533009b3976fb115bcf30f46fef95dc8ed10d8dbfea",
+    "tests/fixtures/interpretation-v1/pronoun.json": "a5a1db9811825e204964910f046ba3e98f65af54f1252ca7ad0fcb2770d05277",
+    "tests/fixtures/interpretation-v1/scope-conflict.json": "a273807413b62d507341a64ca82681ebe7f9e24ac64ff317f02df8c115b115b7",
+    "tests/fixtures/interpretation-v1/temporal.json": "00ad6ac5ef2399d48a37c2ce1468b10f3383c178fd19df678d08965d97e7416c"
+  },
+  "coverage": {
+    "crates/gateway-application/src/interpretation.rs": {
+      "count": 570,
+      "covered": 561,
+      "percent": 98.42105263157895
+    },
+    "crates/gateway-domain/src/interpretation.rs": {
+      "count": 14,
+      "covered": 14,
+      "percent": 100.0
+    }
+  },
+  "checks": {
+    "resolver_tests": {
+      "passed": 18,
+      "failed": 0
+    },
+    "domain_application_cgsl_regressions": {
+      "passed": 582,
+      "failed": 0,
+      "ignored": 0
+    },
+    "workspace_build": "PASS",
+    "format": "PASS",
+    "architecture_dependency_guard": "PASS",
+    "coverage_gate_and_self_test": "PASS",
+    "diff_check": "PASS",
+    "workspace_tests": "FAIL: unchanged daemon local_mcp timeout test at runtime.rs:545 (both attempts)",
+    "clippy": "FAIL: existing worker_fabric.rs:291 nonminimal_bool",
+    "architecture_unittests": "35 tests, 5 errors; identical errors reproduced on clean baseline"
+  },
+  "limitations": [
+    "Fixture host validates component behavior; external authority adapters require integration qualification.",
+    "No installed natural-language client, durable session continuation, completeness planner or policy authority is claimed.",
+    "Full repository qualification remains incomplete; no issue closure was performed."
+  ]
+}
