@@ -1,0 +1,32 @@
+{
+  "version": "1.0",
+  "thresholds": [
+    {
+      "source": "classifier",
+      "model_id": "fixture",
+      "model_version": "v1",
+      "artifact_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "embedding_space": null,
+      "minimum_rank": 0.8,
+      "fixture_dataset": "interpretation-adapters-v1"
+    },
+    {
+      "source": "embedding",
+      "model_id": "fixture",
+      "model_version": "v1",
+      "artifact_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "embedding_space": "space-v1",
+      "minimum_rank": 0.8,
+      "fixture_dataset": "interpretation-adapters-v1"
+    },
+    {
+      "source": "slm",
+      "model_id": "fixture",
+      "model_version": "v1",
+      "artifact_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "embedding_space": null,
+      "minimum_rank": 0.8,
+      "fixture_dataset": "interpretation-adapters-v1"
+    }
+  ]
+}
