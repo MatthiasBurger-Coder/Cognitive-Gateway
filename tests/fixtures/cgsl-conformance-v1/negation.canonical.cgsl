@@ -1,0 +1,190 @@
+{
+  "ambiguity": [],
+  "assumption": [
+    {
+      "basis": {
+        "contract": "cg.knowledge",
+        "contract_version": "1.0",
+        "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "id": "workload-note",
+        "revision": "7",
+        "scope": "project-x"
+      },
+      "confidence": {
+        "kind": "UNKNOWN"
+      },
+      "id": "workload-comparable",
+      "premise": {
+        "kind": "BOOLEAN",
+        "value": true
+      }
+    }
+  ],
+  "cgsl": "1.0",
+  "confidence": [],
+  "constraint": [
+    {
+      "id": "mutation-consent",
+      "kind": "LIVE_MUTATION_REQUIRES_CONSENT"
+    }
+  ],
+  "context": [
+    {
+      "contract": "cg.declarative-context",
+      "contract_version": "1.0",
+      "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "id": "service-x-context",
+      "revision": "7",
+      "scope": "project-x"
+    }
+  ],
+  "desired_state": {
+    "acceptance_criteria": [],
+    "conditions": [
+      {
+        "expected": {
+          "kind": "INTEGER",
+          "value": 300
+        },
+        "id": "p95-target",
+        "operator": "LESS_OR_EQUAL",
+        "subject": "ServiceX.p95_ms"
+      }
+    ],
+    "constraints": [],
+    "expression": {
+      "kind": "NOT",
+      "value": {
+        "kind": "CONDITION",
+        "value": "p95-target"
+      }
+    },
+    "id": "latency-goal",
+    "schema_version": "1.0"
+  },
+  "evidence": [
+    {
+      "contract": "cg.evidence",
+      "contract_version": "1.0",
+      "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "id": "latency-report-7",
+      "revision": "7",
+      "scope": "project-x"
+    }
+  ],
+  "goal": {
+    "description": "Identify remaining latency causes for ServiceX",
+    "outcome": "identify-latency-causes"
+  },
+  "history": [
+    {
+      "contract": "cg.process-history",
+      "contract_version": "1.0",
+      "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "id": "query-optimization",
+      "revision": "7",
+      "scope": "project-x"
+    }
+  ],
+  "id": "task-perf",
+  "input": [
+    {
+      "role": "incident",
+      "value": {
+        "kind": "REFERENCE",
+        "value": {
+          "contract": "cg.issue",
+          "contract_version": "1.0",
+          "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "id": "PERF-142",
+          "revision": "7",
+          "scope": "project-x"
+        }
+      }
+    },
+    {
+      "role": "threshold-ms",
+      "value": {
+        "kind": "LITERAL",
+        "value": {
+          "kind": "INTEGER",
+          "value": 300
+        }
+      }
+    }
+  ],
+  "knowledge_gap": [],
+  "observation": [
+    {
+      "contract": "cg.observation",
+      "contract_version": "1.0",
+      "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "id": "p95-run-7",
+      "revision": "7",
+      "scope": "project-x"
+    }
+  ],
+  "output": {
+    "schema": {
+      "contract": "cg.output-schema",
+      "contract_version": "1.0",
+      "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "id": "PerformanceAnalysis",
+      "revision": "7",
+      "scope": "project-x"
+    }
+  },
+  "policy": [
+    {
+      "contract": "cg.policy",
+      "contract_version": "1.0",
+      "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "id": "performance-diagnostics",
+      "revision": "7",
+      "scope": "project-x"
+    }
+  ],
+  "process": {
+    "digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "id": "diagnostics",
+    "version": 1
+  },
+  "requires": [
+    {
+      "contract": "cg.capability",
+      "contract_version": "1.0",
+      "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "id": "performance.analysis",
+      "revision": "7",
+      "scope": "project-x"
+    }
+  ],
+  "state": {
+    "contract": "cg.observed-state",
+    "contract_version": "1.0",
+    "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "id": "service-x-7",
+    "revision": "7",
+    "scope": "project-x"
+  },
+  "target": {
+    "kind": "SERVICE",
+    "reference": {
+      "contract": "cg.service",
+      "contract_version": "1.0",
+      "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "id": "ServiceX",
+      "revision": "7",
+      "scope": "project-x"
+    }
+  },
+  "task": "ANALYZE_PERFORMANCE",
+  "verification": {
+    "checks": [
+      "OUTPUT_SCHEMA_VALID",
+      "EVIDENCE_REQUIRED",
+      "ALL_CLAIMS_SUPPORTED",
+      "NO_UNRESOLVED_REFERENCE"
+    ]
+  }
+}

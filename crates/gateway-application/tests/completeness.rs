@@ -612,3 +612,119 @@ fn plans_require_task_correlation_and_compile_rechecks_fresh_resolution() {
         Err(CompletenessError::InvalidRequirements)
     );
 }
+
+/// Component boundary: the host has refused stale/duplicate replies and projects
+/// only accepted fresh input. Persisted reply correlation remains #275/#279-owned.
+#[test]
+fn resumed_compilation_rejects_stale_duplicate_and_changed_scope_projections() {
+    let host = Host::default();
+    let lookup = Lookup::default();
+    let v = validator(&host, &lookup);
+    let fields = [field("target", &[])];
+    let pending = data(vec![]);
+    let old_plan = check(pending.clone(), &fields).clarification;
+    // A refused reply adds no fact and cannot unblock compilation.
+    for revision in ["stale-reply-refused", "duplicate-reply-refused"] {
+        let mut fresh = pending.clone();
+        fresh.revision = id(revision);
+        let context = InterpretationContext::admit(fresh, &host, time(101)).unwrap();
+        let (result, compiled) = v
+            .compile(&context, &revision_id(), &fields, time(101), |_| {
+                panic!("refused reply reached compiler")
+            })
+            .unwrap();
+        assert!(compiled.is_none());
+        assert_ne!(
+            result.clarification.questions[0].id,
+            old_plan.questions[0].id
+        );
+    }
+    // Replaying the same accepted capture is deterministic; it creates no new
+    // authority, policy or state transition at this stateless boundary.
+    let fresh = data(vec![fact(
+        "reply",
+        "service",
+        InterpretationTier::CurrentInput,
+    )]);
+    let context = InterpretationContext::admit(fresh.clone(), &host, time(101)).unwrap();
+    let compiler = |decisions: &[InterpretationDecision]| {
+        let mut data = task().data().clone();
+        let InterpretationValue::Target(target) =
+            decisions[0].resolution.require_resolved().unwrap()
+        else {
+            panic!("expected target")
+        };
+        data.target = target.clone();
+        data.output_contract.schema.scope = target.reference.scope.clone();
+        SemanticTaskIR::new(data).map_err(|_| CompletenessError::Compilation)
+    };
+    let first = v
+        .compile(&context, &revision_id(), &fields, time(101), compiler)
+        .unwrap();
+    assert_eq!(first.1.as_ref().unwrap().data().target, target("service"));
+    let second = v
+        .compile(&context, &revision_id(), &fields, time(101), compiler)
+        .unwrap();
+    assert_eq!(first, second);
+    // A host admitting the new project must still reject old-project operands.
+    let wire = serde_json::to_string(&fresh)
+        .unwrap()
+        .replace("project-p", "project-new");
+    let changed = InterpretationContext::admit_json(wire.as_bytes(), &host, time(101)).unwrap();
+    assert_eq!(
+        v.compile(&changed, &revision_id(), &fields, time(101), |_| Ok(task())),
+        Err(CompletenessError::Compilation)
+    );
+    let (_, rebound) = v
+        .compile(&changed, &revision_id(), &fields, time(101), compiler)
+        .unwrap();
+    assert_eq!(
+        rebound.unwrap().data().target.reference.scope,
+        ContextScopeId::new("project-new").unwrap()
+    );
+    // Keeping the old fact under the new binding fails before compilation.
+    let mut changed: InterpretationContextData = serde_json::from_str(&wire).unwrap();
+    changed.relevant_facts = fresh.relevant_facts;
+    assert!(InterpretationContext::admit(changed, &host, time(101)).is_err());
+}
+
+#[test]
+fn stale_conflicting_and_duplicate_answer_facts_are_revalidated() {
+    let host = Host::default();
+    let lookup = Lookup::default();
+    let v = validator(&host, &lookup);
+    let fields = [field("target", &[])];
+    let answer = fact("reply", "service", InterpretationTier::CurrentInput);
+    let mut stale = answer.clone();
+    stale.valid_until = time(101);
+    let context = InterpretationContext::admit(data(vec![stale]), &host, time(100)).unwrap();
+    let (result, task) = v
+        .compile(&context, &revision_id(), &fields, time(101), |_| {
+            panic!("stale reply reached compiler")
+        })
+        .unwrap();
+    assert!(!result.is_complete());
+    assert!(task.is_none());
+    // Identical facts normalize once. Persisted reply refusal is host-owned.
+    assert_eq!(
+        check(data(vec![answer.clone(), answer.clone()]), &fields),
+        check(data(vec![answer.clone()]), &fields)
+    );
+    let mut conflicting = answer.clone();
+    conflicting.id = id("second-reply");
+    conflicting.provenance = provenance("second-reply");
+    conflicting.value = InterpretationValue::Target(target("other-service"));
+    let context =
+        InterpretationContext::admit(data(vec![answer, conflicting]), &host, time(101)).unwrap();
+    let (result, task) = v
+        .compile(&context, &revision_id(), &fields, time(101), |_| {
+            panic!("conflicting reply reached compiler")
+        })
+        .unwrap();
+    assert!(!result.is_complete());
+    assert!(task.is_none());
+    assert_eq!(
+        result.decisions[0].resolution.state(),
+        SemanticResolutionState::Conflicting
+    );
+}

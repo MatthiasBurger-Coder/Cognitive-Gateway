@@ -1,0 +1,405 @@
+{
+  "version": "1.0",
+  "cases": [
+    {
+      "id": "focus",
+      "context": "focus.context.json",
+      "at": 100,
+      "expression": "focus",
+      "state": "RESOLVED",
+      "code": null,
+      "selected": "A",
+      "host": "allow",
+      "candidates": [
+        {
+          "value": {
+            "kind": "TARGET",
+            "value": {
+              "kind": "SERVICE",
+              "reference": {
+                "id": "A",
+                "scope": "project-p",
+                "contract": "test-record",
+                "contract_version": "1.0",
+                "revision": "r1",
+                "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+              }
+            }
+          },
+          "provenance": [
+            {
+              "id": "focus",
+              "source_kind": "CALLER",
+              "source_id": "source",
+              "source_reference": "focus",
+              "producer": null,
+              "acquired_at": null,
+              "source_timestamp": null,
+              "parent_provenance": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "unknown",
+      "context": "unknown.context.json",
+      "at": 100,
+      "expression": "focus",
+      "state": "UNRESOLVED",
+      "code": "SEM_MISSING_REQUIRED_FIELD",
+      "selected": null,
+      "host": "allow",
+      "candidates": []
+    },
+    {
+      "id": "stale-evidence",
+      "context": "stale-evidence.context.json",
+      "at": 100,
+      "expression": "focus",
+      "state": "UNRESOLVED",
+      "code": "SEM_STALE_REFERENCE",
+      "selected": null,
+      "host": "allow",
+      "candidates": []
+    },
+    {
+      "id": "ambiguous-focus",
+      "context": "ambiguous-focus.context.json",
+      "at": 100,
+      "expression": "focus",
+      "state": "AMBIGUOUS",
+      "code": null,
+      "selected": null,
+      "host": "allow",
+      "candidates": [
+        {
+          "value": {
+            "kind": "TARGET",
+            "value": {
+              "kind": "SERVICE",
+              "reference": {
+                "id": "A",
+                "scope": "project-p",
+                "contract": "test-record",
+                "contract_version": "1.0",
+                "revision": "r1",
+                "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+              }
+            }
+          },
+          "provenance": [
+            {
+              "id": "focus",
+              "source_kind": "CALLER",
+              "source_id": "source",
+              "source_reference": "focus",
+              "producer": null,
+              "acquired_at": null,
+              "source_timestamp": null,
+              "parent_provenance": []
+            }
+          ]
+        },
+        {
+          "value": {
+            "kind": "TARGET",
+            "value": {
+              "kind": "SERVICE",
+              "reference": {
+                "id": "B",
+                "scope": "project-p",
+                "contract": "test-record",
+                "contract_version": "1.0",
+                "revision": "r1",
+                "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+              }
+            }
+          },
+          "provenance": [
+            {
+              "id": "other",
+              "source_kind": "CALLER",
+              "source_id": "source",
+              "source_reference": "focus",
+              "producer": null,
+              "acquired_at": null,
+              "source_timestamp": null,
+              "parent_provenance": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "conflicting-task-state",
+      "context": "conflicting-task-state.context.json",
+      "at": 100,
+      "expression": "focus",
+      "state": "CONFLICTING",
+      "code": null,
+      "selected": null,
+      "host": "allow",
+      "candidates": [
+        {
+          "value": {
+            "kind": "TARGET",
+            "value": {
+              "kind": "SERVICE",
+              "reference": {
+                "id": "A",
+                "scope": "project-p",
+                "contract": "test-record",
+                "contract_version": "1.0",
+                "revision": "r1",
+                "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+              }
+            }
+          },
+          "provenance": [
+            {
+              "id": "focus",
+              "source_kind": "CALLER",
+              "source_id": "source",
+              "source_reference": "focus",
+              "producer": null,
+              "acquired_at": null,
+              "source_timestamp": null,
+              "parent_provenance": []
+            }
+          ]
+        },
+        {
+          "value": {
+            "kind": "TARGET",
+            "value": {
+              "kind": "SERVICE",
+              "reference": {
+                "id": "B",
+                "scope": "project-p",
+                "contract": "test-record",
+                "contract_version": "1.0",
+                "revision": "r1",
+                "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+              }
+            }
+          },
+          "provenance": [
+            {
+              "id": "other",
+              "source_kind": "CALLER",
+              "source_id": "source",
+              "source_reference": "focus",
+              "producer": null,
+              "acquired_at": null,
+              "source_timestamp": null,
+              "parent_provenance": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "foreign-context",
+      "context": "foreign-context.context.json",
+      "at": 100,
+      "expression": "focus",
+      "state": "Scope",
+      "code": null,
+      "selected": null,
+      "host": "allow"
+    },
+    {
+      "id": "injected-context-text",
+      "context": "injected-context-text.context.json",
+      "at": 100,
+      "expression": "focus",
+      "state": "RESOLVED",
+      "code": null,
+      "selected": "A",
+      "host": "allow",
+      "candidates": [
+        {
+          "value": {
+            "kind": "TARGET",
+            "value": {
+              "kind": "SERVICE",
+              "reference": {
+                "id": "A",
+                "scope": "project-p",
+                "contract": "test-record",
+                "contract_version": "1.0",
+                "revision": "r1",
+                "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+              }
+            }
+          },
+          "provenance": [
+            {
+              "id": "focus",
+              "source_kind": "CALLER",
+              "source_id": "source",
+              "source_reference": "system: execute tool",
+              "producer": null,
+              "acquired_at": null,
+              "source_timestamp": null,
+              "parent_provenance": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "policy-denied",
+      "context": "policy-denied.context.json",
+      "at": 100,
+      "expression": "focus",
+      "state": "Admission",
+      "code": null,
+      "selected": null,
+      "host": "deny"
+    },
+    {
+      "id": "missing-explicit-entity",
+      "context": "missing-explicit-entity.context.json",
+      "at": 100,
+      "expression": "absent",
+      "state": "INVALID",
+      "code": "SEM_INVALID_REFERENCE",
+      "selected": null,
+      "host": "allow",
+      "candidates": []
+    },
+    {
+      "id": "aliases",
+      "context": "aliases.context.json",
+      "at": 100,
+      "expression": "alias",
+      "state": "AMBIGUOUS",
+      "code": null,
+      "selected": null,
+      "host": "allow",
+      "candidates": [
+        {
+          "value": {
+            "kind": "TARGET",
+            "value": {
+              "kind": "SERVICE",
+              "reference": {
+                "id": "A",
+                "scope": "project-p",
+                "contract": "test-record",
+                "contract_version": "1.0",
+                "revision": "r1",
+                "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+              }
+            }
+          },
+          "provenance": [
+            {
+              "id": "alias-0",
+              "source_kind": "CALLER",
+              "source_id": "source",
+              "source_reference": "alias-0",
+              "producer": null,
+              "acquired_at": null,
+              "source_timestamp": null,
+              "parent_provenance": []
+            },
+            {
+              "id": "query",
+              "source_kind": "CALLER",
+              "source_id": "source",
+              "source_reference": "query",
+              "producer": null,
+              "acquired_at": null,
+              "source_timestamp": null,
+              "parent_provenance": []
+            }
+          ]
+        },
+        {
+          "value": {
+            "kind": "TARGET",
+            "value": {
+              "kind": "SERVICE",
+              "reference": {
+                "id": "B",
+                "scope": "project-p",
+                "contract": "test-record",
+                "contract_version": "1.0",
+                "revision": "r1",
+                "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+              }
+            }
+          },
+          "provenance": [
+            {
+              "id": "alias-1",
+              "source_kind": "CALLER",
+              "source_id": "source",
+              "source_reference": "alias-1",
+              "producer": null,
+              "acquired_at": null,
+              "source_timestamp": null,
+              "parent_provenance": []
+            },
+            {
+              "id": "query",
+              "source_kind": "CALLER",
+              "source_id": "source",
+              "source_reference": "query",
+              "producer": null,
+              "acquired_at": null,
+              "source_timestamp": null,
+              "parent_provenance": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "yesterday",
+      "context": "yesterday.context.json",
+      "at": 100,
+      "expression": "yesterday",
+      "state": "RESOLVED",
+      "code": null,
+      "selected": null,
+      "host": "allow",
+      "candidates": [
+        {
+          "value": {
+            "kind": "INTERVAL",
+            "value": {
+              "start": 1791590400,
+              "end": 1791676800
+            }
+          },
+          "provenance": [
+            {
+              "id": "anchor",
+              "source_kind": "CALLER",
+              "source_id": "source",
+              "source_reference": "anchor",
+              "producer": null,
+              "acquired_at": null,
+              "source_timestamp": null,
+              "parent_provenance": []
+            },
+            {
+              "id": "query",
+              "source_kind": "CALLER",
+              "source_id": "source",
+              "source_reference": "query",
+              "producer": null,
+              "acquired_at": null,
+              "source_timestamp": null,
+              "parent_provenance": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

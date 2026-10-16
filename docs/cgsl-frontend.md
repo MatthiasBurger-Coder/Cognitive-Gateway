@@ -11,8 +11,10 @@ Every value, member and key has a half-open UTF-8 byte span. Numbers retain thei
 original tokens, strings are decoded without Unicode normalization, duplicate
 decoded keys fail at every depth, and arrays preserve order. `source_location`
 resolves decoded member/index paths back to the original AST. `Node::json()` is
-an exact-number compact renderer, not the canonical source formatter specified
-for subsequent tooling work.
+an exact-number compact renderer. `format_source(&Document)` implements the
+specified canonical source formatter, preserving sidecars and number tokens.
+`serialize(&SemanticTaskIR)` projects admitted task meaning into canonical CGSL;
+see the [conformance suite and compatibility matrix](cgsl-conformance.md).
 
 `compile(source_id, bytes)` checks the language version before interpreting
 operands and returns `CompiledSource` or ordered semantic diagnostics. Its

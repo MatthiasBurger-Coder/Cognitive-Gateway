@@ -1,0 +1,118 @@
+{
+  "version": "1.0",
+  "id": "context",
+  "revision": "capture-1",
+  "binding": {
+    "scope": "project-p",
+    "request": "request",
+    "input": {
+      "id": "input",
+      "scope": "project-p",
+      "contract": "test-record",
+      "contract_version": "1.0",
+      "revision": "r1",
+      "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "conversation": {
+      "id": "conversation",
+      "scope": "project-p",
+      "contract": "test-record",
+      "contract_version": "1.0",
+      "revision": "r1",
+      "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "task": {
+      "id": "task",
+      "scope": "project-p",
+      "contract": "test-record",
+      "contract_version": "1.0",
+      "revision": "r1",
+      "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "host_basis": {
+      "id": "host",
+      "scope": "project-p",
+      "contract": "test-record",
+      "contract_version": "1.0",
+      "revision": "r1",
+      "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  },
+  "captured_at": 100,
+  "expires_at": 200,
+  "basis_refs": [
+    {
+      "id": "input",
+      "scope": "project-p",
+      "contract": "test-record",
+      "contract_version": "1.0",
+      "revision": "r1",
+      "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    {
+      "id": "host",
+      "scope": "project-p",
+      "contract": "test-record",
+      "contract_version": "1.0",
+      "revision": "r1",
+      "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    {
+      "id": "source",
+      "scope": "project-p",
+      "contract": "test-record",
+      "contract_version": "1.0",
+      "revision": "r1",
+      "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    {
+      "id": "conversation",
+      "scope": "project-p",
+      "contract": "test-record",
+      "contract_version": "1.0",
+      "revision": "r1",
+      "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    {
+      "id": "task",
+      "scope": "project-p",
+      "contract": "test-record",
+      "contract_version": "1.0",
+      "revision": "r1",
+      "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  ],
+  "permitted_sources": [
+    {
+      "source": {
+        "id": "source",
+        "scope": "project-p",
+        "contract": "test-record",
+        "contract_version": "1.0",
+        "revision": "r1",
+        "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "tier": "VERIFIED_MEMORY",
+      "sensitivity_ceiling": "NORMAL",
+      "trust": "CANONICAL_REFERENCE",
+      "max_results": 10
+    },
+    {
+      "source": {
+        "id": "source",
+        "scope": "project-p",
+        "contract": "test-record",
+        "contract_version": "1.0",
+        "revision": "r1",
+        "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "tier": "RETRIEVED_EVIDENCE",
+      "sensitivity_ceiling": "NORMAL",
+      "trust": "CANONICAL_REFERENCE",
+      "max_results": 10
+    }
+  ],
+  "relevant_facts": [],
+  "aliases": [],
+  "temporal_anchors": []
+}

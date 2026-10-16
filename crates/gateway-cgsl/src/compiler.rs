@@ -10,7 +10,7 @@ macro_rules! operands {
         #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
         #[serde(untagged)]
         pub enum Operand { $( $variant($ty), )+ }
-        const MAPPING: &[(&str, &str, &str)] = &[$(($source, $wire, $default)),+];
+        pub(crate) const MAPPING: &[(&str, &str, &str)] = &[$(($source, $wire, $default)),+];
         fn operand(ctx: &Context<'_>, field: &str, node: &Node, path: Vec<PathPart>) -> Result<Operand, Diagnostic> {
             let result = match field {
                 $($source => ctx.decode::<$ty>(node, path.clone()).map(Operand::$variant),)+
