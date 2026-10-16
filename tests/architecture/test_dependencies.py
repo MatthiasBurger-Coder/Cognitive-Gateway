@@ -20,6 +20,7 @@ class DependencyTests(unittest.TestCase):
         for package in self.metadata["packages"]:
             for name in guard.ALLOWED[package["name"]]:
                 package["dependencies"].append({"name": name, "source": "registry+crates.io",
+                    **({"kind": "dev"} if package["name"] == "gateway-application" and name == "gateway-cgsl" else {}),
                     **({"path": f"/repo/crates/{name}"} if name in guard.ALLOWED else {})})
         guard.check(self.metadata)
         for kind in [None, "dev", "build"]:
@@ -29,6 +30,17 @@ class DependencyTests(unittest.TestCase):
                     {"name": "reqwest", "rename": "serde", "kind": kind, "target": target})
                 with self.assertRaises(ValueError):
                     guard.check(invalid)
+
+    def test_cgsl_application_edge_is_dev_only(self):
+        application = next(p for p in self.metadata["packages"] if p["name"] == "gateway-application")
+        for kind in [None, "build", "dev"]:
+            application["dependencies"] = [{"name": "gateway-cgsl", "kind": kind,
+                                            "path": "/repo/crates/gateway-cgsl"}]
+            if kind == "dev":
+                guard.check(self.metadata)
+            else:
+                with self.assertRaisesRegex(ValueError, "dev-only"):
+                    guard.check(self.metadata)
 
     def test_outward_and_cross_component_dependencies(self):
         for source, target in [("gateway-domain", "gateway-application"),

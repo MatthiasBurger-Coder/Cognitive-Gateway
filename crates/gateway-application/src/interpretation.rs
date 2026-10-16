@@ -416,6 +416,10 @@ impl InterpretationContext {
         &self.digest
     }
 
+    pub fn binding(&self) -> &InterpretationBinding {
+        &self.data.binding
+    }
+
     pub fn revalidate(
         &self,
         host: &impl InterpretationHost,
