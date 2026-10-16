@@ -16,6 +16,10 @@ implement the CGSL grammar/compiler, entity resolution, planning adapters,
 output validation, verification execution or runtime invocation. Those remain
 #181–#193. MUST and MUST NOT below are normative.
 
+The [epistemic contract](semantic-epistemic-contract.md) defines interpretation
+attachments, evidence admissibility and assumption lifecycle without changing
+the task 1.0 wire format.
+
 ## Domain and wire fields
 
 `SemanticTaskData` is construction input. `SemanticTaskIR::new` validates and

@@ -69,6 +69,10 @@ Describes **how a selected runtime/provider receives the already constrained tas
 
 A model or SLM may assist steps 2–4 by proposing candidates, but the canonical result must pass deterministic schema and semantic validation.
 
+The [epistemic contract](semantic-epistemic-contract.md) implements the domain
+classification and admissibility boundary under #183; production source
+resolution and compiler integration remain planned.
+
 ## Required epistemic separation
 
 The semantic layer preserves the difference between:

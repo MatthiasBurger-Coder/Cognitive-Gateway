@@ -39,6 +39,7 @@ pub mod reasoning_strategy;
 pub mod relationships;
 pub mod retrieval;
 pub mod retrieval_plane;
+pub mod semantic_epistemic;
 pub mod semantic_resolution;
 pub mod semantic_task;
 pub mod serialization;
