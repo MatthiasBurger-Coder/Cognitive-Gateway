@@ -20,6 +20,9 @@ The [epistemic contract](semantic-epistemic-contract.md) defines interpretation
 attachments, evidence admissibility and assumption lifecycle without changing
 the task 1.0 wire format.
 
+The [CG-06/07/08 integration](semantic-planning-boundaries.md) defines the
+implemented #190 mapping, typed planning handoff and migration rules.
+
 The [output and verification contracts](semantic-output-contracts.md) elaborate
 the pinned output schema and verification checks into versioned definitions,
 JSON Schema projections and result assessment without changing task 1.0.
