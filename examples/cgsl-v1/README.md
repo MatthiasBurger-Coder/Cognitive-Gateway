@@ -1,7 +1,9 @@
 # CGSL 1.0 specification examples
 
 These files accompany the [normative grammar](../../docs/cgsl-language-v1.md).
-They are specification vectors for #185, not evidence of an implemented compiler.
+They originated as specification vectors for #185. The #186
+[Rust frontend tests](../../crates/gateway-cgsl/tests/frontend.rs) now execute the
+mapped and rejected vectors and preserve the incomplete source's sidecars.
 All references use synthetic bindings; no registry or source authority is implied.
 
 | Source | Expected result |
@@ -51,6 +53,6 @@ An unknown `task` enum, out-of-range typed integer, duplicate input role and
 inline process transition are semantic failures. A `requires` pin resolving to
 a concrete Agent is a reference-kind failure even if its envelope parses.
 
-Specification review covers all 20 constructs across the complete and incomplete
-sources. #186/#193 must run these vectors through the production parser/compiler
-and expand them into the full conformance, resource-limit and adversarial suite.
+All 20 constructs are exercised across the complete and incomplete sources.
+The frontend suite adds resource limits and generated/adversarial input checks;
+#193 still owns full runtime conformance, including captured reference bases.

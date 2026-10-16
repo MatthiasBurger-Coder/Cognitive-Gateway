@@ -6,6 +6,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 ALLOWED = {
+    "gateway-cgsl": {"gateway-domain", "serde", "serde_json"},
     "gateway-domain": {"serde", "serde_json", "sha2"},
     "gateway-application": {"gateway-domain", "gateway-context", "gateway-process",
                             "gateway-policy", "gateway-registry", "sha2", "serde", "serde_json"},

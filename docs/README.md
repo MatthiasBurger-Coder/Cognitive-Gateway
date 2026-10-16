@@ -30,6 +30,8 @@ EPIC-05.01 task semantics, the finite formal-core vocabulary and boundaries
 to existing domains. The [semantic interpretation architecture](semantic-language-and-interpretation.md)
 distinguishes this specification from planned compiler/runtime capabilities.
 
+See [Rust CGSL frontend](cgsl-frontend.md) for the offline parser/compiler API,
+source locations, resource profile and verification commands.
 See [CGSL 1.0 grammar, serialization and diagnostics](cgsl-language-v1.md) for
 EPIC-05.07 normative syntax, source/IR roundtrip rules, diagnostic categories
 and [complete examples and counterexamples](../examples/cgsl-v1/README.md).

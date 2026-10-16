@@ -1,0 +1,14 @@
+[package]
+name = "gateway-cgsl"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+gateway-domain = { path = "../gateway-domain" }
+serde.workspace = true
+serde_json.workspace = true
+
+[lints]
+workspace = true

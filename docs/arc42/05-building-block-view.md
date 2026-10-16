@@ -205,11 +205,13 @@ current authorization and estimation in `gateway-application`, and exposes
 optional tokenizer and compaction ports to outer adapters. See
 [context budgeting](../context-budgeting.md).
 
-## 5.5 Semantic interpretation plane (planned EPIC-05)
+## 5.5 Semantic interpretation plane (partial EPIC-05)
 
-CGSL/`SemanticTaskIR` is a planned semantic frontend, not a replacement for
-CG-06/07/08. A parser/compiler adapter must remain independent from model and
-network providers. Optional model interpretation produces proposals only; a
+`gateway-cgsl` implements the offline parser, source AST and semantic compiler
+using the existing `gateway-domain` contracts. It preserves unresolved source
+sidecars and produces task shapes without granting execution authority. See the
+[frontend boundary and verification](../cgsl-frontend.md). Production reference
+resolution and completeness remain planned. Optional model interpretation produces proposals only; a
 deterministic compiler/validator owns canonical semantics. See
 [semantic language and interpretation](../semantic-language-and-interpretation.md).
 
