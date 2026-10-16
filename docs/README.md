@@ -35,6 +35,8 @@ source locations, resource profile and verification commands.
 See [Deterministic interpretation resolution](deterministic-interpretation-resolution.md)
 for scoped entity/alias lookup, discourse and temporal resolution, source traces
 and the EPIC-05.09 component verification boundary.
+See [Completeness validation and clarification planning](semantic-completeness.md)
+for the EPIC-05.10 application service, dependency ordering and reply revalidation.
 See [CGSL 1.0 grammar, serialization and diagnostics](cgsl-language-v1.md) for
 EPIC-05.07 normative syntax, source/IR roundtrip rules, diagnostic categories
 and [complete examples and counterexamples](../examples/cgsl-v1/README.md).
