@@ -55,4 +55,9 @@ a concrete Agent is a reference-kind failure even if its envelope parses.
 
 All 20 constructs are exercised across the complete and incomplete sources.
 The frontend suite adds resource limits and generated/adversarial input checks;
-#193 still owns full runtime conformance, including captured reference bases.
+#193 supplies the [portable component conformance corpus](../../docs/cgsl-conformance.md),
+including captured reference bases. Production host/runtime proof remains separate.
+
+See the [reference walkthroughs](../../docs/cgsl-reference-examples.md) for natural-language
+intent, every construct, clarification and the planning/process/prompt continuations;
+see the [migration guide](../../docs/cgsl-migration.md) for compatibility.

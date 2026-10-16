@@ -22,3 +22,12 @@ CGSL answers **what the task means**. Process IR answers **how controlled execut
 - The semantic compiler must remain provider/network independent at its deterministic core.
 - Structured callers can continue to bypass natural-language interpretation and submit existing typed contracts directly.
 - EPIC-05 #177 owns the implementation and conformance work.
+
+## Implementation status — 2026-10-17
+
+The [implementer guide](../cgsl-implementer-guide.md) records the delivered
+CGSL 1.0 parser/compiler/serializer, typed contracts, resolution/completeness,
+CG-06/07/08 adapter and component conformance. The Process boundary and two offline
+prompt renderings preserve the decision's separation. Canonical context/example
+producers and production invocation/clarification hosting remain downstream;
+this update does not change the original authority or ownership decision.

@@ -8,8 +8,9 @@ under [EPIC-05 #177](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/i
 It refines [ADR-015](adr/ADR-015-semantic-task-ir-boundary.md) and the
 [semantic interpretation architecture](semantic-language-and-interpretation.md).
 The vocabulary baseline is **CGSL 1.0**. This document specifies semantic
-contracts; it does not establish an implemented parser, compiler or runtime
-handoff. Those capabilities remain [planned](current-architecture-state.md).
+contracts. The [implementer guide](cgsl-implementer-guide.md) identifies the
+delivered parser/compiler and application handoff components and the remaining
+production host/runtime integration.
 
 MUST, MUST NOT, SHALL and SHALL NOT express mandatory conformance rules.
 SHOULD expresses a recommendation whose exceptions need a documented reason.
@@ -52,7 +53,7 @@ categories below constrain later schema/grammar work; they are not declarations
 of new Rust types or a complete wire schema.
 
 “CGSL validation” means structural, semantic, completeness and reference
-validation in the planned compiler. Validation delegated to another domain MUST
+validation across the frontend and trusted application admission. Validation delegated to another domain MUST
 use its existing contracts; it cannot be replaced by a permissive CGSL copy.
 
 | Construct | Normative meaning | Operand type category | Semantic ownership | Validation responsibility |

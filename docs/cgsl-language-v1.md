@@ -2,7 +2,8 @@
 
 ## Status and authority
 
-This is the normative language specification for EPIC-05.07
+This is the normative CGSL 1.0 language specification, completed and indexed for
+EPIC-05.16 #194 in the [implementer guide](cgsl-implementer-guide.md). It originated in EPIC-05.07
 [#185](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/issues/185).
 MUST and MUST NOT express conformance requirements. It selects a surface syntax
 for the [20 canonical constructs](cgsl-scope-and-vocabulary.md), reusing
@@ -327,3 +328,12 @@ tests passed with `uv run --no-project --with jsonschema python -m unittest
 discover -s tests/contracts -p test_semantic_task_contract.py`. This checks
 existing JSON Schema and IR fixtures, not the proposed CGSL compiler. No
 production code changed, so production-code coverage is not applicable.
+
+## Implementer companions
+
+The [reference walkthroughs](cgsl-reference-examples.md) cover all 20 constructs
+and connect formal documents to resolution, clarification, planning, process and
+prompt boundaries. The [migration guide](cgsl-migration.md) defines the supported
+entry paths and applies the normative versioning rules without implicit downgrade.
+The [conformance guide](cgsl-conformance.md) identifies frozen expectations,
+reproduction commands and currently reserved diagnostic emitters.

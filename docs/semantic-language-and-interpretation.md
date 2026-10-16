@@ -2,20 +2,15 @@
 
 ## Status
 
-**Planned architecture — EPIC-05 #177.**
+**Implemented components; complete hosted natural-language path remains partial — 2026-10-17.**
 
-The current deterministic core can consume structured task/context contracts, but Cognitive Gateway does not yet provide the complete natural-language-to-`SemanticTaskIR` compiler described here.
+The [implementer guide](cgsl-implementer-guide.md) indexes the complete normative
+language/task specifications, contextual and epistemic contracts, conformance
+corpus, migration rules and reference examples. Formal CGSL compiles offline.
+Contextual resolution, completeness and CG-06/07/08 handoff have component proofs;
+a deployed general natural-language-to-execution path is not qualified.
 
 ## Purpose
-
-The normative [CGSL scope and canonical vocabulary](cgsl-scope-and-vocabulary.md)
-defines the EPIC-05.01 semantic baseline, construct ownership, validation
-responsibilities and domain boundaries. Grammar and runtime implementation
-remain separate planned slices. The [SemanticTaskIR v1 contract](semantic-task-ir-v1.md)
-now supplies Rust types, canonical JSON, invariants and versioning under #180.
-The [Interpretation Context specification](interpretation-context.md) defines
-request identity, typed relevance, seven-tier precedence, conflicts and lifecycle
-under #181. Its production assembly/resolution remains planned.
 
 CGSL and `SemanticTaskIR` form the semantic boundary between ambiguous human language and deterministic planning/execution.
 
@@ -69,9 +64,9 @@ Describes **how a selected runtime/provider receives the already constrained tas
 
 A model or SLM may assist steps 2–4 by proposing candidates, but the canonical result must pass deterministic schema and semantic validation.
 
-The [epistemic contract](semantic-epistemic-contract.md) implements the domain
-classification and admissibility boundary under #183; production source
-resolution and compiler integration remain planned.
+The [epistemic contract](semantic-epistemic-contract.md) defines classification
+and admissibility. The deterministic resolver and completeness compiler preserve
+that boundary; their trusted host ports must authenticate captured sources.
 
 ## Required epistemic separation
 
@@ -89,17 +84,22 @@ A hypothesis cannot silently become a fact, and a model-generated value cannot s
 
 ## Current implementation boundary
 
-As of 2026-10-11:
+As of 2026-10-17:
 
-- the architecture and work breakdown are defined in EPIC-05;
-- the [SemanticTaskIR v1 Rust/wire contract](semantic-task-ir-v1.md), invariants, versioning and reference fixtures are implemented under #180;
-- the [Interpretation Context contract](interpretation-context.md), deterministic precedence and lifecycle are specified under #181; runtime resolution remains planned;
-- Rust parser/compiler work is planned under EPIC-05.08 #186;
-- integration with CG-06/07/08 is planned under EPIC-05.12 #190;
-- the [Process IR boundary](semantic-process-boundary.md) is specified and proven
-  at component level under EPIC-05.13 #191;
-- Prompt IR handoff is planned under EPIC-05.14 #192;
-- conformance and adversarial qualification are planned under EPIC-05.15 #193;
-- complete language/arc42 documentation is planned under EPIC-05.16 #194.
+| Component | Delivered scope |
+| --- | --- |
+| [CGSL frontend](cgsl-frontend.md) | Strict parser/AST, typed source compiler, canonical formatter and semantic serializer |
+| [Task contract](semantic-task-ir-v1.md) | Typed Rust and wire contract, canonical bytes/digest, exact independently versioned pins |
+| [Resolver](deterministic-interpretation-resolution.md) | Captured-context admission, scoped entities/aliases, precedence, temporal anchors and candidate traces |
+| [Completeness](semantic-completeness.md) | Host-authenticated requirement manifest, dependency frontier, clarification plan and revalidated compilation |
+| [Optional proposal adapters](interpretation-adapters.md) | Deterministic-first proposals with validation and unavailable-model fallback; no model authority |
+| [Planning adapter](semantic-planning-boundaries.md) | Existing CG-06/07/08 delegation, immutable task/source/Plan envelope and revalidation |
+| [Process boundary](semantic-process-boundary.md) | Executable exact-definition/activity proof; lifecycle and gates remain CG-04-owned |
+| [Prompt boundary](prompt-ir-handoff-boundary.md) | Normative section/admission contract and two offline renderings; not a production invocation IR |
+| [Conformance](cgsl-conformance.md) | Frozen source/IR/digest vectors, generated roundtrips and adversarial component tests |
 
-Until this vertical slice exists, callers that need deterministic execution must supply the required structured contracts through existing interfaces instead of assuming free natural-language compilation is available.
+Canonical context requirement/source planning (#285), example selection (#286),
+production invocation admission (#263), persisted clarification hosting (#275) and
+full runtime proof (#279) remain downstream work. Structured callers continue to
+use existing APIs. Formal CGSL callers must compose the trusted admission ports;
+a successful frontend task shape alone is insufficient for execution.

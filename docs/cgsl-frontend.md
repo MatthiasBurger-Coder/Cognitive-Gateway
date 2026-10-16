@@ -65,5 +65,5 @@ against canonical task bytes, all published syntax/semantic rejection vectors,
 nonempty sidecars, default equivalence, semantic errors, source spans, Unicode,
 exact numbers, resource exhaustion and generated deterministic properties.
 The property corpus includes 2,000 seeded JSON/byte cases and every prefix of
-the minimal source. These tests establish frontend behavior, not the future
-full runtime conformance scope of #193.
+the minimal source. These tests establish frontend behavior, not installed-runtime qualification. #193 adds the
+[portable component conformance suite](cgsl-conformance.md).

@@ -152,3 +152,19 @@ manufacture authority. Each immutable version is digest-bound and lifecycle
 decisions are append-only, inspectable events. The wider EPIC-03 reflex and
 automatic pattern-discovery behavior remains gated by evaluation, approval and
 verification.
+
+## CGSL canonical identity, evolution and conformance
+
+CGSL 1.0 source and SemanticTaskIR 1.0 are independently versioned closed
+contracts. The formatter preserves interpretation sidecars and exact source
+number tokens. Semantic serialization projects admitted IR and emits empty
+sidecars. Only compact canonical task JSON is hashed as task identity; pretty
+source bytes are not digest input. Old readers reject unsupported minor as well
+as major versions, and unknown semantics cannot be dropped. See the
+[language specification](../cgsl-language-v1.md) and [migration guide](../cgsl-migration.md).
+
+The [portable conformance corpus](../cgsl-conformance.md) freezes canonical
+bytes/digests and diagnostic classes independently of implementation discovery.
+Reference truth, scope, freshness and policy require trusted captured-basis
+admission. Component conformance does not establish production source authenticity,
+result verification or installed-runtime qualification.

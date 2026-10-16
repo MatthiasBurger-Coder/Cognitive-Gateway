@@ -128,15 +128,16 @@ failure. A green gate qualifies the tested revision for release review.
 
 The technical architecture is maintained in the repository as the canonical source of truth.
 
-**Start with [`docs/current-architecture-state.md`](docs/current-architecture-state.md)** for the dated implemented-vs-planned status map. This is important because the target architecture now contains planned CGSL and MCP connector boundaries alongside an implemented optional local model reference service.
+**Start with [`docs/current-architecture-state.md`](docs/current-architecture-state.md)** for the dated implemented-vs-planned status map. It distinguishes implemented CGSL components and local model services from pending host/runtime and MCP connector integration.
 
 Canonical entry points:
 
 - [`docs/arc42/`](docs/arc42/) — arc42 architecture documentation
 - [`docs/README.md`](docs/README.md) — complete technical documentation index
 - [`docs/current-architecture-state.md`](docs/current-architecture-state.md) — current implementation/plan status matrix
-- [`docs/semantic-language-and-interpretation.md`](docs/semantic-language-and-interpretation.md) — CGSL / SemanticTaskIR boundary; IR v1 contract implemented, compiler planned
-- [Interpretation Context](docs/interpretation-context.md) — request-scoped contract, resolution precedence, conflict and lifecycle specification (#181); runtime resolution planned
+- [CGSL implementer guide](docs/cgsl-implementer-guide.md) — normative language/task specifications, compiler stages, reference examples, migration and conformance
+- [`docs/semantic-language-and-interpretation.md`](docs/semantic-language-and-interpretation.md) — implemented semantic components and remaining runtime boundaries
+- [Interpretation Context](docs/interpretation-context.md) — request-scoped contract, resolution precedence, conflict and lifecycle specification (#181); deterministic resolver implemented, host integration separate
 - [Ambiguity, conflict and knowledge-gap contracts](docs/semantic-resolution-contracts.md) — EPIC-05.04 domain types, stable diagnostics and mandatory compilation blockers.
 - [`docs/codex-local-integration.md`](docs/codex-local-integration.md) — Codex -> CG local no-key MCP trust contract
 - [Codex local setup and operator runbook](docs/codex-local-setup.md) — bootstrap, secret-free configuration, CLI fallback and reproducible smoke tests (#244).
@@ -173,7 +174,7 @@ The GitHub Wiki is intended for simplified end-user documentation, tutorials and
   as catalog membership or execution authority
 - MCP/tool adapters as controlled capabilities; EPIC-07 defines the external connector/plugin runtime while EPIC-04 separately defines Codex as an inbound local client
 - execution runtimes remain replaceable
-- CGSL/SemanticTaskIR is the formal boundary from natural language into deterministic task semantics; the [IR v1 contract](docs/semantic-task-ir-v1.md) is implemented, while compilation and runtime handoff remain planned
+- CGSL/SemanticTaskIR is the formal boundary from natural language into deterministic task semantics; the [IR v1 contract](docs/semantic-task-ir-v1.md), offline compiler and application handoff components are implemented; complete hosted runtime integration remains partial
 - learned procedures are governed, immutable/versioned artifacts and never create policy authority
 
 See [`docs/current-architecture-state.md`](docs/current-architecture-state.md) for the authoritative dated status and the relevant Epic/issue anchors.

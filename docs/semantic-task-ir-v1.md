@@ -11,10 +11,11 @@ schema is **1.0**. This specification refines the
 [CGSL scope and vocabulary](cgsl-scope-and-vocabulary.md) and
 [ADR-015](adr/ADR-015-semantic-task-ir-boundary.md).
 
-This slice supplies typed task meaning and structural admission. It does not
-implement the CGSL grammar/compiler, entity resolution, planning adapters,
-output validation, verification execution or runtime invocation. Those remain
-#181–#193. MUST and MUST NOT below are normative.
+This contract supplies typed task meaning and structural admission. The
+[implementer guide](cgsl-implementer-guide.md) identifies the delivered CGSL
+frontend, resolver, completeness and planning adapters. Runtime invocation and
+independent result verification remain downstream. MUST and MUST NOT below
+are normative.
 
 The [epistemic contract](semantic-epistemic-contract.md) defines interpretation
 attachments, evidence admissibility and assumption lifecycle without changing
