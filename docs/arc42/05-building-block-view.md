@@ -288,6 +288,7 @@ atomic durable release/routing stores remain outer adapters. See
 | `gateway-cgsl` | Offline parser, AST, typed compiler, formatter/serializer; depends inward on domain, not on application or a process/provider parser |
 | `gateway-domain` | SemanticTaskIR, output/verification, interpretation, gap and evidence types and canonical invariants |
 | `gateway-application::interpretation` / `completeness` | Deterministic resolution, host-authenticated mandatory manifest, clarification frontier and revalidated compiler callback |
+| `gateway-application::inspection_language` | Bounded original-text inspection profile; input digest and spans, deterministic target query, existing completeness/reference checks; no new authority or runtime |
 | `gateway-application::semantic_planning` | CG-06 mapping and immutable semantic envelope; invokes existing CG-07/08 without duplicate planners |
 | `gateway-process` / CG-09 | Process definition, lifecycle, gates and policy authority; CGSL carries a definition pin only |
 | CG-10 / outer invocation adapters | Context compilation; prompt layout references are test-only, production #263 remains downstream |

@@ -2,11 +2,26 @@
 
 These walkthroughs connect natural-language intent to formal semantics and the
 planning, process and prompt boundaries. Natural-language sentences are explanatory
-inputs, not a claim that a shipped general interpreter produces these documents.
+inputs. The bounded inspection profile below is executable; other walkthroughs
+do not claim that a shipped general interpreter produces these documents.
 All fixture pins and hosts are synthetic. Follow the complete linked artifacts;
 abbreviations in this prose are not valid reference operands.
 
 ## Inspect an artifact
+
+Executable supported request: `Inspect artifact artifact-1.` The public
+`CompletenessValidator::compile_inspection_request` service parses the original
+sentence and resolves its target against permitted captured registry/project
+records. With the minimal fixture's authenticated output contract and task
+identity it produces exactly the same canonical task bytes and digest as the
+formal source below. `Inspect it.` produces that same task when the unique
+eligible focus is `artifact-1`; missing or ambiguous focus returns diagnostics
+and a clarification plan without executable IR. See the
+[profile and host contract](cgsl-implementer-guide.md#supported-natural-language-inspection-profile).
+
+```sh
+cargo test -p gateway-application --test inspection_language --locked
+```
 
 Request: “Inspect artifact-1 in project-x and report its properties.” The complete
 formal source is [minimal.cgsl](../examples/cgsl-v1/minimal.cgsl). The captured

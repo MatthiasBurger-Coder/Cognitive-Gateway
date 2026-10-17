@@ -68,6 +68,10 @@
     "command": "cargo llvm-cov -p gateway-domain -p gateway-application --test interpretation --locked --json --output-path \"$EVIDENCE_DIR/interpretation-coverage.json\"\npython3 scripts/check-interpretation-coverage.py --self-test\npython3 scripts/check-interpretation-coverage.py \"$EVIDENCE_DIR/interpretation-coverage.json\""
   },
   {
+    "name": "EPIC-05 parent acceptance: bounded natural-language compilation and independent conformance",
+    "command": "cargo test -p gateway-application --test inspection_language -p gateway-cgsl --test independent_conformance --locked\ncargo llvm-cov -p gateway-application --test inspection_language --locked --json --output-path \"$EVIDENCE_DIR/inspection-language-coverage.json\"\npython3 scripts/check-inspection-language-coverage.py --self-test\npython3 scripts/check-inspection-language-coverage.py \"$EVIDENCE_DIR/inspection-language-coverage.json\""
+  },
+  {
     "name": "EPIC-05.15 semantic conformance and adversarial component suite",
     "command": "cargo test -p gateway-cgsl --all-targets --locked\ncargo test -p gateway-application --test interpretation --test completeness --test semantic_planning --locked\ncargo test -p gateway-domain --test semantic_task_v1 --test semantic_resolution --test semantic_output --locked\ncargo test -p gateway-context --test prompt_handoff_reference --locked"
   },

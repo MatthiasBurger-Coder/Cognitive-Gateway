@@ -63,11 +63,51 @@ canonical IR, digest and resolution expectations.
 The Prompt IR boundary has two offline reference renderings. Its supplemental
 planning/example records are test-only consumer views. The [canonical context requirements/source planner](context-requirement-planning.md)
 (#285) now has a real CG-10 producer handoff and offline conformance proof.
-Dynamic example selection (#286), production
-Prompt/Invocation IR admission (#263), persisted clarification hosting (#275) and
+The [canonical dynamic example selector](dynamic-example-selection.md) (#286)
+and its dedicated CG-10 examples handoff are implemented and have offline producer
+conformance proof. Production Prompt/Invocation IR admission (#263), persisted clarification hosting (#275) and
 full runtime proof (#279) remain separate integration work. No complete arbitrary
 natural-language interpreter, real model invocation or external effect is
 qualified by these component tests. See [architecture state](current-architecture-state.md).
+
+## Supported natural-language inspection profile
+
+`gateway_application::inspection_language` implements the bounded English
+`artifact-inspection/1.0` profile. Invoke
+`CompletenessValidator::compile_inspection_request(context, text, output, at)`
+with the original text, an admitted context and a host-authenticated pinned output
+contract. Supported complete sentences are `Inspect artifact <canonical-id>` and
+`Inspect it`, optionally ending in one period and surrounded by whitespace.
+Case, internal spacing and identifier spelling are exact. Other operations,
+negation, extra clauses and instruction-like suffixes return `UnsupportedRequest`.
+Input is bounded to 4096 UTF-8 bytes and its exact SHA-256 must match the admitted
+input pin before interpretation. Spans address the original bytes.
+
+The profile derives `INSPECT`, goal `inspect-artifact` / `Report the artifact
+properties`, and the mandatory schema/reference verification checks. It derives
+the target query from the text, rather than accepting a preinterpreted query or
+caller-selected target. Explicit IDs use the bounded permitted registry/project
+ports; `it` uses the normal deterministic context tiers. A missing focus produces
+a correlated clarification plan; equal eligible focus targets preserve ambiguity;
+an unknown explicit ID never falls back to the conversation target.
+
+The `InspectionLanguageHost` must authenticate the output definition and reject
+any task/schema needing additional mandatory semantics outside this profile.
+Existing host query/manifest validation and reference validation remain required.
+`inspection_revision` binds the profile, original text, output and capture digest.
+The normal completeness compiler constructs and revalidates the final task; a
+clarification answer enters this same text API with a fresh authenticated capture.
+The result retains original-input provenance and resolution traces alongside IR.
+No permission, policy decision, process transition or execution is produced.
+
+Run `cargo test -p gateway-application --test inspection_language --locked`.
+The actual original sentences compile to the exact frozen minimal formal task;
+negative cases cover unsupported/hostile text, changed input, missing/ambiguous
+targets, unknown explicit IDs, foreign scope, expired/changed basis, rejected
+manifest/output/reference and fresh clarification resumption. This is a public
+application service with component-host evidence. A general interpreter and an
+installed natural-language client remain separate; neither is required to use
+this supported deterministic profile.
 
 ## Reproduce without an installed runtime
 
@@ -84,7 +124,12 @@ These tests require no model, network, database or tool credentials. A second
 implementation should consume the [data corpus and host/query profile](../tests/fixtures/cgsl-conformance-v1/README.md)
 directly and compare frozen bytes, digests, diagnostic classes and complete
 resolution candidates. Passing the Rust tests establishes reference-component
-behavior; it does not qualify a second implementation or a deployed host.
+behavior. The [independent valid-source comparison](cgsl-conformance.md#independent-valid-source-conformance-witness)
+additionally qualifies IR/digest equivalence with a separately implemented
+offline reader. Neither establishes a deployed host.
 
 The [EPIC-05.16 review and evidence record](epic-05.16-documentation-review.md)
 maps documentation acceptance to source inspection and executed regressions.
+The subsequent [parent acceptance record](evidence/EPIC-05-parent-acceptance.json)
+reconciles all 29 parent criteria, the late additions and the three audit findings
+against its exact source hashes, retained logs and measured coverage.
