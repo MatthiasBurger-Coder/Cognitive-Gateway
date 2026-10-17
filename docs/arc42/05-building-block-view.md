@@ -330,3 +330,14 @@ behind `ModelInvocationPort`; mutable health remains separate from semantic elig
 See [model invocation contracts](../model-invocation-contracts.md). Existing CG-26
 routing and CG-27 inference consumers retain their current paths; #262/#263 own
 routing and full semantic-handoff integration.
+
+
+## EPIC-06.04 semantic rendering boundary
+
+`gateway-domain::prompt_rendering` owns versioned tokenizer profile, component
+usage, count mode/provenance and budget snapshot contracts.
+`gateway-application::prompt_rendering` owns exact handoff/model/tool correlation,
+`PromptRendererPort`, `TokenizerPort` and the sealed successful render. Outer
+`gateway-daemon::prompt_renderers` owns both concrete runtime message formats.
+No renderer dependency enters CGSL, domain or CG-10. The existing planned handoff
+remains the semantic producer; no competing Prompt/Invocation IR is introduced.

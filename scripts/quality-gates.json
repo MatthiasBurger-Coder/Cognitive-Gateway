@@ -186,5 +186,9 @@
   {
     "name": "EPIC-06.01 model contracts and generation negotiation coverage",
     "command": "cargo llvm-cov -p gateway-domain -p gateway-application --test model_invocation --locked --json --output-path \"$EVIDENCE_DIR/model-invocation-coverage.json\"\npython3 scripts/check-model-invocation-coverage.py --self-test\npython3 scripts/check-model-invocation-coverage.py \"$EVIDENCE_DIR/model-invocation-coverage.json\""
+  },
+  {
+    "name": "EPIC-06.04 deterministic prompt rendering and accounting coverage",
+    "command": "CARGO_LLVM_COV_TARGET_DIR=target/prompt-rendering-coverage cargo llvm-cov -p gateway-domain -p gateway-application -p gateway-daemon --test prompt_rendering --locked --json --output-path \"$EVIDENCE_DIR/prompt-rendering-coverage.json\"\npython3 scripts/check-prompt-rendering-coverage.py --self-test\npython3 scripts/check-prompt-rendering-coverage.py \"$EVIDENCE_DIR/prompt-rendering-coverage.json\""
   }
 ]

@@ -194,3 +194,18 @@ Seeds are hints, never proof of deterministic generation. Invocation pins preser
 task/context/output revisions, permitted capabilities, locality, sensitivity and
 Process/Policy authority; outer adapters cannot silently discard controls.
 See [contracts and diagnostics](../model-invocation-contracts.md).
+
+## Deterministic rendering and tokenizer accounting (#264)
+
+The actual CG-10 handoff and prepared model invocation feed a pure application
+rendering/accounting service. Two outer daemon adapters project the same semantic
+envelope into chat messages or block messages, with fixed authority roles and
+JSON-escaped user data. No source acquisition, template interpolation or implicit
+history occurs. A provider-neutral tokenizer port counts the complete payload and
+binds exact/estimated provenance to model, profile, tokenizer and template versions.
+Full framing/schema/tool usage plus output reserve must fit the capability limit;
+typed overflow retains accounting and delegates compaction to EPIC-02/CG-10.
+The successful render retains semantic/invocation/payload digests. This boundary
+requires the still separate #263 authenticated admission host and #269 transports;
+it neither grants dispatch permission nor verifies model output. See the
+[renderer contracts and operator guidance](../model-invocation-contracts.md#deterministic-semantic-renderers--epic-0604-264).

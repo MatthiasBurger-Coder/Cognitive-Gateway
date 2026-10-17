@@ -244,5 +244,20 @@ constructs `ModelInvocation`, then calls `prepare_model_invocation`. It checks e
 compatibility, disclosure bounds and generation controls before checking health;
 unsupported controls fail explicitly. The sealed result retains effective defaults
 and parameter provenance. This is component preparation only: full CG-10 admission,
-rendering and real model dispatch remain #263/#264/#269. See the
+real model dispatch remains #263/#269. The #264 pure rendering boundary below
+is implemented separately. See the
 [contract integration sequence](../model-invocation-contracts.md).
+
+
+## Semantic rendering and pre-dispatch budgeting (#264)
+
+The host supplies a prepared invocation, the actual immutable planned CG-10
+handoff, exact tool definitions and the effective tokenizer/template profile to
+`render_invocation`. Exact binding checks precede the outer renderer. Both
+chat-message and block-message layouts preserve the complete non-authority data
+envelope. `TokenizerPort` receives the final serialized payload, all schema/tool
+data and profile identity. Accounting binds that payload digest and rejects an
+input-plus-output-reserve sum above the model limit. Overflow returns metadata
+for upstream compaction; no successful render escapes. The host must complete
+#263 admission before dispatch and revalidate after route/context changes. These
+component tests do not establish live provider or installed-client dispatch.

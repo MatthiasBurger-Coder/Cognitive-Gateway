@@ -70,3 +70,5 @@ pub mod context_planning;
 pub mod example_selection;
 
 pub mod model_invocation;
+
+pub mod prompt_rendering;

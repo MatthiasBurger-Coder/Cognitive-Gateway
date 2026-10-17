@@ -184,3 +184,5 @@ pub mod example_selection;
 pub use example_selection::*;
 
 pub mod model_invocation;
+
+pub mod prompt_rendering;
