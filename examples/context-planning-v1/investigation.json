@@ -1,0 +1,58 @@
+{
+  "schema_version": "1.0",
+  "id": "task-investigation",
+  "task_type": "ANALYZE_PERFORMANCE",
+  "target": {
+    "kind": "SERVICE",
+    "reference": {
+      "id": "artifact-1",
+      "scope": "project-x",
+      "contract": "cg.artifact",
+      "contract_version": "1.0",
+      "revision": "7",
+      "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  },
+  "goal": {
+    "outcome": "inspect-artifact",
+    "description": "Investigate the observed service behavior using evidence"
+  },
+  "inputs": [],
+  "context_refs": [],
+  "current_state": null,
+  "desired_state": null,
+  "observations": [],
+  "history": [],
+  "capability_requirements": [],
+  "constraints": [],
+  "policy_refs": [],
+  "evidence_refs": [
+    {
+      "id": "evidence-1",
+      "scope": "project-x",
+      "contract": "cg.evidence",
+      "contract_version": "1.0",
+      "revision": "7",
+      "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  ],
+  "assumptions": [],
+  "output_contract": {
+    "schema": {
+      "id": "ArtifactInspection",
+      "scope": "project-x",
+      "contract": "cg.output-schema",
+      "contract_version": "1.0",
+      "revision": "7",
+      "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  },
+  "verification_contract": {
+    "checks": [
+      "OUTPUT_SCHEMA_VALID",
+      "NO_UNRESOLVED_REFERENCE",
+      "EVIDENCE_REQUIRED"
+    ]
+  },
+  "process": null
+}

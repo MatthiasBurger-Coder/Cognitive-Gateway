@@ -127,7 +127,9 @@ hidden context or promote examples to policy authority. Existing CG-26 routing
 attaches after admission and revalidates CG-10 before each dispatch. #266/#267
 verify outputs against the exact invocation independently of provider confidence.
 The boundary specification and two offline reference layouts are available;
-canonical #285/#286 integration and the #263 production envelope remain planned.
+[#285 canonical producer/CG-10 integration](../context-requirement-planning.md)
+is implemented and checked offline. #286 examples and the #263 production
+envelope remain separate work.
 
 Local or remote model use must retain provider/model identity and the
 configuration needed to reproduce material behavior where applicable. CG-27
@@ -168,3 +170,16 @@ bytes/digests and diagnostic classes independently of implementation discovery.
 Reference truth, scope, freshness and policy require trusted captured-basis
 admission. Component conformance does not establish production source authenticity,
 result verification or installed-runtime qualification.
+
+## Context planning identity and bounded sufficiency
+
+Requirements are independent of source availability. Every requirement preserves
+necessity, ordered permitted source classes, CG-15 suitability constraints,
+hard budgets and stop conditions. Plans distinguish present and pending content,
+record explicit missing needs and class-level `NONE_REQUIRED` decisions, and
+retain deterministic selection/rejection reasons. Canonical SHA-256 bindings
+cover full requirement/plan metadata and the captured task/Situation/Plan pins.
+CG-10 correlates actual selected fragment identities, exact source revisions,
+quality and payload digests; mandatory unsatisfied needs block the handoff.
+Dynamic data cannot supply authority or cross scope, and compilation/rendering
+cannot acquire replacement context. See [the contract](../context-requirement-planning.md).

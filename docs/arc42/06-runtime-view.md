@@ -188,3 +188,26 @@ explicit goal, exact trusted interactions and a separate v2 session boundary.
 See the [typed specification and prerequisite matrix](../shared-session-contract.md).
 The artifact verifier and #272/#273/#275/#276/#277 services remain delivery work;
 no session lifecycle is claimed by the standalone host or this runtime diagram.
+
+## Context planning and CG-10 producer handoff (#285)
+
+```mermaid
+flowchart LR
+    ST[Validated SemanticTaskIR and captured CG-07 needs] --> A[Requirement analysis]
+    A --> R[ContextRequirementsIR 1.0]
+    R --> S[Deterministic source selection]
+    SM[Trusted source metadata] --> S
+    S --> P[ContextPlanIR 1.0]
+    P --> AC[Existing governed acquisition owners]
+    AC --> CC[CG-10 compiled context]
+    P --> H[CG-10 planned-context handoff]
+    R --> H
+    CC --> H
+    H --> N[263: future production invocation admission]
+```
+
+Present sources skip acquisition. Unavailable requirements remain explicit;
+missing mandatory satisfaction, stale or foreign-scope inputs and exact-binding
+mismatches reject the handoff. The handoff itself has no acquisition or invocation
+port. [The producer contract](../context-requirement-planning.md) describes exact
+version/digest correlation and the bounded offline proof.

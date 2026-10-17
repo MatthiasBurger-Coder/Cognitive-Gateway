@@ -61,8 +61,9 @@ have executable component proofs. The portable conformance suite freezes source,
 canonical IR, digest and resolution expectations.
 
 The Prompt IR boundary has two offline reference renderings. Its supplemental
-planning/example records are test-only consumer views. Canonical context
-requirements/source selection (#285), dynamic example selection (#286), production
+planning/example records are test-only consumer views. The [canonical context requirements/source planner](context-requirement-planning.md)
+(#285) now has a real CG-10 producer handoff and offline conformance proof.
+Dynamic example selection (#286), production
 Prompt/Invocation IR admission (#263), persisted clarification hosting (#275) and
 full runtime proof (#279) remain separate integration work. No complete arbitrary
 natural-language interpreter, real model invocation or external effect is

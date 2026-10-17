@@ -63,3 +63,5 @@ pub use situation_application::{
 pub mod local_inference;
 
 pub mod worker_fabric;
+
+pub mod context_planning;
