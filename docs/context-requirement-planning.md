@@ -149,12 +149,12 @@ catalog satisfaction binds CG-10's stable catalog reference section. Only catalo
 context may satisfy authority, and it never grants permission. External fragments
 cannot satisfy instruction/authority requirements. Memory and evidence retain
 their existing CG-10 kinds and metadata. Requirements of class Examples require the dedicated validated example section.
-Actual bounded example production and that section remain #286 owned; mandatory
-pending examples block this handoff.
+[#286 implements bounded example production and the dedicated section](dynamic-example-selection.md);
+missing mandatory examples block this handoff.
 
 `PlannedContextHandoff` retains the exact task, requirements, plan and compiled
 context. Its canonical projection separates instructions, dynamic context,
-evidence, optional examples (currently absent), output and verification. It
+evidence, optional canonical examples, output and verification. It
 retains complete planning records, satisfaction links and exact task/requirements/
 plan/context/execution-projection/output/verification bindings. Two offline test
 layouts preserve the entire payload unchanged. Neither handoff nor rendering has
@@ -206,4 +206,4 @@ crates passed. Architecture (43 tests, one existing platform skip), contracts
 Measured line coverage: domain 339/340 (99.71%), application 358/359 (99.72%),
 CG-10 handoff 212/214 (99.07%). The dedicated per-file 95% gate passed and is
 included in release qualification. Injected fixture-host proof does not establish
-live reference authenticity, installed-runtime invocation or #286 example validation.
+live reference authenticity, installed-runtime invocation or production invocation admission.

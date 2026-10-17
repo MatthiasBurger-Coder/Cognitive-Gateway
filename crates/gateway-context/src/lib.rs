@@ -55,4 +55,4 @@ impl ContextCompiler {
 }
 
 pub mod planning;
-pub use planning::{ContextHandoffContracts, PlannedContextHandoff};
+pub use planning::{ContextHandoffContracts, ContextHandoffWithExamples, PlannedContextHandoff};

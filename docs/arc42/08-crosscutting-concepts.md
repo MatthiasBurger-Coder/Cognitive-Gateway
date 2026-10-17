@@ -128,8 +128,9 @@ attaches after admission and revalidates CG-10 before each dispatch. #266/#267
 verify outputs against the exact invocation independently of provider confidence.
 The boundary specification and two offline reference layouts are available;
 [#285 canonical producer/CG-10 integration](../context-requirement-planning.md)
-is implemented and checked offline. #286 examples and the #263 production
-envelope remain separate work.
+and [#286 canonical examples](../dynamic-example-selection.md) are implemented
+and checked through the actual CG-10 handoff offline. The #263 production
+envelope remains separate work.
 
 Local or remote model use must retain provider/model identity and the
 configuration needed to reproduce material behavior where applicable. CG-27

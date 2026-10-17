@@ -295,7 +295,8 @@ atomic durable release/routing stores remain outer adapters. See
 See the [implementer guide](../cgsl-implementer-guide.md) for all contracts,
 source-to-IR stages. [Context requirement planning](../context-requirement-planning.md)
 implements #285 in the domain/application modules and the real CG-10 handoff;
-#286 bounded examples remain separate producer work.
+[#286 dynamic example selection](../dynamic-example-selection.md) adds canonical
+example contracts, deterministic selection and a dedicated CG-10 examples section.
 
 ### Context requirement and source planning (#285)
 
@@ -307,3 +308,14 @@ retrievable needs into CG-15. No acquisition adapter is called by planning.
 `gateway-context::planning` validates the actual producer records against a real
 compiled context and preserves exact bindings, satisfaction and resolved output/
 verification contracts in the #192 handoff. #263 production invocation is separate.
+
+### Dynamic example selection (#286)
+
+`gateway-domain::example_selection` owns immutable requirement/set contracts,
+captured CG-16 candidate fragments, exact compatibility and validating constructors.
+`gateway-application::example_selection` filters authenticated metadata/quarantine,
+ranks eligible demonstrations, suppresses redundancy and enforces CG-20B bounds.
+The optional `ExampleRanker` port cannot change eligibility or authority.
+`gateway-context::planning` verifies the set pin and #285 satisfaction link, keeps
+examples separate from instructions/evidence, and applies CG-10 disclosure to audit
+exports. Existing retrieval/memory/promotion owners still supply captured data.

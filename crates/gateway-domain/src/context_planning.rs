@@ -204,6 +204,7 @@ pub enum ContextSatisfaction {
     OutputContract,
     Catalog,
     Fragment(ReferenceId),
+    Examples(ReferenceId),
 }
 /// Trusted host metadata, not retrieved assertions. `pin` binds the captured source snapshot.
 #[derive(Debug, Clone, PartialEq, Eq)]
