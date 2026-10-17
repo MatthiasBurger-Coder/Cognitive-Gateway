@@ -238,3 +238,11 @@ this actual producer output, including hostile instructions, optional zero sets
 and mandatory denials. This subsequent producer proof does not replace #192's
 historical fixture evidence. Current host authentication, provider disclosure
 and production invocation remain #263 responsibilities.
+
+## EPIC-06.01 foundation (#261)
+
+[Model invocation contracts](model-invocation-contracts.md) now provide shared
+immutable binding and generation declarations plus strict preparation. They reuse
+SemanticTaskIR and OutputContract without adding provider configuration to EPIC-05.
+`ModelInvocationBasis` takes trusted captured pins; it is not the complete #263
+consumer and does not replace the mandatory full-handoff admission sequence above.

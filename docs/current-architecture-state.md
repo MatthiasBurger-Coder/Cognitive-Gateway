@@ -111,3 +111,12 @@ flowchart LR
 - CG-29 #220 — distributed cognitive worker fabric.
 
 This file should be updated whenever a planned boundary becomes implemented or a new authoritative architectural boundary is introduced.
+
+## EPIC-06.01 contract foundation (#261)
+
+The candidate adds versioned immutable model capability/provider/invocation and
+generation-profile contracts, strict numeric/control validation, effective-default
+provenance and an application preparation/adapter port. Runtime availability is
+separate from eligibility. [Component evidence](model-invocation-contracts.md) does
+not establish a shipped invocation path; routing, full CG-10 admission, rendering,
+real adapters and result verification remain the later EPIC-06 slices.
