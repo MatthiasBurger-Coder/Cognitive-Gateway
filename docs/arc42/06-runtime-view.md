@@ -211,3 +211,16 @@ missing mandatory satisfaction, stale or foreign-scope inputs and exact-binding
 mismatches reject the handoff. The handoff itself has no acquisition or invocation
 port. [The producer contract](../context-requirement-planning.md) describes exact
 version/digest correlation and the bounded offline proof.
+
+## Dynamic examples in the planned handoff (#286)
+
+An active #285 `Examples` need derives an `ExampleRequirement` from the exact task
+and a host-admitted source/reuse policy. Existing acquisition supplies captured
+pairs. Eligibility rejects invalid, unvalidated, stale, incompatible, cross-scope
+or quarantined data before optional advisory ranking. Deterministic relevance,
+tag diversity, duplicate suppression and hard count/token bounds yield a pinned
+`ExampleSet`. The source plan records that set as a dedicated satisfaction link.
+CG-10 accepts the same immutable set and expected binding; zero optional examples
+succeed and missing mandatory examples block. The #192 projection and both
+reference layouts retain examples as non-authoritative data. See the
+[selection flow and exact producer contract](../dynamic-example-selection.md).

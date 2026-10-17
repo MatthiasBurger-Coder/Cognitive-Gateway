@@ -226,3 +226,15 @@ contracts, and checks negative satisfaction cases plus two pure offline layouts.
 This is subsequent #285 evidence, separate from the historical #192 fixture proof
 above. Bounded example production remains #286 owned and invocation enforcement
 remains #263 owned. Neither reference rendering qualifies production invocation.
+
+## Canonical #286 producer implementation
+
+[`ExampleSet` and the deterministic selector](dynamic-example-selection.md) now
+produce validated, bounded examples and pass them through the actual CG-10
+`handoff_planned_context_with_examples` boundary. The dedicated `examples`
+section retains the set and candidate pins, captured input/output metadata,
+validation, compatibility, decisions and usage. Reference renderings exercise
+this actual producer output, including hostile instructions, optional zero sets
+and mandatory denials. This subsequent producer proof does not replace #192's
+historical fixture evidence. Current host authentication, provider disclosure
+and production invocation remain #263 responsibilities.

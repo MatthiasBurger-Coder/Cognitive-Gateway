@@ -29,6 +29,6 @@ The [implementer guide](../cgsl-implementer-guide.md) records the delivered
 CGSL 1.0 parser/compiler/serializer, typed contracts, resolution/completeness,
 CG-06/07/08 adapter and component conformance. The Process boundary and two offline
 prompt renderings preserve the decision's separation. [Canonical context planning and its CG-10 handoff](../context-requirement-planning.md)
-now have producer proof. Bounded examples and production invocation/clarification
-hosting remain downstream;
+and [bounded examples](../dynamic-example-selection.md) now have producer proof.
+Production invocation/clarification hosting remain downstream;
 this update does not change the original authority or ownership decision.

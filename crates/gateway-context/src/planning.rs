@@ -17,6 +17,7 @@ pub struct PlannedContextHandoff {
     projection_binding: ResolvedReference<ReferenceId>,
     satisfaction: BTreeMap<ReferenceId, ContextSourceMetadata>,
     contracts: ContextHandoffContracts,
+    examples: Option<ExampleSet>,
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ContextHandoffContracts {
@@ -24,7 +25,30 @@ pub struct ContextHandoffContracts {
     pub verification: VerificationContract,
     pub verification_revision: ReferenceId,
 }
+/// Canonical set plus the upstream expected pin. The host authenticates this
+/// pin and current quarantine before the pure CG-10 boundary is entered.
+pub struct ContextHandoffWithExamples {
+    pub contracts: ContextHandoffContracts,
+    pub examples: ExampleSet,
+    pub expected_examples: ResolvedReference<ReferenceId>,
+}
 impl PlannedContextHandoff {
+    pub fn examples(&self) -> Option<&ExampleSet> {
+        self.examples.as_ref()
+    }
+
+    /// Disclosure-limited examples for audit only. Redacted output is never
+    /// invocation input; the immutable full set and its pin remain unchanged.
+    pub fn example_audit_value(&self, policy: crate::ContextDisclosurePolicy) -> Option<Value> {
+        self.examples.as_ref().map(|examples| {
+            if !policy.include_external_content || examples.selected().iter().any(|c|
+                c.quality().sensitivity() > policy.maximum_sensitivity) {
+                json!({"binding":examples.binding(),"representation":"redacted",
+                    "selected":examples.selected().iter().map(|c|
+                        json!({"id":c.pin.id,"quality":c.quality(),"content":"[REDACTED]"})).collect::<Vec<_>>()})
+            } else { examples.to_value() }
+        })
+    }
     pub fn task(&self) -> &SemanticTaskIR {
         &self.task
     }
@@ -45,6 +69,7 @@ impl PlannedContextHandoff {
             "bindings":{"task":self.requirements.basis().task,
                 "requirements":self.requirements.binding(),"plan":self.plan.binding(),
                 "context":self.context_binding,"execution_projection":self.projection_binding,
+                "examples":self.examples.as_ref().map(ExampleSet::binding),
                 "output":binding("output-definition", &self.contracts.output.schema.revision, &self.context_binding.scope,
                     &serde_json::to_value(&self.contracts.output).expect("output JSON")),
                 "verification":binding("verification-definition", &self.contracts.verification_revision, &self.context_binding.scope,
@@ -53,7 +78,7 @@ impl PlannedContextHandoff {
             "context":{"scope":compiled["scope"],"step":compiled["step"],"execution_context":compiled["execution_context"],
                 "fragments":fragments.iter().filter(|f| f["kind"] != "evidence").collect::<Vec<_>>()},
             "evidence":fragments.iter().filter(|f| f["kind"] == "evidence").collect::<Vec<_>>(),
-            "examples":null,
+            "examples":self.examples.as_ref().map(ExampleSet::to_value),
             "planning":{"requirements":self.requirements.to_value(),"plan":self.plan.to_value(),
                 "satisfaction":self.satisfaction.iter().map(|(r,s)| json!({"requirement":r,
                     "source":s.to_value(),"link":s.present,"tokens":s.tokens})).collect::<Vec<_>>()},
@@ -72,7 +97,61 @@ impl ContextCompiler {
         acquired: &[ContextSourceMetadata],
         contracts: ContextHandoffContracts,
     ) -> Result<PlannedContextHandoff, ContextPlanningError> {
+        Self::assemble_planned_context(
+            task,
+            requirements,
+            plan,
+            context,
+            expected_context,
+            acquired,
+            (contracts, None),
+        )
+    }
+    pub fn handoff_planned_context_with_examples(
+        task: SemanticTaskIR,
+        requirements: ContextRequirementsIR,
+        plan: ContextPlanIR,
+        context: CompiledContext,
+        expected_context: ResolvedReference<ReferenceId>,
+        acquired: &[ContextSourceMetadata],
+        options: ContextHandoffWithExamples,
+    ) -> Result<PlannedContextHandoff, ContextPlanningError> {
+        if options.examples.binding() != options.expected_examples {
+            return Err(ContextPlanningError::BindingMismatch);
+        }
+        Self::assemble_planned_context(
+            task,
+            requirements,
+            plan,
+            context,
+            expected_context,
+            acquired,
+            (options.contracts, Some(options.examples)),
+        )
+    }
+    fn assemble_planned_context(
+        task: SemanticTaskIR,
+        requirements: ContextRequirementsIR,
+        plan: ContextPlanIR,
+        context: CompiledContext,
+        expected_context: ResolvedReference<ReferenceId>,
+        acquired: &[ContextSourceMetadata],
+        options: (ContextHandoffContracts, Option<ExampleSet>),
+    ) -> Result<PlannedContextHandoff, ContextPlanningError> {
+        let (contracts, examples) = options;
         use ContextPlanningError as E;
+        if let Some(examples) = &examples {
+            if examples.requirement().requirements() != &requirements.binding() {
+                return Err(E::BindingMismatch);
+            }
+            // Revalidate immutable canonical producer output and its exact requirement.
+            if !requirements
+                .requirements()
+                .contains(examples.requirement().context())
+            {
+                return Err(E::InvalidSatisfaction);
+            }
+        }
         validate_contracts(&task, &contracts.output, &contracts.verification)
             .map_err(|_| E::BindingMismatch)?;
         let value: Value = serde_json::from_str(&context.to_json().expect("compiled JSON"))
@@ -99,6 +178,7 @@ impl ContextCompiler {
         {
             return Err(E::ScopeMismatch);
         }
+        let example_source = examples.as_ref().and_then(ExampleSet::source);
         let mut acquisition = BTreeMap::new();
         for s in acquired {
             if acquisition.insert(&s.pin.id, s).is_some() {
@@ -108,6 +188,16 @@ impl ContextCompiler {
                 .selected()
                 .values()
                 .any(|v| v.pin == s.pin && v.present.is_none())
+            {
+                return Err(E::InvalidSatisfaction);
+            }
+        }
+        if let Some(s) = &example_source {
+            if plan
+                .selected()
+                .values()
+                .any(|p| p.pin == s.pin && p.present.is_none())
+                && acquisition.insert(&s.pin.id, s).is_some()
             {
                 return Err(E::InvalidSatisfaction);
             }
@@ -144,7 +234,13 @@ impl ContextCompiler {
             {
                 return Err(E::InvalidSatisfaction);
             }
-            validate_link(r, source, &task, &context, &value, &contracts)?;
+            if let Some(ContextSatisfaction::Examples(_)) = &source.present {
+                if r.class != ContextClass::Examples || example_source.as_ref() != Some(source) {
+                    return Err(E::InvalidSatisfaction);
+                }
+            } else {
+                validate_link(r, source, &task, &context, &value, &contracts)?;
+            }
             if charged.insert(source.pin.id.clone()) {
                 used = used.checked_add(source.tokens).ok_or(E::InfeasibleBudget)?;
                 if used > requirements.total_tokens().0 {
@@ -152,6 +248,12 @@ impl ContextCompiler {
                 }
             }
             satisfaction.insert(r.id.clone(), source.clone());
+        }
+        if example_source
+            .as_ref()
+            .is_some_and(|s| !satisfaction.values().any(|v| v == s))
+        {
+            return Err(E::InvalidSatisfaction);
         }
         // A compiled payload cannot smuggle context outside the canonical plan.
         let linked: BTreeSet<_> = satisfaction
@@ -179,6 +281,7 @@ impl ContextCompiler {
             projection_binding,
             satisfaction,
             contracts,
+            examples,
         })
     }
 }
@@ -248,7 +351,7 @@ fn validate_link(
                         .any(|v| v.as_str() == p.as_str())
                 })
         }),
-        None => false,
+        Some(ContextSatisfaction::Examples(_)) | None => false,
     };
     if valid {
         Ok(())
