@@ -68,3 +68,5 @@ pub mod worker_fabric;
 pub mod context_planning;
 
 pub mod example_selection;
+
+pub mod model_invocation;

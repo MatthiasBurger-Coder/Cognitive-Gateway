@@ -236,3 +236,13 @@ CG-10 accepts the same immutable set and expected binding; zero optional example
 succeed and missing mandatory examples block. The #192 projection and both
 reference layouts retain examples as non-authoritative data. See the
 [selection flow and exact producer contract](../dynamic-example-selection.md).
+
+## Model contract preparation (#261)
+
+A trusted host captures task/output/context and current Process/Policy bindings,
+constructs `ModelInvocation`, then calls `prepare_model_invocation`. It checks exact
+compatibility, disclosure bounds and generation controls before checking health;
+unsupported controls fail explicitly. The sealed result retains effective defaults
+and parameter provenance. This is component preparation only: full CG-10 admission,
+rendering and real model dispatch remain #263/#264/#269. See the
+[contract integration sequence](../model-invocation-contracts.md).

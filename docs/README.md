@@ -285,3 +285,5 @@ Run `python3 scripts/quality-gate.py` for the complete CG-13 gate. See [the rele
 - [Optional interpretation adapters](interpretation-adapters.md) — deterministic-first classifier, embedding and SLM proposals, validation, provenance and fallback.
 
 - [Dynamic example and few-shot context selection](dynamic-example-selection.md) — #286 contracts, eligibility, budgets and canonical CG-10 handoff.
+
+- [Model invocation contracts](model-invocation-contracts.md) — #261 immutable capabilities, providers, generation profiles, invocation bindings and strict parameter negotiation.

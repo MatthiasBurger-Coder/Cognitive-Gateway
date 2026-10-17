@@ -320,3 +320,13 @@ The optional `ExampleRanker` port cannot change eligibility or authority.
 `gateway-context::planning` verifies the set pin and #285 satisfaction link, keeps
 examples separate from instructions/evidence, and applies CG-10 disclosure to audit
 exports. Existing retrieval/memory/promotion owners still supply captured data.
+
+## EPIC-06.01 model contract foundation
+
+`gateway-domain::model_invocation` owns immutable provider-neutral capabilities,
+provider declarations, generation profiles and task/context/output/tool bindings.
+`gateway-application::model_invocation` prepares strictly negotiated adapter inputs
+behind `ModelInvocationPort`; mutable health remains separate from semantic eligibility.
+See [model invocation contracts](../model-invocation-contracts.md). Existing CG-26
+routing and CG-27 inference consumers retain their current paths; #262/#263 own
+routing and full semantic-handoff integration.

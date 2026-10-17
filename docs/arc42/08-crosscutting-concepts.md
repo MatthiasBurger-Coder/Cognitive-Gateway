@@ -184,3 +184,13 @@ CG-10 correlates actual selected fragment identities, exact source revisions,
 quality and payload digests; mandatory unsatisfied needs block the handoff.
 Dynamic data cannot supply authority or cross scope, and compilation/rendering
 cannot acquire replacement context. See [the contract](../context-requirement-planning.md).
+
+## Versioned model generation inputs (#261)
+
+Provider-neutral immutable generation profiles reject non-finite values and use
+ordered controls/stops plus zero normalization for deterministic bytes. Effective
+records distinguish requested values, declared defaults and unexposed defaults.
+Seeds are hints, never proof of deterministic generation. Invocation pins preserve
+task/context/output revisions, permitted capabilities, locality, sensitivity and
+Process/Policy authority; outer adapters cannot silently discard controls.
+See [contracts and diagnostics](../model-invocation-contracts.md).
