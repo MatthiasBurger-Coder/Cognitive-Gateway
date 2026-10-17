@@ -131,6 +131,99 @@ Run component tests with
 Run the measured per-file gate using the EPIC-06.01 entry in
 `scripts/quality-gates.json`. See
 [evidence](evidence/EPIC-06.01-model-contracts.json) for executed checks and source
-bindings. Production routing (#262), Prompt/Invocation IR (#263), rendering and
-exact token accounting (#264), output verification (#265–267), cumulative resilience
+bindings. Production routing (#262), Prompt/Invocation IR (#263),
+output verification (#265–267), cumulative resilience
 (#268), real adapters (#269) and full-plane qualification (#270) remain separate.
+The #264 rendering/accounting boundary is implemented below.
+
+## Deterministic semantic renderers — EPIC-06.04 (#264)
+
+`gateway-application::prompt_rendering::render_invocation` consumes the actual
+immutable CG-10 `PlannedContextHandoff`, a `PreparedModelInvocation`, the complete
+host-authenticated tool definitions and an explicit tokenizer profile. It checks
+exact task/context/output bindings, model/profile identity, renderer/template
+identity and the complete permitted tool inventory before rendering. This is a
+pure preparation boundary: it does not acquire sources, select context, compact,
+load history, execute tools or dispatch a model.
+
+The outer `gateway-daemon::prompt_renderers::SemanticRenderer` implements two
+version-1 runtime message projections:
+
+| Renderer identity / template | Runtime structure | Semantic payload |
+| --- | --- | --- |
+| `semantic-chat` / `1` | `messages` with one system and one user string | JSON envelope in user content |
+| `semantic-blocks` / `1` | Separate `system`; one user message with a text block | Same JSON envelope in block text |
+
+These structures can be consumed by chat-message and block-message transports.
+They are offline projections, not complete provider HTTP requests. Endpoint,
+model parameters, native tool/output configuration, credentials and exact provider
+SDK compatibility belong to #269. Neither layout interpolates template text or
+infers roles from content. JSON serialization escapes quotes/control characters;
+XML, role and chat-template delimiters remain string data. Only the fixed Gateway
+boundary statement and CG-10 stable catalog references enter the system channel.
+Catalog references do not themselves authenticate instruction prose. Every other
+handoff section remains separate inside `semantic`: bindings, task, context,
+evidence, examples, planning, output and verification. Scope, revisions, trust,
+sensitivity and provenance survive losslessly, including reference-only content.
+Tools retain exact capability pins, descriptions and typed input schemas; the
+output schema uses the existing `OutputContract::json_schema()` projection.
+Structural role separation does not prove probabilistic injection resistance.
+
+`gateway-domain::prompt_rendering` defines `TokenizerProfile`, `CountMode`,
+`TokenUsage`, `TokenCountResult`, `TokenBudgetSnapshot` and stable diagnostics.
+Tokenizer profiles carry exact schema version `1.0`; unsupported versions fail.
+`TokenizerPort` receives the **complete serialized runtime payload**, its SHA-256,
+semantic sections and effective model pin, generation-profile digest, tokenizer
+ID/version, renderer ID and template version. An adapter must count the actual
+framing, instructions, task, context, evidence, tools and schemas, allocating all
+usage across the named component fields and `framing_tokens`. Planning, bindings,
+examples and verification also contribute to total usage. The components sum to
+`total_input_tokens`; they are allocations of a whole-payload count, not a claim
+that independently tokenizing substrings is additive for every tokenizer.
+
+Exact counting is preferred whenever the effective tokenizer is available.
+Conservative estimation must return `estimated` and a pinned method/provenance
+reference. Never substitute a character heuristic labeled `exact`, invent a
+universal byte bound or count only user prose. The tests use an explicitly named
+synthetic byte tokenizer; it is not a production LLM tokenizer. This slice defines
+the replaceable tokenizer port; model-specific tokenizer adapters remain outer
+implementations. Unavailable counting fails as `TOKENIZER_UNAVAILABLE`.
+
+The service rejects mismatched profile/payload digests, floating tokenizer
+versions, invalid provenance, zero totals and arithmetic overflow. It reserves
+the effective profile's output capacity and compares the full sum against the
+selected capability's context limit. Exactly fitting input is accepted.
+`CONTEXT_LIMIT_EXCEEDED` returns the full accounting snapshot to EPIC-02/CG-10
+for replan/compaction. No evidence or constraint is dropped. Other stable errors
+are `INVALID_BINDING`, `UNSUPPORTED_RENDERER`, `INVALID_ACCOUNTING` and
+`RENDERING_FAILED`. Errors never return a dispatchable `RenderedInvocation`.
+Successful results retain invocation, handoff and payload digests plus complete
+accounting metadata. The host controls trace retention and disclosure because the
+serialized payload contains full admitted content.
+
+Host integration order is: authenticate current Process/Policy and full handoff
+through #263; prepare the model invocation; authenticate tool definitions and
+choose the tokenizer/template profile for that exact route; render and account;
+then pass both prepared controls and the successful render to the corresponding
+outer transport. Re-run admission/rendering/accounting after any route or context
+change. A renderer does not authenticate source stores, define a new Invocation
+IR, implement cumulative session budgets (#268), or accept model output (#266/267).
+The repository still lacks #263's complete invocation admission/dispatch host;
+these APIs do not make the older `ModelInvocationPort` a qualified dispatch path.
+Issue-level production integration remains dependent on that prerequisite.
+
+| ID | #264 requirement | Production owner | Automated proof |
+| --- | --- | --- | --- |
+| R01 | Same canonical input/version yields identical structure | Outer renderer; immutable `RenderInput` | Both layouts decode to the complete actual CG-10 producer output; repeated payload/accounting equality |
+| R02 | Delimiters cannot upgrade trust | JSON envelope, fixed runtime roles | Hostile canonical examples remain in user data in both layouts; no additional roles/system content |
+| R03 | Tokenizer/model/template metadata and exact/estimated provenance | Domain accounting and `TokenizerPort` | Both count modes, profile/version/payload/provenance mismatch denials |
+| R04 | Schemas/tools/framing and output reserve count | Application full-payload accounting | Synthetic exact whole-payload count; nonzero schema/framing usage; boundary at limit ±1 |
+| R05 | Overflow explicit; mandatory data intact | Typed error and immutable handoff | Overflow snapshot and unchanged source; no successful rendered result on errors |
+| R06 | Existing scope/authority/provenance types and independent adapters | CG-10 handoff, application ports, daemon adapters | Exact section/tool equality, stale bindings/tool inventory denials, architecture guard |
+| R07 | >=95% introduced production coverage | `check-prompt-rendering-coverage.py`, release gate | Per-file measured coverage for domain/application/outer adapter; missing and undercovered evidence rejected |
+
+Run `cargo test -p gateway-daemon --test prompt_rendering --locked` and the
+EPIC-06.04 measured gate in `scripts/quality-gates.json`. Qualification scope and
+executed evidence are retained in
+[`EPIC-06.04-prompt-rendering.json`](evidence/EPIC-06.04-prompt-rendering.json).
+Live-provider and installed-host E2E are not claimed by these offline tests.

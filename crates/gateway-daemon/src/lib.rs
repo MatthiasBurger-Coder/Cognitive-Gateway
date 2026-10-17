@@ -27,3 +27,5 @@ pub mod local_mcp;
 pub mod codex_workspace;
 pub mod local_sessions;
 pub mod session_store;
+
+pub mod prompt_renderers;

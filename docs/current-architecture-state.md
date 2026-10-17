@@ -118,5 +118,16 @@ The candidate adds versioned immutable model capability/provider/invocation and
 generation-profile contracts, strict numeric/control validation, effective-default
 provenance and an application preparation/adapter port. Runtime availability is
 separate from eligibility. [Component evidence](model-invocation-contracts.md) does
-not establish a shipped invocation path; routing, full CG-10 admission, rendering,
+not establish a shipped invocation path; routing, full CG-10 admission,
 real adapters and result verification remain the later EPIC-06 slices.
+
+## EPIC-06.04 rendering boundary (#264)
+
+Versioned chat-message and block-message outer renderers now consume the actual
+CG-10 handoff and prepared invocation through a pure application service.
+Full-payload tokenizer accounting binds model/profile/tokenizer/template metadata,
+preserves exact versus estimated provenance, reserves output and returns typed
+overflow without truncation. [Component qualification](model-invocation-contracts.md#deterministic-semantic-renderers--epic-0604-264)
+uses actual producer data with a synthetic tokenizer; production tokenizer/provider
+adapters and the #263 authenticated admission/dispatch host remain prerequisites
+for full issue integration.
