@@ -61,7 +61,7 @@ source formatting is confused with IR normalization; fixtures drift with code.
 Mitigation: preserve the immutable semantic envelope, retain interpretation
 sidecars when saving source, and compare against frozen cross-implementation
 bytes/digests. [Migration](../cgsl-migration.md) requires explicit versioned,
-validated transformations. Canonical context/example producers (#285/#286) and
-production invocation admission (#263) must qualify their integration against the
+validated transformations. The #285 canonical context producer has a checked CG-10 handoff. Bounded examples
+(#286) and production invocation admission (#263) must qualify their integration against the
 [Prompt IR boundary](../prompt-ir-handoff-boundary.md); illustrative renderings
 are not sufficient runtime evidence.

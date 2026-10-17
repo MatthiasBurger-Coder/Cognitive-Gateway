@@ -176,3 +176,6 @@ pub use semantic_resolution::{
     ResolutionCandidates, ResolutionFailure, SemanticFieldRequirement, SemanticGapReason,
     SemanticResolution, SemanticResolutionState,
 };
+
+pub mod context_planning;
+pub use context_planning::*;

@@ -98,7 +98,8 @@ As of 2026-10-17:
 | [Prompt boundary](prompt-ir-handoff-boundary.md) | Normative section/admission contract and two offline renderings; not a production invocation IR |
 | [Conformance](cgsl-conformance.md) | Frozen source/IR/digest vectors, generated roundtrips and adversarial component tests |
 
-Canonical context requirement/source planning (#285), example selection (#286),
+Canonical [context requirement/source planning](context-requirement-planning.md)
+(#285) and its CG-10 handoff now have offline producer proof. Example selection (#286),
 production invocation admission (#263), persisted clarification hosting (#275) and
 full runtime proof (#279) remain downstream work. Structured callers continue to
 use existing APIs. Formal CGSL callers must compose the trusted admission ports;

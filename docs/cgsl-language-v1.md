@@ -337,3 +337,12 @@ prompt boundaries. The [migration guide](cgsl-migration.md) defines the supporte
 entry paths and applies the normative versioning rules without implicit downgrade.
 The [conformance guide](cgsl-conformance.md) identifies frozen expectations,
 reproduction commands and currently reserved diagnostic emitters.
+
+## Context planning after semantic admission
+
+CGSL task meaning is an input to the implemented
+[context requirement/source planner](context-requirement-planning.md) (#285).
+The planner's separately versioned shared contracts retain permitted source
+classes and information constraints; source availability does not alter CGSL or
+canonical task meaning. No retrieval, example-selection, prompt/provider or
+policy constructs are added to CGSL 1.0 by this stage.

@@ -214,3 +214,15 @@ database, live-provider and complete release qualification are not required to
 prove this boundary-definition scope and are not claimed. The downstream
 integration obligations are explicitly retained in #285/#286 and the #263
 ownership section. No completion dependency on those implementations remains.
+
+## Canonical #285 producer implementation
+
+[Context requirement planning](context-requirement-planning.md) now implements
+shared domain requirements/plans, deterministic application analysis/selection,
+CG-15 mapping and `ContextCompiler::handoff_planned_context`. Its conformance
+suite uses the actual producer and real CG-10 context, preserves complete
+planning records, exact content bindings and resolved output/verification
+contracts, and checks negative satisfaction cases plus two pure offline layouts.
+This is subsequent #285 evidence, separate from the historical #192 fixture proof
+above. Bounded example production remains #286 owned and invocation enforcement
+remains #263 owned. Neither reference rendering qualifies production invocation.

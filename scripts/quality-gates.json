@@ -48,6 +48,10 @@
     "command": "set -euo pipefail\ncommand -v cg-registry\ncg-registry --help >/dev/null\ncg-registry agent list --json >/dev/null\ncg-registry agent show system-architect --json >/dev/null\ncg-registry skill list --json >/dev/null\ncg-registry skill show architecture-hexagonal --json >/dev/null\ncg-registry skill graph architecture-hexagonal --json >/dev/null\ncg-registry capability list --json >/dev/null\ncg-registry capability show architecture.dependency-analysis --json >/dev/null\ncg-registry capability resolve architecture.dependency-analysis --json >/dev/null\n"
   },
   {
+    "name": "EPIC-05.17 context requirements, source planning and CG-10 conformance coverage",
+    "command": "cargo llvm-cov -p gateway-domain -p gateway-context -p gateway-application --test context_planning --locked --json --output-path \"$EVIDENCE_DIR/context-planning-coverage.json\"\npython3 scripts/check-context-planning-coverage.py --self-test\npython3 scripts/check-context-planning-coverage.py \"$EVIDENCE_DIR/context-planning-coverage.json\""
+  },
+  {
     "name": "EPIC-05.12 semantic planning boundary coverage",
     "command": "cargo llvm-cov -p gateway-application --test semantic_planning --locked --json --output-path \"$EVIDENCE_DIR/semantic-planning-coverage.json\"\npython3 scripts/check-semantic-planning-coverage.py --self-test\npython3 scripts/check-semantic-planning-coverage.py \"$EVIDENCE_DIR/semantic-planning-coverage.json\""
   },

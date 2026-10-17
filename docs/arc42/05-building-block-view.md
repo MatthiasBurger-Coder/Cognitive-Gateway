@@ -293,4 +293,17 @@ atomic durable release/routing stores remain outer adapters. See
 | CG-10 / outer invocation adapters | Context compilation; prompt layout references are test-only, production #263 remains downstream |
 
 See the [implementer guide](../cgsl-implementer-guide.md) for all contracts,
-source-to-IR stages and the remaining #285/#286 producer integration.
+source-to-IR stages. [Context requirement planning](../context-requirement-planning.md)
+implements #285 in the domain/application modules and the real CG-10 handoff;
+#286 bounded examples remain separate producer work.
+
+### Context requirement and source planning (#285)
+
+`gateway-domain::context_planning` owns versioned immutable requirements and plans,
+reusing CG-15 information, trust, freshness, provenance, budgets and stop contracts.
+`gateway-application::context_planning` validates the semantic basis, analyzes the
+task and captured CG-07 information needs, selects finite source metadata and maps
+retrievable needs into CG-15. No acquisition adapter is called by planning.
+`gateway-context::planning` validates the actual producer records against a real
+compiled context and preserves exact bindings, satisfaction and resolved output/
+verification contracts in the #192 handoff. #263 production invocation is separate.

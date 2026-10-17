@@ -32,6 +32,10 @@ semantics, planning, Process IR and prompt layouts, and the
 [migration guide](cgsl-migration.md) for existing structured consumers and version
 evolution.
 
+See [Context requirement analysis and source selection](context-requirement-planning.md)
+for EPIC-05.17 canonical contracts, CG-15 mapping, actual CG-10 handoff, examples
+and measured qualification.
+
 ## Core domain contract
 
 See [CGSL scope and canonical vocabulary](cgsl-scope-and-vocabulary.md) for
