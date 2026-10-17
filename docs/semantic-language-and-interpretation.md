@@ -92,6 +92,7 @@ As of 2026-10-17:
 | [Task contract](semantic-task-ir-v1.md) | Typed Rust and wire contract, canonical bytes/digest, exact independently versioned pins |
 | [Resolver](deterministic-interpretation-resolution.md) | Captured-context admission, scoped entities/aliases, precedence, temporal anchors and candidate traces |
 | [Completeness](semantic-completeness.md) | Host-authenticated requirement manifest, dependency frontier, clarification plan and revalidated compilation |
+| [Natural-language inspection](cgsl-implementer-guide.md#supported-natural-language-inspection-profile) | Original-text `Inspect artifact <id>` / `Inspect it` profile through the existing resolver and completeness compiler, with exact input binding and negative-path tests |
 | [Optional proposal adapters](interpretation-adapters.md) | Deterministic-first proposals with validation and unavailable-model fallback; no model authority |
 | [Planning adapter](semantic-planning-boundaries.md) | Existing CG-06/07/08 delegation, immutable task/source/Plan envelope and revalidation |
 | [Process boundary](semantic-process-boundary.md) | Executable exact-definition/activity proof; lifecycle and gates remain CG-04-owned |
@@ -99,8 +100,9 @@ As of 2026-10-17:
 | [Conformance](cgsl-conformance.md) | Frozen source/IR/digest vectors, generated roundtrips and adversarial component tests |
 
 Canonical [context requirement/source planning](context-requirement-planning.md)
-(#285) and its CG-10 handoff now have offline producer proof. Example selection (#286),
-production invocation admission (#263), persisted clarification hosting (#275) and
+(#285) and its CG-10 handoff have offline producer proof. Canonical bounded
+[example selection](dynamic-example-selection.md) (#286) and its dedicated CG-10
+handoff also have offline producer proof. Production invocation admission (#263), persisted clarification hosting (#275) and
 full runtime proof (#279) remain downstream work. Structured callers continue to
 use existing APIs. Formal CGSL callers must compose the trusted admission ports;
 a successful frontend task shape alone is insufficient for execution.

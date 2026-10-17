@@ -102,6 +102,45 @@ frozen expectations; they do not claim exhaustive input-space proof.
 #279 owns full runtime integration and real effects. Component tests explicitly
 model accepted/refused host projections and never equate semantic clarification
 with consent. This issue retains evidence for those consumers and does not
-qualify a second implementation, a deployed host, or full EPIC-05 acceptance.
+qualify a second implementation, a deployed host, or full EPIC-05 acceptance
+within that historical #193 report. The subsequent independent valid-source
+comparison below adds separate evidence without changing the historical report.
 Rollback removes the additive serializer/API, tests, corpus and gate entries;
 task wire format, pins and digests remain unchanged.
+
+## Independent valid-source conformance witness
+
+The parent acceptance follow-up adds two independently executed implementations
+of executable-source compilation: the Rust frontend and
+[`tests/conformance/cgsl_reference.py`](../tests/conformance/cgsl_reference.py).
+The Python witness independently parses JSON, transcribes the normative root
+mapping, validates against the published wire schema, normalizes exact decimals,
+typed sets, confidence, reference scope, collection/check and CG-06 expression
+order, then serializes compact canonical JSON and hashes it. It imports no Rust
+code, mapping, serializer or frozen expected IR. Its inputs are source strings
+only. The normative schema is shared as a specification, not an implementation.
+
+[`independent_conformance.rs`](../crates/gateway-cgsl/tests/independent_conformance.rs)
+feeds both implementations the four frozen executable-source vectors, 64 varied
+sources and an omitted-defaults source. It compares the complete canonical IR
+bytes and SHA-256 for all 69 sources, including every task kind, Unicode/control
+escapes, i64 extremes, exact decimal coefficients beyond binary64 precision,
+homogeneous sets, confidence quantization and nested commutative expressions.
+The separate Python contract suite also checks the four frozen expected IR/digest
+vectors without invoking Rust and rejects malformed/version/scope/schema cases.
+
+```sh
+cargo test -p gateway-cgsl --test independent_conformance --locked
+python3 -m unittest discover -s tests/contracts -p test_cgsl_independent_reference.py
+```
+
+The witness qualifies equivalence for valid executable CGSL source at the IR
+boundary required by parent AC24. It is test tooling, not an alternative
+authoritative runtime, a deployed resolver or an implementation of the frontend's
+diagnostic/span protocol. It does not qualify live authentication, acquisition,
+provider invocation or interoperability for every possible input. Python and the
+pinned contract-test dependencies are required; a missing interpreter/dependency
+fails the differential test instead of skipping it. Set `CG_CONFORMANCE_PYTHON`
+to the pinned environment's interpreter when needed (default `python3` on Unix,
+`python` on Windows). Existing Rust conformance
+continues to own all diagnostics and denied runtime boundaries.

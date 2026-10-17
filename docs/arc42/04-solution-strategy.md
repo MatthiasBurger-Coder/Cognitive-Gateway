@@ -40,8 +40,11 @@ The dependency rule is inward-only: adapters depend on application ports and dom
 ### Semantic interpretation and Execution Context IR
 
 The implemented deterministic pipeline consumes validated structured contracts
-and produces provider-independent execution context. Natural-language input is
-**not yet** a fully implemented direct compiler path.
+and produces provider-independent execution context. The bounded
+[natural-language inspection profile](../cgsl-implementer-guide.md#supported-natural-language-inspection-profile)
+compiles original text through the same resolver/completeness path to task IR.
+General natural-language interpretation and installed client composition remain
+partial.
 
 EPIC-05 supplies the offline semantic frontend and application components. The
 diagram includes the hosted natural-language composition that remains partial:

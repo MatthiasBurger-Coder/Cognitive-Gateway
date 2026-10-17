@@ -191,6 +191,18 @@ no session lifecycle is claimed by the standalone host or this runtime diagram.
 
 ## Context planning and CG-10 producer handoff (#285)
 
+For the supported `artifact-inspection/1.0` natural-language entry, the host first
+admits the original-input digest, task/scope binding and pinned output definition.
+`CompletenessValidator::compile_inspection_request` parses the complete original
+sentence into a target query, then uses the existing deterministic resolver and
+completeness compiler. A missing/ambiguous focus returns a correlated
+clarification plan and no task. A fresh reply re-enters that same text API; expired
+or changed context and invalid references fail validation. A complete result
+contains validated `SemanticTaskIR` and source diagnostics; planning/context
+consumers still enforce their existing admission and Process/Policy boundaries.
+This application entry does not invoke models, tools or processes. See the
+[supported profile](../cgsl-implementer-guide.md#supported-natural-language-inspection-profile).
+
 ```mermaid
 flowchart LR
     ST[Validated SemanticTaskIR and captured CG-07 needs] --> A[Requirement analysis]

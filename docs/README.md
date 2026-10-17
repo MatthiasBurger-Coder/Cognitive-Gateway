@@ -223,7 +223,7 @@ The approved CG-02 v2 handoff extension is documented in
 
 ## Semantic interpretation and runtime boundaries
 
-- [CGSL, SemanticTaskIR and natural-language interpretation](semantic-language-and-interpretation.md) — EPIC-05 target boundary; natural-language compilation is not yet a completed runtime path.
+- [CGSL, SemanticTaskIR and natural-language interpretation](semantic-language-and-interpretation.md) — implemented formal compiler and bounded original-text inspection profile; general hosted interpretation remains a separate runtime path.
 - [Versioned Codex-facing contracts](codex-facing-contracts.md) — EPIC-04.02 schemas, catalog, diagnostics, compatibility and frozen session projections.
 - [`codex-application-facade.md`](codex-application-facade.md): implemented application facade, canonical delegation and trusted host ports (#239).
 - [Codex scope isolation](codex-scope-isolation.md) — trusted workspace/session binding, immutable resources and provenance (#240).

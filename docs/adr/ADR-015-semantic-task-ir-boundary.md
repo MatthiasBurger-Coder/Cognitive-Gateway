@@ -32,3 +32,9 @@ prompt renderings preserve the decision's separation. [Canonical context plannin
 and [bounded examples](../dynamic-example-selection.md) now have producer proof.
 Production invocation/clarification hosting remain downstream;
 this update does not change the original authority or ownership decision.
+
+Parent acceptance follow-up: the bounded `artifact-inspection/1.0` natural-language
+profile now compiles original text through existing resolver/completeness ports.
+The independent valid-source witness compares Rust/Python canonical IR and digest
+outputs. Both are documented in the implementer/conformance guides; no new
+authority, task wire version or provider/runtime ownership is introduced.
