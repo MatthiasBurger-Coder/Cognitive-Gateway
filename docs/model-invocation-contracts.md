@@ -231,3 +231,8 @@ EPIC-06.04 measured gate in `scripts/quality-gates.json`. Qualification scope an
 executed evidence are retained in
 [`EPIC-06.04-prompt-rendering.json`](evidence/EPIC-06.04-prompt-rendering.json).
 Live-provider and installed-host E2E are not claimed by these offline tests.
+
+The [#266 verification boundary](output-verification.md) now binds parsed output
+and trusted constraint/rule reports to the full admitted invocation identity and
+exact response digest. Schema/reference/tool checks and current admission are
+mandatory; critics are advisory. Verification grants no tool-dispatch authority.

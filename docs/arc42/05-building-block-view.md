@@ -360,3 +360,13 @@ semantic reference/admission checks, correlated rendering and proposal transport
 ports. It reuses the typed CG-10 producer; no domain dependency on context, provider
 SDK or second planner/router is introduced. Trusted stores/current Process/Policy
 remain host responsibilities. See [contract and evidence](../prompt-invocation-ir.md).
+
+### Output verification — EPIC-06.06
+
+`gateway-domain::output_verification` owns versioned proposal/correlation/audit
+records and pure structural validation. The application service composes the
+strict bounded parser, captured schema/tool inventory, existing semantic-result
+assessment and mandatory `OutputVerificationPort` checks. Its host extends
+`InvocationAdmissionPort` for current task/context/Process/Policy admission;
+reference resolution and rule execution stay with their existing owners. There
+is no provider or effect dependency. See [integration and evidence](../output-verification.md).

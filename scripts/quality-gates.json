@@ -198,5 +198,9 @@
   {
     "name": "EPIC-06.03 prompt and invocation IR coverage",
     "command": "CARGO_LLVM_COV_TARGET_DIR=target/prompt-ir-coverage cargo llvm-cov -p gateway-domain -p gateway-application --test prompt_ir --locked --json --output-path \"$EVIDENCE_DIR/prompt-ir-coverage.json\"\npython3 scripts/check-prompt-ir-coverage.py --self-test\npython3 scripts/check-prompt-ir-coverage.py \"$EVIDENCE_DIR/prompt-ir-coverage.json\""
+  },
+  {
+    "name": "EPIC-06.06 schema, reference and constraint verification coverage",
+    "command": "CARGO_LLVM_COV_TARGET_DIR=target/output-verification-coverage cargo llvm-cov -p gateway-domain -p gateway-application --test output_verification --test prompt_ir --locked --json --output-path \"$EVIDENCE_DIR/output-verification-coverage.json\"\npython3 scripts/check-output-verification-coverage.py --self-test\npython3 scripts/check-output-verification-coverage.py \"$EVIDENCE_DIR/output-verification-coverage.json\""
   }
 ]
