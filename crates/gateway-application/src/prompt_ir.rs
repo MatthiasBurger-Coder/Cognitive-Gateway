@@ -79,12 +79,12 @@ pub trait InvocationAdmissionPort: SemanticReferenceValidator {
     fn validate_current(&self, invocation: &InvocationIr) -> Result<(), InvocationIrError>;
 }
 
-fn validate_current(
+pub(crate) fn validate_current<H: InvocationAdmissionPort + ?Sized>(
     ir: &InvocationIr,
-    host: &dyn InvocationAdmissionPort,
+    host: &H,
 ) -> Result<(), InvocationIrError> {
-    struct References<'a>(&'a dyn InvocationAdmissionPort);
-    impl SemanticReferenceValidator for References<'_> {
+    struct References<'a, H: ?Sized>(&'a H);
+    impl<H: InvocationAdmissionPort + ?Sized> SemanticReferenceValidator for References<'_, H> {
         fn validate(
             &self,
             task: &SemanticTaskData,

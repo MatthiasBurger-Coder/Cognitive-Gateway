@@ -291,3 +291,5 @@ Run `python3 scripts/quality-gate.py` for the complete CG-13 gate. See [the rele
 - [Deterministic model capability routing](model-capability-routing.md) — EPIC-06.02 eligibility, CG-26 integration, diagnostics and evidence.
 
 - [Provider-independent prompt and invocation IR](prompt-invocation-ir.md) — #263 admission, correlation and current-host integration.
+
+- [Schema, reference and constraint verification](output-verification.md) — #266 typed, correlated verification and trusted-host integration.

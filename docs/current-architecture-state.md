@@ -152,3 +152,12 @@ implemented over the actual CG-10 producer and #261/#264 services. It requires
 authenticated current-host checks on admission, rendering and transport. Evidence
 is component/synthetic-host integration; installed-host and live-provider
 composition remain #269/#279.
+
+## EPIC-06.06 verification boundary
+
+The [output verification service](output-verification.md) now consumes strict bounded
+JSON proposals against the admitted Invocation IR, validates schema/references/tool
+arguments and requires current host constraint/rule reports. Critics remain advisory.
+Accepted/rejected records bind exact response bytes and full invocation/task identity.
+Current-store, Process/Policy and semantic verifier integrations are mandatory ports;
+qualification uses synthetic hosts. No live provider or tool dispatch is added.

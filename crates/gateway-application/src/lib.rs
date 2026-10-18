@@ -76,3 +76,5 @@ pub mod prompt_rendering;
 pub mod model_routing;
 
 pub mod prompt_ir;
+
+pub mod output_verification;

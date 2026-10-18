@@ -34,7 +34,8 @@ pub enum InvocationIrError {
 }
 
 /// Correlates downstream rendering/verification with the complete admitted IR.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct InvocationIrIdentity {
     pub schema_version: SchemaVersion,
     pub invocation_id: ReferenceId,

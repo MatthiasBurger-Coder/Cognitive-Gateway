@@ -286,3 +286,16 @@ after rendering blocks dispatch. Routing hosts use this sequence inside each mod
 attempt after CG-26 prepare, including fallback; deterministic routes stay model-free.
 Transport returns unverified proposals. See [host requirements](../prompt-invocation-ir.md);
 installed/live composition remains #269/#279.
+
+### Verify a completed model proposal — EPIC-06.06
+
+The host correlates complete response bytes with the dispatched IR, parses the
+strict envelope, then calls `verify_output`. The service validates the exact
+invocation identity, schema, pinned result references and tool arguments, checks
+current admission, resolves references and requires correlated deterministic
+Process/Policy/completeness/semantic reports. Existing `assess_result` enforces
+the exact task rule set. Admission is checked again before acceptance. Every
+accept/reject record retains submitted/admitted identities and output digest;
+critics are advisory. Accepted tool proposals remain data for a separately
+current-authorized host effect boundary. Stale input requires a freshly compiled
+and admitted invocation. See [output verification](../output-verification.md).
