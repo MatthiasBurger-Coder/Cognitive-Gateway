@@ -14,7 +14,7 @@ use crate::{
 pub const MODEL_CONTRACT_VERSION: SchemaVersion = SchemaVersion::V1;
 type Pin = ResolvedReference<ReferenceId>;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum ModelContractError {
     IncompatibleVersion,

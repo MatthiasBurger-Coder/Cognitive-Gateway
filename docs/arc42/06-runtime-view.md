@@ -261,3 +261,16 @@ input-plus-output-reserve sum above the model limit. Overflow returns metadata
 for upstream compaction; no successful render escapes. The host must complete
 #263 admission before dispatch and revalidate after route/context changes. These
 component tests do not establish live provider or installed-client dispatch.
+
+## Invocation-aware deterministic routing (#262)
+
+Capture one versioned invocation-routing snapshot, validate immutable fallback
+meaning and model/provider/health bindings, reject incompatible alternatives,
+then apply CG-26 hard filters and stable ranking. Deterministic sufficiency
+excludes every model, including after a deterministic failure. Before each
+attempt the host compiles a current CG-10 step. Model handoffs receive strictly
+negotiated invocation controls; deterministic/reflex handoffs receive no model
+invocation. CG-26 retains failed-attempt reservations and reevaluates fallback
+against the remaining cumulative bounds. Telemetry binds decisions to the
+computed snapshot digest and records effective controls and health provenance.
+See [routing traceability](../model-capability-routing.md).

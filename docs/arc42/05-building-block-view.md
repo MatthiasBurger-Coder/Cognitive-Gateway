@@ -328,8 +328,9 @@ provider declarations, generation profiles and task/context/output/tool bindings
 `gateway-application::model_invocation` prepares strictly negotiated adapter inputs
 behind `ModelInvocationPort`; mutable health remains separate from semantic eligibility.
 See [model invocation contracts](../model-invocation-contracts.md). Existing CG-26
-routing and CG-27 inference consumers retain their current paths; #262/#263 own
-routing and full semantic-handoff integration.
+routing and CG-27 inference consumers retain their current paths. The strict
+#262 routing service below integrates capability negotiation with CG-26; #263 owns
+full semantic-handoff integration.
 
 
 ## EPIC-06.04 semantic rendering boundary
@@ -341,3 +342,12 @@ usage, count mode/provenance and budget snapshot contracts.
 `gateway-daemon::prompt_renderers` owns both concrete runtime message formats.
 No renderer dependency enters CGSL, domain or CG-10. The existing planned handoff
 remains the semantic producer; no competing Prompt/Invocation IR is introduced.
+
+## EPIC-06.02 invocation-aware routing
+
+`gateway-application::model_routing` composes the existing CG-26 router with
+EPIC-06.01 strict preparation. Versioned host snapshots bind model candidates to
+admitted invocations, canonical capability/provider declarations and independent
+health observations. `InvocationRouteRuntime` keeps CG-10/Process/Policy admission
+and adapter dispatch with the host. There is one CG-26 ranking/execution owner.
+See [routing contracts and operator integration](../model-capability-routing.md).

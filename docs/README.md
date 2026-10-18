@@ -287,3 +287,5 @@ Run `python3 scripts/quality-gate.py` for the complete CG-13 gate. See [the rele
 - [Dynamic example and few-shot context selection](dynamic-example-selection.md) — #286 contracts, eligibility, budgets and canonical CG-10 handoff.
 
 - [Model invocation contracts](model-invocation-contracts.md) — #261 immutable capabilities, providers, generation profiles, invocation bindings and strict parameter negotiation.
+
+- [Deterministic model capability routing](model-capability-routing.md) — EPIC-06.02 eligibility, CG-26 integration, diagnostics and evidence.

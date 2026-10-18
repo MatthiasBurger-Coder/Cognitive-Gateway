@@ -136,6 +136,8 @@ pub enum RouteRejection {
     ReflexInapplicable,
     PreviouslyAttempted,
     LowerPrecedence,
+    ModelNotRequired,
+    Invocation(crate::model_invocation::ModelContractError),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
