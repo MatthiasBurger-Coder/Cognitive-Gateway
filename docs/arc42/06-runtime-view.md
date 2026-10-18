@@ -312,3 +312,13 @@ all parsing and verification. No fragment, proposal or replay dispatches a tool.
 ### Evidence grounding in output acceptance
 
 After parsing and current admission, output verification requires grounding whenever evidence or all-claims support is mandatory. The trusted host projects all assertions and resolves current scoped records; deterministic checks reject invalid citations, stale/contradictory support, excessive sensitivity and unobserved external-effect claims. Current admission is checked again before acceptance. Verification dispatches no actions. See [grounding](../evidence-grounding-verification.md).
+
+### Retry, cancel and degrade an invocation — EPIC-06.08
+
+The CG-14 host retains one invocation run, re-admits/renders each preselected
+alternative, and reserves cumulative tokens/output/cost before bounded transport.
+Cancellation/deadline checks bracket dispatch; late results are charged and
+rejected. Correlated provider usage reconciles reservations without resetting
+the ledger. Malformed results remain proposals; uncertain effects are terminal.
+See [operator semantics](../invocation-resilience.md); live adapter interruption
+and installed-host composition require their own qualification.

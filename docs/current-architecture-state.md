@@ -83,7 +83,7 @@ flowchart LR
 | Governed offline learning pipeline | IMPLEMENTED (contracts and reference coordinator) | CG-28 validates signals, assembles scoped/versioned datasets, gates offline jobs/evaluation and journals canary/rollback. Concrete CPU feature/training/CV/calibration worker, PostgreSQL release journals and current-version inference/rollback are implemented; see complete EPIC-03 acceptance. |
 | Distributed cognitive worker fabric | IMPLEMENTED (contracts and local reference) | CG-29: immutable scoped snapshots, bounded queue/retries, fenced leases, provenance and a local worker adapter. PostgreSQL coordination preserves leases/fencing/idempotency across restart; Linux process and isolated container resource enforcement are implemented. Swarm/Kubernetes transport remains optional. |
 | Qwen3-8B reference profile | PLANNED | Reference candidate only; not a mandatory product dependency. |
-| General provider-independent model invocation | PARTIAL (application contracts/services) | EPIC-06 #178 owns the plane. #261–266 contracts, routing, IR, rendering, parsing and output verification are implemented. #267 adds [evidence grounding](evidence-grounding-verification.md) over EPIC-02/CG-06 with synthetic-host component qualification. Live adapters, host integration and complete parent qualification remain separate. |
+| General provider-independent model invocation | PARTIAL (application contracts/services) | EPIC-06 #178 owns the plane. #261–266 contracts, routing, IR, rendering, parsing and output verification are implemented. #267 adds [evidence grounding](evidence-grounding-verification.md) over EPIC-02/CG-06 with synthetic-host component qualification. The #268 [bounded run ledger](invocation-resilience.md) enforces retry/fallback budgets and cancellation. Live adapters, host integration and complete parent qualification remain separate. |
 | MCP connector/plugin runtime | PLANNED | EPIC-07 #223 owns external MCP server integration. |
 | GitHub MCP connector | PLANNED | Reference connector under EPIC-07. |
 | Codex -> CG local no-key MCP | PARTIAL | #238 implements [private stdio lifecycle/discovery](local-mcp-server.md); #236 / ADR-020 define trust. [Application facade](codex-application-facade.md) #239 is implemented and injectable. [Workspace/session isolation](codex-scope-isolation.md) #240 supplies admitted situation queries and scoped resource reads; discovery-only calls remain unsupported. [Credential and sensitive-data isolation](codex-secret-isolation.md) #241 checks launch environment, admission, request/result disclosure and trace/cache inputs. [Current policy/consent gates](codex-policy-gates.md) #242 and [bounded runtime](codex-runtime.md) #243 are implemented. #245 adds [inbound component qualification](codex-release-qualification.md); [canonical host wiring](codex-canonical-host.md) now provides resolve/explain/context through the shipped binaries, and [installed Codex qualification](codex-installed-client-qualification.md) exercises those paths with CLI 0.162.1. The accepted [shared session specification](shared-session-contract.md) / ADR-021 defines the verified artifact goal and explicit v2 boundary. Typed services, the shared coordinator, trusted interactions and PostgreSQL lifecycle/recovery are implemented and exercised by [runtime qualification](shared-session-implementation.md) and installed-client lifecycle checks. Fresh full-parent reconciliation after the 2026-10-11 evidence-contract correction remains required; #279 full model/connector/runtime acceptance is separate. |
@@ -167,5 +167,13 @@ qualification uses synthetic hosts. No live provider or tool dispatch is added.
 [Parsing contracts](structured-output-parsing.md) now bind complete bounded JSON
 and typed tool proposals to the admitted schema/inventory. Provisional streams
 and bounded repair proposals are implemented with a mandatory aggregate-budget
-port. Qualification is component/synthetic-host; concrete session accounting,
-provider adapters and installed composition remain #268/#269/#279.
+port. Qualification is component/synthetic-host. #268 now supplies the shared
+application run ledger; provider adapters and installed composition remain #269/#279.
+
+## EPIC-06.08 bounded invocation resilience (#268)
+
+[InvocationRun](invocation-resilience.md) adds cumulative token/output/cost/attempt
+accounting, shared cancellation/deadlines, strict fallback bindings and correlated
+provider usage/provenance. Component qualification uses synthetic admitted hosts
+and provider ports. Live adapters, durable host ownership and installed runtime
+composition remain separate #269/#271/#279 work; the full plane remains PARTIAL.

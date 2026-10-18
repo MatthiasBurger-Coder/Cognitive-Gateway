@@ -382,3 +382,11 @@ See [operator and contract guide](../structured-output-parsing.md).
 ### Evidence and grounding verification
 
 `gateway-domain::grounding` owns version 1 trusted claim/snapshot contracts and stable diagnostics. `gateway-application::grounding` reuses EPIC-02 provenance, CG-06 evidence and existing quality types. `OutputVerificationPort` exposes the required `GroundingEvidencePort` for evidence/claim rules; store authentication and independent observation remain adapter responsibilities. See [integration and operator guidance](../evidence-grounding-verification.md).
+
+### Bounded invocation resilience — EPIC-06.08
+
+Domain versioned limits/usage contracts and the application `InvocationRun`
+compose admitted/rendered IRs, CG-14 lifecycle decisions and the shared request
+context with a replaceable bounded provider port. One ledger accounts for every
+retry/repair/fallback; no provider SDK, connector effect or second lifecycle
+controller enters the core. See [integration and evidence](../invocation-resilience.md).

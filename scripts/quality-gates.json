@@ -210,5 +210,9 @@
   {
     "name": "EPIC-06.07 evidence and grounding verification coverage",
     "command": "CARGO_LLVM_COV_TARGET_DIR=target/grounding-coverage cargo llvm-cov -p gateway-domain -p gateway-application --test output_verification --test prompt_ir --locked --json --output-path \"$EVIDENCE_DIR/grounding-coverage.json\"\npython3 scripts/check-grounding-coverage.py --self-test\npython3 scripts/check-grounding-coverage.py \"$EVIDENCE_DIR/grounding-coverage.json\""
+  },
+  {
+    "name": "EPIC-06.08 cumulative invocation retry, cancellation and degradation coverage",
+    "command": "CARGO_LLVM_COV_TARGET_DIR=target/invocation-resilience-coverage cargo llvm-cov -p gateway-domain -p gateway-application --test invocation_resilience --locked --json --output-path \"$EVIDENCE_DIR/invocation-resilience-coverage.json\"\npython3 scripts/check-invocation-resilience-coverage.py --self-test\npython3 scripts/check-invocation-resilience-coverage.py \"$EVIDENCE_DIR/invocation-resilience-coverage.json\""
   }
 ]
