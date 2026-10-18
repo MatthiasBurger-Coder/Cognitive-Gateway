@@ -75,7 +75,7 @@ flowchart LR
 | Learned procedure domain contracts | IMPLEMENTED | CG-21 foundation added on 2026-10-03. |
 | Experience normalization and pattern inspection | IMPLEMENTED | CG-22 correlates governed, verified outcomes and supports PostgreSQL backed inspection; it creates candidates without executable authority. |
 | Learned procedure discovery/promotion/reflex runtime | IMPLEMENTED (governed reference runtime) | CG-21 through CG-25 and CG-30 demonstrate experience → detected pattern → evaluated procedure → governed promotion → reflex, fallback and rollback. |
-| CGSL / SemanticTaskIR | PARTIAL (components implemented; full hosted runtime pending) | [Implementer guide](cgsl-implementer-guide.md): normative CGSL/task contracts, offline parser/compiler/formatter/serializer, deterministic resolution, completeness/clarification, optional proposals and CG-06/07/08 adapter are implemented. Process boundary and two offline prompt renderings have component proofs. [Conformance](cgsl-conformance.md) freezes portable source/IR/digest and adversarial expectations. #285 [canonical requirements/source planning and CG-10 handoff](context-requirement-planning.md) are implemented with offline conformance; #286 [canonical example selection and dedicated CG-10 handoff](dynamic-example-selection.md) are implemented with offline conformance; #263 invocation, #275 clarification host and #279 runtime integration remain separate. |
+| CGSL / SemanticTaskIR | PARTIAL (components implemented; full hosted runtime pending) | [Implementer guide](cgsl-implementer-guide.md): normative CGSL/task contracts, offline parser/compiler/formatter/serializer, deterministic resolution, completeness/clarification, optional proposals and CG-06/07/08 adapter are implemented. Process boundary and two offline prompt renderings have component proofs. [Conformance](cgsl-conformance.md) freezes portable source/IR/digest and adversarial expectations. #285 [canonical requirements/source planning and CG-10 handoff](context-requirement-planning.md) are implemented with offline conformance; #286 [canonical example selection and dedicated CG-10 handoff](dynamic-example-selection.md) are implemented with offline conformance; #263 [invocation IR/admission](prompt-invocation-ir.md) is implemented as an application boundary; #275 clarification host and #279 installed runtime integration remain separate. |
 | Natural-language-to-IR compiler | IMPLEMENTED (bounded inspection profile); general runtime PARTIAL | The [inspection profile](cgsl-implementer-guide.md#supported-natural-language-inspection-profile) compiles original `Inspect artifact <id>` / `Inspect it` text through host-bound resolution/completeness to validated task IR. Formal CGSL compiles offline. General interpretation and the installed natural-language runtime path are not qualified. See [reference walkthroughs](cgsl-reference-examples.md). |
 | Optional SLM semantic interpreter | PARTIAL (proposal adapters implemented) | [Optional interpretation adapters](interpretation-adapters.md) validate classifier/embedding/SLM proposals and preserve deterministic fallback; model output is never authoritative. Full semantic host/runtime qualification remains separate. |
 | Local SLM/LxM runtime | IMPLEMENTED (reference service) | CG-27.01: separate CPU-first Ollama/Python containers, Rust port/adapter, immutable profiles, qualification, promotion and rollback. EPIC-05.11 proposal adapters exist; complete hosted interpretation remains separate integration work. |
@@ -130,8 +130,9 @@ Full-payload tokenizer accounting binds model/profile/tokenizer/template metadat
 preserves exact versus estimated provenance, reserves output and returns typed
 overflow without truncation. [Component qualification](model-invocation-contracts.md#deterministic-semantic-renderers--epic-0604-264)
 uses actual producer data with a synthetic tokenizer; production tokenizer/provider
-adapters and the #263 authenticated admission/dispatch host remain prerequisites
-for full issue integration.
+adapters remain prerequisites for hosted integration. The #263 application
+admission/dispatch boundary is implemented below; production hosts supply its
+authenticated current-store checks.
 
 ## EPIC-06.02 deterministic invocation routing (#262)
 
@@ -140,6 +141,14 @@ execution coordinator: strict capability/provider/health eligibility, exact
 fallback task/context/output/tools/authority/generation invariants, context and
 resource constraints, stable explanations and computed snapshot identity, and
 zero model dispatch for deterministic tasks. Tests compile real CG-10 steps with
-a fake host runtime. Installed inference transports and full invocation handoff
-admission remain separate #269/#263 work. See
+a fake host runtime. Installed inference transports remain #269 work; the #263
+admission boundary below binds the full invocation handoff. See
 [operator guide and traceability](model-capability-routing.md).
+
+## EPIC-06.03 prompt and invocation IR (#263)
+
+The [#263 Prompt/Invocation IR application boundary](prompt-invocation-ir.md) is
+implemented over the actual CG-10 producer and #261/#264 services. It requires
+authenticated current-host checks on admission, rendering and transport. Evidence
+is component/synthetic-host integration; installed-host and live-provider
+composition remain #269/#279.

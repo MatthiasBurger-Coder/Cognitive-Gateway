@@ -39,7 +39,8 @@ Host integration sequence:
 4. Call `prepare_model_invocation` with immutable capability/provider declarations
    and an authenticated current health observation. Semantic eligibility is checked
    before availability. No routing or fallback occurs.
-5. Future #263/#264 hosts render the full semantic handoff, recheck current authority
+5. The [#263 IR admission service](prompt-invocation-ir.md) and #264 rendering
+   service bind the full semantic handoff and recheck current authority
    and tokenizer-aware budgets, then call an outer adapter through the port. The
    adapter must apply every effective control or return a typed mismatch. Transport
    success produces a `ModelProposal`, never a verified result or tool dispatch.
@@ -133,8 +134,9 @@ Run the measured per-file gate using the EPIC-06.01 entry in
 `scripts/quality-gates.json`. See
 [evidence](evidence/EPIC-06.01-model-contracts.json) for executed checks and source
 bindings. [Production routing (#262)](model-capability-routing.md) is implemented
-as a separate application service. Prompt/Invocation IR (#263),
-output verification (#265–267), cumulative resilience
+as a separate application service. [Prompt/Invocation IR (#263)](prompt-invocation-ir.md)
+now supplies the application admission boundary. Output verification (#265–267),
+cumulative resilience
 (#268), real adapters (#269) and full-plane qualification (#270) remain separate.
 The #264 rendering/accounting boundary is implemented below.
 

@@ -274,3 +274,15 @@ invocation. CG-26 retains failed-attempt reservations and reevaluates fallback
 against the remaining cumulative bounds. Telemetry binds decisions to the
 computed snapshot digest and records effective controls and health provenance.
 See [routing traceability](../model-capability-routing.md).
+
+## Invocation admission, rendering and dispatch (#263)
+
+After CG-10 handoff and #261 negotiation, `admit_invocation_ir` binds task, context,
+output, verification and exact tools. Existing semantic reference validation and
+the trusted host authenticate the complete record. `render_invocation_ir` rechecks
+current admission before #264 rendering; `dispatch_invocation_ir` checks exact IR
+correlation and current admission immediately before the outer transport. Revocation
+after rendering blocks dispatch. Routing hosts use this sequence inside each model
+attempt after CG-26 prepare, including fallback; deterministic routes stay model-free.
+Transport returns unverified proposals. See [host requirements](../prompt-invocation-ir.md);
+installed/live composition remains #269/#279.
