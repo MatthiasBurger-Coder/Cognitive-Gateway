@@ -9,7 +9,9 @@ ROOT = Path(__file__).resolve().parents[2]
 
 class OutputVerificationArchitecture(unittest.TestCase):
     def test_verification_has_no_effect_or_provider_dependency(self):
-        for path in ("crates/gateway-domain/src/output_parsing.rs",
+        for path in ("crates/gateway-domain/src/grounding.rs",
+                     "crates/gateway-application/src/grounding.rs",
+                     "crates/gateway-domain/src/output_parsing.rs",
                      "crates/gateway-application/src/output_parsing.rs",
                      "crates/gateway-domain/src/output_verification.rs",
                      "crates/gateway-application/src/output_verification.rs"):
@@ -39,6 +41,18 @@ class OutputVerificationArchitecture(unittest.TestCase):
             self.assertIn(required, configured["command"])
         spec = importlib.util.spec_from_file_location(
             "parsing_coverage", ROOT / "scripts/check-output-parsing-coverage.py")
+        gate = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(gate)
+        gate.self_test()
+
+    def test_grounding_ci_requires_measured_coverage(self):
+        configured = next(g for g in json.loads((ROOT / "scripts/quality-gates.json").read_text())
+                          if g["name"].startswith("EPIC-06.07"))
+        for required in ("cargo llvm-cov", "--test output_verification", "--locked",
+                         "--self-test", "check-grounding-coverage.py"):
+            self.assertIn(required, configured["command"])
+        spec = importlib.util.spec_from_file_location(
+            "grounding_coverage", ROOT / "scripts/check-grounding-coverage.py")
         gate = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(gate)
         gate.self_test()

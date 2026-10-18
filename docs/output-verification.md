@@ -63,10 +63,11 @@ Required task checks use the pinned rule/verifier definitions already admitted
 by CG-10. `assess_result` computes schema validity locally and rejects missing,
 extra, failed or indeterminate semantic reports. In particular the host must
 scan every mandatory reference, not merely trust the model's reference list.
-Evidence/claim checks, where requested, require real reports from the evidence
-owner; #267 owns concrete grounding/provenance integration. An absent grounding
-implementation must return indeterminate/unavailable. This service does not
-interpret raw model text as evidence or implement retrieval.
+Evidence/claim checks require the [#267 grounding integration](evidence-grounding-verification.md)
+in addition to semantic reports. The host exposes `GroundingEvidencePort` through
+`grounding`; evidence-required tasks fail closed without it. The core validates
+current support, provenance, scope, freshness, trust, sensitivity and independent
+effect observations. It does not interpret raw model text as evidence or implement retrieval.
 
 ## Results and operations
 

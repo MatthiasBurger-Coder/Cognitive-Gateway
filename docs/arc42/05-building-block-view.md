@@ -378,3 +378,7 @@ checks the exact admitted schema/inventory, and owns provisional stream buffers
 and bounded repair sessions. The domain owns completion/repair audit contracts;
 the mandatory budget port delegates aggregate accounting to the trusted host.
 See [operator and contract guide](../structured-output-parsing.md).
+
+### Evidence and grounding verification
+
+`gateway-domain::grounding` owns version 1 trusted claim/snapshot contracts and stable diagnostics. `gateway-application::grounding` reuses EPIC-02 provenance, CG-06 evidence and existing quality types. `OutputVerificationPort` exposes the required `GroundingEvidencePort` for evidence/claim rules; store authentication and independent observation remain adapter responsibilities. See [integration and operator guidance](../evidence-grounding-verification.md).

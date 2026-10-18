@@ -120,6 +120,11 @@ pub struct ConstraintReport {
     pub checks: BTreeMap<SemanticVerificationCheck, CheckOutcome>,
 }
 pub trait OutputVerificationPort: InvocationAdmissionPort {
+    /// Required for evidence/claim checks. Absence fails closed; other tasks
+    /// retain their existing contract. Hosts may opt in for any task.
+    fn grounding(&self) -> Option<&dyn crate::grounding::GroundingEvidencePort> {
+        None
+    }
     /// Resolve exact entity pins from current trusted stores, never model labels.
     fn resolve_reference(
         &self,
@@ -186,6 +191,23 @@ fn check(
     let verification: VerificationContract =
         serde_json::from_value(handoff["verification"].clone())
             .map_err(|_| E::VerificationUnavailable)?;
+    let grounding_required = verification.rules.iter().any(|rule| {
+        matches!(
+            rule.check,
+            SemanticVerificationCheck::EvidenceRequired
+                | SemanticVerificationCheck::AllClaimsSupported
+        )
+    });
+    if grounding_required || host.grounding().is_some() {
+        let evidence = host.grounding().ok_or(E::VerificationUnavailable)?;
+        crate::grounding::verify_grounding(ir, output, evidence).map_err(|error| match error {
+            gateway_domain::grounding::GroundingError::Unavailable => E::VerificationUnavailable,
+            gateway_domain::grounding::GroundingError::CorrelationMismatch => {
+                E::CorrelationMismatch
+            }
+            error => E::GroundingFailed(error),
+        })?;
+    }
     let validity = assess_result(
         ir.prompt().handoff().task(),
         contract,

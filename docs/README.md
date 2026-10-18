@@ -295,3 +295,5 @@ Run `python3 scripts/quality-gate.py` for the complete CG-13 gate. See [the rele
 - [Schema, reference and constraint verification](output-verification.md) — #266 typed, correlated verification and trusted-host integration.
 
 - [Structured output parsing and tool proposals](structured-output-parsing.md) — #265.
+
+- [Evidence and grounding verification](evidence-grounding-verification.md) — #267 source pins, CG-06 support and observed effects.

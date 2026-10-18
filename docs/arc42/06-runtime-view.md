@@ -308,3 +308,7 @@ rejects. The unchanged admitted IR flows into #266 verification. Repairable
 failures may create bounded diagnostic proposals after mandatory aggregate host
 budget reservation. Repair dispatch remains host-owned and repaired bytes repeat
 all parsing and verification. No fragment, proposal or replay dispatches a tool.
+
+### Evidence grounding in output acceptance
+
+After parsing and current admission, output verification requires grounding whenever evidence or all-claims support is mandatory. The trusted host projects all assertions and resolves current scoped records; deterministic checks reject invalid citations, stale/contradictory support, excessive sensitivity and unobserved external-effect claims. Current admission is checked again before acceptance. Verification dispatches no actions. See [grounding](../evidence-grounding-verification.md).
