@@ -194,5 +194,9 @@
   {
     "name": "EPIC-06.02 deterministic invocation routing coverage",
     "command": "CARGO_LLVM_COV_TARGET_DIR=target/model-routing-coverage cargo llvm-cov -p gateway-domain -p gateway-application --test model_routing --test cognitive_routing --test context_application --test model_invocation --locked --json --output-path \"$EVIDENCE_DIR/model-routing-coverage.json\"\npython3 scripts/check-model-routing-coverage.py --self-test\npython3 scripts/check-model-routing-coverage.py \"$EVIDENCE_DIR/model-routing-coverage.json\""
+  },
+  {
+    "name": "EPIC-06.03 prompt and invocation IR coverage",
+    "command": "CARGO_LLVM_COV_TARGET_DIR=target/prompt-ir-coverage cargo llvm-cov -p gateway-domain -p gateway-application --test prompt_ir --locked --json --output-path \"$EVIDENCE_DIR/prompt-ir-coverage.json\"\npython3 scripts/check-prompt-ir-coverage.py --self-test\npython3 scripts/check-prompt-ir-coverage.py \"$EVIDENCE_DIR/prompt-ir-coverage.json\""
   }
 ]

@@ -289,3 +289,5 @@ Run `python3 scripts/quality-gate.py` for the complete CG-13 gate. See [the rele
 - [Model invocation contracts](model-invocation-contracts.md) — #261 immutable capabilities, providers, generation profiles, invocation bindings and strict parameter negotiation.
 
 - [Deterministic model capability routing](model-capability-routing.md) — EPIC-06.02 eligibility, CG-26 integration, diagnostics and evidence.
+
+- [Provider-independent prompt and invocation IR](prompt-invocation-ir.md) — #263 admission, correlation and current-host integration.

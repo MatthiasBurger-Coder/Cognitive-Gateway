@@ -74,3 +74,5 @@ pub mod model_invocation;
 pub mod prompt_rendering;
 
 pub mod model_routing;
+
+pub mod prompt_ir;

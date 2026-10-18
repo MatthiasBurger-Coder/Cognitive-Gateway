@@ -1,0 +1,108 @@
+{
+  "issue": 263,
+  "epic": "EPIC-06.03",
+  "date": "2026-10-18",
+  "status": "VERIFIED",
+  "mode": "DEVELOPMENT",
+  "scope": "Provider-independent typed Prompt/Invocation IR over actual immutable CG-10 producers; current-host admission, correlated rendering and proposal transport boundaries. Component and synthetic-host integration evidence.",
+  "source_binding": {
+    "base_commit": "201d54a9c7eccb66e16860898f681dbb1859e654",
+    "candidate": "Local worktree changes over base; no commit, remote publication or issue closure performed",
+    "files_sha256": {
+      "crates/gateway-application/src/lib.rs": "79a8fde0c69c1e5da1f17d5b5d862265724e725fb35cfe44ff18fedeb05dea52",
+      "crates/gateway-application/src/prompt_ir.rs": "4214bb26b2c81b415c68c73db0fc1bfeec6010fe48947171a36ef5069fdd3bee",
+      "crates/gateway-application/tests/prompt_ir.rs": "5e130e5fd83b059b955cafa71ebf3ec6c4cf4fd21ec93584f9d7fd6af433433c",
+      "crates/gateway-domain/src/lib.rs": "8511d258ffb117f56c8f653a2ca401fba0722624b57eecc0f7c099dabfda2e9e",
+      "crates/gateway-domain/src/prompt_ir.rs": "5fea9e49949a7e2ba6f3eff53feec50eb0ca9cb84302401b74158e1561b4799d",
+      "docs/README.md": "27f2829f3189a8d861f77719f296df77aec3823edc52ac741b6efd8b185ffec1",
+      "docs/arc42/05-building-block-view.md": "487769b23cb5908daa03333d9c35c2e3525e52397f0b95f3a7528789594cc1ae",
+      "docs/arc42/06-runtime-view.md": "12e8ab299e50115e09ea72e0c650ea15d8a4e94c27618dc1cb35ece50d2f7b19",
+      "docs/current-architecture-state.md": "0e54b63356624f72c9281c3a3b6ed523f551dd08cbafec8fe66142ccc442ce60",
+      "docs/model-invocation-contracts.md": "9eeeedd3129dfbe4fad94e8907dff1b9b0e97ba6043910bf1abeef2086fa1f45",
+      "docs/prompt-invocation-ir.md": "1bf664a8d9fee90be25c22660ae5d52910d80f8b864b62561c428639e150e6b2",
+      "scripts/check-prompt-ir-coverage.py": "e94fa588d54e18fb418b8b5fefec0ffe73886224033bf431c47369a437b99f9b",
+      "scripts/quality-gates.json": "7b72198266617446a43537b5dd8e28d5930c9ea64fa1749400c86753bdf55e49",
+      "tests/architecture/test_prompt_ir.py": "220129bb862f26d9126c31a7af1aa835ee5ab750df7b0b94db13f8ff172a0365",
+      "tests/fixtures/prompt-ir-v1/README.md": "a20a4ae5f3ba367d8d62cfa823c5e8e676edc76ea9ab55027a5f3e09f5ba16c8",
+      "tests/fixtures/prompt-ir-v1/denials.json": "d6979904de4918badaec17bfd89f483898e4a57beaa9329795af5f0d34813c9d"
+    }
+  },
+  "review": {
+    "method": "Requirement, architecture, automation and evidence role passes by the implementing agent; no independent approval claimed",
+    "traceability": "I01-I06 in docs/prompt-invocation-ir.md"
+  },
+  "criteria": {
+    "I01": "VERIFIED",
+    "I02": "VERIFIED",
+    "I03": "VERIFIED",
+    "I04": "VERIFIED",
+    "I05": "VERIFIED",
+    "I06": "VERIFIED"
+  },
+  "checks": [
+    {
+      "command": "CARGO_BUILD_JOBS=1 TMPDIR=/home/micro/.cache/cg263-evidence CARGO_LLVM_COV_TARGET_DIR=/home/micro/.cache/cg263-coverage cargo llvm-cov -p gateway-domain -p gateway-application --test prompt_ir --locked --json --output-path /home/micro/.cache/cg263-evidence/coverage.json",
+      "status": "PASS",
+      "passed": 6,
+      "coverage": {
+        "crates/gateway-application/src/prompt_ir.rs": {
+          "count": 131,
+          "covered": 131,
+          "percent": 100.0
+        },
+        "crates/gateway-domain/src/prompt_ir.rs": {
+          "count": 18,
+          "covered": 18,
+          "percent": 100.0
+        }
+      },
+      "report_sha256": "c79df8e6b6456d0210254d02ce9ab2298922fd5412993b4b297d3ae6c25404dc",
+      "log_sha256": "3800236fca6a914e032e71c8c8ee38f5bb6876a08b8a33fe7bbdca41445f17e4"
+    },
+    {
+      "command": "python3 scripts/check-prompt-ir-coverage.py --self-test; python3 scripts/check-prompt-ir-coverage.py /home/micro/.cache/cg263-evidence/coverage.json",
+      "status": "PASS",
+      "log_sha256": "4e33417abe5b6bd1c018b02d9f0286f7d58ef057dc630b34ef814f694e0157b2"
+    },
+    {
+      "command": "TMPDIR=/home/micro/.cache/cg263-evidence CARGO_BUILD_JOBS=1 cargo test -p gateway-domain --test model_invocation -p gateway-context --test v2_handoff --test prompt_handoff_reference -p gateway-application --test prompt_ir --test model_invocation --test model_routing --test cognitive_routing --test context_application -p gateway-daemon --test prompt_rendering --locked",
+      "status": "PASS",
+      "passed": 105,
+      "failed": 0,
+      "ignored": 0,
+      "log_sha256": "b1c2b79d9a4413cefcb004d5300f1a8815e164a204ecdb57334f01bb90aa0a55"
+    },
+    {
+      "command": "python3 -m unittest discover -s tests/architecture -p 'test_*.py'",
+      "status": "PASS",
+      "run": 54,
+      "skipped": 1,
+      "skip_reason": "Existing native WinDLL test requires Windows",
+      "log_sha256": "70fbb9cca4d0267fbdecad8b49e999865c9c38c64539b3fe6ef1f23d1932d65f"
+    },
+    {
+      "command": "bash scripts/check-architecture.sh",
+      "status": "PASS",
+      "log_sha256": "93ac95f0b1f64cf17bf0bdb338976158dd160d72faf3c5c843ad5bfffaec2503"
+    },
+    {
+      "command": "TMPDIR=/home/micro/.cache/cg263-evidence CARGO_BUILD_JOBS=1 cargo clippy --workspace --all-targets --locked -- -D warnings",
+      "status": "PASS",
+      "log_sha256": "e3ee3a705a320f700802853995faf06bfc1009d95da5505335e363026afad015"
+    },
+    {
+      "command": "cargo fmt --all -- --check",
+      "status": "PASS"
+    },
+    {
+      "command": "git diff --check",
+      "status": "PASS"
+    }
+  ],
+  "limitations": [
+    "Current-store and Process/Policy authentication is an explicit trusted-host port with no permissive production default; tests use synthetic stores and revocation.",
+    "No installed-host, live provider, production tokenizer or probabilistic prompt-injection-resistance qualification is claimed. #269/#279 own live compositions.",
+    "CG-26 routing prepare remains the host integration point before every attempt/fallback; hosts use the new admission/render/dispatch APIs in model attempts. Existing pure preparation/rendering APIs do not establish dispatch admission.",
+    "Model responses remain unverified proposals. #265-267 own output/grounding verification; #268 owns aggregate resilience; the parent invocation plane is not declared complete."
+  ]
+}

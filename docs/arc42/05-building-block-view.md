@@ -351,3 +351,12 @@ admitted invocations, canonical capability/provider declarations and independent
 health observations. `InvocationRouteRuntime` keeps CG-10/Process/Policy admission
 and adapter dispatch with the host. There is one CG-26 ranking/execution owner.
 See [routing contracts and operator integration](../model-capability-routing.md).
+
+## Provider-independent invocation IR (#263)
+
+`gateway-domain::prompt_ir` owns producer pins, identity and diagnostics.
+`gateway-application::prompt_ir` owns immutable `PromptIr`/`InvocationIr`, current
+semantic reference/admission checks, correlated rendering and proposal transport
+ports. It reuses the typed CG-10 producer; no domain dependency on context, provider
+SDK or second planner/router is introduced. Trusted stores/current Process/Policy
+remain host responsibilities. See [contract and evidence](../prompt-invocation-ir.md).
