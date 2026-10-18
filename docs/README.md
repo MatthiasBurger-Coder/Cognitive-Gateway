@@ -297,3 +297,5 @@ Run `python3 scripts/quality-gate.py` for the complete CG-13 gate. See [the rele
 - [Structured output parsing and tool proposals](structured-output-parsing.md) — #265.
 
 - [Evidence and grounding verification](evidence-grounding-verification.md) — #267 source pins, CG-06 support and observed effects.
+
+- [Bounded invocation retry, cancellation and degradation](invocation-resilience.md) — shared run budgets, fallback admission and usage reconciliation (#268).

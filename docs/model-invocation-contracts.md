@@ -135,9 +135,10 @@ Run the measured per-file gate using the EPIC-06.01 entry in
 [evidence](evidence/EPIC-06.01-model-contracts.json) for executed checks and source
 bindings. [Production routing (#262)](model-capability-routing.md) is implemented
 as a separate application service. [Prompt/Invocation IR (#263)](prompt-invocation-ir.md)
-now supplies the application admission boundary. Output verification (#265–267),
-cumulative resilience
-(#268), real adapters (#269) and full-plane qualification (#270) remain separate.
+now supplies the application admission boundary.
+[Cumulative resilience (#268)](invocation-resilience.md) supplies a shared
+application run ledger. Real adapters (#269) and full-plane qualification (#270)
+remain separate.
 The #264 rendering/accounting boundary is implemented below.
 
 ## Deterministic semantic renderers — EPIC-06.04 (#264)

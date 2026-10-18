@@ -1,0 +1,131 @@
+{
+  "schema_version": "1.0",
+  "issue": 268,
+  "epic": "EPIC-06.08",
+  "date": "2026-10-18",
+  "status": "VERIFIED",
+  "mode": "DEVELOPMENT",
+  "scope": "Versioned domain contracts and application run service for bounded retry/repair/fallback, cancellation/deadlines, token/output/cost/attempt accounting and correlated usage reconciliation. Synthetic-host component integration.",
+  "source_binding": {
+    "base_commit": "6eff7a5d2b00be0c1b3fdcb8e3f089c36be9cbc4",
+    "candidate": "Local worktree changes over base; no commit, publication or issue closure performed",
+    "files_sha256": {
+      "crates/gateway-application/src/invocation_resilience.rs": "f1877c084f79b37fbc4f782223f90688f21608d90b2b02ac5dc552771c74c43d",
+      "crates/gateway-application/src/lib.rs": "0ab8db8d77b2cddc30bcd43272d7b4decc24313080ec42de7b5a8d35e6565d89",
+      "crates/gateway-application/tests/invocation_resilience.rs": "2f66d9a9c83cc407fe9651aba7fe4925a5a43aa1fdca96adcdb81d99657397c8",
+      "crates/gateway-domain/src/invocation_resilience.rs": "8c4a0c3e4fe5ea69dbdc1a4c7dc08039f459993bbb3254ccca225052e7517ea8",
+      "crates/gateway-domain/src/lib.rs": "341c50e8fee1979ac82b14f062cc08cd64a3a61b0a53d3d70a35b30dbc4d0e0a",
+      "docs/README.md": "4ffee66db4097174144661467a6fe3788ecbabbc9760ac5b41de89d1dcb9fb09",
+      "docs/arc42/05-building-block-view.md": "5b24b7a1870cf7101f5020fc4d2ab75c40d5002c975151ab8942970be9674865",
+      "docs/arc42/06-runtime-view.md": "7fe035ad4e5967dfc77aa9f687f036b1ad9c60d7843e6e18d98fbfab1bb8e7c4",
+      "docs/current-architecture-state.md": "1af16847881d13889ea6db9d5d2a4c4a5e35d2e5e67d6137d647178de5112a2f",
+      "docs/invocation-resilience.md": "32ca9bf2822c6843389bdaa23f69cf0ab475c5e25a585e149b6d189103f3e157",
+      "docs/model-invocation-contracts.md": "64dec4f4540359c9612fd3a91b1db1d57d1d7fac5502f1085b7939050651f2c5",
+      "scripts/check-invocation-resilience-coverage.py": "044e54926a3f62b98866eddb96f8914377d89b342621e64075f3be472563c365",
+      "scripts/quality-gates.json": "c5363b98c4f47818f250cb56fc476698fe705bb1fbcef2bbc631f5985a729f59",
+      "tests/architecture/test_invocation_resilience.py": "9a1b9ece1b88396848697dd0820111d35b72fc66d023024b188817a08b12d0a4",
+      "tests/fixtures/invocation-resilience-v1/README.md": "3ad8af747a266b24bb313347ea0736f74def0299fcd1763ced8b2726384b95ea",
+      "tests/fixtures/invocation-resilience-v1/diagnostics.json": "a004fb35cb376c88c1cca33f172b0b88977e517a167b88bb26bb4fb4d8e0df0d"
+    }
+  },
+  "review": {
+    "method": "Requirement, architecture, automation and tester role passes by implementing agent; no independent reviewer or approval claimed",
+    "readiness": "READY_FOR_WORKFLOW",
+    "traceability": "B01-B07 in docs/invocation-resilience.md"
+  },
+  "criteria": {
+    "B01": "VERIFIED",
+    "B02": "VERIFIED",
+    "B03": "VERIFIED",
+    "B04": "VERIFIED",
+    "B05": "VERIFIED",
+    "B06": "VERIFIED",
+    "B07": "VERIFIED"
+  },
+  "checks": [
+    {
+      "command": "CARGO_BUILD_JOBS=2 TMPDIR=/home/micro/.cache/cg268-evidence CARGO_LLVM_COV_TARGET_DIR=/home/micro/.cache/cg263-coverage cargo llvm-cov -p gateway-domain -p gateway-application --test invocation_resilience --locked --json --output-path /home/micro/.cache/cg268-evidence/coverage.json",
+      "status": "PASS",
+      "log_sha256": "ad2169914cf04762e0c4de2b4fe95b0f73df5714b89e166d55944cba906b933b",
+      "passed": 13,
+      "failed": 0,
+      "ignored": 0,
+      "coverage": {
+        "crates/gateway-application/src/invocation_resilience.rs": {
+          "count": 228,
+          "covered": 226,
+          "percent": 99.12280701754385
+        },
+        "crates/gateway-domain/src/invocation_resilience.rs": {
+          "count": 15,
+          "covered": 15,
+          "percent": 100.0
+        }
+      }
+    },
+    {
+      "command": "python3 scripts/check-invocation-resilience-coverage.py --self-test && python3 scripts/check-invocation-resilience-coverage.py /home/micro/.cache/cg268-evidence/coverage.json",
+      "status": "PASS",
+      "log_sha256": "f6e2ed5ffb4259004363daf4e5e37160d241a94d6c72864f0cf7886632160dd3"
+    },
+    {
+      "command": "python3 -m unittest discover -s tests/architecture -p 'test_*.py'",
+      "status": "PASS",
+      "log_sha256": "0c19bd19b9a7c37017c8f5792d71f125244e31aaad65ee81392aacc01ee2bbd6",
+      "run": 61,
+      "skipped": 1,
+      "skip_reason": "Existing Windows native WinDLL test requires Windows"
+    },
+    {
+      "command": "bash scripts/check-architecture.sh",
+      "status": "PASS",
+      "log_sha256": "93ac95f0b1f64cf17bf0bdb338976158dd160d72faf3c5c843ad5bfffaec2503"
+    },
+    {
+      "command": "python3 -m unittest discover -s tests/contracts -p 'test_*.py'",
+      "status": "PASS",
+      "log_sha256": "499a084b8c6ffc8301909d4c3d7d894caaabae269f286803135cf06819de250e"
+    },
+    {
+      "command": "CARGO_BUILD_JOBS=2 cargo test --workspace --locked",
+      "status": "PASS",
+      "log_sha256": "f87c22bee2139c5a44e45d8be3993114b2aaae86a89aa4a08130c7aa67d33fe0",
+      "passed": 1001,
+      "failed": 0,
+      "ignored": 3
+    },
+    {
+      "command": "CARGO_BUILD_JOBS=2 cargo clippy --workspace --all-targets --locked -- -D warnings",
+      "status": "PASS",
+      "log_sha256": "bd04aff8e1c7e8b5b3126618cde3d8f0384289bf8a7910b94f91bba98a7fd010"
+    },
+    {
+      "command": "cargo fmt --all -- --check",
+      "status": "PASS",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "git diff --check",
+      "status": "PASS",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "artifacts": {
+    "coverage": {
+      "path": "docs/evidence/EPIC-06.08-invocation-resilience-coverage.json.gz",
+      "uncompressed_sha256": "a1464d889ef7eef027257d856bea46bd069386d57cf86fcfb7e4299c579e01fe",
+      "compressed_sha256": "12f2ce0407a35a2dbda2b263bb95df848921316c32a06a070e2d4ef61d4ebc2c"
+    },
+    "validation": {
+      "path": "docs/evidence/EPIC-06.08-invocation-resilience-validation.log.gz",
+      "uncompressed_sha256": "563779df623b90ee987132c96487b4af4e821816e513640697c9358584237ca4",
+      "compressed_sha256": "f351d481f4f24e8f8d5c7dbe97fae2174319c33bcae1f1a990939f1d92eafed6"
+    }
+  },
+  "limitations": [
+    "Qualified at admitted application-boundary/component level. No live provider pricing, tokenizer or SDK interruption is claimed; adapters must honor the shared cancellation/deadline and output ceiling.",
+    "The trusted CG-14 host must retain one non-cloneable run across every retry/repair/fallback. Durable host ownership and installed composition remain #271/#279; live adapters and full-plane qualification remain #269/#270.",
+    "Frozen-context repair retries regenerate the same admitted schema-bound payload. Richer repair prompts require fresh admission and are outside this interface.",
+    "Parsed outputs and repair proposals grant no tool/effect authority. Current reference/constraint/evidence verification remains mandatory. No parent epic acceptance is claimed."
+  ]
+}

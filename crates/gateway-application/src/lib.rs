@@ -18,6 +18,7 @@ pub mod grounding;
 pub mod inspection_language;
 pub mod interpretation;
 pub mod interpretation_adapters;
+pub mod invocation_resilience;
 pub mod memory;
 pub mod model_releases;
 pub mod offline_learning;

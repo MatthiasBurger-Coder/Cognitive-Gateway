@@ -20,6 +20,7 @@ pub mod grounding;
 pub mod identifiers;
 pub mod intent;
 pub mod interpretation;
+pub mod invocation_resilience;
 pub mod knowledge_graph;
 pub mod learning;
 pub mod memory;
