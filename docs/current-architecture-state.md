@@ -161,3 +161,11 @@ arguments and requires current host constraint/rule reports. Critics remain advi
 Accepted/rejected records bind exact response bytes and full invocation/task identity.
 Current-store, Process/Policy and semantic verifier integrations are mandatory ports;
 qualification uses synthetic hosts. No live provider or tool dispatch is added.
+
+## EPIC-06.05 structured output parsing (#265)
+
+[Parsing contracts](structured-output-parsing.md) now bind complete bounded JSON
+and typed tool proposals to the admitted schema/inventory. Provisional streams
+and bounded repair proposals are implemented with a mandatory aggregate-budget
+port. Qualification is component/synthetic-host; concrete session accounting,
+provider adapters and installed composition remain #268/#269/#279.

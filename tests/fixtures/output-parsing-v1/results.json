@@ -1,0 +1,8 @@
+[
+  {"raw":"\"entity\"", "error":null},
+  {"raw":"null", "error":"OUTPUT_SCHEMA_INVALID"},
+  {"raw":"{\"unknown\":true}", "error":"OUTPUT_SCHEMA_INVALID"},
+  {"raw":"{\"a\":1,\"\\u0061\":2}", "error":"OUTPUT_PARSE_FAILED"},
+  {"raw":"\"unterminated", "error":"OUTPUT_PARSE_FAILED"},
+  {"raw":"NaN", "error":"OUTPUT_PARSE_FAILED"}
+]

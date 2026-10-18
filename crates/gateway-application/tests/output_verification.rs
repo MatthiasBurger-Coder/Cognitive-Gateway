@@ -186,7 +186,11 @@ fn accepted_output_is_exactly_correlated_and_critics_are_advisory() {
     let mut value = wire(&ir);
     value["references"] = json!([{"pointer":"", "binding":pin("entity")}]);
     value["tools"] = json!([{"capability":ir.prompt().tools().values().next().unwrap().binding,"arguments":"inspect"}]);
-    let output = parse(&value);
+    let output = gateway_application::output_parsing::parse_invocation_output(
+        &ir,
+        &serde_json::to_vec(&value).unwrap(),
+    )
+    .unwrap();
     let binding = output.binding();
     assert_eq!(
         binding.output_digest,
@@ -461,4 +465,257 @@ fn diagnostics_and_wire_contracts_are_stable() {
         serde_json::from_value::<Vec<VerificationError>>(expected).unwrap(),
         errors
     );
+}
+
+#[test]
+fn invocation_parser_uses_complete_schema_inventory_and_fixture_results() {
+    use gateway_application::output_parsing::*;
+    let (ir, _) = fixture();
+    let cases: Value = serde_json::from_str(include_str!(
+        "../../../tests/fixtures/output-parsing-v1/results.json"
+    ))
+    .unwrap();
+    let template = serde_json::to_string(&wire(&ir)).unwrap();
+    for case in cases.as_array().unwrap() {
+        let raw = template.replace("\"entity\"", case["raw"].as_str().unwrap());
+        let result = parse_invocation_output(&ir, raw.as_bytes());
+        match case["error"].as_str() {
+            None => assert_eq!(result.unwrap().data().result, "entity"),
+            Some(error) => assert_eq!(json!(result.unwrap_err()), error),
+        }
+    }
+    let mut value = wire(&ir);
+    let tool = json!({"capability":ir.prompt().tools().values().next().unwrap().binding,"arguments":"inspect"});
+    value["tools"] = json!([tool]);
+    parse_invocation_output(&ir, &serde_json::to_vec(&value).unwrap()).unwrap();
+    for field in ["id", "revision", "scope", "digest"] {
+        let mut value = value.clone();
+        value["tools"][0]["capability"][field] = if field == "digest" {
+            json!(context_content_digest(b"changed"))
+        } else {
+            json!("changed")
+        };
+        assert_eq!(
+            parse_invocation_output(&ir, &serde_json::to_vec(&value).unwrap()).unwrap_err(),
+            VerificationError::InvalidToolProposal
+        );
+    }
+    value["tools"][0]["arguments"] = json!({"command":"touch /tmp/never"});
+    assert_eq!(
+        parse_invocation_output(&ir, &serde_json::to_vec(&value).unwrap()).unwrap_err(),
+        VerificationError::InvalidToolProposal
+    );
+}
+
+#[test]
+fn streams_require_completion_and_overflow_is_terminal() {
+    use gateway_application::output_parsing::*;
+    use gateway_domain::output_parsing::*;
+    let (ir, _) = fixture();
+    let mut value = wire(&ir);
+    value["result"] = json!("é");
+    let raw = serde_json::to_vec(&value).unwrap();
+    // Single-byte chunks deliberately split the UTF-8 character.
+    let mut stream = OutputStream::new(&ir);
+    for byte in &raw {
+        stream.push(&[*byte]).unwrap();
+    }
+    assert_eq!(
+        stream
+            .finish(OutputCompletion::Complete)
+            .unwrap()
+            .data()
+            .result,
+        "é"
+    );
+    let mut stream = OutputStream::new(&ir);
+    stream.push(&raw).unwrap();
+    assert_eq!(
+        stream.finish(OutputCompletion::Interrupted).unwrap_err(),
+        VerificationError::OutputParseFailed
+    );
+    let mut stream = OutputStream::new(&ir);
+    stream.push(&raw[..raw.len() - 1]).unwrap();
+    assert_eq!(
+        stream.finish(OutputCompletion::Complete).unwrap_err(),
+        VerificationError::OutputParseFailed
+    );
+    let mut padded = raw;
+    padded.resize(MAX_OUTPUT_BYTES, b' ');
+    let mut stream = OutputStream::new(&ir);
+    stream.push(&padded).unwrap();
+    stream.finish(OutputCompletion::Complete).unwrap();
+    let mut stream = OutputStream::new(&ir);
+    stream.push(&padded).unwrap();
+    assert_eq!(
+        stream.push(b" "),
+        Err(VerificationError::OutputLimitExceeded)
+    );
+    assert_eq!(
+        stream.push(b""),
+        Err(VerificationError::OutputLimitExceeded)
+    );
+    assert_eq!(
+        stream.finish(OutputCompletion::Complete).unwrap_err(),
+        VerificationError::OutputLimitExceeded
+    );
+    assert_eq!(json!(OutputCompletion::Interrupted), "INTERRUPTED");
+    assert_eq!(
+        serde_json::from_value::<OutputCompletion>(json!("COMPLETE")).unwrap(),
+        OutputCompletion::Complete
+    );
+}
+
+#[test]
+fn repairs_are_correlated_bounded_and_require_aggregate_admission() {
+    use gateway_application::output_parsing::*;
+    use gateway_domain::output_parsing::*;
+    struct Budget {
+        remaining: u8,
+        calls: usize,
+        expected: gateway_domain::prompt_ir::InvocationIrIdentity,
+    }
+    impl OutputRepairBudgetPort for Budget {
+        fn reserve(
+            &mut self,
+            ir: &InvocationIr,
+            attempt: u8,
+            bytes: usize,
+        ) -> Result<(), RepairError> {
+            assert_eq!(ir.identity(), self.expected);
+            assert!((1..=3).contains(&attempt));
+            assert_eq!(bytes, 1024);
+            self.calls += 1;
+            if self.remaining == 0 {
+                return Err(RepairError::BudgetExhausted);
+            }
+            self.remaining -= 1;
+            Ok(())
+        }
+    }
+    let (ir, _) = fixture();
+    for (attempts, bytes) in [(0, 1024), (4, 1024), (1, 0), (1, MAX_OUTPUT_BYTES + 1)] {
+        assert!(matches!(
+            OutputRepairSession::new(&ir, attempts, bytes),
+            Err(RepairError::InvalidBudget)
+        ));
+    }
+    let mut budget = Budget {
+        remaining: 3,
+        calls: 0,
+        expected: ir.identity(),
+    };
+    let mut session = OutputRepairSession::new(&ir, 3, 1024).unwrap();
+    let mut schema = wire(&ir);
+    schema["result"] = json!(null);
+    let mut tool = wire(&ir);
+    tool["tools"] = json!([{"capability":support::examples::pin(CapabilityId::new("absent").unwrap()),"arguments":{}}]);
+    for (index, raw) in [
+        b"{".to_vec(),
+        serde_json::to_vec(&schema).unwrap(),
+        serde_json::to_vec(&tool).unwrap(),
+    ]
+    .iter()
+    .enumerate()
+    {
+        let proposal = session.propose(raw, &mut budget).unwrap();
+        assert_eq!(proposal.attempt, index as u8 + 1);
+        assert_eq!(proposal.failed_output.invocation, ir.identity());
+        assert_eq!(
+            proposal.failed_output.output_digest,
+            context_content_digest(raw)
+        );
+        assert_eq!(json!(proposal)["schema_version"], "1.0");
+        assert_eq!(proposal.max_output_bytes, 1024);
+    }
+    assert!(matches!(
+        session.propose(b"{", &mut budget),
+        Err(RepairError::BudgetExhausted)
+    ));
+    // Reconstructing a local controller cannot reset the host's aggregate budget.
+    let mut session = OutputRepairSession::new(&ir, 1, 1024).unwrap();
+    assert!(matches!(
+        session.propose(b"{", &mut budget),
+        Err(RepairError::BudgetExhausted)
+    ));
+    assert!(matches!(
+        session.propose(b"{", &mut budget),
+        Err(RepairError::BudgetExhausted)
+    ));
+    assert_eq!(budget.calls, 4);
+    let mut session = OutputRepairSession::new(&ir, 1, 1024).unwrap();
+    let mut wrong_identity = wire(&ir);
+    wrong_identity["invocation"]["invocation_id"] = json!("wrong");
+    let mut wrong_version = wire(&ir);
+    wrong_version["schema_version"] = json!("2.0");
+    for raw in [
+        serde_json::to_vec(&wire(&ir)).unwrap(),
+        serde_json::to_vec(&wrong_identity).unwrap(),
+        serde_json::to_vec(&wrong_version).unwrap(),
+        vec![b' '; MAX_OUTPUT_BYTES + 1],
+    ] {
+        assert!(matches!(
+            session.propose(&raw, &mut budget),
+            Err(RepairError::RepairNotPermitted)
+        ));
+    }
+    assert_eq!(budget.calls, 4);
+    for error in [
+        RepairError::InvalidBudget,
+        RepairError::BudgetExhausted,
+        RepairError::RepairNotPermitted,
+    ] {
+        assert_eq!(
+            serde_json::from_value::<RepairError>(json!(error)).unwrap(),
+            error
+        );
+    }
+}
+
+#[test]
+fn nested_typed_arguments_reject_unknown_null_and_coerced_fields() {
+    use gateway_application::output_parsing::parse_invocation_output;
+    let (original, _) = fixture();
+    let mut tools = original.prompt().tools().clone();
+    tools.values_mut().next().unwrap().input = OutputType::Object {
+        fields: BTreeMap::from([(
+            "target".into(),
+            OutputField {
+                required: true,
+                value_type: OutputType::Object {
+                    fields: BTreeMap::from([(
+                        "id".into(),
+                        OutputField {
+                            required: true,
+                            value_type: OutputType::String {},
+                        },
+                    )]),
+                },
+            },
+        )]),
+    };
+    let ir = admit_invocation_ir(
+        SchemaVersion::V1,
+        original.prompt().handoff().clone(),
+        original.prepared().clone(),
+        tools,
+        &Capture,
+    )
+    .unwrap();
+    let mut value = wire(&ir);
+    for arguments in [
+        json!({"target":{"id":"entity"}}),
+        json!({"target":{"id":"entity","shell":"echo injected"}}),
+        json!({"target":{"id":12}}),
+        json!({"target":null}),
+        json!({}),
+    ] {
+        value["tools"] = json!([{"capability":ir.prompt().tools().values().next().unwrap().binding,"arguments":arguments}]);
+        let parsed = parse_invocation_output(&ir, &serde_json::to_vec(&value).unwrap());
+        if arguments == json!({"target":{"id":"entity"}}) {
+            assert_eq!(parsed.unwrap().data().tools[0].arguments, arguments);
+        } else {
+            assert_eq!(parsed.unwrap_err(), VerificationError::InvalidToolProposal);
+        }
+    }
 }

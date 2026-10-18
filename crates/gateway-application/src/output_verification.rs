@@ -8,7 +8,7 @@ use serde::{
 use serde_json::Value;
 use std::collections::BTreeMap;
 
-pub const MAX_OUTPUT_BYTES: usize = 1_048_576;
+pub use gateway_domain::output_parsing::MAX_OUTPUT_BYTES;
 const MAX_DEPTH: usize = 64;
 
 /// Duplicate keys must be rejected before Value can silently overwrite them.
@@ -165,14 +165,7 @@ fn check(
     for reference in &d.references {
         host.resolve_reference(ir, reference)?;
     }
-    for tool in &d.tools {
-        let Some(definition) = ir.prompt().tools().get(&tool.capability.id) else {
-            return Err(E::InvalidToolProposal);
-        };
-        if definition.binding != tool.capability || !definition.input.accepts(&tool.arguments) {
-            return Err(E::InvalidToolProposal);
-        }
-    }
+    crate::output_parsing::validate_tools(ir, d)?;
     let report = host.evaluate(ir, output)?;
     if report.binding != output.binding() {
         return Err(E::CorrelationMismatch);

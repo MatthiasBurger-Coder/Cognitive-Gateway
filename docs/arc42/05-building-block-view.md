@@ -370,3 +370,11 @@ assessment and mandatory `OutputVerificationPort` checks. Its host extends
 `InvocationAdmissionPort` for current task/context/Process/Policy admission;
 reference resolution and rule execution stay with their existing owners. There
 is no provider or effect dependency. See [integration and evidence](../output-verification.md).
+
+### Structured output parsing — EPIC-06.05
+
+`gateway-application::output_parsing` reuses the #266 strict parser and proposals,
+checks the exact admitted schema/inventory, and owns provisional stream buffers
+and bounded repair sessions. The domain owns completion/repair audit contracts;
+the mandatory budget port delegates aggregate accounting to the trusted host.
+See [operator and contract guide](../structured-output-parsing.md).
