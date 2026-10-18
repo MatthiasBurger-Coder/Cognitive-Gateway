@@ -24,3 +24,19 @@ class ModelInvocationArchitecture(unittest.TestCase):
         self.assertIn("--test model_invocation", gate["command"])
         self.assertIn("check-model-invocation-coverage.py", gate["command"])
         self.assertIn("--self-test", gate["command"])
+
+
+class ModelRoutingArchitecture(unittest.TestCase):
+    def test_strict_routing_composes_existing_owner_and_no_provider_dependencies(self):
+        source = (ROOT / "crates/gateway-application/src/model_routing.rs").read_text()
+        for dependency in ("prepare_model_invocation", "route_with_rejections", "CompiledStep"):
+            self.assertIn(dependency, source)
+        for forbidden in ("reqwest::", "openai::", "anthropic::", "ollama::", "std::net"):
+            self.assertNotIn(forbidden, source)
+
+    def test_measured_routing_coverage_is_part_of_release_gate(self):
+        gates = json.loads((ROOT / "scripts/quality-gates.json").read_text())
+        gate = next(g for g in gates if g["name"].startswith("EPIC-06.02"))
+        for command in ("cargo llvm-cov", "--test model_routing", "--test cognitive_routing",
+                        "check-model-routing-coverage.py", "--self-test"):
+            self.assertIn(command, gate["command"])

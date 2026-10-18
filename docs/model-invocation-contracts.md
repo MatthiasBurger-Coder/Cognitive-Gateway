@@ -23,7 +23,8 @@ Reuse `ResolvedReference`, `SchemaVersion`, `ContentDigest`, `SemanticTaskIR`,
 `TaskClass`/`PrivacyBoundary`. No new dependency edge or semantic-task field is
 introduced. Existing `cognitive_routing::ModelIdentity`, `RouteCandidate` and
 `LocalInferencePort` retain their existing consumers. This slice introduces no
-second router or automatic bridge to those older paths; #262 owns integration.
+second router. [EPIC-06.02 routing](model-capability-routing.md) now composes
+these contracts with the existing CG-26 selection and bounded coordinator.
 
 Host integration sequence:
 
@@ -131,7 +132,8 @@ Run component tests with
 Run the measured per-file gate using the EPIC-06.01 entry in
 `scripts/quality-gates.json`. See
 [evidence](evidence/EPIC-06.01-model-contracts.json) for executed checks and source
-bindings. Production routing (#262), Prompt/Invocation IR (#263),
+bindings. [Production routing (#262)](model-capability-routing.md) is implemented
+as a separate application service. Prompt/Invocation IR (#263),
 output verification (#265–267), cumulative resilience
 (#268), real adapters (#269) and full-plane qualification (#270) remain separate.
 The #264 rendering/accounting boundary is implemented below.

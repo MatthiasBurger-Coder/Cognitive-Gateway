@@ -118,8 +118,9 @@ The candidate adds versioned immutable model capability/provider/invocation and
 generation-profile contracts, strict numeric/control validation, effective-default
 provenance and an application preparation/adapter port. Runtime availability is
 separate from eligibility. [Component evidence](model-invocation-contracts.md) does
-not establish a shipped invocation path; routing, full CG-10 admission,
-real adapters and result verification remain the later EPIC-06 slices.
+not establish a shipped invocation path. Routing integration is implemented in
+#262 below; full CG-10 admission, real adapters and result verification remain
+separate EPIC-06 slices.
 
 ## EPIC-06.04 rendering boundary (#264)
 
@@ -131,3 +132,14 @@ overflow without truncation. [Component qualification](model-invocation-contract
 uses actual producer data with a synthetic tokenizer; production tokenizer/provider
 adapters and the #263 authenticated admission/dispatch host remain prerequisites
 for full issue integration.
+
+## EPIC-06.02 deterministic invocation routing (#262)
+
+Implemented as an application service over the existing CG-26 ranking and bounded
+execution coordinator: strict capability/provider/health eligibility, exact
+fallback task/context/output/tools/authority/generation invariants, context and
+resource constraints, stable explanations and computed snapshot identity, and
+zero model dispatch for deterministic tasks. Tests compile real CG-10 steps with
+a fake host runtime. Installed inference transports and full invocation handoff
+admission remain separate #269/#263 work. See
+[operator guide and traceability](model-capability-routing.md).

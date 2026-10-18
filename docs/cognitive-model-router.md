@@ -106,3 +106,12 @@ privacy-preserving fallback, fresh Process/Policy denial, output mismatch and
 incorrect runtime identity/usage reports. No external model is needed. The shared
 fixture is `tests/fixtures/cognitive-routing.rs`; domain and application tests
 validate their respective boundaries independently.
+
+## Invocation-aware integration (#262)
+
+Model invocation hosts use the [strict invocation routing service](model-capability-routing.md)
+to compose these filters and bounded execution with EPIC-06.01 capability/provider
+eligibility. It adds pinned declarations, context/output/generation requirements,
+health observations, immutable fallback meaning and a hard no-model constraint
+when deterministic execution is sufficient. The original APIs remain the advisory
+CG-26 boundary; they do not themselves negotiate invocation contracts.

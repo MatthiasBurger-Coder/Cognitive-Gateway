@@ -2,7 +2,7 @@
 use crate::context_application::CompiledStep;
 use gateway_domain::cognitive_routing::*;
 use serde::Serialize;
-use std::collections::BTreeSet;
+use std::collections::{BTreeMap, BTreeSet};
 
 /// Host-owned, immutable qualified capability/configuration snapshot.
 pub trait ModelCapabilityPort {
@@ -21,13 +21,14 @@ pub fn select_route(
     request: &CognitiveRouteRequest,
     snapshot: &ModelCapabilitySnapshot,
 ) -> Result<RouteExplanation, RoutingError> {
-    evaluate(request, snapshot, &BTreeSet::new())
+    evaluate(request, snapshot, &BTreeSet::new(), &BTreeMap::new())
 }
 
-fn evaluate(
+pub(crate) fn evaluate(
     request: &CognitiveRouteRequest,
     snapshot: &ModelCapabilitySnapshot,
     attempted: &BTreeSet<String>,
+    rejections: &BTreeMap<String, BTreeSet<RouteRejection>>,
 ) -> Result<RouteExplanation, RoutingError> {
     request.validate()?;
     snapshot.validate()?;
@@ -41,7 +42,7 @@ fn evaluate(
     let mut selected = None;
     let mut alternatives = Vec::new();
     for c in candidates {
-        let mut reasons = BTreeSet::new();
+        let mut reasons = rejections.get(&c.id).cloned().unwrap_or_default();
         let checks = [
             (!c.qualified, RouteRejection::Unqualified),
             (!c.available, RouteRejection::Unavailable),
@@ -198,6 +199,15 @@ pub fn route_and_execute(
     registry: &dyn ModelCapabilityPort,
     runtime: &dyn CognitiveRouteRuntime,
 ) -> Result<RoutingTelemetry, RoutingError> {
+    route_with_rejections(request, registry, runtime, &BTreeMap::new())
+}
+
+pub(crate) fn route_with_rejections(
+    request: &CognitiveRouteRequest,
+    registry: &dyn ModelCapabilityPort,
+    runtime: &dyn CognitiveRouteRuntime,
+    rejections: &BTreeMap<String, BTreeSet<RouteRejection>>,
+) -> Result<RoutingTelemetry, RoutingError> {
     request.validate()?;
     let snapshot = registry.snapshot()?;
     snapshot.validate()?;
@@ -213,7 +223,7 @@ pub fn route_and_execute(
         consumed_latency_ms: 0,
     };
     for _ in 0..request.max_attempts {
-        let decision = evaluate(&remaining, &snapshot, &attempted)?;
+        let decision = evaluate(&remaining, &snapshot, &attempted, rejections)?;
         let candidate = decision.selected.clone();
         telemetry.decisions.push(decision);
         let Some(candidate) = candidate else {
