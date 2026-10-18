@@ -400,3 +400,13 @@ Rust owns admission, aggregate budgets and verification. The optional Python
 `canonical.py` bridge maps `/v1/invoke` to the qualified local runtime without
 replacing the legacy `/v1/infer` contract. Credentials remain outer runtime state.
 See [adapter integration and qualification](../model-provider-adapters.md).
+
+### Invocation qualification — EPIC-06.10
+
+`gateway-domain::invocation_qualification` owns versioned role/provenance/metric
+contracts; the application module owns content-free trace capture, receipt-only
+replay through existing validators and independent metric thresholds. The daemon
+`qualify-invocation` example evaluates trusted measurements without dispatch.
+The [fixture runner and operator guide](../invocation-qualification.md) bind fresh
+tests/coverage to candidate sources. Persistence/admission and release authority
+remain existing host responsibilities; no provider SDK enters the core.

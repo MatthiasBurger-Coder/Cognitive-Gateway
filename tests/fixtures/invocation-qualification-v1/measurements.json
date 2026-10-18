@@ -1,0 +1,124 @@
+{
+  "schema_version": "1.0",
+  "provenance": {
+    "schema_version": "1.0",
+    "model": {
+      "id": "synthetic-model",
+      "scope": "project-x",
+      "contract": "synthetic-model",
+      "contract_version": "1.0",
+      "revision": "1",
+      "digest": "8e528a5edc5e8394368eecdc20e272477e9b638e4150a5a51ef9a71eddb4952b"
+    },
+    "family": "synthetic-fixture",
+    "tokenizer": {
+      "id": "byte-bound",
+      "scope": "project-x",
+      "contract": "byte-bound",
+      "contract_version": "1.0",
+      "revision": "1",
+      "digest": "28335066a24f347c721775cc7dde2c67b2c35a1674b798ced7e8ea1b0e7ed9c7"
+    },
+    "runtime": {
+      "id": "synthetic-runtime",
+      "scope": "project-x",
+      "contract": "synthetic-runtime",
+      "contract_version": "1.0",
+      "revision": "1",
+      "digest": "55d70ab224bbed0f29c2762bf18100ebc222ca9a6088f926be445bb4d6058a4a"
+    },
+    "quantization": "synthetic-none",
+    "generation_profile": "419f8babe9cc4dbc9814f649d76842843b6b9f4f908101ebfaf4c93e9fa9750b",
+    "renderer": {
+      "id": "synthetic-renderer",
+      "scope": "project-x",
+      "contract": "synthetic-renderer",
+      "contract_version": "1.0",
+      "revision": "1",
+      "digest": "389f5443b3863182ea96d1796019b06a82dd219f100d87bce39839fa128f6f9e"
+    },
+    "dataset": {
+      "id": "qualification-v1",
+      "scope": "project-x",
+      "contract": "qualification-v1",
+      "contract_version": "1.0",
+      "revision": "1",
+      "digest": "5223d3e195fde874a8762af29b9ec55861887773ca7e1132c20e3c230d70a535"
+    },
+    "hardware": "synthetic-no-performance-claim"
+  },
+  "evidence": "fixture",
+  "cases_digest": "e50e816f717cc608f4b8467a7c91172bee4fd70a9d064d5115afc7260d7e32ec",
+  "metrics": {
+    "schema_conformance": {
+      "numerator": 10,
+      "denominator": 10
+    },
+    "field_correctness": {
+      "numerator": 10,
+      "denominator": 10
+    },
+    "required_completeness": {
+      "numerator": 10,
+      "denominator": 10
+    },
+    "reference_accuracy": {
+      "numerator": 10,
+      "denominator": 10
+    },
+    "clarification_correctness": {
+      "numerator": 10,
+      "denominator": 10
+    },
+    "unsupported_claim_rate": {
+      "numerator": 0,
+      "denominator": 10
+    },
+    "citation_validity": {
+      "numerator": 10,
+      "denominator": 10
+    },
+    "bounded_recovery": {
+      "numerator": 10,
+      "denominator": 10
+    },
+    "context_limit_behavior": {
+      "numerator": 10,
+      "denominator": 10
+    },
+    "failure_fallback_behavior": {
+      "numerator": 10,
+      "denominator": 10
+    },
+    "cold_latency_ms": {
+      "numerator": 10,
+      "denominator": 1
+    },
+    "warm_latency_ms": {
+      "numerator": 10,
+      "denominator": 1
+    },
+    "throughput_milli_per_second": {
+      "numerator": 10,
+      "denominator": 1
+    },
+    "cpu_millis": {
+      "numerator": 10,
+      "denominator": 1
+    },
+    "ram_bytes": {
+      "numerator": 10,
+      "denominator": 1
+    },
+    "input_tokens": {
+      "numerator": 10,
+      "denominator": 1
+    },
+    "output_tokens": {
+      "numerator": 10,
+      "denominator": 1
+    }
+  },
+  "perplexity_diagnostic": null,
+  "cross_entropy_diagnostic": null
+}
