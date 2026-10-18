@@ -20,6 +20,7 @@ pub enum VerificationError {
     VerificationUnavailable,
     ConstraintViolation,
     SemanticVerificationFailed,
+    GroundingFailed(crate::grounding::GroundingError),
 }
 
 /// Pins are attached to actual JSON-pointer locations in the result payload.

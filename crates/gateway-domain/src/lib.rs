@@ -16,6 +16,7 @@ pub mod execution_context;
 pub mod execution_context_v2;
 pub mod execution_profile;
 pub mod explainability;
+pub mod grounding;
 pub mod identifiers;
 pub mod intent;
 pub mod interpretation;

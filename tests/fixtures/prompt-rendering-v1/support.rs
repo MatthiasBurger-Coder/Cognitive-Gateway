@@ -77,6 +77,9 @@ fn contracts(t: &SemanticTaskIR) -> ContextHandoffContracts {
 }
 
 pub fn handoff() -> PlannedContextHandoff {
+    handoff_for(task())
+}
+pub fn handoff_for(task: SemanticTaskIR) -> PlannedContextHandoff {
     let quality = QualityMetadata::new(
         TrustClass::ObservedEvidence,
         SensitivityClass::Normal,
@@ -128,7 +131,11 @@ pub fn handoff() -> PlannedContextHandoff {
         SchemaVersion::V1,
         id("r1"),
         ContextPlanningBasis {
-            task: model::invocation_data().task,
+            task: {
+                let mut pin = model::invocation_data().task;
+                pin.digest = task.content_digest().unwrap();
+                pin
+            },
             situation: None,
             plan: None,
         },
@@ -136,7 +143,7 @@ pub fn handoff() -> PlannedContextHandoff {
         TokenBudget(400),
     )
     .unwrap();
-    let r = ExampleRequirement::from_context(&req, &task(), &id("examples"), policy())
+    let r = ExampleRequirement::from_context(&req, &task, &id("examples"), policy())
         .unwrap()
         .unwrap();
     let mut hostile = candidate("malicious");
@@ -163,14 +170,14 @@ pub fn handoff() -> PlannedContextHandoff {
     .unwrap();
     let c = compiled(&[fragment]);
     ContextCompiler::handoff_planned_context_with_examples(
-        task(),
+        task.clone(),
         req,
         plan,
         c.clone(),
         context_pin(&c),
         &[],
         ContextHandoffWithExamples {
-            contracts: contracts(&task()),
+            contracts: contracts(&task),
             expected_examples: set.binding(),
             examples: set,
         },
@@ -184,6 +191,7 @@ pub fn prepared(
 ) -> gateway_application::model_invocation::PreparedModelInvocation {
     use gateway_domain::model_invocation::*;
     let mut data = model::invocation_data();
+    data.task = serde_json::from_value(h.to_value()["bindings"]["task"].clone()).unwrap();
     data.compiled_context =
         serde_json::from_value(h.to_value()["bindings"]["context"].clone()).unwrap();
     if tool {
@@ -202,7 +210,7 @@ pub fn prepared(
     let invocation = ModelInvocation::new(
         data.clone(),
         ModelInvocationBasis {
-            task: &task(),
+            task: h.task(),
             output: &model::output(),
             compiled_context: &data.compiled_context,
             permitted_capabilities: &data.permitted_capabilities,

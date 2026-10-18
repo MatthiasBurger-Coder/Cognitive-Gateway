@@ -1,0 +1,6 @@
+[
+  {"id":"supported-fact", "result":"entity", "expected":null},
+  {"id":"unsupported-claim", "result":"invented", "expected":"UNSUPPORTED_CLAIM"},
+  {"id":"completion-is-a-proposal", "result":"completed", "expected":"UNSUPPORTED_CLAIM"},
+  {"id":"confidence-is-not-evidence", "result":{"status":"completed", "confidence":1.0}, "expected":"UNSUPPORTED_CLAIM"}
+]
