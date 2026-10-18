@@ -137,8 +137,9 @@ bindings. [Production routing (#262)](model-capability-routing.md) is implemente
 as a separate application service. [Prompt/Invocation IR (#263)](prompt-invocation-ir.md)
 now supplies the application admission boundary.
 [Cumulative resilience (#268)](invocation-resilience.md) supplies a shared
-application run ledger. Real adapters (#269) and full-plane qualification (#270)
-remain separate.
+application run ledger. [Local and independent HTTP adapters (#269)](model-provider-adapters.md)
+are implemented with loopback conformance; live/full-plane qualification (#270)
+remains separate.
 The #264 rendering/accounting boundary is implemented below.
 
 ## Deterministic semantic renderers — EPIC-06.04 (#264)

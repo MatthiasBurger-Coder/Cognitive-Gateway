@@ -1,0 +1,32 @@
+{
+  "schema_version": "1.0",
+  "adapters": [
+    {
+      "endpoint": "http://127.0.0.1:8091",
+      "locality": "ON_DEVICE",
+      "model": {
+        "id": "REPLACE_WITH_IMMUTABLE_MODEL_ID",
+        "scope": "project-x",
+        "contract": "model",
+        "contract_version": "1.0",
+        "revision": "REPLACE_WITH_REVISION",
+        "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "context_limit": 32768
+    },
+    {
+      "endpoint": "https://api.openai.com",
+      "locality": "EXTERNAL",
+      "model": {
+        "id": "REPLACE_WITH_IMMUTABLE_MODEL_ID",
+        "scope": "project-x",
+        "contract": "model",
+        "contract_version": "1.0",
+        "revision": "REPLACE_WITH_REVISION",
+        "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "context_limit": 32768,
+      "credential_env": "CG_INDEPENDENT_PROVIDER_KEY"
+    }
+  ]
+}

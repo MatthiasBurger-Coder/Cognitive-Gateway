@@ -1,0 +1,12 @@
+{
+  "schema_version": "1.0",
+  "kind": "proposal",
+  "model_id": "model",
+  "model_version": "7",
+  "artifact_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "content": "{\"message\":\"verified separately\"}",
+  "usage": {
+    "prompt_tokens": 12,
+    "completion_tokens": 3
+  }
+}

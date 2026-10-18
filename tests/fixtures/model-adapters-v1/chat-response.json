@@ -1,0 +1,15 @@
+{
+  "model": "model",
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "message": {
+        "content": "{\"message\":\"verified separately\"}"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 12,
+    "completion_tokens": 3
+  }
+}

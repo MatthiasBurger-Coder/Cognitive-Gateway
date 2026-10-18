@@ -89,7 +89,9 @@ expiry in flight still charges usage and rejects the returned result.
 bound their own blocking I/O. This synchronous application interface cannot
 preempt a non-cooperating SDK call. Late results are rejected and no subsequent
 call can dispatch. Live SDK interruption is an adapter qualification requirement
-for #269/#270, not established by these synthetic component tests.
+for #270, not established by these synthetic component tests. #269 supplies
+[cooperating HTTP adapters](model-provider-adapters.md) with loopback interruption
+conformance; live provider execution remains explicit opt-in.
 
 `UncertainSideEffect` is always terminal, regardless of a subsequent lifecycle
 retry decision. Invocation logic never retries a connector operation. Hard

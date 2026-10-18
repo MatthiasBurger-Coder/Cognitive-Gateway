@@ -80,6 +80,13 @@ pub fn handoff() -> PlannedContextHandoff {
     handoff_for(task())
 }
 pub fn handoff_for(task: SemanticTaskIR) -> PlannedContextHandoff {
+    let output = contracts(&task).output;
+    handoff_for_output(task, output)
+}
+pub fn handoff_for_output(
+    task: SemanticTaskIR,
+    output: gateway_domain::semantic_output::OutputContract,
+) -> PlannedContextHandoff {
     let quality = QualityMetadata::new(
         TrustClass::ObservedEvidence,
         SensitivityClass::Normal,
@@ -177,7 +184,10 @@ pub fn handoff_for(task: SemanticTaskIR) -> PlannedContextHandoff {
         context_pin(&c),
         &[],
         ContextHandoffWithExamples {
-            contracts: contracts(&task),
+            contracts: ContextHandoffContracts {
+                output,
+                ..contracts(&task)
+            },
             expected_examples: set.binding(),
             examples: set,
         },
