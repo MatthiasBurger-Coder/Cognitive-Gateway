@@ -1,0 +1,148 @@
+{
+  "schema_version": "1.0",
+  "id": {
+    "id": "synthetic-extraction-gates",
+    "scope": "project-x",
+    "contract": "synthetic-extraction-gates",
+    "contract_version": "1.0",
+    "revision": "1",
+    "digest": "66f8ea6873a14708effb30e9c408c60b8c7dcdfec939c9b228d094bb38dd7444"
+  },
+  "provenance": {
+    "schema_version": "1.0",
+    "model": {
+      "id": "synthetic-model",
+      "scope": "project-x",
+      "contract": "synthetic-model",
+      "contract_version": "1.0",
+      "revision": "1",
+      "digest": "8e528a5edc5e8394368eecdc20e272477e9b638e4150a5a51ef9a71eddb4952b"
+    },
+    "family": "synthetic-fixture",
+    "tokenizer": {
+      "id": "byte-bound",
+      "scope": "project-x",
+      "contract": "byte-bound",
+      "contract_version": "1.0",
+      "revision": "1",
+      "digest": "28335066a24f347c721775cc7dde2c67b2c35a1674b798ced7e8ea1b0e7ed9c7"
+    },
+    "runtime": {
+      "id": "synthetic-runtime",
+      "scope": "project-x",
+      "contract": "synthetic-runtime",
+      "contract_version": "1.0",
+      "revision": "1",
+      "digest": "55d70ab224bbed0f29c2762bf18100ebc222ca9a6088f926be445bb4d6058a4a"
+    },
+    "quantization": "synthetic-none",
+    "generation_profile": "419f8babe9cc4dbc9814f649d76842843b6b9f4f908101ebfaf4c93e9fa9750b",
+    "renderer": {
+      "id": "synthetic-renderer",
+      "scope": "project-x",
+      "contract": "synthetic-renderer",
+      "contract_version": "1.0",
+      "revision": "1",
+      "digest": "389f5443b3863182ea96d1796019b06a82dd219f100d87bce39839fa128f6f9e"
+    },
+    "dataset": {
+      "id": "qualification-v1",
+      "scope": "project-x",
+      "contract": "qualification-v1",
+      "contract_version": "1.0",
+      "revision": "1",
+      "digest": "5223d3e195fde874a8762af29b9ec55861887773ca7e1132c20e3c230d70a535"
+    },
+    "hardware": "synthetic-no-performance-claim"
+  },
+  "role": "semantic_extraction",
+  "confidence_emitted": true,
+  "gpu_used": false,
+  "thresholds": {
+    "schema_conformance": {
+      "minimum": 10000,
+      "maximum": 10000,
+      "minimum_samples": 10
+    },
+    "field_correctness": {
+      "minimum": 10000,
+      "maximum": 10000,
+      "minimum_samples": 10
+    },
+    "required_completeness": {
+      "minimum": 10000,
+      "maximum": 10000,
+      "minimum_samples": 10
+    },
+    "reference_accuracy": {
+      "minimum": 10000,
+      "maximum": 10000,
+      "minimum_samples": 10
+    },
+    "clarification_correctness": {
+      "minimum": 10000,
+      "maximum": 10000,
+      "minimum_samples": 10
+    },
+    "unsupported_claim_rate": {
+      "minimum": 0,
+      "maximum": 0,
+      "minimum_samples": 10
+    },
+    "citation_validity": {
+      "minimum": 10000,
+      "maximum": 10000,
+      "minimum_samples": 10
+    },
+    "bounded_recovery": {
+      "minimum": 10000,
+      "maximum": 10000,
+      "minimum_samples": 10
+    },
+    "context_limit_behavior": {
+      "minimum": 10000,
+      "maximum": 10000,
+      "minimum_samples": 10
+    },
+    "failure_fallback_behavior": {
+      "minimum": 10000,
+      "maximum": 10000,
+      "minimum_samples": 10
+    },
+    "cold_latency_ms": {
+      "minimum": 1,
+      "maximum": 1000,
+      "minimum_samples": 1
+    },
+    "warm_latency_ms": {
+      "minimum": 1,
+      "maximum": 1000,
+      "minimum_samples": 1
+    },
+    "throughput_milli_per_second": {
+      "minimum": 1,
+      "maximum": 1000,
+      "minimum_samples": 1
+    },
+    "cpu_millis": {
+      "minimum": 1,
+      "maximum": 1000,
+      "minimum_samples": 1
+    },
+    "ram_bytes": {
+      "minimum": 1,
+      "maximum": 1000,
+      "minimum_samples": 1
+    },
+    "input_tokens": {
+      "minimum": 1,
+      "maximum": 1000,
+      "minimum_samples": 1
+    },
+    "output_tokens": {
+      "minimum": 1,
+      "maximum": 1000,
+      "minimum_samples": 1
+    }
+  }
+}

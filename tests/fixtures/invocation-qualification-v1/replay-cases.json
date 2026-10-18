@@ -1,0 +1,82 @@
+[
+  {
+    "id": "case-0",
+    "recorded_result": "entity",
+    "expected_result": "entity",
+    "supported_claims": [
+      "entity"
+    ]
+  },
+  {
+    "id": "case-1",
+    "recorded_result": "entity",
+    "expected_result": "entity",
+    "supported_claims": [
+      "entity"
+    ]
+  },
+  {
+    "id": "case-2",
+    "recorded_result": "entity",
+    "expected_result": "entity",
+    "supported_claims": [
+      "entity"
+    ]
+  },
+  {
+    "id": "case-3",
+    "recorded_result": "entity",
+    "expected_result": "entity",
+    "supported_claims": [
+      "entity"
+    ]
+  },
+  {
+    "id": "case-4",
+    "recorded_result": "entity",
+    "expected_result": "entity",
+    "supported_claims": [
+      "entity"
+    ]
+  },
+  {
+    "id": "case-5",
+    "recorded_result": "entity",
+    "expected_result": "entity",
+    "supported_claims": [
+      "entity"
+    ]
+  },
+  {
+    "id": "case-6",
+    "recorded_result": "entity",
+    "expected_result": "entity",
+    "supported_claims": [
+      "entity"
+    ]
+  },
+  {
+    "id": "case-7",
+    "recorded_result": "entity",
+    "expected_result": "entity",
+    "supported_claims": [
+      "entity"
+    ]
+  },
+  {
+    "id": "case-8",
+    "recorded_result": "entity",
+    "expected_result": "entity",
+    "supported_claims": [
+      "entity"
+    ]
+  },
+  {
+    "id": "case-9",
+    "recorded_result": "invented-entity",
+    "expected_result": "entity",
+    "supported_claims": [
+      "entity"
+    ]
+  }
+]

@@ -334,3 +334,13 @@ control acceptance. Local runtime/template identity is checked before and after
 generation. A service readiness response never promotes semantic capability.
 Live transport qualification is explicitly opt-in; installed host composition
 remains #271/#279. See [operator guidance](../model-provider-adapters.md).
+
+### Invocation trace and replay qualification — EPIC-06.10
+
+An admitted invocation and its exact rendered response produce correlation-only
+trace metadata. Policy-permitted storage retains original bytes. Replay checks
+exact bindings and reuses parsing, current authority, schema/reference/tool,
+constraint and grounding validators, then emits an audit receipt. It has no
+provider or action dispatch path. Role measurements pass individual threshold
+and provenance gates; fixtures cannot establish promotion eligibility. See
+[qualification commands and release limits](../invocation-qualification.md).

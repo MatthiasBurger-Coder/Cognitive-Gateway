@@ -798,3 +798,66 @@ fn cancelled_adapter_preserves_run_cancellation_and_reservations() {
     canceller.join().unwrap();
     server.join().unwrap();
 }
+
+// Synthetic deterministic verifier used only for adapter -> trace -> replay
+// integration. Production host verifier/authority ownership remains unchanged.
+impl gateway_application::output_verification::OutputVerificationPort for Host {
+    fn resolve_reference(
+        &self,
+        _: &InvocationIr,
+        _: &gateway_domain::output_verification::OutputReference,
+    ) -> Result<(), gateway_domain::output_verification::VerificationError> {
+        Err(gateway_domain::output_verification::VerificationError::UnsupportedReference)
+    }
+    fn evaluate(
+        &self,
+        ir: &InvocationIr,
+        output: &gateway_application::output_verification::ParsedOutput,
+    ) -> Result<
+        gateway_application::output_verification::ConstraintReport,
+        gateway_domain::output_verification::VerificationError,
+    > {
+        use gateway_domain::semantic_output::CheckOutcome;
+        Ok(gateway_application::output_verification::ConstraintReport {
+            binding: output.binding(),
+            policy: CheckOutcome::Passed,
+            process: CheckOutcome::Passed,
+            task_completeness: CheckOutcome::Passed,
+            semantic_output: CheckOutcome::Passed,
+            checks: ir
+                .prompt()
+                .handoff()
+                .task()
+                .data()
+                .verification_contract
+                .checks
+                .iter()
+                .filter(|c| **c != SemanticVerificationCheck::OutputSchemaValid)
+                .map(|c| (*c, CheckOutcome::Passed))
+                .collect(),
+        })
+    }
+}
+
+#[test]
+fn both_adapter_outputs_replay_after_http_server_is_gone() {
+    use gateway_application::invocation_qualification::{replay_output, trace_output};
+    for kind in [AdapterKind::LocalServiceV1, AdapterKind::ChatCompletionsV1] {
+        let f = fixture(kind, |_, _| {});
+        let (endpoint, server) =
+            server(kind, 200, success(kind).to_string(), Duration::ZERO, false);
+        let adapter = HttpModelAdapter::new(kind, endpoint, None).unwrap();
+        let raw = call(&adapter, &f, &context(), 4096).output.unwrap();
+        // The server accepts exactly one request and then shuts down. Replay
+        // has no adapter/dispatch port and works after the transport is dropped.
+        server.join().unwrap();
+        drop(adapter);
+        let trace = trace_output(&f.0, &f.1, &raw).unwrap();
+        for _ in 0..2 {
+            assert_eq!(
+                replay_output(&f.0, &trace.replay, &raw, &Host).diagnostic,
+                None
+            );
+        }
+    }
+}

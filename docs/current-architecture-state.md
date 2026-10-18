@@ -188,3 +188,12 @@ qualified with loopback fixtures. Legacy readiness does not qualify canonical
 SemanticTaskIR support. An ignored, explicit live profile is supplied; live
 execution is NOT_RUN. Installed-host ownership/composition remain #271/#279 and
 full-plane release qualification remains #270; the parent is still PARTIAL.
+
+## EPIC-06.10 invocation qualification (#270)
+
+[Trace/replay and role qualification](invocation-qualification.md) now provide
+content-free correlated traces, deterministic replay through current independent
+validators, role-specific metric gates and revision-bound executable fixture
+qualification. Replay exposes no dispatch port or verified tool result. Both HTTP
+adapter paths are exercised with loopback fixtures. Full release remains PARTIAL:
+live model fitness and installed host composition (#271/#279) are not established.
