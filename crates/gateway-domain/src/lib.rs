@@ -189,4 +189,5 @@ pub mod prompt_rendering;
 
 pub mod prompt_ir;
 
+pub mod output_parsing;
 pub mod output_verification;

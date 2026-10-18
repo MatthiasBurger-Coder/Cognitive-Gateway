@@ -293,3 +293,5 @@ Run `python3 scripts/quality-gate.py` for the complete CG-13 gate. See [the rele
 - [Provider-independent prompt and invocation IR](prompt-invocation-ir.md) — #263 admission, correlation and current-host integration.
 
 - [Schema, reference and constraint verification](output-verification.md) — #266 typed, correlated verification and trusted-host integration.
+
+- [Structured output parsing and tool proposals](structured-output-parsing.md) — #265.

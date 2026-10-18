@@ -9,7 +9,9 @@ ROOT = Path(__file__).resolve().parents[2]
 
 class OutputVerificationArchitecture(unittest.TestCase):
     def test_verification_has_no_effect_or_provider_dependency(self):
-        for path in ("crates/gateway-domain/src/output_verification.rs",
+        for path in ("crates/gateway-domain/src/output_parsing.rs",
+                     "crates/gateway-application/src/output_parsing.rs",
+                     "crates/gateway-domain/src/output_verification.rs",
                      "crates/gateway-application/src/output_verification.rs"):
             source = (ROOT / path).read_text()
             for forbidden in ("std::process", "std::net", "std::fs", "reqwest::",
@@ -25,6 +27,18 @@ class OutputVerificationArchitecture(unittest.TestCase):
             self.assertIn(required, configured["command"])
         spec = importlib.util.spec_from_file_location(
             "output_coverage", ROOT / "scripts/check-output-verification-coverage.py")
+        gate = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(gate)
+        gate.self_test()
+
+    def test_parsing_ci_requires_measured_coverage(self):
+        configured = next(g for g in json.loads((ROOT / "scripts/quality-gates.json").read_text())
+                          if g["name"].startswith("EPIC-06.05"))
+        for required in ("cargo llvm-cov", "--test output_verification", "--locked",
+                         "--self-test", "check-output-parsing-coverage.py"):
+            self.assertIn(required, configured["command"])
+        spec = importlib.util.spec_from_file_location(
+            "parsing_coverage", ROOT / "scripts/check-output-parsing-coverage.py")
         gate = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(gate)
         gate.self_test()

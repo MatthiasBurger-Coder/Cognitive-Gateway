@@ -299,3 +299,12 @@ accept/reject record retains submitted/admitted identities and output digest;
 critics are advisory. Accepted tool proposals remain data for a separately
 current-authorized host effect boundary. Stale input requires a freshly compiled
 and admitted invocation. See [output verification](../output-verification.md).
+
+### Complete and repair structured output — EPIC-06.05
+
+Transport pushes provisional bytes into one bounded stream. Only explicit complete
+termination runs full JSON/schema/inventory parsing; interruption or overflow
+rejects. The unchanged admitted IR flows into #266 verification. Repairable
+failures may create bounded diagnostic proposals after mandatory aggregate host
+budget reservation. Repair dispatch remains host-owned and repaired bytes repeat
+all parsing and verification. No fragment, proposal or replay dispatches a tool.

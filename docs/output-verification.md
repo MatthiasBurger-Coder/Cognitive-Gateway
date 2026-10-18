@@ -27,13 +27,10 @@ parser's own recursion bound may produce `OUTPUT_PARSE_FAILED` before the
 explicit depth check. No stream fragment or repair proposal can construct a
 `VerifiedOutput`. `ParsedOutput` has private fields and no deserializer.
 
-#265 is still a separate open dependency. This slice supplies only the strict
-complete-JSON prerequisite needed by #266; it does not claim #265's complete
-provider parsing, stream/repair contracts or qualification. Adapters must map
-provider output into this envelope while retaining the dispatch identity. They
-must never take an identity from an unrelated invocation or discard unknown
-fields to obtain successful parsing. Any future parser must retain equivalent
-bounds, duplicate-key rejection and immutable output construction.
+[#265 parsing contracts](structured-output-parsing.md) now add invocation-bound
+schema/tool validation, provisional streams and bounded repair proposals over this
+same parser. Provider adapters preserve the dispatch identity and unknown fields
+for canonical rejection. Live adapter composition remains separate.
 
 Structural verification compares every invocation identity field, validates the
 result with the bound output schema and checks each declared reference's pin,
