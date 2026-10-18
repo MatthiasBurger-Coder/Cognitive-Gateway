@@ -83,7 +83,7 @@ flowchart LR
 | Governed offline learning pipeline | IMPLEMENTED (contracts and reference coordinator) | CG-28 validates signals, assembles scoped/versioned datasets, gates offline jobs/evaluation and journals canary/rollback. Concrete CPU feature/training/CV/calibration worker, PostgreSQL release journals and current-version inference/rollback are implemented; see complete EPIC-03 acceptance. |
 | Distributed cognitive worker fabric | IMPLEMENTED (contracts and local reference) | CG-29: immutable scoped snapshots, bounded queue/retries, fenced leases, provenance and a local worker adapter. PostgreSQL coordination preserves leases/fencing/idempotency across restart; Linux process and isolated container resource enforcement are implemented. Swarm/Kubernetes transport remains optional. |
 | Qwen3-8B reference profile | PLANNED | Reference candidate only; not a mandatory product dependency. |
-| General provider-independent model invocation | PARTIAL (application contracts/services) | EPIC-06 #178 owns the plane. #261–266 contracts, routing, IR, rendering, parsing and output verification are implemented. #267 adds [evidence grounding](evidence-grounding-verification.md) over EPIC-02/CG-06 with synthetic-host component qualification. The #268 [bounded run ledger](invocation-resilience.md) enforces retry/fallback budgets and cancellation. Live adapters, host integration and complete parent qualification remain separate. |
+| General provider-independent model invocation | PARTIAL (application contracts/services) | EPIC-06 #178 owns the plane. #261–266 contracts, routing, IR, rendering, parsing and output verification are implemented. #267 adds [evidence grounding](evidence-grounding-verification.md) over EPIC-02/CG-06 with synthetic-host component qualification. The #268 [bounded run ledger](invocation-resilience.md) enforces retry/fallback budgets and cancellation. #269 adds [local and independent HTTP adapters](model-provider-adapters.md) with loopback conformance. Live qualification, installed host integration and complete parent qualification remain separate. |
 | MCP connector/plugin runtime | PLANNED | EPIC-07 #223 owns external MCP server integration. |
 | GitHub MCP connector | PLANNED | Reference connector under EPIC-07. |
 | Codex -> CG local no-key MCP | PARTIAL | #238 implements [private stdio lifecycle/discovery](local-mcp-server.md); #236 / ADR-020 define trust. [Application facade](codex-application-facade.md) #239 is implemented and injectable. [Workspace/session isolation](codex-scope-isolation.md) #240 supplies admitted situation queries and scoped resource reads; discovery-only calls remain unsupported. [Credential and sensitive-data isolation](codex-secret-isolation.md) #241 checks launch environment, admission, request/result disclosure and trace/cache inputs. [Current policy/consent gates](codex-policy-gates.md) #242 and [bounded runtime](codex-runtime.md) #243 are implemented. #245 adds [inbound component qualification](codex-release-qualification.md); [canonical host wiring](codex-canonical-host.md) now provides resolve/explain/context through the shipped binaries, and [installed Codex qualification](codex-installed-client-qualification.md) exercises those paths with CLI 0.162.1. The accepted [shared session specification](shared-session-contract.md) / ADR-021 defines the verified artifact goal and explicit v2 boundary. Typed services, the shared coordinator, trusted interactions and PostgreSQL lifecycle/recovery are implemented and exercised by [runtime qualification](shared-session-implementation.md) and installed-client lifecycle checks. Fresh full-parent reconciliation after the 2026-10-11 evidence-contract correction remains required; #279 full model/connector/runtime acceptance is separate. |
@@ -119,8 +119,8 @@ generation-profile contracts, strict numeric/control validation, effective-defau
 provenance and an application preparation/adapter port. Runtime availability is
 separate from eligibility. [Component evidence](model-invocation-contracts.md) does
 not establish a shipped invocation path. Routing integration is implemented in
-#262 below; full CG-10 admission, real adapters and result verification remain
-separate EPIC-06 slices.
+#262 below; CG-10 admission, result verification and optional HTTP adapters
+are implemented in the later EPIC-06 slices described below.
 
 ## EPIC-06.04 rendering boundary (#264)
 
@@ -129,8 +129,8 @@ CG-10 handoff and prepared invocation through a pure application service.
 Full-payload tokenizer accounting binds model/profile/tokenizer/template metadata,
 preserves exact versus estimated provenance, reserves output and returns typed
 overflow without truncation. [Component qualification](model-invocation-contracts.md#deterministic-semantic-renderers--epic-0604-264)
-uses actual producer data with a synthetic tokenizer; production tokenizer/provider
-adapters remain prerequisites for hosted integration. The #263 application
+uses actual producer data with a synthetic tokenizer; production tokenizer qualification and installed provider composition
+remain prerequisites for hosted integration; optional HTTP adapters are in #269. The #263 application
 admission/dispatch boundary is implemented below; production hosts supply its
 authenticated current-store checks.
 
@@ -141,7 +141,7 @@ execution coordinator: strict capability/provider/health eligibility, exact
 fallback task/context/output/tools/authority/generation invariants, context and
 resource constraints, stable explanations and computed snapshot identity, and
 zero model dispatch for deterministic tasks. Tests compile real CG-10 steps with
-a fake host runtime. Installed inference transports remain #269 work; the #263
+a fake host runtime. Optional inference transports are implemented in #269; installed composition remains separate; the #263
 admission boundary below binds the full invocation handoff. See
 [operator guide and traceability](model-capability-routing.md).
 
@@ -151,7 +151,7 @@ The [#263 Prompt/Invocation IR application boundary](prompt-invocation-ir.md) is
 implemented over the actual CG-10 producer and #261/#264 services. It requires
 authenticated current-host checks on admission, rendering and transport. Evidence
 is component/synthetic-host integration; installed-host and live-provider
-composition remain #269/#279.
+composition remain #279; optional adapter implementations are documented under #269.
 
 ## EPIC-06.06 verification boundary
 
@@ -168,12 +168,23 @@ qualification uses synthetic hosts. No live provider or tool dispatch is added.
 and typed tool proposals to the admitted schema/inventory. Provisional streams
 and bounded repair proposals are implemented with a mandatory aggregate-budget
 port. Qualification is component/synthetic-host. #268 now supplies the shared
-application run ledger; provider adapters and installed composition remain #269/#279.
+application run ledger; provider adapters and installed composition remain #279; optional adapter implementations are documented under #269.
 
 ## EPIC-06.08 bounded invocation resilience (#268)
 
 [InvocationRun](invocation-resilience.md) adds cumulative token/output/cost/attempt
 accounting, shared cancellation/deadlines, strict fallback bindings and correlated
 provider usage/provenance. Component qualification uses synthetic admitted hosts
-and provider ports. Live adapters, durable host ownership and installed runtime
-composition remain separate #269/#271/#279 work; the full plane remains PARTIAL.
+and provider ports. #269 adds optional HTTP adapters; live qualification, durable
+host ownership and installed composition remain separate #270/#271/#279 work; the full plane remains PARTIAL.
+
+## EPIC-06.09 local and independent adapters (#269)
+
+[Optional adapters](model-provider-adapters.md) now implement the existing bounded
+invocation port for CG-27 `/v1/invoke` and independent Chat Completions providers.
+Complete wire bodies are rendered before accounting. Contract conformance,
+identity, runtime-only credentials, cancellation and run/parser integration are
+qualified with loopback fixtures. Legacy readiness does not qualify canonical
+SemanticTaskIR support. An ignored, explicit live profile is supplied; live
+execution is NOT_RUN. Installed-host ownership/composition remain #271/#279 and
+full-plane release qualification remains #270; the parent is still PARTIAL.

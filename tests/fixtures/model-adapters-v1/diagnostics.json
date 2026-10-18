@@ -1,0 +1,15 @@
+{
+  "schema_version": "1.0",
+  "diagnostics": [
+    "INVALID_CONFIGURATION",
+    "INVALID_BINDING",
+    "CAPABILITY_MISMATCH",
+    "UNAVAILABLE",
+    "PROVIDER_REJECTED",
+    "CANCELLED",
+    "DEADLINE_EXCEEDED",
+    "OUTPUT_LIMIT",
+    "INVALID_RESPONSE",
+    "IDENTITY_MISMATCH"
+  ]
+}

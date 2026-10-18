@@ -322,3 +322,15 @@ rejected. Correlated provider usage reconciles reservations without resetting
 the ledger. Malformed results remain proposals; uncertain effects are terminal.
 See [operator semantics](../invocation-resilience.md); live adapter interruption
 and installed-host composition require their own qualification.
+
+### EPIC-06.09 adapter dispatch
+
+After current-host admission and deterministic rendering/accounting, the existing
+InvocationRun calls the optional local or independent HTTP adapter. The adapter
+checks frozen payload/profile bindings, enforces cancellation/output bounds and
+checks the returned model identity. It wraps raw result JSON in the correlated
+proposal envelope; the existing strict parser and independent verification still
+control acceptance. Local runtime/template identity is checked before and after
+generation. A service readiness response never promotes semantic capability.
+Live transport qualification is explicitly opt-in; installed host composition
+remains #271/#279. See [operator guidance](../model-provider-adapters.md).

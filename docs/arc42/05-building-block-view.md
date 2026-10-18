@@ -390,3 +390,13 @@ compose admitted/rendered IRs, CG-14 lifecycle decisions and the shared request
 context with a replaceable bounded provider port. One ledger accounts for every
 retry/repair/fallback; no provider SDK, connector effect or second lifecycle
 controller enters the core. See [integration and evidence](../invocation-resilience.md).
+
+### Local and independent model adapters — EPIC-06.09
+
+`gateway-daemon::model_adapters` implements the existing bounded invocation port
+for the CG-27 local service and an independent Chat Completions provider.
+Adapter renderers include full wire controls/schema before token accounting;
+Rust owns admission, aggregate budgets and verification. The optional Python
+`canonical.py` bridge maps `/v1/invoke` to the qualified local runtime without
+replacing the legacy `/v1/infer` contract. Credentials remain outer runtime state.
+See [adapter integration and qualification](../model-provider-adapters.md).

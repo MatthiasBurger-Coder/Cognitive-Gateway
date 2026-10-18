@@ -214,5 +214,9 @@
   {
     "name": "EPIC-06.08 cumulative invocation retry, cancellation and degradation coverage",
     "command": "CARGO_LLVM_COV_TARGET_DIR=target/invocation-resilience-coverage cargo llvm-cov -p gateway-domain -p gateway-application --test invocation_resilience --locked --json --output-path \"$EVIDENCE_DIR/invocation-resilience-coverage.json\"\npython3 scripts/check-invocation-resilience-coverage.py --self-test\npython3 scripts/check-invocation-resilience-coverage.py \"$EVIDENCE_DIR/invocation-resilience-coverage.json\""
+  },
+  {
+    "name": "EPIC-06.09 local and independent model adapter conformance and coverage",
+    "command": "CARGO_LLVM_COV_TARGET_DIR=target/model-adapters-coverage cargo llvm-cov -p gateway-daemon --test model_adapters --locked --json --output-path \"$EVIDENCE_DIR/model-adapters-coverage.json\"\npython3 scripts/check-model-adapters-coverage.py --self-test\npython3 scripts/check-model-adapters-coverage.py \"$EVIDENCE_DIR/model-adapters-coverage.json\"\n\"$RUNNER_TEMP/local-model-python/bin/python\" -m pip install coverage==7.15.2\nCOVERAGE_FILE=\"$EVIDENCE_DIR/model-adapters-python.data\" \"$RUNNER_TEMP/local-model-python/bin/python\" -m coverage run --source=services/local-model -m unittest discover -s tests/local-model\nCOVERAGE_FILE=\"$EVIDENCE_DIR/model-adapters-python.data\" \"$RUNNER_TEMP/local-model-python/bin/python\" -m coverage json -o \"$EVIDENCE_DIR/model-adapters-python.json\"\nCOVERAGE_FILE=\"$EVIDENCE_DIR/model-adapters-python.data\" \"$RUNNER_TEMP/local-model-python/bin/python\" -m coverage report --include=\"*/canonical.py\" --fail-under=95"
   }
 ]

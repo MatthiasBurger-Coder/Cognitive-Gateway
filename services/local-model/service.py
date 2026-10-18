@@ -384,7 +384,7 @@ class Handler(BaseHTTPRequestHandler):
             self.respond(400, {'error': 'request_invalid'})
 
     def do_POST(self):
-        if self.path != '/v1/infer':
+        if self.path not in ('/v1/infer', '/v1/invoke'):
             self.respond(404, {'error': 'route_missing'})
             return
         try:
@@ -398,7 +398,11 @@ class Handler(BaseHTTPRequestHandler):
         except (ValueError, TimeoutError):
             self.respond(400, {'error': 'request_invalid'})
             return
-        self.apply(lambda registry: registry.infer(request))
+        if self.path == '/v1/invoke':
+            from canonical import invoke
+            self.apply(lambda registry: invoke(registry, request, ModelError))
+        else:
+            self.apply(lambda registry: registry.infer(request))
 
 
 def main():

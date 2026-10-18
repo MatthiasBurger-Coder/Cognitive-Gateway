@@ -357,3 +357,13 @@ implementation, prompts and hardware. The CPU model failed ranking tie-break and
 negative matching cases. Those failures remain visible in the report and prevent
 a passing benchmark outcome; the profile remains unqualified. The active service
 registry was unchanged by the run. No GPU hardware benchmark was performed.
+
+## Canonical invocation integration — EPIC-06.09
+
+The optional service also exposes `/v1/invoke` through the existing bounded
+canonical invocation port. This route preserves admitted messages, generation
+controls, output schema and exact model pins; it does not reuse the legacy
+suite's system prompt. See [local and independent provider adapters](model-provider-adapters.md)
+for host integration, runtime-only credentials, conformance evidence and the
+explicit opt-in live profile. The shipped legacy profile and readiness checks
+do not declare qualified SemanticTaskIR support. No profile is auto-promoted.

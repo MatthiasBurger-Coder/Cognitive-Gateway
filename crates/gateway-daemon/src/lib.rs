@@ -29,3 +29,5 @@ pub mod local_sessions;
 pub mod session_store;
 
 pub mod prompt_renderers;
+
+pub mod model_adapters;

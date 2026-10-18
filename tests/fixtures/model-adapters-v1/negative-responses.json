@@ -1,0 +1,25 @@
+{
+  "schema_version": "1.0",
+  "cases": [
+    {
+      "kind": "chat",
+      "response": {
+        "model": "model",
+        "choices": []
+      },
+      "diagnostic": "INVALID_RESPONSE"
+    },
+    {
+      "kind": "local",
+      "response": {
+        "schema_version": "1.0",
+        "kind": "proposal",
+        "model_id": "model",
+        "model_version": "7",
+        "artifact_digest": "changed",
+        "content": "{}"
+      },
+      "diagnostic": "IDENTITY_MISMATCH"
+    }
+  ]
+}
