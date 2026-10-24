@@ -29,9 +29,24 @@ class ModelAdaptersArchitecture(unittest.TestCase):
     def test_coverage_gate_is_required_and_rejects_invalid_reports(self):
         gate = next(g for g in json.loads((ROOT / 'scripts/quality-gates.json').read_text())
                     if g['name'].startswith('EPIC-06.09'))
-        for requirement in ('--test model_adapters', '--locked', '--fail-under=95', '--self-test'):
+        for requirement in ('--test model_adapters', '--test invocation_host', '--locked', '--fail-under=95', '--self-test'):
             self.assertIn(requirement, gate['command'])
         spec = importlib.util.spec_from_file_location('adapter_coverage', ROOT / 'scripts/check-model-adapters-coverage.py')
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
         module.self_test()
+
+    def test_general_coverage_keeps_live_profile_opt_in(self):
+        gates = json.loads((ROOT / 'scripts/quality-gates.json').read_text())
+        integration_gates = [g for g in gates if '--include-ignored' in g['command']]
+        self.assertEqual({g['name'] for g in integration_gates}, {
+            'CG-03 registry CLI coverage gate',
+            'CG-16 retrieval pipeline coverage gate',
+        })
+        for gate in integration_gates:
+            # PostgreSQL tests remain included; external live endpoints require
+            # the separate explicit profile rather than a general CI runner.
+            self.assertIn('--include-ignored --skip live_adapter_profile', gate['command'])
+        registry_gate = next(g for g in integration_gates
+                             if g['name'] == 'CG-03 registry CLI coverage gate')
+        self.assertIn('--fail-under-lines 95', registry_gate['command'])

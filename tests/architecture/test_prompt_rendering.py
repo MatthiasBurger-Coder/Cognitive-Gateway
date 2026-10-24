@@ -30,6 +30,7 @@ class PromptRenderingArchitecture(unittest.TestCase):
         configured = next(g for g in json.loads((ROOT / "scripts/quality-gates.json").read_text())
                           if g["name"].startswith("EPIC-06.04"))
         for required in ("cargo llvm-cov", "--test prompt_rendering", "--locked",
+                         "--test invocation_host", "--test model_adapters",
                          "check-prompt-rendering-coverage.py"):
             self.assertIn(required, configured["command"])
 

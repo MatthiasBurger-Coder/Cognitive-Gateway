@@ -35,13 +35,13 @@ fn main() {
         args.remove(0);
     }
     let mut options = BTreeMap::new();
-    if args.len() % 2 != 0 {
+    if !args.len().is_multiple_of(2) {
         fail(
             "CG_INVALID_INPUT",
             "use cg-local --help; options require values",
         );
     }
-    for pair in args.chunks_exact(2) {
+    for pair in args.as_chunks::<2>().0 {
         if options.insert(pair[0].as_str(), pair[1].as_str()).is_some() {
             fail("CG_INVALID_INPUT", "use unique launch options");
         }

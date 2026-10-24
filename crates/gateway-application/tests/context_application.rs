@@ -1417,12 +1417,14 @@ mod parallel_execution_tests {
     struct Worker {
         active: AtomicUsize,
         peak: AtomicUsize,
+        rendezvous: Option<(std::sync::Mutex<usize>, std::sync::Condvar)>,
     }
     impl Worker {
         fn new() -> Self {
             Self {
                 active: AtomicUsize::new(0),
                 peak: AtomicUsize::new(0),
+                rendezvous: None,
             }
         }
     }
@@ -1435,6 +1437,15 @@ mod parallel_execution_tests {
         ) -> TaskResult {
             let count = self.active.fetch_add(1, Ordering::SeqCst) + 1;
             self.peak.fetch_max(count, Ordering::SeqCst);
+            if let Some((started, ready)) = &self.rendezvous {
+                let mut started = started.lock().unwrap();
+                *started += 1;
+                ready.notify_all();
+                let (started, _) = ready
+                    .wait_timeout_while(started, Duration::from_secs(5), |n| *n < 2)
+                    .unwrap();
+                assert_eq!(*started, 2, "both workers must start concurrently");
+            }
             let capability = capsule.spec().capabilities.iter().next().unwrap();
             assert!(
                 tools
@@ -1477,7 +1488,10 @@ mod parallel_execution_tests {
             ],
             2,
         );
-        let worker = Worker::new();
+        let worker = Worker {
+            rendezvous: Some((std::sync::Mutex::new(0), std::sync::Condvar::new())),
+            ..Worker::new()
+        };
         let results = run.run_wave(&worker, &Host, &Verify, &Host, &Host).unwrap();
         assert_eq!(
             results

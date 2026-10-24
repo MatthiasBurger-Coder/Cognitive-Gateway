@@ -1,0 +1,40 @@
+{
+  "schema_version": "1.0",
+  "model_id": "qwen2.5-3b-canonical-v4",
+  "model_family": "qwen2.5",
+  "model_version": "2.5-3b",
+  "artifact_digest": null,
+  "runtime": "ollama",
+  "runtime_version": "0.11.10",
+  "runtime_model": "qwen2.5:3b",
+  "quantization": "Q4_K_M",
+  "role": "canonical-invocation",
+  "capabilities": [
+    "structured-extraction",
+    "classification"
+  ],
+  "supported_input_contracts": [
+    "local-inference/1.0",
+    "prompt-ir-v1"
+  ],
+  "supported_output_contracts": [
+    "semantic-proposal/1.0",
+    "ArtifactInspection",
+    "EvidenceProjection"
+  ],
+  "structured_output_support": true,
+  "context_limit": 16384,
+  "resources": {
+    "cpu": true,
+    "gpu": "optional"
+  },
+  "prompt_version": "semantic-proposal-v4",
+  "template_digest": null,
+  "qualification_suite": "semantic-proposal-v4",
+  "qualification_status": "unqualified",
+  "lifecycle": "candidate",
+  "provenance": {
+    "source": "https://ollama.com/library/qwen2.5:3b",
+    "revision": null
+  }
+}

@@ -83,7 +83,7 @@ flowchart LR
 | Governed offline learning pipeline | IMPLEMENTED (contracts and reference coordinator) | CG-28 validates signals, assembles scoped/versioned datasets, gates offline jobs/evaluation and journals canary/rollback. Concrete CPU feature/training/CV/calibration worker, PostgreSQL release journals and current-version inference/rollback are implemented; see complete EPIC-03 acceptance. |
 | Distributed cognitive worker fabric | IMPLEMENTED (contracts and local reference) | CG-29: immutable scoped snapshots, bounded queue/retries, fenced leases, provenance and a local worker adapter. PostgreSQL coordination preserves leases/fencing/idempotency across restart; Linux process and isolated container resource enforcement are implemented. Swarm/Kubernetes transport remains optional. |
 | Qwen3-8B reference profile | PLANNED | Reference candidate only; not a mandatory product dependency. |
-| General provider-independent model invocation | PARTIAL (application contracts/services) | EPIC-06 #178 owns the plane. #261–266 contracts, routing, IR, rendering, parsing and output verification are implemented. #267 adds [evidence grounding](evidence-grounding-verification.md) over EPIC-02/CG-06 with synthetic-host component qualification. The #268 [bounded run ledger](invocation-resilience.md) enforces retry/fallback budgets and cancellation. #269 adds [local and independent HTTP adapters](model-provider-adapters.md) with loopback conformance. Live qualification, installed host integration and complete parent qualification remain separate. |
+| General provider-independent model invocation | IMPLEMENTED (bounded operator host; registered live role qualified) | EPIC-06 #178 owns the plane. #261–266 contracts, routing, IR, rendering, parsing and output verification are implemented. #267 adds [evidence grounding](evidence-grounding-verification.md) over EPIC-02/CG-06 with synthetic-host component qualification. The #268 [bounded run ledger](invocation-resilience.md) enforces retry/fallback budgets and cancellation. #269 adds [local and independent HTTP adapters](model-provider-adapters.md) with loopback conformance. The optional `cg-invoke` operator host now composes current admission, real CG-10 context, independent file-oracle grounding and durable invocation accounting. Its scope is read-only Inspect/Analyze proposals. The explicitly registered file-request ANALYZE role passed all ten frozen cases and six operational probes through each real HTTP adapter. Shared task-session integration remains EPIC-08; final source-bound parent reconciliation is retained in the evidence record. See [host and live qualification](invocation-qualification.md#operator-invocation-host). |
 | MCP connector/plugin runtime | PLANNED | EPIC-07 #223 owns external MCP server integration. |
 | GitHub MCP connector | PLANNED | Reference connector under EPIC-07. |
 | Codex -> CG local no-key MCP | PARTIAL | #238 implements [private stdio lifecycle/discovery](local-mcp-server.md); #236 / ADR-020 define trust. [Application facade](codex-application-facade.md) #239 is implemented and injectable. [Workspace/session isolation](codex-scope-isolation.md) #240 supplies admitted situation queries and scoped resource reads; discovery-only calls remain unsupported. [Credential and sensitive-data isolation](codex-secret-isolation.md) #241 checks launch environment, admission, request/result disclosure and trace/cache inputs. [Current policy/consent gates](codex-policy-gates.md) #242 and [bounded runtime](codex-runtime.md) #243 are implemented. #245 adds [inbound component qualification](codex-release-qualification.md); [canonical host wiring](codex-canonical-host.md) now provides resolve/explain/context through the shipped binaries, and [installed Codex qualification](codex-installed-client-qualification.md) exercises those paths with CLI 0.162.1. The accepted [shared session specification](shared-session-contract.md) / ADR-021 defines the verified artifact goal and explicit v2 boundary. Typed services, the shared coordinator, trusted interactions and PostgreSQL lifecycle/recovery are implemented and exercised by [runtime qualification](shared-session-implementation.md) and installed-client lifecycle checks. Fresh full-parent reconciliation after the 2026-10-11 evidence-contract correction remains required; #279 full model/connector/runtime acceptance is separate. |
@@ -178,7 +178,7 @@ provider usage/provenance. Component qualification uses synthetic admitted hosts
 and provider ports. #269 adds optional HTTP adapters; live qualification, durable
 host ownership and installed composition remain separate #270/#271/#279 work; the full plane remains PARTIAL.
 
-## EPIC-06.09 local and independent adapters (#269)
+## EPIC-06.09 local and independent adapters (#269, original component evidence)
 
 [Optional adapters](model-provider-adapters.md) now implement the existing bounded
 invocation port for CG-27 `/v1/invoke` and independent Chat Completions providers.
@@ -189,7 +189,7 @@ SemanticTaskIR support. An ignored, explicit live profile is supplied; live
 execution is NOT_RUN. Installed-host ownership/composition remain #271/#279 and
 full-plane release qualification remains #270; the parent is still PARTIAL.
 
-## EPIC-06.10 invocation qualification (#270)
+## EPIC-06.10 invocation qualification (#270, original component evidence)
 
 [Trace/replay and role qualification](invocation-qualification.md) now provide
 content-free correlated traces, deterministic replay through current independent
@@ -197,3 +197,44 @@ validators, role-specific metric gates and revision-bound executable fixture
 qualification. Replay exposes no dispatch port or verified tool result. Both HTTP
 adapter paths are exercised with loopback fixtures. Full release remains PARTIAL:
 live model fitness and installed host composition (#271/#279) are not established.
+
+
+## EPIC-06 operator capability host
+
+The shipped `cg-invoke` binary supplies concrete admission, token-counting,
+verification and grounding ports, composed with CG-10 producers and CG-09 policy.
+Private durable journals retain conservative invocation-group budgets, original
+deadlines, duplicate protection and replay receipts across process restarts.
+The operator registers pinned sources and independent expected-value oracles;
+this host supports read-only Inspect/Analyze proposal evaluation. The operator renderer is separately versioned and preserves all selected semantic
+data below the fixed authority boundary; derived Gateway receipts use digest
+references to the full IR retained in the private journal. Model output never grants capabilities or executes tools.
+
+The earlier EPIC-06.01–.10 paragraphs describe their original component evidence.
+This host extends that evidence boundary; it does not extend the frozen Codex
+artifact session goal or take over EPIC-08 task/connector lifecycle ownership.
+Live model acceptance requires the separate source-bound report described in
+[invocation qualification](invocation-qualification.md#live-role-qualification-through-the-shipped-host).
+
+The candidate's [host/live evidence record](evidence/EPIC-06-host-live.json)
+records the executed checks and distinguishes successful component checks from
+live-role fitness. It is the acceptance source for this extension; an unavailable
+or semantically incorrect model remains unqualified.
+
+
+## EPIC-06 host and live acceptance extension
+
+The source-bound V12 live run is `LIVE_ROLE_PASS` for both the native service and
+the separate Chat Completions adapter, using the same isolated Docker backend.
+All 20 fixed-case outputs and all 12 operational probes passed the unchanged
+independent verification and metric gates. The final candidate is
+`qwen3-4b-instruct2507-cpu-q8-t4-v1`, with explicit JSON generation, registered
+`FILE_REQUEST_EXTRACTION_V1`, transport version 9 and a pinned static instruction.
+The [current evidence record](evidence/EPIC-06-host-live.json) retains exact
+source/model/runtime bindings, gate logs, measurements and synthetic journals.
+Earlier NOT_RUN/PARTIAL statements in the component subsections describe those
+historical candidates. This extension establishes the bounded invocation host and
+registered extraction role; it does not qualify arbitrary tasks, another provider
+backend or the EPIC-08 task/connector lifecycle. The registered role's fixed
+system instruction never interpolates task goals or evidence; all selected
+semantic sections and the exact request alias remain user data.

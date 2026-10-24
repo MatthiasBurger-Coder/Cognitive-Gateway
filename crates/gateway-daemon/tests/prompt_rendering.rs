@@ -114,6 +114,7 @@ fn actual_handoff_preserved_in_both_runtime_layouts_with_stable_accounting() {
     let p = prepared(&h, 100_000, true);
     for r in [
         SemanticRenderer::ChatMessagesV1,
+        SemanticRenderer::TaskChatMessagesV4,
         SemanticRenderer::BlockMessagesV1,
     ] {
         for mode in [CountMode::Exact, CountMode::Estimated] {
@@ -125,7 +126,10 @@ fn actual_handoff_preserved_in_both_runtime_layouts_with_stable_accounting() {
             assert_eq!(rendered, repeated);
             let payload: Value = serde_json::from_str(rendered.payload()).unwrap();
             let (system, data) = match r {
-                SemanticRenderer::ChatMessagesV1 => {
+                SemanticRenderer::ChatMessagesV1
+                | SemanticRenderer::TaskChatMessagesV4
+                | SemanticRenderer::OperatorTaskV3
+                | SemanticRenderer::FileRequestExtractionV1 => {
                     assert_eq!(payload["messages"].as_array().unwrap().len(), 2);
                     assert_eq!(payload["messages"][0]["role"], "system");
                     assert_eq!(payload["messages"][1]["role"], "user");
@@ -144,7 +148,24 @@ fn actual_handoff_preserved_in_both_runtime_layouts_with_stable_accounting() {
                 }
             };
             assert!(!system.as_str().unwrap().contains("ignore policy"));
+            let authority: Value = serde_json::from_str(system.as_str().unwrap()).unwrap();
+            assert_eq!(
+                authority.get("task_directive").is_some(),
+                matches!(r, SemanticRenderer::TaskChatMessagesV4)
+            );
+            assert_eq!(
+                r.identity().1.as_str(),
+                if matches!(r, SemanticRenderer::TaskChatMessagesV4) {
+                    "4"
+                } else {
+                    "1"
+                }
+            );
             let data: Value = serde_json::from_str(data.as_str().unwrap()).unwrap();
+            assert_eq!(
+                data.get("admitted_task_request").is_some(),
+                matches!(r, SemanticRenderer::TaskChatMessagesV4)
+            );
             let mut canonical = h.to_value();
             canonical.as_object_mut().unwrap().remove("instructions");
             assert_eq!(data["semantic"], canonical);
@@ -301,5 +322,103 @@ fn renderer_failures_remain_typed() {
     assert_eq!(
         serde_json::to_value(RenderDiagnostic::UnsupportedRenderer).unwrap(),
         "UNSUPPORTED_RENDERER"
+    );
+}
+
+#[test]
+fn operator_projection_preserves_every_semantic_section_and_binds_retained_receipts() {
+    let h = handoff();
+    let p = prepared(&h, 100_000, true);
+    let r = SemanticRenderer::OperatorTaskV3;
+    let counter = Counter {
+        mode: CountMode::Estimated,
+        fault: 0,
+    };
+    let rendered = render_invocation(&h, &p, tools(&p), profile(&p, r), &r, &counter).unwrap();
+    let repeated = render_invocation(&h, &p, tools(&p), profile(&p, r), &r, &counter).unwrap();
+    assert_eq!(rendered, repeated);
+    assert_eq!(r.identity(), (id("operator-task"), id("3")));
+    let payload: Value = serde_json::from_str(rendered.payload()).unwrap();
+    assert_eq!(payload["messages"].as_array().unwrap().len(), 2);
+    let authority = payload["messages"][0]["content"].as_str().unwrap();
+    assert!(!authority.contains("ignore policy"));
+    let content = payload["messages"][1]["content"].as_str().unwrap();
+    assert!(content.starts_with("{\"semantic\":{\"task\":"));
+    assert!(
+        content.find("\"admitted_task_request\"").unwrap()
+            > content.find("\"audit_receipts\"").unwrap()
+    );
+    let data: Value = serde_json::from_str(content).unwrap();
+    let canonical = h.to_value();
+    for section in [
+        "schema_version",
+        "task",
+        "context",
+        "evidence",
+        "examples",
+        "output",
+    ] {
+        assert_eq!(data["semantic"][section], canonical[section]);
+    }
+    assert_eq!(data["semantic"].as_object().unwrap().len(), 6);
+    for section in ["bindings", "planning", "verification"] {
+        assert_eq!(
+            data["audit_receipts"][section]["digest"],
+            context_content_digest(&serde_json::to_vec(&canonical[section]).unwrap()).as_str()
+        );
+        assert_eq!(
+            data["audit_receipts"][section]["retained_in"],
+            "canonical-invocation-ir"
+        );
+    }
+    assert_eq!(
+        data["output_schema"],
+        p.invocation().data().output.json_schema()
+    );
+    assert_eq!(data["tools"], serde_json::to_value(tools(&p)).unwrap());
+    assert!(content.contains("ignore policy"));
+    let mut changed = h.task().data().clone();
+    changed.goal.description = "A different admitted goal".into();
+    assert!(changed.verification_contract.checks.len() > 1);
+    changed
+        .verification_contract
+        .checks
+        .push(SemanticVerificationCheck::EvidenceRequired);
+    let changed = handoff_for(SemanticTaskIR::new(changed).unwrap());
+    let prepared = prepared(&changed, 100_000, true);
+    let rendered = render_invocation(
+        &changed,
+        &prepared,
+        tools(&prepared),
+        profile(&prepared, r),
+        &r,
+        &counter,
+    )
+    .unwrap();
+    let wire: Value = serde_json::from_str(rendered.payload()).unwrap();
+    assert_eq!(wire["messages"][0]["content"].as_str().unwrap(), authority);
+    let changed: Value =
+        serde_json::from_str(wire["messages"][1]["content"].as_str().unwrap()).unwrap();
+    for section in ["bindings", "planning", "verification"] {
+        assert_ne!(
+            data["audit_receipts"][section]["digest"],
+            changed["audit_receipts"][section]["digest"]
+        );
+    }
+}
+
+#[test]
+fn registered_renderer_refuses_an_unmatched_role_definition() {
+    let h = handoff();
+    let p = prepared(&h, 100_000, true);
+    let r = SemanticRenderer::FileRequestExtractionV1;
+    assert_eq!(r.identity(), (id("file-request-extraction"), id("1")));
+    let counter = Counter {
+        mode: CountMode::Estimated,
+        fault: 0,
+    };
+    assert_eq!(
+        render_invocation(&h, &p, tools(&p), profile(&p, r), &r, &counter).unwrap_err(),
+        RenderError::Diagnostic(RenderDiagnostic::RenderingFailed)
     );
 }

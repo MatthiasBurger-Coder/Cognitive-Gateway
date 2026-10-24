@@ -89,7 +89,7 @@
   },
   {
     "name": "CG-03 registry CLI coverage gate",
-    "command": "cargo llvm-cov -p gateway-daemon --all-targets --fail-under-lines 95 --json --output-path \"$EVIDENCE_DIR/cg11-coverage.json\" -- --include-ignored"
+    "command": "cargo llvm-cov -p gateway-daemon --all-targets --fail-under-lines 95 --json --output-path \"$EVIDENCE_DIR/cg11-coverage.json\" -- --include-ignored --skip live_adapter_profile"
   },
   {
     "name": "Install declarative CLI",
@@ -133,7 +133,7 @@
   },
   {
     "name": "CG-16 retrieval pipeline coverage gate",
-    "command": "cargo llvm-cov clean --workspace\nCARGO_BUILD_JOBS=1 cargo llvm-cov --workspace --tests --json --output-path \"$EVIDENCE_DIR/cg16-coverage.json\" -- --include-ignored\npython3 scripts/check-cg16-coverage.py --self-test\npython3 scripts/check-cg16-coverage.py \"$EVIDENCE_DIR/cg16-coverage.json\"\n"
+    "command": "cargo llvm-cov clean --workspace\nCARGO_BUILD_JOBS=1 cargo llvm-cov --workspace --tests --json --output-path \"$EVIDENCE_DIR/cg16-coverage.json\" -- --include-ignored --skip live_adapter_profile\npython3 scripts/check-cg16-coverage.py --self-test\npython3 scripts/check-cg16-coverage.py \"$EVIDENCE_DIR/cg16-coverage.json\"\n"
   },
   {
     "name": "CG-18 governed memory coverage gate",
@@ -189,7 +189,7 @@
   },
   {
     "name": "EPIC-06.04 deterministic prompt rendering and accounting coverage",
-    "command": "CARGO_LLVM_COV_TARGET_DIR=target/prompt-rendering-coverage cargo llvm-cov -p gateway-domain -p gateway-application -p gateway-daemon --test prompt_rendering --locked --json --output-path \"$EVIDENCE_DIR/prompt-rendering-coverage.json\"\npython3 scripts/check-prompt-rendering-coverage.py --self-test\npython3 scripts/check-prompt-rendering-coverage.py \"$EVIDENCE_DIR/prompt-rendering-coverage.json\""
+    "command": "CARGO_LLVM_COV_TARGET_DIR=target/prompt-rendering-coverage cargo llvm-cov -p gateway-domain -p gateway-application -p gateway-daemon --test prompt_rendering --test invocation_host --test model_adapters --locked --json --output-path \"$EVIDENCE_DIR/prompt-rendering-coverage.json\"\npython3 scripts/check-prompt-rendering-coverage.py --self-test\npython3 scripts/check-prompt-rendering-coverage.py \"$EVIDENCE_DIR/prompt-rendering-coverage.json\""
   },
   {
     "name": "EPIC-06.02 deterministic invocation routing coverage",
@@ -217,10 +217,18 @@
   },
   {
     "name": "EPIC-06.09 local and independent model adapter conformance and coverage",
-    "command": "CARGO_LLVM_COV_TARGET_DIR=target/model-adapters-coverage cargo llvm-cov -p gateway-daemon --test model_adapters --locked --json --output-path \"$EVIDENCE_DIR/model-adapters-coverage.json\"\npython3 scripts/check-model-adapters-coverage.py --self-test\npython3 scripts/check-model-adapters-coverage.py \"$EVIDENCE_DIR/model-adapters-coverage.json\"\n\"$RUNNER_TEMP/local-model-python/bin/python\" -m pip install coverage==7.15.2\nCOVERAGE_FILE=\"$EVIDENCE_DIR/model-adapters-python.data\" \"$RUNNER_TEMP/local-model-python/bin/python\" -m coverage run --source=services/local-model -m unittest discover -s tests/local-model\nCOVERAGE_FILE=\"$EVIDENCE_DIR/model-adapters-python.data\" \"$RUNNER_TEMP/local-model-python/bin/python\" -m coverage json -o \"$EVIDENCE_DIR/model-adapters-python.json\"\nCOVERAGE_FILE=\"$EVIDENCE_DIR/model-adapters-python.data\" \"$RUNNER_TEMP/local-model-python/bin/python\" -m coverage report --include=\"*/canonical.py\" --fail-under=95"
+    "command": "CARGO_LLVM_COV_TARGET_DIR=target/model-adapters-coverage cargo llvm-cov -p gateway-daemon --test model_adapters --test invocation_host --locked --json --output-path \"$EVIDENCE_DIR/model-adapters-coverage.json\"\npython3 scripts/check-model-adapters-coverage.py --self-test\npython3 scripts/check-model-adapters-coverage.py \"$EVIDENCE_DIR/model-adapters-coverage.json\"\n\"$RUNNER_TEMP/local-model-python/bin/python\" -m pip install coverage==7.15.2\nCOVERAGE_FILE=\"$EVIDENCE_DIR/model-adapters-python.data\" \"$RUNNER_TEMP/local-model-python/bin/python\" -m coverage run --source=services/local-model -m unittest discover -s tests/local-model\nCOVERAGE_FILE=\"$EVIDENCE_DIR/model-adapters-python.data\" \"$RUNNER_TEMP/local-model-python/bin/python\" -m coverage json -o \"$EVIDENCE_DIR/model-adapters-python.json\"\nCOVERAGE_FILE=\"$EVIDENCE_DIR/model-adapters-python.data\" \"$RUNNER_TEMP/local-model-python/bin/python\" -m coverage report --include=\"*/canonical.py\" --fail-under=95\nCOVERAGE_FILE=\"$EVIDENCE_DIR/model-adapters-python.data\" \"$RUNNER_TEMP/local-model-python/bin/python\" -m coverage report --include=\"*/service.py\" --fail-under=95"
   },
   {
     "name": "EPIC-06.10 trace replay and role qualification coverage",
     "command": "CARGO_LLVM_COV_TARGET_DIR=target/invocation-qualification-coverage cargo llvm-cov -p gateway-domain -p gateway-application --test invocation_qualification --locked --json --output-path \"$EVIDENCE_DIR/invocation-qualification-coverage.json\"\npython3 scripts/check-invocation-qualification-coverage.py --self-test\npython3 scripts/check-invocation-qualification-coverage.py \"$EVIDENCE_DIR/invocation-qualification-coverage.json\"\nCOVERAGE_FILE=\"$EVIDENCE_DIR/invocation-qualification-python.data\" \"$RUNNER_TEMP/local-model-python/bin/python\" -m coverage run --source=scripts -m unittest discover -s tests/architecture -p test_invocation_qualification.py\nCOVERAGE_FILE=\"$EVIDENCE_DIR/invocation-qualification-python.data\" \"$RUNNER_TEMP/local-model-python/bin/python\" -m coverage json -o \"$EVIDENCE_DIR/invocation-qualification-python.json\"\nCOVERAGE_FILE=\"$EVIDENCE_DIR/invocation-qualification-python.data\" \"$RUNNER_TEMP/local-model-python/bin/python\" -m coverage report --include=\"*/qualify-invocation.py\" --fail-under=95"
+  },
+  {
+    "name": "EPIC-06 concrete invocation host coverage",
+    "command": "CARGO_LLVM_COV_TARGET_DIR=target/invocation-host-coverage cargo llvm-cov -p gateway-daemon --test invocation_host --locked --json --output-path \"$EVIDENCE_DIR/invocation-host-coverage.json\"\npython3 scripts/check-invocation-host-coverage.py --self-test\npython3 scripts/check-invocation-host-coverage.py \"$EVIDENCE_DIR/invocation-host-coverage.json\""
+  },
+  {
+    "name": "EPIC-06 live qualification runner regression coverage",
+    "command": "COVERAGE_FILE=\"$EVIDENCE_DIR/live-runner-coverage.data\" \"$RUNNER_TEMP/local-model-python/bin/python\" -m coverage run -m unittest discover -s tests/architecture -p test_invocation_live.py\nCOVERAGE_FILE=\"$EVIDENCE_DIR/live-runner-coverage.data\" \"$RUNNER_TEMP/local-model-python/bin/python\" -m coverage json -o \"$EVIDENCE_DIR/live-runner-coverage.json\"\nCOVERAGE_FILE=\"$EVIDENCE_DIR/live-runner-coverage.data\" \"$RUNNER_TEMP/local-model-python/bin/python\" -m coverage report --include=\"*/qualify-invocation-live.py\" --fail-under=95"
   }
 ]

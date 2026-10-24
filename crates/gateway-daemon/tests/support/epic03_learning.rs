@@ -125,7 +125,7 @@ impl gateway_daemon::cpu_learning::LearningFeaturePort for CpuFeatures {
         Ok(BTreeMap::from([
             (
                 "health".into(),
-                if n % 2 == 0 {
+                if n.is_multiple_of(2) {
                     1.0 + n as f64 / 1000.0
                 } else {
                     -1.0 - n as f64 / 1000.0
@@ -147,8 +147,14 @@ fn cpu_dataset() -> (
         source.observed_at = at(i64::from(n) + 10);
         source.created_at = at(200);
         source.valid_from = at(200);
-        source.outcome =
-            Some(NonEmptyText::new(if n % 2 == 0 { "SUCCESS" } else { "FAILURE" }).unwrap());
+        source.outcome = Some(
+            NonEmptyText::new(if n.is_multiple_of(2) {
+                "SUCCESS"
+            } else {
+                "FAILURE"
+            })
+            .unwrap(),
+        );
         memory.admit(source.clone(), id("admit"), at(200)).unwrap();
         memory
             .curate(

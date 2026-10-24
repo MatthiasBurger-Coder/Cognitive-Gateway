@@ -410,3 +410,23 @@ replay through existing validators and independent metric thresholds. The daemon
 The [fixture runner and operator guide](../invocation-qualification.md) bind fresh
 tests/coverage to candidate sources. Persistence/admission and release authority
 remain existing host responsibilities; no provider SDK enters the core.
+
+### Concrete invocation capability host
+
+`gateway-daemon::invocation_host` implements current operator/source/schema
+admission, model-bound conservative accounting and file-oracle constraint and
+CG-06 grounding ports. `cg-invoke` composes actual CG-10 planning/handoff, model
+preparation/rendering, `InvocationRun`, HTTP adapters and independent verification.
+A private locked journal reserves aggregate invocation budgets before transport
+and retains correlated outputs/verification for replay. Wire model names and
+token-limit dialects remain outer adapter configuration. The registered
+Inspect/Analyze evaluation role uses existing application contracts; shared task
+lifecycle remains with EPIC-08.
+
+
+The host's explicit `FILE_REQUEST_EXTRACTION_V1` role binds a fixed instruction
+file to renderer/profile identity, validates the admitted task/agent/scope/output
+shape, and retains the full semantic context below the authority boundary. The
+V12 live qualification passed both native and Chat Completions HTTP paths against
+the same Docker backend. Exact artifacts and the bounded acceptance scope are
+recorded in [host/live evidence](../evidence/EPIC-06-host-live.json).

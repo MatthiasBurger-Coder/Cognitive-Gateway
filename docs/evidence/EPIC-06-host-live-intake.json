@@ -1,0 +1,121 @@
+{
+  "schema_version": "1.0",
+  "epic": 178,
+  "base_commit": "1275e35670c7dc6bb727d290b309fbca1ae8ceba",
+  "mode": "DEVELOPMENT",
+  "authorization": "User requested closing host integration and live qualification after the parent Python-gate repair.",
+  "review": "Requirement, architecture, automation and tester role passes by one agent; no independent approval claimed.",
+  "decision": "READY_FOR_WORKFLOW",
+  "scope": "EPIC-06 operator capability host over actual CG-10/Policy/invocation/rendering/verification services; durable invocation budget groups and replay records; two real adapter transports to the local Docker SLM and measured extraction qualification. No second task coordinator or extension of frozen Codex v1/v2 task goals.",
+  "implementation_order": [
+    "Typed operator admission and actual CG-10 producer composition",
+    "Current file/schema/oracle reference checks and independent CG-06 grounding",
+    "Durable pre-dispatch reservations, duplicate refusal, cancellation and receipt-only replay",
+    "Shipped cg-invoke composition root and negative executable tests",
+    "Docker candidate profile, both live HTTP transports, exact role graders and provenance-bound metrics",
+    "Per-file >=95% coverage and complete EPIC-06 qualification; retain exact limitations"
+  ],
+  "matrix": [
+    {
+      "id": "H01",
+      "requirement": "#178 authorized compiled context to model to verified result",
+      "owner": "gateway-daemon invocation_host / existing application services",
+      "dependency": "CG-10, PolicyEngine, #261-270 present",
+      "gate": "Concrete host executable positive/denied paths",
+      "status": "VERIFIED",
+      "evidence": "docs/evidence/EPIC-06-host-live.json; final COMPONENT_PASS164/40/9 and V12 LIVE_ROLE_PASS both10cases+6probes"
+    },
+    {
+      "id": "H02",
+      "requirement": "#178 token accounting and no implicit history",
+      "owner": "TokenizerPort and CG-10 producer",
+      "dependency": "Runtime has no exact counting endpoint; mark byte upper bounds estimated and bind effective model/tokenizer/template",
+      "gate": "Full-payload component accounting, overflow and provider usage comparison",
+      "status": "VERIFIED",
+      "evidence": "docs/evidence/EPIC-06-host-live.json; final COMPONENT_PASS164/40/9 and V12 LIVE_ROLE_PASS both10cases+6probes"
+    },
+    {
+      "id": "H03",
+      "requirement": "#178 audit/replay and aggregate invocation budgets",
+      "owner": "Outer invocation journal / InvocationRun; EPIC-08 retains task lifecycle",
+      "dependency": "Filesystem atomic replace, fsync and exclusive File locks available on Linux; existing task session API unchanged",
+      "gate": "Restart duplicate/no-redispatch, conservatively retained reservations, cancellation and exhausted budget",
+      "status": "VERIFIED",
+      "evidence": "docs/evidence/EPIC-06-host-live.json; final COMPONENT_PASS164/40/9 and V12 LIVE_ROLE_PASS both10cases+6probes"
+    },
+    {
+      "id": "L01",
+      "requirement": "#269 both adapter paths live and #270 role-specific qualification",
+      "owner": "Local runtime/model profile operator and Rust evaluator",
+      "dependency": "Ollama 0.11.10 and local service present; independent external provider not configured. User clarified local Docker SLM. Same real backend qualifies two transport adapters only.",
+      "gate": "Exact case outputs, schema/claims/references/clarification, measured latency/resources/tokens and failure bounds; no promotion from readiness",
+      "status": "VERIFIED",
+      "evidence": "docs/evidence/EPIC-06-host-live.json; final COMPONENT_PASS164/40/9 and V12 LIVE_ROLE_PASS both10cases+6probes"
+    }
+  ],
+  "effort_engineer_days": {
+    "implementation": [
+      2,
+      4
+    ],
+    "qualification": [
+      1,
+      2
+    ],
+    "prerequisites": [
+      0.5,
+      1
+    ],
+    "includes": "Host/current-store/journal/tokenizer foundations included; installed Codex model task-session API and external connector lifecycle remain EPIC-08.",
+    "confidence": "medium; hardware/model fitness must be measured"
+  },
+  "rollback": "Remove optional cg-invoke host/module and candidate model service/profile; retain journal/evidence and keep existing structured task coordinator and legacy model alias available.",
+  "stop_conditions": [
+    "Missing authority or source authentication",
+    "A model/fixture claim replacing independent verification",
+    "Resetting session invocation budgets or redispatching replay",
+    "Coverage below 95% or failed acceptance gate",
+    "Hardware/model measurement failure must remain FAIL, not be relabelled PASS"
+  ],
+  "prerequisite_refinement": "Daemon MSRV 1.89 is required by std::fs::File locking; concurrent README/Cargo.toml edits raising it were preserved. Five preexisting nested if statements were mechanically collapsed to satisfy the resulting Clippy gate, with workspace regression tests required.",
+  "execution_status": {
+    "updated_at": "2026-10-18T17:32:50.963185+00:00",
+    "coordinating_thread": "01a14f55-5ccc-7242-b8ba-67b613041697",
+    "outbound_thread_messages": "MCP transport cannot connect to 127.0.0.1:37239; incoming coordination received; use this shared record",
+    "source_freeze": "FINALfrozen: allDocwordingcorrected+all9gatesPASS. No more product/doc mutations; evidenceonly next.",
+    "workspace_tests": "FINALPASS1032/4existingignored /tmp/epic06-final-accepted-workspace.log",
+    "clippy": "PASS fresh parent gate on final wire-v5 source",
+    "first_parent": "target/epic06-host-final-20261018/qualification.json (FAIL/source drift; historical only)",
+    "next_parent": "target/epic06-host-live-final-accepted-20261018/qualification.json",
+    "live_next": "FINAL V12 LIVE_ROLE_PASS both adapters10/10+6probes and allRustevaluator gates; no source drift.",
+    "live_status": "Earlier 4B native real read VERIFIED, wrong write REJECTED, timeouts; v5 fails memory admission:6.2GiB required vs4.7 available.1.7B v3 failed independent base suite; not promoted. Installing Qwen2.5:3B for same fixed v3 suite and criteria; only after Cargo completes will weights load.",
+    "completion": "COMPLETE: final parent acceptance ACCEPTED; all40criteria and56childitems verified; both live adapters pass; all9gates/currentworkspace1032pass4existingignored; complete synthetic evidence retained.",
+    "renderer_refinement": "Wire v5 / semantic-chat v4 repeats task+evidence in existing USER JSON and preserves two-message canonical bridge contract. Earlier wire v4 had three messages and local v5 failures therefore included request_invalid, not solely memory; independent Chat adapter was denied by actual RAM admission. Regression asserts exact two roles at HTTP fixture boundary.",
+    "qualification_candidate": "qwen3-4b-instruct2507-cpu-q8-t4-v1; basePASS11; no live pass claimed.",
+    "installation": "Qwen2.5:3B download first timed out at 180s; retried installation only with600s network timeout. Inference/metric limits unchanged.",
+    "gate_report_status": "FINAL CURRENT COMPONENT_PASS9gates164Rust40criteria noSourceDrift target/epic06-host-live-final-accepted-20261018/qualification.json",
+    "component_binding": "Passing frozen report is retained as historical base; new v4 profile/suite additions require fresh final parent after model/prompt refinement.",
+    "runtime": "cg-invocation-runtime-live (direct11437); native cg-invocation-model-q8 (8093); no proxy in final measured path",
+    "base_report": "/tmp/epic06-4b-q8-v2-baseline-qualification.json",
+    "live_runner_tests": "6 PASS;99% measured coverage incl runtime config drift before/after and no unrelated env retained",
+    "retention": "FIXED: execute now retains full ir/rendered in final journal record, private only; restart/replay test asserts full retained IR equality and rendered payload. The audit reference targets survive finish.",
+    "model_threads": "Optional bounded resources.cpu_threads pins num_thread into immutable model snapshot; schema+invalid-value tests added. CPU4 image rebuilt; new qwen3-4b-cpu-q8-t4-v1 installed, base qualification pending after tests.",
+    "renderer_tests": "Registered host positive all3transports, explicit role invalid definitions and generic refusal PASS; generic behavior preserved.",
+    "python_tests": "35 local-model PASS >=95%; 6 live-runner tests PASS99% incl declaredcontext/thread mismatch, runtimeconfig drift, evaluator/replay denial.",
+    "live_observation": "First complete native host case VERIFIED: cold73701ms,1270 actual provider input tokens (previousfullreceipt3921). Full semantic task/context/evidence/examples/output/schema/tools retained inline; per-record completeIR/rendered retention audited by tests.",
+    "previous_live": "v8 failed: write read, Doit ->read/Doit, genericfile ->whole-source target. Data fields/indices verifiedcorrect; prompt meaning conflict in JSONsystem directive addressed in V3. Archived v8 not qualified.",
+    "admitted_goal": "ANALYZE file-request source with explicit ambiguity formula and4 illustrative examples using only draft.yaml/report.ini/Continue/unspecifiedfile; no actual dataset labels/filenames/oracle values. Inputs/expected/schema/limits unchanged.",
+    "diagnostic": "/tmp/epic06-role-json-diagnostic.json; no-inventionread/empty/true, writewrite/Cargo/false; mode explicitlyselected, not automaticfallback.",
+    "continuation": "Incoming audit/diagnostic advice received and followed. Outbound MCP still unavailable; shared status is current. Requesting no parallel source/runtime changes.",
+    "runtime_reservation": "Inference complete; no modeldiagnostic/feature changes. Reviewer finalread-only reconciliation+evidence archive may proceed.",
+    "reviewer_action": "Read-only audit helper currently globs epic06-host-final*/epic06-host-live-final* only; include epic06-registered-role-final-gates-20261018 for current final parent. Registered tests now mapped, duplicate gate IDs deduplicated without gate removal. No runtime calls by reviewer.",
+    "final_component_report": "target/epic06-host-live-final-accepted-20261018/qualification.json",
+    "final_workspace_log": "/tmp/epic06-final-accepted-workspace.log",
+    "finalization_ready_for_parent_review": true,
+    "parent_review_status": "ACCEPTED",
+    "parent_review_report": "docs/evidence/EPIC-06-parent-acceptance-review.json",
+    "parent_review_audit": "docs/evidence/EPIC-06-parent-final-audit.json",
+    "root_final_audit": "Executed reviewer-authored /tmp/epic06-final-audit.py read-only -> ACCEPTED nofailedchecks; result /tmp/epic06-final-audit.json. Final source/component/live all current. Awaiting reviewer publication/archiving to parent record; no production/source edits.",
+    "artifact_verification": "All9compressed/uncompressedSHA pairs checked; currentcompletecomponentfingerprint and livefingerprint exact."
+  }
+}

@@ -396,16 +396,15 @@ impl Server {
                 json!({"contents":[{"uri":uri,"mimeType":"application/json","text":artifact.to_string()}]}),
             );
         }
-        if self.application.session_v2_enabled() {
-            if let Some(artifact) = uri
+        if self.application.session_v2_enabled()
+            && let Some(artifact) = uri
                 .strip_prefix("cg://contracts/2.0/")
                 .and_then(gateway_application::sessions::boundary::artifact)
-            {
-                return result(
-                    id,
-                    json!({"contents":[{"uri":uri,"mimeType":"application/json","text":artifact.to_string()}]}),
-                );
-            }
+        {
+            return result(
+                id,
+                json!({"contents":[{"uri":uri,"mimeType":"application/json","text":artifact.to_string()}]}),
+            );
         }
         let parts: Vec<_> = uri.split('/').collect();
         if parts.len() == 12
@@ -428,19 +427,18 @@ impl Server {
                         .application
                         .read_resource(&scope, parts[9], parts[10], parts[11]),
                 };
-                if let Ok(resource) = resource {
-                    if runtime::bounded_json(&resource, self.limits.output_bytes / 2).is_ok()
-                        && security::credential_free(&resource)
-                        && security::inline_allowed(&resource["document"])
-                        && !resource["provenance"].as_array().is_some_and(|entries| {
-                            entries.iter().any(|p| p["sensitivity"] == "SECRET")
-                        })
-                    {
-                        return result(
-                            id,
-                            json!({"contents":[{"uri":uri,"mimeType":"application/json","text":resource.to_string()}]}),
-                        );
-                    }
+                if let Ok(resource) = resource
+                    && runtime::bounded_json(&resource, self.limits.output_bytes / 2).is_ok()
+                    && security::credential_free(&resource)
+                    && security::inline_allowed(&resource["document"])
+                    && !resource["provenance"]
+                        .as_array()
+                        .is_some_and(|entries| entries.iter().any(|p| p["sensitivity"] == "SECRET"))
+                {
+                    return result(
+                        id,
+                        json!({"contents":[{"uri":uri,"mimeType":"application/json","text":resource.to_string()}]}),
+                    );
                 }
             }
         }

@@ -83,7 +83,7 @@ fn fixture_with_model(
         serde_json::from_value(h.to_value()["bindings"]["context"].clone()).unwrap();
     let mut provider = support::model::provider_data();
     let mut g = d.generation.data().clone();
-    if kind == AdapterKind::ChatCompletionsV1 {
+    if kind != AdapterKind::LocalServiceV1 {
         g.controls.remove(&GenerationControl::TopK);
         provider.controls.remove(&GenerationControl::TopK);
         provider.unexposed_defaults.remove(&GenerationControl::TopK);
@@ -169,7 +169,7 @@ fn success(kind: AdapterKind) -> Value {
         AdapterKind::LocalServiceV1 => {
             include_str!("../../../tests/fixtures/model-adapters-v1/local-response.json")
         }
-        AdapterKind::ChatCompletionsV1 => {
+        AdapterKind::ChatCompletionsV1 | AdapterKind::ChatCompletionsLegacyV1 => {
             include_str!("../../../tests/fixtures/model-adapters-v1/chat-response.json")
         }
     })
@@ -183,10 +183,35 @@ fn server(
     delay: Duration,
     secret: bool,
 ) -> (String, thread::JoinHandle<Value>) {
+    server_observed(kind, status, response, delay, secret, None)
+}
+fn server_observed(
+    kind: AdapterKind,
+    status: u16,
+    response: String,
+    delay: Duration,
+    secret: bool,
+    accepted: Option<std::sync::mpsc::Sender<()>>,
+) -> (String, thread::JoinHandle<Value>) {
     let listener = TcpListener::bind("127.0.0.1:0").unwrap();
     let endpoint = format!("http://{}", listener.local_addr().unwrap());
+    listener.set_nonblocking(true).unwrap();
     let handle = thread::spawn(move || {
-        let (mut stream, _) = listener.accept().unwrap();
+        let deadline = Instant::now() + Duration::from_secs(10);
+        let (mut stream, _) = loop {
+            match listener.accept() {
+                Ok(connection) => break connection,
+                Err(error)
+                    if error.kind() == std::io::ErrorKind::WouldBlock
+                        && Instant::now() < deadline =>
+                {
+                    thread::sleep(Duration::from_millis(5))
+                }
+                Err(error) => panic!("fixture request missing: {error}"),
+            }
+        };
+        // Accepted sockets inherit nonblocking mode on Windows.
+        stream.set_nonblocking(false).unwrap();
         stream
             .set_read_timeout(Some(Duration::from_secs(3)))
             .unwrap();
@@ -225,7 +250,13 @@ fn server(
             secret
         );
         let body: Value = serde_json::from_slice(&bytes[start..start + length]).unwrap();
+        assert_eq!(body["messages"].as_array().unwrap().len(), 2);
+        assert_eq!(body["messages"][0]["role"], "system");
+        assert_eq!(body["messages"][1]["role"], "user");
         assert!(!body.to_string().contains("runtime-secret"));
+        if let Some(accepted) = accepted {
+            accepted.send(()).unwrap();
+        }
         thread::sleep(delay);
         let _ = write!(
             stream,
@@ -270,7 +301,7 @@ fn both_transports_share_contract_and_preserve_rendering_controls_and_identity()
         assert_eq!(usage.output_tokens, 3);
         assert_eq!(usage.cost_microunits, 7);
         let receipt = adapter.observation().unwrap().receipt.unwrap();
-        assert_eq!(receipt.actual_model_id, id("model"));
+        assert_eq!(receipt.actual_model_id, "model");
         assert_eq!(receipt.profile, f.2.profile);
         assert_eq!(
             receipt.generation,
@@ -469,21 +500,25 @@ fn configuration_binding_cancellation_and_deadlines_fail_closed() {
     let f = fixture(AdapterKind::LocalServiceV1, |_, _| {});
     assert!(AdapterRenderer::new(AdapterKind::ChatCompletionsV1, f.0.prepared().clone()).is_err());
     for cancel in [true, false] {
-        let (endpoint, server) = server(
+        let (accepted, received) = std::sync::mpsc::channel();
+        let (endpoint, server) = server_observed(
             AdapterKind::LocalServiceV1,
             200,
             success(AdapterKind::LocalServiceV1).to_string(),
-            Duration::from_millis(200),
+            Duration::from_millis(if cancel { 200 } else { 1200 }),
             false,
+            Some(accepted),
         );
         let adapter = HttpModelAdapter::new(AdapterKind::LocalServiceV1, endpoint, None).unwrap();
         let mut cx = context();
         if !cancel {
-            cx.deadline = Instant::now() + Duration::from_millis(60);
+            cx.deadline = Instant::now() + Duration::from_millis(600);
         }
         let other = cx.clone();
         let canceller = thread::spawn(move || {
-            thread::sleep(Duration::from_millis(40));
+            // Cancel only after the complete request reached the fixture;
+            // process startup and Windows scheduling are not the behavior under test.
+            received.recv_timeout(Duration::from_secs(3)).unwrap();
             if cancel {
                 other.cancel();
             }
@@ -753,24 +788,29 @@ fn versioned_negative_wire_fixtures_keep_stable_diagnostics() {
 #[test]
 fn cancelled_adapter_preserves_run_cancellation_and_reservations() {
     let f = fixture(AdapterKind::LocalServiceV1, |_, _| {});
-    let (endpoint, server) = server(
+    let (sent, received) = std::sync::mpsc::channel();
+    let (endpoint, server) = server_observed(
         AdapterKind::LocalServiceV1,
         200,
         success(AdapterKind::LocalServiceV1).to_string(),
         Duration::from_millis(200),
         false,
+        Some(sent),
     );
     let adapter = HttpModelAdapter::new(AdapterKind::LocalServiceV1, endpoint, None).unwrap();
-    let cx = context();
+    let cx = RequestContext::new(
+        "cancelled-adapter".into(),
+        Instant::now() + Duration::from_secs(10),
+    );
     let cancellation = cx.clone();
     let canceller = thread::spawn(move || {
-        thread::sleep(Duration::from_millis(80));
+        received.recv_timeout(Duration::from_secs(10)).unwrap();
         cancellation.cancel();
     });
     let limits = InvocationRunLimits {
         schema_version: SchemaVersion::V1,
         max_attempts: 1,
-        timeout_ms: 3000,
+        timeout_ms: 10000,
         invocation_input_tokens: 100_000,
         invocation_output_tokens: 128,
         run_input_tokens: 100_000,
@@ -857,6 +897,154 @@ fn both_adapter_outputs_replay_after_http_server_is_gone() {
             assert_eq!(
                 replay_output(&f.0, &trace.replay, &raw, &Host).diagnostic,
                 None
+            );
+        }
+    }
+}
+
+#[test]
+fn runtime_names_are_outer_mappings_bound_to_exact_canonical_model_pins() {
+    for kind in [
+        AdapterKind::ChatCompletionsV1,
+        AdapterKind::ChatCompletionsLegacyV1,
+    ] {
+        let original = fixture(kind, |_, _| {});
+        let mapping = RuntimeModelBinding {
+            canonical: original.0.prepared().capability().data().model.clone(),
+            runtime_id: "org/model:snapshot-7".into(),
+        };
+        let renderer =
+            AdapterRenderer::for_runtime(kind, original.0.prepared().clone(), mapping.clone())
+                .unwrap();
+        let mut profile = original.2.profile.clone();
+        profile.template_version = renderer.identity().1;
+        let rendered =
+            render_invocation_ir(&original.0, &Host, profile, &renderer, &Counter).unwrap();
+        assert_eq!(
+            serde_json::from_str::<Value>(rendered.rendered().payload()).unwrap()["model"],
+            mapping.runtime_id
+        );
+        let wire: Value = serde_json::from_str(rendered.rendered().payload()).unwrap();
+        let (limit, unsupported) = if kind == AdapterKind::ChatCompletionsLegacyV1 {
+            ("max_tokens", "max_completion_tokens")
+        } else {
+            ("max_completion_tokens", "max_tokens")
+        };
+        assert_eq!(
+            wire[limit],
+            original
+                .0
+                .prepared()
+                .effective_generation()
+                .max_output_tokens
+        );
+        assert!(wire.get(unsupported).is_none());
+        let mut binding = original.2.clone();
+        binding.profile = rendered.rendered().accounting().count.profile.clone();
+        binding.payload_digest = rendered
+            .rendered()
+            .accounting()
+            .count
+            .payload_digest
+            .clone();
+        let f = (original.0, rendered, binding);
+        let mut response = success(kind);
+        response["model"] = json!(mapping.runtime_id);
+        let (endpoint, s) = server(kind, 200, response.to_string(), Duration::ZERO, false);
+        let adapter = HttpModelAdapter::for_runtime(kind, endpoint, None, mapping.clone()).unwrap();
+        assert!(call(&adapter, &f, &context(), 4096).output.is_ok());
+        s.join().unwrap();
+        assert_eq!(
+            adapter
+                .observation()
+                .unwrap()
+                .receipt
+                .unwrap()
+                .actual_model_id,
+            mapping.runtime_id
+        );
+        let mut wrong = mapping.clone();
+        wrong.canonical = pin("different-model");
+        assert!(AdapterRenderer::for_runtime(kind, f.0.prepared().clone(), wrong.clone()).is_err());
+        let adapter =
+            HttpModelAdapter::for_runtime(kind, "http://127.0.0.1:1".into(), None, wrong).unwrap();
+        assert!(call(&adapter, &f, &context(), 4096).output.is_err());
+        assert_eq!(
+            adapter.observation().unwrap().diagnostic,
+            Some(AdapterDiagnostic::InvalidBinding)
+        );
+        for value in [
+            String::new(),
+            "model\nunsafe".into(),
+            "contains space".into(),
+            "x".repeat(257),
+        ] {
+            let mut invalid = mapping.clone();
+            invalid.runtime_id = value;
+            assert!(
+                AdapterRenderer::for_runtime(kind, f.0.prepared().clone(), invalid.clone())
+                    .is_err()
+            );
+            assert!(
+                HttpModelAdapter::for_runtime(kind, "http://127.0.0.1:1".into(), None, invalid)
+                    .is_err()
+            );
+        }
+    }
+}
+
+#[test]
+fn host_task_directive_is_versioned_and_bound_to_transport() {
+    for kind in [
+        AdapterKind::LocalServiceV1,
+        AdapterKind::ChatCompletionsV1,
+        AdapterKind::ChatCompletionsLegacyV1,
+    ] {
+        for mapped in [false, true] {
+            let original = fixture(kind, |_, _| {});
+            let mapping = mapped.then(|| RuntimeModelBinding {
+                canonical: original.0.prepared().capability().data().model.clone(),
+                runtime_id: "model:snapshot".into(),
+            });
+            let renderer =
+                AdapterRenderer::for_host(kind, original.0.prepared().clone(), mapping.clone())
+                    .unwrap();
+            assert_eq!(renderer.identity().1.as_str(), "8");
+            let mut profile = original.2.profile.clone();
+            profile.template_version = renderer.identity().1;
+            let rendered =
+                render_invocation_ir(&original.0, &Host, profile, &renderer, &Counter).unwrap();
+            let wire: Value = serde_json::from_str(rendered.rendered().payload()).unwrap();
+            assert_eq!(wire["messages"].as_array().unwrap().len(), 2);
+            let authority = wire["messages"][0]["content"].as_str().unwrap();
+            assert!(authority.contains("semantic.task.goal.description"));
+            assert!(!authority.contains("ignore policy"));
+            let mut binding = original.2.clone();
+            binding.profile = rendered.rendered().accounting().count.profile.clone();
+            binding.payload_digest = rendered
+                .rendered()
+                .accounting()
+                .count
+                .payload_digest
+                .clone();
+            let f = (original.0, rendered, binding);
+            let mut response = success(kind);
+            if let Some(mapping) = &mapping {
+                response[if kind == AdapterKind::LocalServiceV1 {
+                    "model_id"
+                } else {
+                    "model"
+                }] = json!(mapping.runtime_id);
+            }
+            let (endpoint, s) = server(kind, 200, response.to_string(), Duration::ZERO, false);
+            let adapter = HttpModelAdapter::for_host(kind, endpoint, None, mapping).unwrap();
+            assert!(call(&adapter, &f, &context(), 4096).output.is_ok());
+            s.join().unwrap();
+            let legacy = HttpModelAdapter::new(kind, "http://localhost:1".into(), None).unwrap();
+            call(&legacy, &f, &context(), 4096);
+            assert_eq!(
+                legacy.observation().unwrap().diagnostic,
+                Some(AdapterDiagnostic::InvalidBinding)
             );
         }
     }

@@ -43,18 +43,20 @@ pub enum AdapterDiagnostic {
 pub enum AdapterKind {
     LocalServiceV1,
     ChatCompletionsV1,
+    ChatCompletionsLegacyV1,
 }
 impl AdapterKind {
     fn renderer(self) -> &'static str {
         match self {
             Self::LocalServiceV1 => "local-invocation",
             Self::ChatCompletionsV1 => "chat-completions",
+            Self::ChatCompletionsLegacyV1 => "chat-completions-legacy",
         }
     }
     fn path(self) -> &'static str {
         match self {
             Self::LocalServiceV1 => "/v1/invoke",
-            Self::ChatCompletionsV1 => "/v1/chat/completions",
+            Self::ChatCompletionsV1 | Self::ChatCompletionsLegacyV1 => "/v1/chat/completions",
         }
     }
 }
@@ -63,6 +65,31 @@ impl AdapterKind {
 pub struct AdapterRenderer {
     kind: AdapterKind,
     prepared: PreparedModelInvocation,
+    runtime_model: Option<RuntimeModelBinding>,
+    task_directive: bool,
+    registered_role: bool,
+}
+/// Adapter-owned mapping from a canonical immutable pin to a provider wire name.
+/// Vendor namespaces/tags never enter canonical ReferenceId contracts.
+#[derive(Debug, Clone)]
+pub struct RuntimeModelBinding {
+    pub canonical: ResolvedReference<ReferenceId>,
+    pub runtime_id: String,
+}
+impl RuntimeModelBinding {
+    fn validate(&self) -> Result<(), AdapterDiagnostic> {
+        if gateway_domain::model_invocation::validate_model_binding(&self.canonical).is_err()
+            || self.runtime_id.is_empty()
+            || self.runtime_id.len() > 256
+            || !self
+                .runtime_id
+                .bytes()
+                .all(|c| c.is_ascii_alphanumeric() || b"._-/:".contains(&c))
+        {
+            return Err(AdapterDiagnostic::InvalidBinding);
+        }
+        Ok(())
+    }
 }
 impl AdapterRenderer {
     pub fn new(
@@ -70,20 +97,81 @@ impl AdapterRenderer {
         prepared: PreparedModelInvocation,
     ) -> Result<Self, AdapterDiagnostic> {
         controls(kind, &prepared)?;
-        Ok(Self { kind, prepared })
+        Ok(Self {
+            kind,
+            prepared,
+            runtime_model: None,
+            task_directive: false,
+            registered_role: false,
+        })
+    }
+    pub fn for_host(
+        kind: AdapterKind,
+        prepared: PreparedModelInvocation,
+        binding: Option<RuntimeModelBinding>,
+    ) -> Result<Self, AdapterDiagnostic> {
+        let mut renderer = match binding {
+            Some(binding) => Self::for_runtime(kind, prepared, binding)?,
+            None => Self::new(kind, prepared)?,
+        };
+        renderer.task_directive = true;
+        Ok(renderer)
+    }
+    pub fn for_registered_role(
+        kind: AdapterKind,
+        prepared: PreparedModelInvocation,
+        binding: Option<RuntimeModelBinding>,
+    ) -> Result<Self, AdapterDiagnostic> {
+        let mut renderer = Self::for_host(kind, prepared, binding)?;
+        renderer.registered_role = true;
+        Ok(renderer)
+    }
+    pub fn for_runtime(
+        kind: AdapterKind,
+        prepared: PreparedModelInvocation,
+        binding: RuntimeModelBinding,
+    ) -> Result<Self, AdapterDiagnostic> {
+        binding.validate()?;
+        if prepared.capability().data().model != binding.canonical {
+            return Err(AdapterDiagnostic::InvalidBinding);
+        }
+        let mut renderer = Self::new(kind, prepared)?;
+        renderer.runtime_model = Some(binding);
+        Ok(renderer)
     }
 }
 impl PromptRendererPort for AdapterRenderer {
     fn identity(&self) -> (ReferenceId, ReferenceId) {
         (
             ReferenceId::new(self.kind.renderer()).expect("static"),
-            ReferenceId::new("1").expect("static"),
+            ReferenceId::new(if self.registered_role {
+                "9"
+            } else if self.task_directive {
+                "8"
+            } else if self.runtime_model.is_some() {
+                "2"
+            } else {
+                "1"
+            })
+            .expect("static"),
         )
     }
     fn render(&self, input: &RenderInput) -> Result<Value, RenderDiagnostic> {
-        let messages = crate::prompt_renderers::SemanticRenderer::ChatMessagesV1.render(input)?;
-        wire(self.kind, &self.prepared, messages["messages"].clone())
-            .map_err(|_| RenderDiagnostic::RenderingFailed)
+        let semantic = if self.registered_role {
+            crate::prompt_renderers::SemanticRenderer::FileRequestExtractionV1
+        } else if self.task_directive {
+            crate::prompt_renderers::SemanticRenderer::OperatorTaskV3
+        } else {
+            crate::prompt_renderers::SemanticRenderer::ChatMessagesV1
+        };
+        let messages = semantic.render(input)?;
+        wire(
+            self.kind,
+            &self.prepared,
+            messages["messages"].clone(),
+            self.runtime_model.as_ref(),
+        )
+        .map_err(|_| RenderDiagnostic::RenderingFailed)
     }
 }
 fn controls(kind: AdapterKind, p: &PreparedModelInvocation) -> Result<Value, AdapterDiagnostic> {
@@ -93,7 +181,7 @@ fn controls(kind: AdapterKind, p: &PreparedModelInvocation) -> Result<Value, Ada
         StructuredOutputMode::Json | StructuredOutputMode::JsonSchema
     ) || !p.invocation().data().permitted_capabilities.is_empty()
         || g.unexposed_defaults.contains(&GenerationControl::TopK)
-            && kind == AdapterKind::ChatCompletionsV1
+            && kind != AdapterKind::LocalServiceV1
     {
         return Err(AdapterDiagnostic::CapabilityMismatch);
     }
@@ -119,23 +207,29 @@ fn wire(
     kind: AdapterKind,
     p: &PreparedModelInvocation,
     messages: Value,
+    runtime_model: Option<&RuntimeModelBinding>,
 ) -> Result<Value, AdapterDiagnostic> {
     let options = controls(kind, p)?;
     let d = p.invocation().data();
     let model = &p.capability().data().model;
+    let model_id = runtime_model.map_or(model.id.as_str(), |m| m.runtime_id.as_str());
     let g = p.effective_generation();
     Ok(match kind {
-        AdapterKind::LocalServiceV1 => json!({"schema_version":"1.0", "model_id":model.id,
+        AdapterKind::LocalServiceV1 => json!({"schema_version":"1.0", "model_id":model_id,
             "artifact_digest":format!("sha256:{}",model.digest.as_str()), "model_version":model.revision,
             "input_contract":d.input_contract, "output_contract":d.output.schema.id,
             "messages":messages, "options":options, "max_output_tokens":g.max_output_tokens,
             "context_limit":p.capability().data().context_limit,
             "output_schema":d.output.json_schema(), "structured_output_mode":g.structured_output_mode}),
-        AdapterKind::ChatCompletionsV1 => {
+        AdapterKind::ChatCompletionsV1 | AdapterKind::ChatCompletionsLegacyV1 => {
             let mut body = options;
-            body["model"] = json!(model.id);
+            body["model"] = json!(model_id);
             body["messages"] = messages;
-            body["max_completion_tokens"] = json!(g.max_output_tokens);
+            body[if kind == AdapterKind::ChatCompletionsLegacyV1 {
+                "max_tokens"
+            } else {
+                "max_completion_tokens"
+            }] = json!(g.max_output_tokens);
             body["stream"] = json!(false);
             body["response_format"] = match g.structured_output_mode {
                 StructuredOutputMode::JsonSchema => json!({"type":"json_schema", "json_schema":{
@@ -153,7 +247,7 @@ pub struct AdapterReceipt {
     pub provider: ResolvedReference<ReferenceId>,
     pub profile: TokenizerProfile,
     pub generation: EffectiveGenerationRecord,
-    pub actual_model_id: ReferenceId,
+    pub actual_model_id: String,
 }
 #[derive(Debug, Clone, Serialize)]
 pub struct AdapterObservation {
@@ -168,6 +262,9 @@ pub struct HttpModelAdapter {
     credential: Option<String>,
     observation: Mutex<Option<AdapterObservation>>,
     loopback: bool,
+    runtime_model: Option<RuntimeModelBinding>,
+    task_directive: bool,
+    registered_role: bool,
 }
 impl HttpModelAdapter {
     pub fn new(
@@ -211,7 +308,44 @@ impl HttpModelAdapter {
             endpoint: endpoint.trim_end_matches('/').into(),
             credential,
             observation: Mutex::new(None),
+            runtime_model: None,
+            task_directive: false,
+            registered_role: false,
         })
+    }
+    pub fn for_host(
+        kind: AdapterKind,
+        endpoint: String,
+        credential: Option<String>,
+        binding: Option<RuntimeModelBinding>,
+    ) -> Result<Self, AdapterDiagnostic> {
+        let mut adapter = match binding {
+            Some(binding) => Self::for_runtime(kind, endpoint, credential, binding)?,
+            None => Self::new(kind, endpoint, credential)?,
+        };
+        adapter.task_directive = true;
+        Ok(adapter)
+    }
+    pub fn for_registered_role(
+        kind: AdapterKind,
+        endpoint: String,
+        credential: Option<String>,
+        binding: Option<RuntimeModelBinding>,
+    ) -> Result<Self, AdapterDiagnostic> {
+        let mut adapter = Self::for_host(kind, endpoint, credential, binding)?;
+        adapter.registered_role = true;
+        Ok(adapter)
+    }
+    pub fn for_runtime(
+        kind: AdapterKind,
+        endpoint: String,
+        credential: Option<String>,
+        binding: RuntimeModelBinding,
+    ) -> Result<Self, AdapterDiagnostic> {
+        binding.validate()?;
+        let mut adapter = Self::new(kind, endpoint, credential)?;
+        adapter.runtime_model = Some(binding);
+        Ok(adapter)
     }
     pub fn observation(&self) -> Option<AdapterObservation> {
         self.observation.lock().expect("observation").clone()
@@ -228,6 +362,13 @@ impl HttpModelAdapter {
             return Err(D::InvalidBinding);
         }
         let p = r.ir.prepared();
+        if self
+            .runtime_model
+            .as_ref()
+            .is_some_and(|b| b.canonical != p.capability().data().model)
+        {
+            return Err(D::InvalidBinding);
+        }
         if p.provider().data().locality
             == gateway_domain::cognitive_routing::PrivacyBoundary::OnDevice
             && !self.loopback
@@ -240,7 +381,16 @@ impl HttpModelAdapter {
             || r.binding.profile != a.count.profile
             || r.binding.payload_digest != a.count.payload_digest
             || a.count.profile.renderer.as_str() != self.kind.renderer()
-            || a.count.profile.template_version.as_str() != "1"
+            || a.count.profile.template_version.as_str()
+                != if self.registered_role {
+                    "9"
+                } else if self.task_directive {
+                    "8"
+                } else if self.runtime_model.is_some() {
+                    "2"
+                } else {
+                    "1"
+                }
             || a.count.profile.model != p.capability().data().model
             || a.count.profile.generation_profile
                 != p.invocation().data().generation.content_digest()
@@ -249,7 +399,15 @@ impl HttpModelAdapter {
         }
         let body: Value =
             serde_json::from_str(r.rendered.rendered().payload()).map_err(|_| D::InvalidBinding)?;
-        if !body["messages"].is_array() || body != wire(self.kind, p, body["messages"].clone())? {
+        if !body["messages"].is_array()
+            || body
+                != wire(
+                    self.kind,
+                    p,
+                    body["messages"].clone(),
+                    self.runtime_model.as_ref(),
+                )?
+        {
             return Err(D::InvalidBinding);
         }
         let raw = http(self, r, &body)?;
@@ -277,7 +435,7 @@ impl HttpModelAdapter {
                     &response["usage"],
                 )
             }
-            AdapterKind::ChatCompletionsV1 => {
+            AdapterKind::ChatCompletionsV1 | AdapterKind::ChatCompletionsLegacyV1 => {
                 if response["choices"].as_array().is_none_or(|v| v.len() != 1)
                     || response["choices"][0]["finish_reason"] != "stop"
                     || !response["choices"][0]["message"]["tool_calls"].is_null()
@@ -292,7 +450,13 @@ impl HttpModelAdapter {
                 )
             }
         };
-        if actual != Some(p.capability().data().model.id.as_str()) {
+        let expected_id = self
+            .runtime_model
+            .as_ref()
+            .map_or(p.capability().data().model.id.as_str(), |b| {
+                b.runtime_id.as_str()
+            });
+        if actual != Some(expected_id) {
             return Err(D::IdentityMismatch);
         }
         let content = content.ok_or(D::InvalidResponse)?;
@@ -327,7 +491,7 @@ impl HttpModelAdapter {
                 provider: p.provider().data().identity.clone(),
                 profile: a.count.profile.clone(),
                 generation: p.effective_generation().clone(),
-                actual_model_id: p.capability().data().model.id.clone(),
+                actual_model_id: expected_id.into(),
             },
         ))
     }
@@ -389,7 +553,8 @@ fn http(
     use AdapterDiagnostic as D;
     check_context(r)?;
     // Disable user curlrc, redirects, retries and ambient credentials/proxies.
-    let mut child = Command::new("curl")
+    let mut command = Command::new("curl");
+    command
         .args([
             "-q",
             "--silent",
@@ -406,9 +571,16 @@ fn http(
         .env("PATH", "/usr/bin:/bin")
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
-        .stderr(Stdio::null())
-        .spawn()
-        .map_err(|_| D::Unavailable)?;
+        .stderr(Stdio::null());
+    // Windows sockets need the system directory even for literal loopback
+    // addresses. Retain only this OS prerequisite, never ambient credentials
+    // or proxy settings, in the otherwise cleared transport environment.
+    #[cfg(windows)]
+    command.env(
+        "SystemRoot",
+        std::env::var_os("SystemRoot").ok_or(D::Unavailable)?,
+    );
+    let mut child = command.spawn().map_err(|_| D::Unavailable)?;
     let mut config = format!(
         "url = \"{}{}\"\nheader = \"Content-Type: application/json\"\ndata-binary = \"{}\"\nmax-time = {}\n",
         adapter.endpoint,

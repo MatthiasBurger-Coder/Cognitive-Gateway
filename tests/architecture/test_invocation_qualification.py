@@ -73,6 +73,67 @@ class InvocationQualificationTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             QUALIFY.run(ROOT / 'crates/evidence', False, self.manifest())
 
+    def test_parent_requires_local_bridge_tests_and_coverage(self):
+        manifest = QUALIFY.validate_manifest(json.loads(QUALIFY.MANIFEST.read_text()))
+        gate = next(g for g in manifest['gates'] if g['id'] == 'local-model-python')
+        self.assertIn('-m unittest discover -s tests/local-model', gate['command'])
+        self.assertIn('--source=services/local-model', gate['command'])
+        self.assertIn('--include="*/canonical.py" --fail-under=95', gate['command'])
+        self.assertIn('--include="*/service.py" --fail-under=95', gate['command'])
+        for criterion in manifest['criteria']:
+            if criterion['id'] == 'P17' or any('/model_adapters.rs::' in t for t in criterion['tests']):
+                self.assertIn(gate['id'], criterion['gates'], criterion['id'])
+
+    def test_real_bridge_test_or_coverage_failure_blocks_parent_qualification(self):
+        from unittest.mock import patch
+        manifest = json.loads(QUALIFY.MANIFEST.read_text())
+        bridge = next(g for g in manifest['gates'] if g['id'] == 'local-model-python')
+        # Execute the actual bridge gate against a tiny isolated bridge. Other
+        # gates are synthetic so this regression never runs Rust or live models.
+        for mode in ['test-failure', 'low-coverage', 'pass']:
+            with self.subTest(mode=mode), tempfile.TemporaryDirectory() as temp:
+                root = Path(temp)
+                source = root / 'services/local-model/canonical.py'
+                source.parent.mkdir(parents=True)
+                source.write_text("def classify(value):\n    if value:\n        return 'yes'\n    return 'no'\n")
+                (source.parent / 'service.py').write_text('def ready():\n    return True\n')
+                tests = root / 'tests/local-model'
+                tests.mkdir(parents=True)
+                assertions = ("self.assertEqual(classify(True), 'no')" if mode == 'test-failure'
+                              else "self.assertEqual(classify(True), 'yes')")
+                if mode == 'pass':
+                    assertions += "\n        self.assertEqual(classify(False), 'no')"
+                (tests / 'test_bridge.py').write_text(
+                    "import sys, unittest\nfrom pathlib import Path\n"
+                    "sys.path.insert(0, str(Path('services/local-model').resolve()))\n"
+                    "from canonical import classify\nfrom service import ready\n"
+                    "class BridgeTests(unittest.TestCase):\n"
+                    "    def test_result(self):\n        self.assertTrue(ready())\n        " + assertions + "\n")
+                def executor(command, log, env):
+                    if command == bridge['command']:
+                        with patch.object(QUALIFY, 'ROOT', root):
+                            return QUALIFY.execute(command, log, env)
+                    log.write_text('\n'.join(
+                        f"test {test.split('::', 1)[1]} ... ok"
+                        for c in manifest['criteria'] for test in c['tests'])
+                        + '\ntest result: ok. 1 passed;\n')
+                    return 0
+                report = QUALIFY.run(root / 'evidence', True, manifest, executor,
+                                     snapshot=lambda _: {'fixture': 'unchanged'})
+                gates = {g['id']: g for g in report['gates']}
+                self.assertEqual(gates[bridge['id']]['status'], 'PASS' if mode == 'pass' else 'FAIL')
+                self.assertEqual(report['status'], 'COMPONENT_PASS' if mode == 'pass' else 'FAIL')
+                self.assertEqual(report['release_status'], 'NOT_COMPLETE')
+                if mode != 'pass':
+                    self.assertEqual(gates['architecture']['status'], 'NOT_RUN')
+                    self.assertTrue(all(c['status'] == 'NOT_VERIFIED' for c in report['criteria']
+                                        if bridge['id'] in c['gates']))
+                if mode == 'test-failure':
+                    self.assertFalse((root / 'evidence/local-model-python.json').exists())
+                else:
+                    coverage = json.loads((root / 'evidence/local-model-python.json').read_text())
+                    self.assertEqual(coverage['files']['services/local-model/canonical.py']['summary']['percent_covered'], 100 if mode == 'pass' else 75)
+
 class RunnerInfrastructureTests(unittest.TestCase):
     def test_real_commands_keep_logs_and_propagate_pipeline_failure(self):
         import os

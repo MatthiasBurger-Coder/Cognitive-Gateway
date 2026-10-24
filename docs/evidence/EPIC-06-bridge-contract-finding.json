@@ -1,0 +1,90 @@
+{
+  "schema_version": "1.0",
+  "issue": 178,
+  "id": "EPIC06-BRIDGE-MESSAGES",
+  "status": "RESOLVED",
+  "recorded_at": "2026-10-18T14:20:25.548559+00:00",
+  "title": "Align host renderer messages with the canonical local bridge contract",
+  "observed": {
+    "renderer": "TaskChatMessagesV3",
+    "wire_template_version": "4",
+    "host_roles": [
+      "system",
+      "user",
+      "user"
+    ],
+    "bridge_roles": [
+      "system",
+      "user"
+    ],
+    "bridge_check": "services/local-model/canonical.py:24: len(messages) == 2",
+    "impact": "Local /v1/invoke rejects host messages before inference; more RAM or a larger model cannot repair this contract mismatch."
+  },
+  "source_sha256": {
+    "crates/gateway-daemon/src/prompt_renderers.rs": "f64b47bb1bc98b0bc3c6c8ba15de1794eea8d111ad134cf0cc95183a6e461d92",
+    "crates/gateway-daemon/src/model_adapters.rs": "8c46be7eab7d289e3acb467465b7cbcdc86018d4613c4103bbb8ba74c41cfd5c",
+    "services/local-model/canonical.py": "694c6a0c989316aadc28d335b2e836f9941f4a573c97bd6c6765aefdbe57c060"
+  },
+  "reproduction": {
+    "evidence_kind": "component_fixture",
+    "purpose": "Reproduce exact local bridge message contract with actual canonical.invoke and explicitly synthetic registry/runtime; no live claim",
+    "results": [
+      {
+        "message_roles": [
+          "system",
+          "user"
+        ],
+        "status": "ACCEPTED",
+        "diagnostic": null,
+        "runtime_called": true
+      },
+      {
+        "message_roles": [
+          "system",
+          "user",
+          "user"
+        ],
+        "status": "REJECTED",
+        "diagnostic": "request_invalid",
+        "runtime_called": false
+      }
+    ]
+  },
+  "correction_requirements": [
+    "Make the versioned renderer and bridge agree while preserving the complete admitted handoff and keeping evidence in the data channel.",
+    "Preserve existing version-1 callers and reject extra authority/history roles.",
+    "Add a regression that passes the actual host-rendered wire message shape through canonical.invoke, rather than validating the renderer and bridge against separate compatible fixtures.",
+    "Retain the earlier failed live reports and unchanged dataset labels and acceptance thresholds."
+  ],
+  "acceptance": [
+    "The new host message shape reaches the synthetic runtime through the actual canonical bridge in a deterministic integration regression.",
+    "Wrong values remain rejected by the host and arbitrary model/client instructions cannot become authority.",
+    "Rendering, bridge, architecture and coverage checks pass against the corrected source.",
+    "Both real HTTP adapter paths pass the declared role suite in the original execution session.",
+    "Full candidate qualification passes without source drift before the parent issue is declared complete."
+  ],
+  "execution_owner": "Existing task: Audit EPIC-06 Invocation Plane (01a14ef4-4cbf-7223-8008-bf4bd9b2fa87), as selected by the user.",
+  "handoff_status": "Historical message delivery was rejected by automatic review. After user authorization and enabled environment access, coordinating messages were delivered and the original execution task implemented the corrected contract and explicit registered role.",
+  "resolution": {
+    "recorded_at": "2026-10-18T17:32:49.055720+00:00",
+    "renderer": "FileRequestExtractionV1 (explicit registered role); OperatorTaskV3 preserved",
+    "wire_template_version": "9 (registered role); 8 (generic operator)",
+    "roles": [
+      "system",
+      "user"
+    ],
+    "description": "Both generic operator and explicit registered role preserve exactly system,user and every inline semantic section; registered role regression covers both adapter kinds and replay. Full current component gates pass.",
+    "source_sha256": {
+      "crates/gateway-daemon/src/prompt_renderers.rs": "f0a519180b33d37a6dce553ff7844678163ea208f5abcd5bf70d49f521361330",
+      "crates/gateway-daemon/src/model_adapters.rs": "8e6648e8f92fe51fda115be5d0c7abe8f732d69d4582df487e08c99563997fa4",
+      "services/local-model/canonical.py": "694c6a0c989316aadc28d335b2e836f9941f4a573c97bd6c6765aefdbe57c060",
+      "crates/gateway-daemon/src/file_request_extraction_v1.txt": "9b33a1041d62ad0ec6b816a09731a80e0ac075019c7943c5ce70294b3ed11092"
+    },
+    "component_evidence": "target/epic06-host-live-final-accepted-20261018/qualification.json",
+    "component_status": "COMPONENT_PASS",
+    "test": "crates/gateway-daemon/tests/invocation_host.rs::registered_instruction_role_is_explicit_pinned_and_preserves_full_context",
+    "limitation": "Qualified for the explicit registered extraction role through two HTTP transports sharing one Docker model; general task sessions and catalog promotion are separate.",
+    "live_evidence": "docs/evidence/EPIC-06-parent-final-execution-bundle.json.gz",
+    "final_parent_review": "docs/evidence/EPIC-06-parent-acceptance-review.json"
+  }
+}

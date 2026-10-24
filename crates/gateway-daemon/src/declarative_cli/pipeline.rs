@@ -411,10 +411,10 @@ fn downstream(options: &Options) -> Result<(Value, i32), CliError> {
         .get("policy")
         .map(|_| policy(options, &resolved, &artifact["basis"]))
         .transpose()?;
-    if let Some((_, _, _, policy_exit)) = &evaluated {
-        if *policy_exit != 0 {
-            exit = *policy_exit;
-        }
+    if let Some((_, _, _, policy_exit)) = &evaluated
+        && *policy_exit != 0
+    {
+        exit = *policy_exit;
     }
     if options.command == "compile" {
         let (authority, context, report, policy_exit) =
