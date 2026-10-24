@@ -500,21 +500,25 @@ fn configuration_binding_cancellation_and_deadlines_fail_closed() {
     let f = fixture(AdapterKind::LocalServiceV1, |_, _| {});
     assert!(AdapterRenderer::new(AdapterKind::ChatCompletionsV1, f.0.prepared().clone()).is_err());
     for cancel in [true, false] {
-        let (endpoint, server) = server(
+        let (accepted, received) = std::sync::mpsc::channel();
+        let (endpoint, server) = server_observed(
             AdapterKind::LocalServiceV1,
             200,
             success(AdapterKind::LocalServiceV1).to_string(),
-            Duration::from_millis(200),
+            Duration::from_millis(if cancel { 200 } else { 1200 }),
             false,
+            Some(accepted),
         );
         let adapter = HttpModelAdapter::new(AdapterKind::LocalServiceV1, endpoint, None).unwrap();
         let mut cx = context();
         if !cancel {
-            cx.deadline = Instant::now() + Duration::from_millis(60);
+            cx.deadline = Instant::now() + Duration::from_millis(600);
         }
         let other = cx.clone();
         let canceller = thread::spawn(move || {
-            thread::sleep(Duration::from_millis(40));
+            // Cancel only after the complete request reached the fixture;
+            // process startup and Windows scheduling are not the behavior under test.
+            received.recv_timeout(Duration::from_secs(3)).unwrap();
             if cancel {
                 other.cancel();
             }
