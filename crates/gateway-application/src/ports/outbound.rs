@@ -2,6 +2,8 @@ use gateway_domain::{
     CapabilityId, ContextCacheEntryId, ContextScopeId, KnowledgeQuery, RetrievedKnowledge,
 };
 
+pub use crate::connectors::ConnectorRuntimePort;
+
 use crate::{
     context::ProjectContext,
     external_context::{

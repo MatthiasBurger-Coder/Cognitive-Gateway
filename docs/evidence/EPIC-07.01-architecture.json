@@ -1,0 +1,103 @@
+{
+  "issue": 224,
+  "parent_issue": 223,
+  "epic": "EPIC-07.01",
+  "date": "2026-10-24",
+  "status": "VERIFIED_ARCHITECTURE_FOUNDATION",
+  "mode": "DEVELOPMENT",
+  "scope": "Normative architecture, provider-neutral v1 application/runtime port types and traits, ADR-022, Mermaid diagrams, ownership/compatibility/authority/failure rules and compile/dependency evidence. No executable connector runtime or authorization enforcement.",
+  "source_binding": {
+    "base_commit": "f3ba1b882d9a2f61dab8aad1c9fdb89fde979a02",
+    "candidate": "Local worktree changes over base; no commit, publication or issue closure performed",
+    "files_sha256": {
+      "crates/gateway-application/src/connectors.rs": "33ec3996f594f1e219293886bcb70a169df4d52f00ac17dc27c07328be7c8d2f",
+      "crates/gateway-application/src/lib.rs": "a34d7f3718617a97ec396a202a04d5239609506c195fd9478a9d0fe458489448",
+      "crates/gateway-application/src/ports/inbound.rs": "c8286c3312bc9dbc1697ee7a3c0622cd42abd25afe77abbf59766f0d236ba34f",
+      "crates/gateway-application/src/ports/outbound.rs": "7eb85d586ff298a980891afb937051a5e8082338938fd683a12502a504aef50d",
+      "crates/gateway-application/tests/connectors.rs": "fc00f2dc56943e7c268a2f29865c317fcdb69774806bc23392a6e6853d49f018",
+      "tests/architecture/test_connectors.py": "ee931ebe462c8c006473a547339fe6f17afd97e84d0c5cf1cd6b202dbdba0058",
+      "docs/mcp-connector-runtime.md": "142ddd5906d9eff44ed49b5224b84ebcc4e2f4ddfe0dfdc478f8079128525379",
+      "docs/adr/ADR-022-outbound-connector-ownership.md": "24ef1d0c39a41109654eaf61908f01b6e2df8901d6a4ce2a41dfdbd219a092bb",
+      "docs/current-architecture-state.md": "07585a5e35357fea63461edb6ae4cbd5211554a48160660c22a5dac46cfdad17",
+      "docs/README.md": "ec686a487ab9601cbfca726af8b69b66c3e6325ed55c79271de4e9f272b96eba",
+      "docs/arc42/05-building-block-view.md": "e69c3f27c23333bbad97bf5737c6886a958ef98584e9af93f51bc9e7cb990784",
+      "docs/arc42/09-architecture-decisions.md": "c4d7b28569d53a080f17000afe2e464c38d221eaba50e14f6dcba88ccd49c181",
+      "scripts/check-dependencies.py": "694e376953d73488bb2b1eacb936e0c8d5cfb3ab841733654c98d4bff4fd0d73",
+      "scripts/check-architecture.sh": "a44c4633c828db0a4ea7f4539c3def28055172b4b72bde2db593737d61c9d136",
+      "Cargo.toml": "3c669b3d2cb91b2f43cd6d2ecc49843298ec12a18e7057cb67f4bc608913f6e5",
+      "Cargo.lock": "a334788810b3894e9a1b7b21bb3c0e9202542e3123e73ed21b423616ee3ccf62",
+      "crates/gateway-application/Cargo.toml": "9249de4a8c35e6d613d64b0d9015b0c9f7d1e023bddd23f6c2d0d21c83c63a4a",
+      "crates/gateway-domain/Cargo.toml": "4046090aa3a98ef50a46f25e9523cdd94dde5cd95856ac55ed97bf2f55d3730e"
+    },
+    "hash_format": "SHA-256 of Git repository blob bytes (checkout line-ending conversion excluded)"
+  },
+  "review": {
+    "method": "Single implementing agent architecture/contract review; no independent reviewer or external approval claimed",
+    "checklist": "docs/mcp-connector-runtime.md#qualification-and-delivery-boundary",
+    "adr": "docs/adr/ADR-022-outbound-connector-ownership.md",
+    "requirements": "Issue #224 and parent #223 including Agent Architecture Integration Review dated 2026-10-04"
+  },
+  "criteria": {
+    "C01": "VERIFIED_AT_ARCHITECTURE_LEVEL",
+    "C02": "VERIFIED_AT_ARCHITECTURE_LEVEL",
+    "C03": "VERIFIED_AT_ARCHITECTURE_LEVEL",
+    "C04": "VERIFIED_AT_ARCHITECTURE_LEVEL",
+    "C05": "VERIFIED_AT_ARCHITECTURE_LEVEL",
+    "C06": "VERIFIED_AT_ARCHITECTURE_LEVEL",
+    "C07": "VERIFIED_AT_ARCHITECTURE_LEVEL"
+  },
+  "checks": [
+    {
+      "command": "cargo test -p gateway-application --test connectors --locked",
+      "status": "PASS",
+      "passed": 2,
+      "scope": "Compile conformance of driving port and two independent synthetic driven adapter types; typed denial fixtures only"
+    },
+    {
+      "command": "cargo test -p gateway-application --doc connectors --locked",
+      "status": "PASS",
+      "passed": 1,
+      "scope": "Compile-fail: runtime invocation rejects an unbound proposal type"
+    },
+    {
+      "command": "python3 -m unittest discover -s tests/architecture -p 'test_*connect*.py'",
+      "status": "PASS",
+      "passed": 3
+    },
+    {
+      "command": "python3 -m unittest discover -s tests/architecture -p 'test_*.py'",
+      "status": "PASS",
+      "run": 83,
+      "passed": 82,
+      "skipped": 1,
+      "note": "Existing environment-dependent skip; fixture tests intentionally print negative gate statuses"
+    },
+    {
+      "command": "bash scripts/check-architecture.sh",
+      "status": "PASS"
+    },
+    {
+      "command": "cargo clippy -p gateway-application --test connectors --locked -- -D warnings",
+      "status": "PASS"
+    },
+    {
+      "command": "cargo fmt --check",
+      "status": "PASS"
+    },
+    {
+      "command": "git diff --check",
+      "status": "PASS"
+    }
+  ],
+  "coverage": {
+    "status": "NOT_APPLICABLE_TO_DECLARATIONS_ONLY",
+    "reason": "New production module contains data declarations, derived traits, constant and trait signatures; no executable application/runtime policy or normalization logic. No quality gate changed or bypassed."
+  },
+  "limitations": [
+    "Live MCP protocol, transport, credentials, policy enforcement, normalization, retries, scope lifecycle and external effects remain NOT_IMPLEMENTED in this slice.",
+    "Public dispatch records are inspectable and constructible, not authorization tokens; #230 must validate trusted current bindings and composition access.",
+    "MCP 2025-11-25 is a pinned target profile, not implemented protocol support. stdio is the first production target; Streamable HTTP needs separate implementation and qualification.",
+    "Full workspace/release/coverage/live qualification gates were not run for this declaration-only slice; focused compile, lint and architecture checks are recorded above.",
+    "Parent EPIC-07 remains incomplete; #225 defines manifest/version format and #226-235 implement and qualify runtime behavior."
+  ]
+}
