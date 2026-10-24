@@ -553,7 +553,8 @@ fn http(
     use AdapterDiagnostic as D;
     check_context(r)?;
     // Disable user curlrc, redirects, retries and ambient credentials/proxies.
-    let mut child = Command::new("curl")
+    let mut command = Command::new("curl");
+    command
         .args([
             "-q",
             "--silent",
@@ -570,9 +571,16 @@ fn http(
         .env("PATH", "/usr/bin:/bin")
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
-        .stderr(Stdio::null())
-        .spawn()
-        .map_err(|_| D::Unavailable)?;
+        .stderr(Stdio::null());
+    // Windows sockets need the system directory even for literal loopback
+    // addresses. Retain only this OS prerequisite, never ambient credentials
+    // or proxy settings, in the otherwise cleared transport environment.
+    #[cfg(windows)]
+    command.env(
+        "SystemRoot",
+        std::env::var_os("SystemRoot").ok_or(D::Unavailable)?,
+    );
+    let mut child = command.spawn().map_err(|_| D::Unavailable)?;
     let mut config = format!(
         "url = \"{}{}\"\nheader = \"Content-Type: application/json\"\ndata-binary = \"{}\"\nmax-time = {}\n",
         adapter.endpoint,

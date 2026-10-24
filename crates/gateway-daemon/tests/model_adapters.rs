@@ -210,6 +210,8 @@ fn server_observed(
                 Err(error) => panic!("fixture request missing: {error}"),
             }
         };
+        // Accepted sockets inherit nonblocking mode on Windows.
+        stream.set_nonblocking(false).unwrap();
         stream
             .set_read_timeout(Some(Duration::from_secs(3)))
             .unwrap();
