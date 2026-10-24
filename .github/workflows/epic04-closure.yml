@@ -34,7 +34,7 @@ jobs:
       - name: Install qualification clients and validators
         if: steps.claim.outputs.required == 'true'
         run: |
-          python3 -m pip install -r tests/contracts/requirements.txt
+          python3 -m pip install -r tests/contracts/requirements.txt coverage==7.15.2
           npm install -g @openai/codex@0.162.1
       - name: Require full evidence for EPIC-04 closure
         if: steps.claim.outputs.required == 'true'
