@@ -35,3 +35,18 @@ class ModelAdaptersArchitecture(unittest.TestCase):
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
         module.self_test()
+
+    def test_general_coverage_keeps_live_profile_opt_in(self):
+        gates = json.loads((ROOT / 'scripts/quality-gates.json').read_text())
+        integration_gates = [g for g in gates if '--include-ignored' in g['command']]
+        self.assertEqual({g['name'] for g in integration_gates}, {
+            'CG-03 registry CLI coverage gate',
+            'CG-16 retrieval pipeline coverage gate',
+        })
+        for gate in integration_gates:
+            # PostgreSQL tests remain included; external live endpoints require
+            # the separate explicit profile rather than a general CI runner.
+            self.assertIn('--include-ignored --skip live_adapter_profile', gate['command'])
+        registry_gate = next(g for g in integration_gates
+                             if g['name'] == 'CG-03 registry CLI coverage gate')
+        self.assertIn('--fail-under-lines 95', registry_gate['command'])

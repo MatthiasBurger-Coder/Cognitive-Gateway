@@ -89,7 +89,7 @@
   },
   {
     "name": "CG-03 registry CLI coverage gate",
-    "command": "cargo llvm-cov -p gateway-daemon --all-targets --fail-under-lines 95 --json --output-path \"$EVIDENCE_DIR/cg11-coverage.json\" -- --include-ignored"
+    "command": "cargo llvm-cov -p gateway-daemon --all-targets --fail-under-lines 95 --json --output-path \"$EVIDENCE_DIR/cg11-coverage.json\" -- --include-ignored --skip live_adapter_profile"
   },
   {
     "name": "Install declarative CLI",
@@ -133,7 +133,7 @@
   },
   {
     "name": "CG-16 retrieval pipeline coverage gate",
-    "command": "cargo llvm-cov clean --workspace\nCARGO_BUILD_JOBS=1 cargo llvm-cov --workspace --tests --json --output-path \"$EVIDENCE_DIR/cg16-coverage.json\" -- --include-ignored\npython3 scripts/check-cg16-coverage.py --self-test\npython3 scripts/check-cg16-coverage.py \"$EVIDENCE_DIR/cg16-coverage.json\"\n"
+    "command": "cargo llvm-cov clean --workspace\nCARGO_BUILD_JOBS=1 cargo llvm-cov --workspace --tests --json --output-path \"$EVIDENCE_DIR/cg16-coverage.json\" -- --include-ignored --skip live_adapter_profile\npython3 scripts/check-cg16-coverage.py --self-test\npython3 scripts/check-cg16-coverage.py \"$EVIDENCE_DIR/cg16-coverage.json\"\n"
   },
   {
     "name": "CG-18 governed memory coverage gate",
