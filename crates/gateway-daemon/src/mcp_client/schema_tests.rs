@@ -32,3 +32,23 @@ fn strict_scalar_object_schema_rejects_unknown_required_semantics() {
     )
     .unwrap();
 }
+
+#[test]
+fn contracts_are_validated_before_optional_values_are_present() {
+    for schema in [
+        json!({"type":"string","properties":{}}),
+        json!({"type":"string","title":false}),
+        json!({"type":"object","properties":{"":{"type":"string"}},"additionalProperties":false}),
+        json!({"type":"object","properties":{"a":{"type":"string","pattern":"x"}},"additionalProperties":false}),
+        json!({"type":"object","properties":{"a":{"type":"string"}},"required":["a","a"],"additionalProperties":false}),
+    ] {
+        assert_eq!(validate(&schema), Err(Error::Schema));
+    }
+    for (schema, value) in [
+        (json!({"type":"integer"}), json!(-3)),
+        (json!({"type":"integer"}), json!(u64::MAX)),
+        (json!({"type":"boolean"}), json!(false)),
+    ] {
+        accepts(&schema, &value).unwrap();
+    }
+}

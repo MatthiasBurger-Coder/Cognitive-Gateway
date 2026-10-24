@@ -6,7 +6,9 @@ and the [connector architecture](mcp-connector-runtime.md). Rust in
 owns deterministic validation, canonical encoding, compatibility and identity-set
 checks. The [JSON Schema](../schemas/connector-manifest-v1.schema.json) defines the
 strict wire shape. These descriptions grant no discovery, transport, policy,
-credential, trust or execution authority. The runtime remains planned.
+credential, trust or execution authority. The [protocol runtime](mcp-client-runtime.md)
+and [deterministic mapping](connector-mapping-v1.md) implement discovery and dispatch
+behind required admission and normalization ports.
 
 ## Identity and ownership
 
@@ -48,8 +50,9 @@ one connector ID in the same proposed set.
 Each entry carries `kind`, `name`, `schema_digest`, `capability_mapping_ref` and
 `source_mapping_ref`. Names use `[A-Za-z0-9_.-]{1,96}` and are case sensitive.
 `schema_digest` is lowercase hex SHA-256 of the complete versioned canonical schema
-bundle for that entry, including input/output contracts where applicable. #227 owns
-schema translation/dialect validation and verifies the resolved bundle's digest.
+bundle for that entry, including input/output contracts where applicable.
+[Mapping v1](connector-mapping-v1.md) owns schema profile validation and verifies
+the complete discovered entry bundle's digest.
 Duplicate `(kind, name)` keys are rejected even if every other field matches;
 conflicting schema or mapping metadata cannot silently replace an entry.
 

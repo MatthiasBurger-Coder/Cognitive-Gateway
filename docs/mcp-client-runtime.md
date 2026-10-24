@@ -12,9 +12,9 @@ raw call endpoint or model-visible transport handle.
 
 The host is an embeddable synchronous application boundary, not a new CLI or an
 EPIC-08 coordinator. Call from a blocking worker if the surrounding host uses an
-async executor. Production canonical mapping, normalization, credential service
-and policy/consent service remain #227/#228/#229/#230. Injected conformance
-adapters establish protocol/runtime behavior, not those later integrations.
+async executor. [Production canonical mapping](connector-mapping-v1.md) is
+implemented under #227. Normalization, credential service and policy/consent
+service remain #228/#229/#230. Injected conformance adapters establish protocol/runtime behavior, not those later integrations.
 
 `ConnectorAdmissionPort` is an additive driving-host authority contract in
 connector port v1. `admit_target` checks current admission for lifecycle/discovery
@@ -96,7 +96,9 @@ Schema profile supports closed objects containing string, integer and boolean
 properties, with required fields and optional descriptive metadata. Unknown
 keywords/dialects, open objects, nested values, decimals and sets fail closed.
 Structured tool outputs are checked against an advertised output schema under
-the same profile. Other schema support requires #227 qualification; it is not
+the same profile. [Mapping v1](connector-mapping-v1.md) validates schemas at
+discovery and enforces explicit result contracts even without advertised output
+schemas. Additional schema support requires separate qualification; it is not
 silently approximated. Resource results preserve their exact requested URI and
 require text or blob content. Tool `isError` remains explicit in `ProtocolResult`.
 Raw bounded content stays with the trusted normalizer; it is never a domain value.

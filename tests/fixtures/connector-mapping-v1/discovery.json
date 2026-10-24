@@ -1,0 +1,36 @@
+{
+  "prompts": [
+    {
+      "name": "summary"
+    }
+  ],
+  "resources": [
+    {
+      "name": "one",
+      "uri": "records://one"
+    }
+  ],
+  "templates": [
+    {
+      "name": "record",
+      "uriTemplate": "records://{id}"
+    }
+  ],
+  "tools": [
+    {
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "query": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "type": "object"
+      },
+      "name": "records.read"
+    }
+  ]
+}

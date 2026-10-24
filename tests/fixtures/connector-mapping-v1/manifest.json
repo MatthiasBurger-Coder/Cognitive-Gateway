@@ -1,0 +1,65 @@
+{
+  "digest": "2e60a24f895fee4a4339391a37dfb7ea387d455f761c2660532a6b40cb36194f",
+  "manifest": {
+    "compatibility": {
+      "gateway_major": 0,
+      "minimum_gateway_minor": 1,
+      "port_version": "1"
+    },
+    "configuration_ref": "config.records.local",
+    "connector_id": "example.records",
+    "deprecation": null,
+    "health": {
+      "contract_ref": "health.ping.v1",
+      "interval_seconds": 30,
+      "timeout_seconds": 5
+    },
+    "inventory": [
+      {
+        "capability_mapping_ref": "mapping.records.read.v1",
+        "kind": "tool",
+        "name": "records.read",
+        "schema_digest": "0edc78ea66d25b995600c704619659b93ba80147c2fd27e963d02e68037e9aa1",
+        "source_mapping_ref": null
+      },
+      {
+        "capability_mapping_ref": null,
+        "kind": "resource",
+        "name": "one",
+        "schema_digest": "0239db224ec1f19ad4e962cfbd733a4406f58aa48cef13fd52f441281db3f3c6",
+        "source_mapping_ref": "mapping.records.source.v1"
+      },
+      {
+        "capability_mapping_ref": null,
+        "kind": "prompt",
+        "name": "summary",
+        "schema_digest": "b1bd004ba183855ad712c9ee3014d22949b6f4e211af495d4c68c5c60a2d7307",
+        "source_mapping_ref": null
+      }
+    ],
+    "lifecycle": "enabled",
+    "manifest_version": "1.0",
+    "profiles": {
+      "authentication": "auth.records.readonly",
+      "sensitivity": "sensitivity.internal",
+      "trust": "trust.external.unverified"
+    },
+    "protocol": {
+      "name": "mcp",
+      "rpc_version": "2.0",
+      "version": "2025-11-25"
+    },
+    "server_id": "example.records.local",
+    "server_version": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    },
+    "transport": "stdio",
+    "version": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    }
+  }
+}

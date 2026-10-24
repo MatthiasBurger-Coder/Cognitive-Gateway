@@ -398,7 +398,7 @@ impl Runtime {
         }
     }
 }
-fn typed(value: &TypedValue) -> Result<Value, Error> {
+pub(super) fn typed(value: &TypedValue) -> Result<Value, Error> {
     value.validate().map_err(|_| Error::Schema)?;
     match value {
         TypedValue::Boolean(v) => Ok(json!(v)),

@@ -1,0 +1,44 @@
+{
+  "mapping_version": "1.0",
+  "records": [
+    {
+      "capability": "records.read",
+      "class": "READ",
+      "consent": "policy",
+      "idempotency": "idempotent",
+      "idempotency_key": null,
+      "kind": "tool",
+      "name": "records.read",
+      "reference": "mapping.records.read.v1",
+      "result_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "value"
+        ],
+        "type": "object"
+      },
+      "retry_safety": "read_only",
+      "side_effects": "none",
+      "source": null
+    },
+    {
+      "capability": "records.resource.read",
+      "class": "READ",
+      "consent": "policy",
+      "idempotency": "idempotent",
+      "idempotency_key": null,
+      "kind": "resource",
+      "name": "one",
+      "reference": "mapping.records.source.v1",
+      "result_schema": null,
+      "retry_safety": "read_only",
+      "side_effects": "none",
+      "source": "records.one"
+    }
+  ]
+}

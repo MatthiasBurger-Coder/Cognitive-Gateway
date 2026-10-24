@@ -88,3 +88,5 @@ until the shared session API exists. See [the versioned contract](../docs/codex-
 [`connector-manifest-v1.schema.json`](connector-manifest-v1.schema.json) defines the
 EPIC-07.02 reference-only connector manifest. Rust adds canonical digest, uniqueness,
 compatibility and cross-field validation. See [the contract](../docs/connector-manifest-v1.md).
+
+`connector-mapping-v1.schema.json` defines strict explicit outbound tool/resource mapping records. Rust additionally enforces reference resolution, schema profile, effect/retry consistency and uniqueness; see [mapping v1](../docs/connector-mapping-v1.md).

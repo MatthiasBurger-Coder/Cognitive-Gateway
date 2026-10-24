@@ -1,0 +1,256 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cognitive-gateway.local/schemas/connector-mapping-v1.schema.json",
+  "title": "CG connector mapping v1 (descriptive, never authorization)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "mapping_version",
+    "records"
+  ],
+  "properties": {
+    "mapping_version": {
+      "const": "1.0"
+    },
+    "records": {
+      "type": "array",
+      "maxItems": 256,
+      "items": {
+        "$ref": "#/$defs/record"
+      }
+    }
+  },
+  "$defs": {
+    "scalar": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "enum": [
+            "string",
+            "integer",
+            "boolean"
+          ]
+        },
+        "description": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "$schema": {
+          "const": "https://json-schema.org/draft/2020-12/schema"
+        }
+      }
+    },
+    "objectSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "properties",
+        "additionalProperties"
+      ],
+      "properties": {
+        "type": {
+          "const": "object"
+        },
+        "properties": {
+          "type": "object",
+          "propertyNames": {
+            "minLength": 1
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/scalar"
+          }
+        },
+        "required": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": {
+          "const": false
+        },
+        "description": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "$schema": {
+          "const": "https://json-schema.org/draft/2020-12/schema"
+        }
+      }
+    },
+    "record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reference",
+        "kind",
+        "name",
+        "capability",
+        "class",
+        "side_effects",
+        "idempotency",
+        "retry_safety",
+        "consent"
+      ],
+      "properties": {
+        "reference": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9.-]{0,95}$(?![\\s\\S])"
+        },
+        "kind": {
+          "enum": [
+            "tool",
+            "resource"
+          ]
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 96
+        },
+        "capability": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[A-Za-z0-9](?:[A-Za-z0-9_.-]*[A-Za-z0-9])?$(?![\\s\\S])"
+        },
+        "source": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128,
+              "pattern": "^[A-Za-z0-9](?:[A-Za-z0-9_.-]*[A-Za-z0-9])?$(?![\\s\\S])"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "class": {
+          "enum": [
+            "READ",
+            "SEARCH",
+            "INSPECT",
+            "MUTATE",
+            "ADMIN"
+          ]
+        },
+        "side_effects": {
+          "enum": [
+            "none",
+            "mutation",
+            "administrative"
+          ]
+        },
+        "idempotency": {
+          "enum": [
+            "non_idempotent",
+            "idempotent",
+            "provider_key"
+          ]
+        },
+        "idempotency_key": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 96
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "retry_safety": {
+          "enum": [
+            "never",
+            "read_only",
+            "idempotent"
+          ]
+        },
+        "consent": {
+          "enum": [
+            "policy",
+            "required"
+          ]
+        },
+        "result_schema": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/objectSchema"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "tool"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "result_schema"
+            ],
+            "properties": {
+              "result_schema": {
+                "$ref": "#/$defs/objectSchema"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "resource"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "source"
+            ],
+            "properties": {
+              "source": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128,
+                "pattern": "^[A-Za-z0-9](?:[A-Za-z0-9_.-]*[A-Za-z0-9])?$(?![\\s\\S])"
+              },
+              "class": {
+                "enum": [
+                  "READ",
+                  "INSPECT"
+                ]
+              },
+              "result_schema": {
+                "type": "null"
+              },
+              "idempotency_key": {
+                "type": "null"
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
