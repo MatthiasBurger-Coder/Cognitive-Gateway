@@ -120,9 +120,10 @@ cargo test -p gateway-daemon --test model_adapters --locked \
 ```
 
 Supply `CG_INDEPENDENT_PROVIDER_KEY` through the runtime environment when required.
-The report records `TRANSPORT_PASS`, receipts, and `semantic_qualification:
-NOT_CLAIMED`. The default suite ignores this test. Live qualification has not
-been executed for this candidate; no live provider/model quality is claimed.
+The historical standalone profile records `TRANSPORT_PASS`, receipts, and `semantic_qualification:
+NOT_CLAIMED`. The default suite ignores this standalone test. Its original evidence did not
+claim live qualification. The later operator-host V12 qualification below supplies
+actual bounded live evidence for both adapters.
 
 ## Requirement review and traceability
 
@@ -144,9 +145,43 @@ runtime setup depends on installed models/provider access and is separate.
 | A04 | #269 readiness is not semantic qualification | canonical.py contract inventory gate | CG-27 qualification remains bounded | Python readiness/unsupported-contract denial | VERIFIED |
 | A05 | #269 credentials stay runtime-only | HttpModelAdapter stdin authorization | trusted host config | credential-header/payload/receipt/reflection negative fixtures | VERIFIED |
 | A06 | parent generation/budget/isolation controls | AdapterRenderer / InvocationRun | #263/#264/#268 | wire equality, controls, hostile data, cancellation/output ceilings | VERIFIED |
-| A07 | #269 opt-in live qualification profile | ignored live_adapter_profile | real runtime/model/provider required | profile supplied; actual live execution NOT_RUN | VERIFIED profile; live NOT_RUN |
+| A07 | #269 opt-in live qualification | cg-invoke / qualify-invocation-live.py | registered immutable local candidate | V12: both real HTTP adapters, 20 exact cases and 12 operational probes | VERIFIED (bounded registered role) |
 
 Retained candidate evidence: `docs/evidence/EPIC-06.09-model-adapters.json`.
 Rollback removes the optional module/route; legacy inference remains separately
 covered. No issue closure, installed-host qualification or parent epic acceptance
 is claimed.
+
+## Concrete host and runtime wire identities
+
+The [operator invocation host](invocation-qualification.md#operator-invocation-host)
+composes current file-backed admission, CG-10, independent verification and a
+durable journal through `cg-invoke`. `RuntimeModelBinding` maps the immutable
+canonical model pin to a provider's wire name, including namespaces/tags. The
+mapping remains outer configuration and is bound into admission and the counted
+payload. Receipts preserve both identities; mapped requests use renderer template
+version 2. Mismatched mappings or response names fail before acceptance.
+
+Chat Completions has explicit modern (`max_completion_tokens`) and legacy
+(`max_tokens`) modes. `chat-completions-legacy` selects the latter for compatible
+runtimes such as Ollama 0.11.10. Its [versioned request implementation](https://github.com/ollama/ollama/blob/v0.11.10/openai/openai.go)
+only consumes `max_tokens`. Explicit mode selection prevents a declared output
+limit from disappearing through an unrecognized field. Both modes use the same
+bounded port and independent verification.
+
+
+An explicitly registered file-request analysis role uses transport version 9 and
+`file-request-extraction` renderer version 1. The host validates its typed goal,
+agent, scope and projection before selecting it. Its fixed instruction profile is
+SHA-256 bound; the exact evidence request alias and complete semantic context
+remain user data. Generic operator invocations retain version 8. The complete
+wire representation, including the alias, is counted before dispatch.
+
+
+The final operator-host V12 report is `LIVE_ROLE_PASS`: each adapter passed ten
+fixed extraction cases, six operational probes and independent CPU/RAM, token,
+latency and throughput gates. The adapters share one Docker model/runtime; this
+qualifies the registered role through two transport implementations. The current
+[evidence record](evidence/EPIC-06-host-live.json) supersedes the historical live
+NOT_RUN status for this bounded host extension. Catalog promotion and EPIC-08
+shared session/effect integration remain separate responsibilities.

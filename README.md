@@ -26,7 +26,7 @@ crates/
 
 ## Installation on Linux
 
-With Rust and Cargo installed, run the installer from the repository root:
+With Rust 1.89 or newer and Cargo installed, run the installer from the repository root:
 
 ```bash
 ./scripts/install-linux.sh

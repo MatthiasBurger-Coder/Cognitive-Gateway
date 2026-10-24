@@ -218,7 +218,13 @@ class Registry:
             # of a mutable upstream tag cannot overwrite the active artifact.
             profile['provenance']['revision'] = profile['artifact_digest']
             snapshot = 'cg-' + hashlib.sha256(profile['model_id'].encode()).hexdigest()[:24] + ':latest'
-            self.runtime.call('/api/create', {'model': snapshot, 'from': profile['runtime_model'], 'stream': False})
+            # Pin context in the immutable snapshot too: chat-compatible clients
+            # cannot send the native num_ctx option with each request.
+            parameters = {'num_ctx': profile['context_limit']}
+            if 'cpu_threads' in profile['resources']:
+                parameters['num_thread'] = profile['resources']['cpu_threads']
+            self.runtime.call('/api/create', {'model': snapshot, 'from': profile['runtime_model'],
+                                             'parameters': parameters, 'stream': False})
             profile['runtime_model'] = snapshot
             profile.update(self.runtime.identity(profile))
         validate(load(SCHEMA), profile)

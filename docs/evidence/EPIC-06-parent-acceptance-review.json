@@ -1,0 +1,1540 @@
+{
+  "schema_version": "1.0",
+  "issue": 178,
+  "recorded_at": "2026-10-18T17:32:49.055720+00:00",
+  "status": "ACCEPTED",
+  "review_status": "CRITERIA_AND_LIVE_VERIFIED",
+  "closure_allowed": true,
+  "review_provenance": "Separate continuation-session requirements/architecture/evidence review. The reviewer also authored live-runner hardening; no fully independent acceptance approval claimed.",
+  "issue_snapshot": {
+    "path": "docs/evidence/EPIC-06-parent-acceptance-sources.json.gz",
+    "sha256": "9904ed7783d323c3c6e5d2ae79f514978649f6149aea4e59a19b7ba241524da0",
+    "fetched_at": "2026-10-18T14:17:35.164Z"
+  },
+  "requirement_inventory": {
+    "parent_checkboxes": 22,
+    "qualification_child_checkboxes": 11,
+    "tokenization_generation_resource_isolation_groups": 4,
+    "host_integration_groups": 3,
+    "manifest_criteria": 40,
+    "child_criteria": 56,
+    "extraction_status": "VERIFIED: exact parent and #270 checkbox matches; every child checkbox maps to named manifest criteria; all mapped Rust tests exist"
+  },
+  "inspected_revision": "1275e35670c7dc6bb727d290b309fbca1ae8ceba",
+  "manifest_sha256": "2f67c8feb7e59c8ceb6c5c3f9aa856b7b0efa81eb90c39dbba6e0e3f4d8355a6",
+  "component_candidate": {
+    "path": "target/epic06-host-live-final-accepted-20261018/qualification.json",
+    "sha256": "38c9e12be802f7bb1f235338d6c62886d8bee3857a472404eb177fb2891f08b8",
+    "status": "COMPONENT_PASS",
+    "source_drift": false,
+    "current_source_mismatches": [],
+    "accepted_as_current_qualification": true,
+    "gates": [
+      {
+        "id": "components",
+        "status": "PASS",
+        "tests_passed": 164
+      },
+      {
+        "id": "coverage",
+        "status": "PASS",
+        "tests_passed": 0
+      },
+      {
+        "id": "local-model-python",
+        "status": "PASS",
+        "tests_passed": 0
+      },
+      {
+        "id": "architecture",
+        "status": "PASS",
+        "tests_passed": 0
+      },
+      {
+        "id": "contracts",
+        "status": "PASS",
+        "tests_passed": 0
+      },
+      {
+        "id": "format",
+        "status": "PASS",
+        "tests_passed": 0
+      },
+      {
+        "id": "clippy",
+        "status": "PASS",
+        "tests_passed": 0
+      },
+      {
+        "id": "runner-coverage",
+        "status": "PASS",
+        "tests_passed": 0
+      },
+      {
+        "id": "live-runner-coverage",
+        "status": "PASS",
+        "tests_passed": 0
+      }
+    ]
+  },
+  "criteria": [
+    {
+      "id": "P01",
+      "requirement": "Models are represented as replaceable capabilities behind provider-independent ports.",
+      "required_evidence": [
+        "COMPONENT"
+      ],
+      "implementation_and_test_evidence": [
+        "crates/gateway-daemon/tests/model_adapters.rs::both_transports_share_contract_and_preserve_rendering_controls_and_identity"
+      ],
+      "required_gates": [
+        "components",
+        "coverage",
+        "architecture",
+        "local-model-python"
+      ],
+      "observed_component_status": "VERIFIED",
+      "current_candidate_verified": true,
+      "status": "VERIFIED"
+    },
+    {
+      "id": "P02",
+      "requirement": "No provider SDK type leaks into canonical domain/context/process contracts.",
+      "required_evidence": [
+        "COMPONENT"
+      ],
+      "implementation_and_test_evidence": [
+        "crates/gateway-daemon/tests/model_adapters.rs::both_transports_share_contract_and_preserve_rendering_controls_and_identity"
+      ],
+      "required_gates": [
+        "components",
+        "coverage",
+        "architecture",
+        "local-model-python"
+      ],
+      "observed_component_status": "VERIFIED",
+      "current_candidate_verified": true,
+      "status": "VERIFIED"
+    },
+    {
+      "id": "P03",
+      "requirement": "The same typed inputs and renderer version produce equivalent provider-facing prompt structure.",
+      "required_evidence": [
+        "COMPONENT"
+      ],
+      "implementation_and_test_evidence": [
+        "crates/gateway-application/tests/prompt_ir.rs::full_producer_handoff_is_immutable_lossless_and_reproducible",
+        "crates/gateway-daemon/tests/prompt_rendering.rs::actual_handoff_preserved_in_both_runtime_layouts_with_stable_accounting",
+        "crates/gateway-daemon/tests/prompt_rendering.rs::operator_projection_preserves_every_semantic_section_and_binds_retained_receipts",
+        "crates/gateway-daemon/tests/invocation_host.rs::registered_instruction_role_is_explicit_pinned_and_preserves_full_context"
+      ],
+      "required_gates": [
+        "components",
+        "coverage",
+        "architecture"
+      ],
+      "observed_component_status": "VERIFIED",
+      "current_candidate_verified": true,
+      "status": "VERIFIED"
+    },
+    {
+      "id": "P04",
+      "requirement": "Conversation history is not implicitly injected.",
+      "required_evidence": [
+        "COMPONENT"
+      ],
+      "implementation_and_test_evidence": [
+        "crates/gateway-application/tests/prompt_ir.rs::strict_bindings_and_stable_diagnostics_reject_implicit_history"
+      ],
+      "required_gates": [
+        "components",
+        "coverage",
+        "architecture"
+      ],
+      "observed_component_status": "VERIFIED",
+      "current_candidate_verified": true,
+      "status": "VERIFIED"
+    },
+    {
+      "id": "P05",
+      "requirement": "Authority, user input, evidence, knowledge, memory and constraints remain distinguishable through rendering.",
+      "required_evidence": [
+        "COMPONENT"
+      ],
+      "implementation_and_test_evidence": [
+        "crates/gateway-application/tests/prompt_ir.rs::full_producer_handoff_is_immutable_lossless_and_reproducible",
+        "crates/gateway-daemon/tests/prompt_rendering.rs::actual_handoff_preserved_in_both_runtime_layouts_with_stable_accounting",
+        "crates/gateway-daemon/tests/prompt_rendering.rs::operator_projection_preserves_every_semantic_section_and_binds_retained_receipts",
+        "crates/gateway-daemon/tests/invocation_host.rs::registered_instruction_role_is_explicit_pinned_and_preserves_full_context"
+      ],
+      "required_gates": [
+        "components",
+        "coverage",
+        "architecture"
+      ],
+      "observed_component_status": "VERIFIED",
+      "current_candidate_verified": true,
+      "status": "VERIFIED"
+    },
+    {
+      "id": "P06",
+      "requirement": "Serialization cannot promote untrusted content into Gateway authority.",
+      "required_evidence": [
+        "COMPONENT"
+      ],
+      "implementation_and_test_evidence": [
+        "crates/gateway-application/tests/prompt_ir.rs::full_producer_handoff_is_immutable_lossless_and_reproducible",
+        "crates/gateway-daemon/tests/prompt_rendering.rs::actual_handoff_preserved_in_both_runtime_layouts_with_stable_accounting",
+        "crates/gateway-daemon/tests/prompt_rendering.rs::operator_projection_preserves_every_semantic_section_and_binds_retained_receipts",
+        "crates/gateway-daemon/tests/invocation_host.rs::registered_instruction_role_is_explicit_pinned_and_preserves_full_context",
+        "crates/gateway-daemon/tests/invocation_host.rs::registered_role_refuses_wrong_agent_scope_shape_goal_and_oracle",
+        "crates/gateway-daemon/tests/prompt_rendering.rs::registered_renderer_refuses_an_unmatched_role_definition"
+      ],
+      "required_gates": [
+        "components",
+        "coverage",
+        "architecture"
+      ],
+      "observed_component_status": "VERIFIED",
+      "current_candidate_verified": true,
+      "status": "VERIFIED"
+    },
+    {
+      "id": "P07",
+      "requirement": "Model routing is explicit, inspectable and bounded by capability and policy constraints.",
+      "required_evidence": [
+        "COMPONENT"
+      ],
+      "implementation_and_test_evidence": [
+        "crates/gateway-application/tests/model_routing.rs::all_cg26_filters_still_apply_after_invocation_negotiation"
+      ],
+      "required_gates": [
+        "components",
+        "coverage",
+        "architecture"
+      ],
+      "observed_component_status": "VERIFIED",
+      "current_candidate_verified": true,
+      "status": "VERIFIED"
+    },
+    {
+      "id": "P08",
+      "requirement": "No model is called when deterministic execution is sufficient.",
+      "required_evidence": [
+        "COMPONENT"
+      ],
+      "implementation_and_test_evidence": [
+        "crates/gateway-application/tests/model_routing.rs::deterministic_execution_and_failure_never_call_a_model_and_reflex_is_preserved"
+      ],
+      "required_gates": [
+        "components",
+        "coverage",
+        "architecture"
+      ],
+      "observed_component_status": "VERIFIED",
+      "current_candidate_verified": true,
+      "status": "VERIFIED"
+    },
+    {
+      "id": "P09",
+      "requirement": "Every model invocation carries an explicit output contract.",
+      "required_evidence": [
+        "COMPONENT"
+      ],
+      "implementation_and_test_evidence": [
+        "crates/gateway-application/tests/output_verification.rs::schema_and_every_identity_axis_must_match"
+      ],
+      "required_gates": [
+        "components",
+        "coverage",
+        "architecture"
+      ],
+      "observed_component_status": "VERIFIED",
+      "current_candidate_verified": true,
+      "status": "VERIFIED"
+    },
+    {
+      "id": "P10",
+      "requirement": "Model output is parsed and validated before becoming a Gateway result.",
+      "required_evidence": [
+        "COMPONENT"
+      ],
+      "implementation_and_test_evidence": [
+        "crates/gateway-application/tests/output_verification.rs::accepted_output_is_exactly_correlated_and_critics_are_advisory"
+      ],
+      "required_gates": [
+        "components",
+        "coverage",
+        "architecture"
+      ],
+      "observed_component_status": "VERIFIED",
+      "current_candidate_verified": true,
+      "status": "VERIFIED"
+    },
+    {
+      "id": "P11",
+      "requirement": "Schema, references, evidence and constraints can be verified independently of model confidence.",
+      "required_evidence": [
+        "COMPONENT"
+      ],
+      "implementation_and_test_evidence": [
+        "crates/gateway-application/tests/output_verification.rs::unsupported_references_and_tool_proposals_are_rejected",
+        "crates/gateway-application/tests/support/grounding_cases.rs::invalid_manifests_and_fabricated_citations_fail",
+        "crates/gateway-application/tests/invocation_qualification.rs::role_specific_metrics_deny_semantically_wrong_schema_valid_outputs"
+      ],
+      "required_gates": [
+        "components",
+        "coverage",
+        "architecture"
+      ],
+      "observed_component_status": "VERIFIED",
+      "current_candidate_verified": true,
+      "status": "VERIFIED"
+    },
+    {
+      "id": "P12",
+      "requirement": "Optional model critics cannot be the sole acceptance authority.",
+      "required_evidence": [
+        "COMPONENT"
+      ],
+      "implementation_and_test_evidence": [
+        "crates/gateway-application/tests/output_verification.rs::accepted_output_is_exactly_correlated_and_critics_are_advisory"
+      ],
+      "required_gates": [
+        "components",
+        "coverage",
+        "architecture"
+      ],
+      "observed_component_status": "VERIFIED",
+      "current_candidate_verified": true,
+      "status": "VERIFIED"
+    },
+    {
+      "id": "P13",
+      "requirement": "Retry/fallback behavior is bounded and cannot expand scope or permissions.",
+      "required_evidence": [
+        "COMPONENT"
+      ],
+      "implementation_and_test_evidence": [
+        "crates/gateway-application/tests/invocation_resilience.rs::malformed_repair_and_retry_share_all_budgets_and_stop"
+      ],
+      "required_gates": [
+        "components",
+        "coverage",
+        "architecture"
+      ],
+      "observed_component_status": "VERIFIED",
+      "current_candidate_verified": true,
+      "status": "VERIFIED"
+    },
+    {
+      "id": "P14",
+      "requirement": "Local SLM and remote/provider adapters can satisfy the same abstract capability where compatible.",
+      "required_evidence": [
+        "COMPONENT",
+        "LIVE_ROLE"
+      ],
+      "implementation_and_test_evidence": [
+        "crates/gateway-daemon/tests/model_adapters.rs::both_transports_share_contract_and_preserve_rendering_controls_and_identity",
+        "crates/gateway-daemon/tests/model_adapters.rs::both_adapter_outputs_replay_after_http_server_is_gone"
+      ],
+      "required_gates": [
+        "components",
+        "coverage",
+        "architecture",
+        "local-model-python"
+      ],
+      "observed_component_status": "VERIFIED",
+      "current_candidate_verified": true,
+      "status": "VERIFIED",
+      "observed_live_status": "LIVE_ROLE_PASS_BOTH_ADAPTERS"
+    },
+    {
+      "id": "P15",
+      "requirement": "Invocation provenance supports audit and replay without requiring chain-of-thought persistence.",
+      "required_evidence": [
+        "COMPONENT"
+      ],
+      "implementation_and_test_evidence": [
+        "crates/gateway-application/tests/invocation_qualification.rs::traces_bind_rendering_and_reject_other_invocations_without_copying_content",
+        "crates/gateway-daemon/tests/model_adapters.rs::both_adapter_outputs_replay_after_http_server_is_gone"
+      ],
+      "required_gates": [
+        "components",
+        "coverage",
+        "architecture",
+        "local-model-python"
+      ],
+      "observed_component_status": "VERIFIED",
+      "current_candidate_verified": true,
+      "status": "VERIFIED"
+    },
+    {
+      "id": "P16",
+      "requirement": "Architecture, security and adversarial tests include prompt injection, malformed output, unsupported references, stale context and provider failure.",
+      "required_evidence": [
+        "COMPONENT"
+      ],
+      "implementation_and_test_evidence": [
+        "crates/gateway-application/tests/output_verification.rs::parser_rejects_fragments_duplicates_unknown_fields_versions_and_limits",
+        "crates/gateway-application/tests/prompt_ir.rs::stale_sources_schema_authority_and_tools_are_denied_before_use",
+        "crates/gateway-daemon/tests/model_adapters.rs::malformed_failure_identity_usage_and_output_are_explicit",
+        "crates/gateway-daemon/tests/prompt_rendering.rs::actual_handoff_preserved_in_both_runtime_layouts_with_stable_accounting"
+      ],
+      "required_gates": [
+        "components",
+        "coverage",
+        "architecture",
+        "local-model-python"
+      ],
+      "observed_component_status": "VERIFIED",
+      "current_candidate_verified": true,
+      "status": "VERIFIED"
+    },
+    {
+      "id": "P17",
+      "requirement": "At least **95% coverage** for introduced/materially changed production code.",
+      "required_evidence": [
+        "COMPONENT",
+        "PER_FILE_COVERAGE"
+      ],
+      "implementation_and_test_evidence": [
+        "crates/gateway-application/tests/invocation_qualification.rs::qualification_fails_closed_on_missing_invalid_or_mismatched_evidence"
+      ],
+      "required_gates": [
+        "components",
+        "coverage",
+        "architecture",
+        "runner-coverage",
+        "local-model-python"
+      ],
+      "observed_component_status": "VERIFIED",
+      "current_candidate_verified": true,
+      "status": "VERIFIED"
+    },
+    {
+      "id": "P18",
+      "requirement": "Stream fragments, malformed output and schema repair never trigger tool execution.",
+      "required_evidence": [
+        "COMPONENT"
+      ],
+      "implementation_and_test_evidence": [
+        "crates/gateway-application/tests/output_verification.rs::streams_require_completion_and_overflow_is_terminal",
+        "crates/gateway-application/tests/output_verification.rs::repairs_are_correlated_bounded_and_require_aggregate_admission"
+      ],
+      "required_gates": [
+        "components",
+        "coverage",
+        "architecture"
+      ],
+      "observed_component_status": "VERIFIED",
+      "current_candidate_verified": true,
+      "status": "VERIFIED"
+    },
+    {
+      "id": "P19",
+      "requirement": "Tool proposals bind authorized inventory, arguments, scope, task and revision before host dispatch.",
+      "required_evidence": [
+        "COMPONENT"
+      ],
+      "implementation_and_test_evidence": [
+        "crates/gateway-application/tests/output_verification.rs::nested_typed_arguments_reject_unknown_null_and_coerced_fields",
+        "crates/gateway-application/tests/output_verification.rs::schema_and_every_identity_axis_must_match"
+      ],
+      "required_gates": [
+        "components",
+        "coverage",
+        "architecture"
+      ],
+      "observed_component_status": "VERIFIED",
+      "current_candidate_verified": true,
+      "status": "VERIFIED"
+    },
+    {
+      "id": "P20",
+      "requirement": "Invocation, repair and fallback consume the aggregate session budget; they cannot reset it.",
+      "required_evidence": [
+        "COMPONENT",
+        "EXECUTABLE"
+      ],
+      "implementation_and_test_evidence": [
+        "crates/gateway-application/tests/invocation_resilience.rs::malformed_repair_and_retry_share_all_budgets_and_stop",
+        "crates/gateway-application/tests/invocation_resilience.rs::fallback_changes_provider_model_and_tokenizer_without_resetting_usage_or_authority"
+      ],
+      "required_gates": [
+        "components",
+        "coverage",
+        "architecture"
+      ],
+      "observed_component_status": "VERIFIED",
+      "current_candidate_verified": true,
+      "status": "VERIFIED"
+    },
+    {
+      "id": "P21",
+      "requirement": "Replay revalidates recorded outputs without redispatching external actions.",
+      "required_evidence": [
+        "COMPONENT",
+        "EXECUTABLE"
+      ],
+      "implementation_and_test_evidence": [
+        "crates/gateway-application/tests/invocation_qualification.rs::replay_rechecks_current_authority_and_returns_no_dispatchable_result",
+        "crates/gateway-daemon/tests/model_adapters.rs::both_adapter_outputs_replay_after_http_server_is_gone"
+      ],
+      "required_gates": [
+        "components",
+        "coverage",
+        "architecture",
+        "local-model-python"
+      ],
+      "observed_component_status": "VERIFIED",
+      "current_candidate_verified": true,
+      "status": "VERIFIED"
+    },
+    {
+      "id": "P22",
+      "requirement": "Deterministic rendering/validation claims are kept separate from probabilistic model generation.",
+      "required_evidence": [
+        "COMPONENT"
+      ],
+      "implementation_and_test_evidence": [
+        "crates/gateway-application/tests/prompt_ir.rs::full_producer_handoff_is_immutable_lossless_and_reproducible",
+        "crates/gateway-application/tests/invocation_qualification.rs::replay_rechecks_current_authority_and_returns_no_dispatchable_result"
+      ],
+      "required_gates": [
+        "components",
+        "coverage",
+        "architecture"
+      ],
+      "observed_component_status": "VERIFIED",
+      "current_candidate_verified": true,
+      "status": "VERIFIED"
+    },
+    {
+      "id": "Q01",
+      "requirement": "Each EPIC-06 criterion maps to tests",
+      "required_evidence": [
+        "COMPONENT"
+      ],
+      "implementation_and_test_evidence": [
+        "crates/gateway-application/tests/invocation_qualification.rs::qualification_fails_closed_on_missing_invalid_or_mismatched_evidence"
+      ],
+      "required_gates": [
+        "components",
+        "coverage",
+        "architecture",
+        "runner-coverage"
+      ],
+      "observed_component_status": "VERIFIED",
+      "current_candidate_verified": true,
+      "status": "VERIFIED"
+    },
+    {
+      "id": "Q02",
+      "requirement": "two adapter paths pass conformance",
+      "required_evidence": [
+        "COMPONENT",
+        "LIVE_ROLE"
+      ],
+      "implementation_and_test_evidence": [
+        "crates/gateway-daemon/tests/model_adapters.rs::both_transports_share_contract_and_preserve_rendering_controls_and_identity",
+        "crates/gateway-daemon/tests/model_adapters.rs::both_adapter_outputs_replay_after_http_server_is_gone"
+      ],
+      "required_gates": [
+        "components",
+        "coverage",
+        "architecture",
+        "local-model-python"
+      ],
+      "observed_component_status": "VERIFIED",
+      "current_candidate_verified": true,
+      "status": "VERIFIED",
+      "observed_live_status": "LIVE_ROLE_PASS_BOTH_ADAPTERS"
+    },
+    {
+      "id": "Q03",
+      "requirement": "fixture and live evidence are clearly labelled",
+      "required_evidence": [
+        "COMPONENT"
+      ],
+      "implementation_and_test_evidence": [
+        "crates/gateway-application/tests/invocation_qualification.rs::role_specific_metrics_deny_semantically_wrong_schema_valid_outputs"
+      ],
+      "required_gates": [
+        "components",
+        "coverage",
+        "architecture",
+        "runner-coverage"
+      ],
+      "observed_component_status": "VERIFIED",
+      "current_candidate_verified": true,
+      "status": "VERIFIED"
+    },
+    {
+      "id": "Q04",
+      "requirement": "deterministic replay cannot redispatch actions",
+      "required_evidence": [
+        "COMPONENT"
+      ],
+      "implementation_and_test_evidence": [
+        "crates/gateway-application/tests/invocation_qualification.rs::replay_rechecks_current_authority_and_returns_no_dispatchable_result",
+        "crates/gateway-daemon/tests/model_adapters.rs::both_adapter_outputs_replay_after_http_server_is_gone"
+      ],
+      "required_gates": [
+        "components",
+        "coverage",
+        "architecture",
+        "local-model-python"
+      ],
+      "observed_component_status": "VERIFIED",
+      "current_candidate_verified": true,
+      "status": "VERIFIED"
+    },
+    {
+      "id": "Q05",
+      "requirement": "failed gates block qualification.",
+      "required_evidence": [
+        "COMPONENT"
+      ],
+      "implementation_and_test_evidence": [
+        "crates/gateway-application/tests/invocation_qualification.rs::qualification_fails_closed_on_missing_invalid_or_mismatched_evidence"
+      ],
+      "required_gates": [
+        "components",
+        "coverage",
+        "architecture",
+        "runner-coverage"
+      ],
+      "observed_component_status": "VERIFIED",
+      "current_candidate_verified": true,
+      "status": "VERIFIED"
+    },
+    {
+      "id": "Q06",
+      "requirement": "Promotion gates use role-specific metric thresholds, not a single aggregate score.",
+      "required_evidence": [
+        "COMPONENT"
+      ],
+      "implementation_and_test_evidence": [
+        "crates/gateway-application/tests/invocation_qualification.rs::role_specific_metrics_deny_semantically_wrong_schema_valid_outputs",
+        "crates/gateway-application/tests/invocation_qualification.rs::tool_role_and_gpu_require_their_own_thresholds_and_matching_provenance"
+      ],
+      "required_gates": [
+        "components",
+        "coverage",
+        "architecture"
+      ],
+      "observed_component_status": "VERIFIED",
+      "current_candidate_verified": true,
+      "status": "VERIFIED"
+    },
+    {
+      "id": "Q07",
+      "requirement": "Schema-valid but semantically wrong output can fail qualification.",
+      "required_evidence": [
+        "COMPONENT"
+      ],
+      "implementation_and_test_evidence": [
+        "crates/gateway-application/tests/invocation_qualification.rs::role_specific_metrics_deny_semantically_wrong_schema_valid_outputs",
+        "crates/gateway-application/tests/invocation_qualification.rs::recorded_schema_valid_wrong_answers_fail_independent_semantic_and_claim_gates"
+      ],
+      "required_gates": [
+        "components",
+        "coverage",
+        "architecture"
+      ],
+      "observed_component_status": "VERIFIED",
+      "current_candidate_verified": true,
+      "status": "VERIFIED"
+    },
+    {
+      "id": "Q08",
+      "requirement": "Hallucination/unsupported-claim evidence is independently measured.",
+      "required_evidence": [
+        "COMPONENT"
+      ],
+      "implementation_and_test_evidence": [
+        "crates/gateway-application/tests/invocation_qualification.rs::role_specific_metrics_deny_semantically_wrong_schema_valid_outputs",
+        "crates/gateway-application/tests/support/grounding_cases.rs::exact_payload_and_cg06_support_edges_are_mandatory",
+        "crates/gateway-application/tests/invocation_qualification.rs::recorded_schema_valid_wrong_answers_fail_independent_semantic_and_claim_gates"
+      ],
+      "required_gates": [
+        "components",
+        "coverage",
+        "architecture"
+      ],
+      "observed_component_status": "VERIFIED",
+      "current_candidate_verified": true,
+      "status": "VERIFIED"
+    },
+    {
+      "id": "Q09",
+      "requirement": "Confidence-bearing models have calibration evidence or confidence is treated as an uncalibrated signal.",
+      "required_evidence": [
+        "COMPONENT"
+      ],
+      "implementation_and_test_evidence": [
+        "crates/gateway-application/tests/invocation_qualification.rs::qualification_fails_closed_on_missing_invalid_or_mismatched_evidence"
+      ],
+      "required_gates": [
+        "components",
+        "coverage",
+        "architecture"
+      ],
+      "observed_component_status": "VERIFIED",
+      "current_candidate_verified": true,
+      "status": "VERIFIED"
+    },
+    {
+      "id": "Q10",
+      "requirement": "Perplexity, when present, is labelled diagnostic and cannot independently pass a model.",
+      "required_evidence": [
+        "COMPONENT"
+      ],
+      "implementation_and_test_evidence": [
+        "crates/gateway-application/tests/invocation_qualification.rs::role_specific_metrics_deny_semantically_wrong_schema_valid_outputs"
+      ],
+      "required_gates": [
+        "components",
+        "coverage",
+        "architecture"
+      ],
+      "observed_component_status": "VERIFIED",
+      "current_candidate_verified": true,
+      "status": "VERIFIED"
+    },
+    {
+      "id": "Q11",
+      "requirement": "Qualification evidence is revision-bound to model, tokenizer, runtime, profile and dataset.",
+      "required_evidence": [
+        "COMPONENT",
+        "LIVE_ROLE"
+      ],
+      "implementation_and_test_evidence": [
+        "crates/gateway-application/tests/invocation_qualification.rs::qualification_fails_closed_on_missing_invalid_or_mismatched_evidence",
+        "crates/gateway-application/tests/invocation_qualification.rs::tool_role_and_gpu_require_their_own_thresholds_and_matching_provenance",
+        "crates/gateway-daemon/tests/invocation_host.rs::registered_instruction_role_is_explicit_pinned_and_preserves_full_context"
+      ],
+      "required_gates": [
+        "components",
+        "coverage",
+        "architecture"
+      ],
+      "observed_component_status": "VERIFIED",
+      "current_candidate_verified": true,
+      "status": "VERIFIED",
+      "observed_live_status": "LIVE_ROLE_PASS_BOTH_ADAPTERS"
+    },
+    {
+      "id": "T01",
+      "requirement": "Tokenizer identity and exact/estimated counting, complete payload/output reserve and typed context overflow",
+      "required_evidence": [
+        "COMPONENT"
+      ],
+      "implementation_and_test_evidence": [
+        "crates/gateway-application/tests/invocation_resilience.rs::exact_count_context_output_reserve_and_reported_context_overflow",
+        "crates/gateway-daemon/tests/prompt_rendering.rs::operator_projection_preserves_every_semantic_section_and_binds_retained_receipts",
+        "crates/gateway-daemon/tests/invocation_host.rs::registered_instruction_role_is_explicit_pinned_and_preserves_full_context"
+      ],
+      "required_gates": [
+        "components",
+        "coverage",
+        "architecture"
+      ],
+      "observed_component_status": "VERIFIED",
+      "current_candidate_verified": true,
+      "status": "VERIFIED"
+    },
+    {
+      "id": "T02",
+      "requirement": "Generation controls are explicit and unsupported controls are denied",
+      "required_evidence": [
+        "COMPONENT"
+      ],
+      "implementation_and_test_evidence": [
+        "crates/gateway-daemon/tests/model_adapters.rs::both_transports_share_contract_and_preserve_rendering_controls_and_identity",
+        "crates/gateway-daemon/tests/model_adapters.rs::unsupported_modes_remote_locality_reflection_http_denials_and_large_wire_fail_closed"
+      ],
+      "required_gates": [
+        "components",
+        "coverage",
+        "architecture",
+        "local-model-python"
+      ],
+      "observed_component_status": "VERIFIED",
+      "current_candidate_verified": true,
+      "status": "VERIFIED"
+    },
+    {
+      "id": "T03",
+      "requirement": "Cold/warm latency, throughput, CPU/RAM and applicable GPU/VRAM, token usage and failure/context behavior have independent gates",
+      "required_evidence": [
+        "COMPONENT",
+        "LIVE_ROLE"
+      ],
+      "implementation_and_test_evidence": [
+        "crates/gateway-application/tests/invocation_qualification.rs::qualification_fails_closed_on_missing_invalid_or_mismatched_evidence",
+        "crates/gateway-application/tests/invocation_qualification.rs::tool_role_and_gpu_require_their_own_thresholds_and_matching_provenance"
+      ],
+      "required_gates": [
+        "components",
+        "coverage",
+        "architecture"
+      ],
+      "observed_component_status": "VERIFIED",
+      "current_candidate_verified": true,
+      "status": "VERIFIED",
+      "observed_live_status": "LIVE_ROLE_PASS_BOTH_ADAPTERS"
+    },
+    {
+      "id": "T04",
+      "requirement": "Sensitive data isolation and cancellation are adversarially tested",
+      "required_evidence": [
+        "COMPONENT"
+      ],
+      "implementation_and_test_evidence": [
+        "crates/gateway-application/tests/support/grounding_cases.rs::freshness_conflicts_trust_and_disclosure_are_enforced",
+        "crates/gateway-daemon/tests/model_adapters.rs::configuration_binding_cancellation_and_deadlines_fail_closed",
+        "crates/gateway-daemon/tests/model_adapters.rs::cancelled_adapter_preserves_run_cancellation_and_reservations"
+      ],
+      "required_gates": [
+        "components",
+        "coverage",
+        "architecture",
+        "local-model-python"
+      ],
+      "observed_component_status": "VERIFIED",
+      "current_candidate_verified": true,
+      "status": "VERIFIED"
+    },
+    {
+      "id": "H01",
+      "requirement": "Shipped host authenticates files/authority, grounds results and persists replayable evidence",
+      "required_evidence": [
+        "COMPONENT",
+        "EXECUTABLE"
+      ],
+      "implementation_and_test_evidence": [
+        "crates/gateway-daemon/tests/invocation_host.rs::file_backed_host_both_transports_verify_persist_restart_and_replay_without_redispatch",
+        "crates/gateway-daemon/tests/invocation_host.rs::registered_instruction_role_is_explicit_pinned_and_preserves_full_context",
+        "crates/gateway-daemon/tests/invocation_host.rs::registered_role_refuses_wrong_agent_scope_shape_goal_and_oracle",
+        "crates/gateway-daemon/tests/prompt_rendering.rs::registered_renderer_refuses_an_unmatched_role_definition"
+      ],
+      "required_gates": [
+        "components",
+        "coverage",
+        "local-model-python",
+        "architecture",
+        "contracts",
+        "format",
+        "clippy",
+        "live-runner-coverage"
+      ],
+      "observed_component_status": "VERIFIED",
+      "current_candidate_verified": true,
+      "status": "VERIFIED"
+    },
+    {
+      "id": "H02",
+      "requirement": "Host accounts for the complete versioned wire payload and refuses overflow without truncation",
+      "required_evidence": [
+        "COMPONENT",
+        "EXECUTABLE"
+      ],
+      "implementation_and_test_evidence": [
+        "crates/gateway-daemon/tests/invocation_host.rs::invalid_adapter_credential_overflow_and_changed_budget_basis_fail_closed",
+        "crates/gateway-daemon/tests/model_adapters.rs::host_task_directive_is_versioned_and_bound_to_transport",
+        "crates/gateway-daemon/tests/prompt_rendering.rs::operator_projection_preserves_every_semantic_section_and_binds_retained_receipts",
+        "crates/gateway-daemon/tests/invocation_host.rs::registered_instruction_role_is_explicit_pinned_and_preserves_full_context",
+        "crates/gateway-daemon/tests/invocation_host.rs::registered_role_refuses_wrong_agent_scope_shape_goal_and_oracle",
+        "crates/gateway-daemon/tests/prompt_rendering.rs::registered_renderer_refuses_an_unmatched_role_definition"
+      ],
+      "required_gates": [
+        "components",
+        "coverage",
+        "local-model-python",
+        "architecture",
+        "contracts",
+        "format",
+        "clippy",
+        "live-runner-coverage"
+      ],
+      "observed_component_status": "VERIFIED",
+      "current_candidate_verified": true,
+      "status": "VERIFIED"
+    },
+    {
+      "id": "H03",
+      "requirement": "Durable aggregate budgets, cancellation and receipt-only replay survive process restart without redispatch or provider refunds",
+      "required_evidence": [
+        "COMPONENT",
+        "EXECUTABLE"
+      ],
+      "implementation_and_test_evidence": [
+        "crates/gateway-daemon/tests/invocation_host.rs::cancellation_interrupts_real_http_and_persists_reservations",
+        "crates/gateway-daemon/tests/invocation_host.rs::conservative_output_reservations_cannot_be_refunded_by_provider_usage",
+        "crates/gateway-daemon/tests/invocation_host.rs::file_backed_host_both_transports_verify_persist_restart_and_replay_without_redispatch",
+        "crates/gateway-daemon/tests/invocation_host.rs::registered_instruction_role_is_explicit_pinned_and_preserves_full_context"
+      ],
+      "required_gates": [
+        "components",
+        "coverage",
+        "local-model-python",
+        "architecture",
+        "contracts",
+        "format",
+        "clippy",
+        "live-runner-coverage"
+      ],
+      "observed_component_status": "VERIFIED",
+      "current_candidate_verified": true,
+      "status": "VERIFIED"
+    }
+  ],
+  "child_criteria": [
+    {
+      "issue": 261,
+      "url": "https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/issues/261",
+      "issue_state": "closed",
+      "criteria": [
+        {
+          "id": "C261-01",
+          "requirement": "Incompatible versions and non-finite/unbounded limits are rejected",
+          "mapped_criteria": [
+            "P01",
+            "P09"
+          ],
+          "status": "VERIFIED"
+        },
+        {
+          "id": "C261-02",
+          "requirement": "provider types never enter canonical contracts",
+          "mapped_criteria": [
+            "P02"
+          ],
+          "status": "VERIFIED"
+        },
+        {
+          "id": "C261-03",
+          "requirement": "invocation binds task, compiled-context digest, output schema and permitted capabilities.",
+          "mapped_criteria": [
+            "P09",
+            "P19"
+          ],
+          "status": "VERIFIED"
+        },
+        {
+          "id": "C261-04",
+          "requirement": "Equivalent canonical generation profiles serialize deterministically.",
+          "mapped_criteria": [
+            "T02"
+          ],
+          "status": "VERIFIED"
+        },
+        {
+          "id": "C261-05",
+          "requirement": "Unsupported generation controls cannot be silently dropped by an adapter.",
+          "mapped_criteria": [
+            "T02"
+          ],
+          "status": "VERIFIED"
+        },
+        {
+          "id": "C261-06",
+          "requirement": "Effective generation parameters and their provenance are available to audit/trace records.",
+          "mapped_criteria": [
+            "T02",
+            "P15"
+          ],
+          "status": "VERIFIED"
+        },
+        {
+          "id": "C261-07",
+          "requirement": "Provider-specific parameter names/types do not enter canonical domain contracts.",
+          "mapped_criteria": [
+            "P02",
+            "T02"
+          ],
+          "status": "VERIFIED"
+        },
+        {
+          "id": "C261-08",
+          "requirement": "Invalid/non-finite parameter values fail before provider dispatch.",
+          "mapped_criteria": [
+            "T02"
+          ],
+          "status": "VERIFIED"
+        }
+      ]
+    },
+    {
+      "issue": 262,
+      "url": "https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/issues/262",
+      "issue_state": "closed",
+      "criteria": [
+        {
+          "id": "C262-01",
+          "requirement": "Equivalent snapshots produce stable eligible selections",
+          "mapped_criteria": [
+            "P07"
+          ],
+          "status": "VERIFIED"
+        },
+        {
+          "id": "C262-02",
+          "requirement": "deterministic tasks make zero model calls",
+          "mapped_criteria": [
+            "P08"
+          ],
+          "status": "VERIFIED"
+        },
+        {
+          "id": "C262-03",
+          "requirement": "unavailable or incompatible providers cannot silently widen scope or switch locality.",
+          "mapped_criteria": [
+            "P07",
+            "P13"
+          ],
+          "status": "VERIFIED"
+        }
+      ]
+    },
+    {
+      "issue": 263,
+      "url": "https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/issues/263",
+      "issue_state": "closed",
+      "criteria": [
+        {
+          "id": "C263-01",
+          "requirement": "No implicit history injection",
+          "mapped_criteria": [
+            "P04"
+          ],
+          "status": "VERIFIED"
+        },
+        {
+          "id": "C263-02",
+          "requirement": "invocation pins context and schema digests",
+          "mapped_criteria": [
+            "P09",
+            "P15"
+          ],
+          "status": "VERIFIED"
+        },
+        {
+          "id": "C263-03",
+          "requirement": "stale input is rejected",
+          "mapped_criteria": [
+            "P16"
+          ],
+          "status": "VERIFIED"
+        },
+        {
+          "id": "C263-04",
+          "requirement": "untrusted data cannot become instructions.",
+          "mapped_criteria": [
+            "P06"
+          ],
+          "status": "VERIFIED"
+        }
+      ]
+    },
+    {
+      "issue": 264,
+      "url": "https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/issues/264",
+      "issue_state": "closed",
+      "criteria": [
+        {
+          "id": "C264-01",
+          "requirement": "Identical canonical inputs and renderer version yield identical rendered structure",
+          "mapped_criteria": [
+            "P03"
+          ],
+          "status": "VERIFIED"
+        },
+        {
+          "id": "C264-02",
+          "requirement": "malicious delimiters do not upgrade trust",
+          "mapped_criteria": [
+            "P06"
+          ],
+          "status": "VERIFIED"
+        },
+        {
+          "id": "C264-03",
+          "requirement": "over-budget inputs fail explicitly rather than dropping mandatory evidence.",
+          "mapped_criteria": [
+            "T01"
+          ],
+          "status": "VERIFIED"
+        },
+        {
+          "id": "C264-04",
+          "requirement": "Token accounting includes tool/schema payloads and output reserve, not only user text.",
+          "mapped_criteria": [
+            "T01"
+          ],
+          "status": "VERIFIED"
+        },
+        {
+          "id": "C264-05",
+          "requirement": "Exact and estimated counts are distinguishable in typed results and traces.",
+          "mapped_criteria": [
+            "T01"
+          ],
+          "status": "VERIFIED"
+        },
+        {
+          "id": "C264-06",
+          "requirement": "Context overflow is detected before provider dispatch when sufficient metadata is available.",
+          "mapped_criteria": [
+            "T01"
+          ],
+          "status": "VERIFIED"
+        },
+        {
+          "id": "C264-07",
+          "requirement": "No mandatory evidence or authority constraint is silently removed to satisfy the limit.",
+          "mapped_criteria": [
+            "T01",
+            "P05"
+          ],
+          "status": "VERIFIED"
+        },
+        {
+          "id": "C264-08",
+          "requirement": "Model/tokenizer/template identity used for accounting is captured with the render evidence.",
+          "mapped_criteria": [
+            "T01",
+            "P15"
+          ],
+          "status": "VERIFIED"
+        }
+      ]
+    },
+    {
+      "issue": 265,
+      "url": "https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/issues/265",
+      "issue_state": "closed",
+      "criteria": [
+        {
+          "id": "C265-01",
+          "requirement": "Malformed/truncated output never dispatches a tool",
+          "mapped_criteria": [
+            "P18"
+          ],
+          "status": "VERIFIED"
+        },
+        {
+          "id": "C265-02",
+          "requirement": "tool IDs and typed arguments must reference the exposed inventory snapshot",
+          "mapped_criteria": [
+            "P19"
+          ],
+          "status": "VERIFIED"
+        },
+        {
+          "id": "C265-03",
+          "requirement": "no raw model text or model-generated shell command is directly executed.",
+          "mapped_criteria": [
+            "P18"
+          ],
+          "status": "VERIFIED"
+        }
+      ]
+    },
+    {
+      "issue": 266,
+      "url": "https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/issues/266",
+      "issue_state": "closed",
+      "criteria": [
+        {
+          "id": "C266-01",
+          "requirement": "Unsupported references and changed context are rejected",
+          "mapped_criteria": [
+            "P11",
+            "P16"
+          ],
+          "status": "VERIFIED"
+        },
+        {
+          "id": "C266-02",
+          "requirement": "optional critics are advisory",
+          "mapped_criteria": [
+            "P12"
+          ],
+          "status": "VERIFIED"
+        },
+        {
+          "id": "C266-03",
+          "requirement": "verification result is typed and correlated to exact invocation/task revisions.",
+          "mapped_criteria": [
+            "P10",
+            "P15"
+          ],
+          "status": "VERIFIED"
+        }
+      ]
+    },
+    {
+      "issue": 267,
+      "url": "https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/issues/267",
+      "issue_state": "closed",
+      "criteria": [
+        {
+          "id": "C267-01",
+          "requirement": "Fabricated citations, cross-scope evidence, stale/contradictory support and unsupported claims fail",
+          "mapped_criteria": [
+            "P11",
+            "P16"
+          ],
+          "status": "VERIFIED"
+        },
+        {
+          "id": "C267-02",
+          "requirement": "Completed/model confidence alone never proves an external action succeeded.",
+          "mapped_criteria": [
+            "P11"
+          ],
+          "status": "VERIFIED"
+        }
+      ]
+    },
+    {
+      "issue": 268,
+      "url": "https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/issues/268",
+      "issue_state": "closed",
+      "criteria": [
+        {
+          "id": "C268-01",
+          "requirement": "Repeated malformed output stops within budget",
+          "mapped_criteria": [
+            "P13"
+          ],
+          "status": "VERIFIED"
+        },
+        {
+          "id": "C268-02",
+          "requirement": "cancellation prevents subsequent dispatch",
+          "mapped_criteria": [
+            "T04"
+          ],
+          "status": "VERIFIED"
+        },
+        {
+          "id": "C268-03",
+          "requirement": "uncertain side effects are never retried by invocation logic",
+          "mapped_criteria": [
+            "P13",
+            "P18"
+          ],
+          "status": "VERIFIED"
+        },
+        {
+          "id": "C268-04",
+          "requirement": "fallback preserves scope, consent and locality.",
+          "mapped_criteria": [
+            "P13"
+          ],
+          "status": "VERIFIED"
+        },
+        {
+          "id": "C268-05",
+          "requirement": "A retry cannot obtain a fresh token budget.",
+          "mapped_criteria": [
+            "P20"
+          ],
+          "status": "VERIFIED"
+        },
+        {
+          "id": "C268-06",
+          "requirement": "Provider fallback cannot reset cumulative input/output usage.",
+          "mapped_criteria": [
+            "P20"
+          ],
+          "status": "VERIFIED"
+        },
+        {
+          "id": "C268-07",
+          "requirement": "Pre-dispatch output reserve is included in context-window admission.",
+          "mapped_criteria": [
+            "T01"
+          ],
+          "status": "VERIFIED"
+        },
+        {
+          "id": "C268-08",
+          "requirement": "Provider-reported usage is correlated to the exact invocation/model profile.",
+          "mapped_criteria": [
+            "T01"
+          ],
+          "status": "VERIFIED"
+        },
+        {
+          "id": "C268-09",
+          "requirement": "Large reconciliation mismatches are observable and testable rather than silently overwritten.",
+          "mapped_criteria": [
+            "T01"
+          ],
+          "status": "VERIFIED"
+        }
+      ]
+    },
+    {
+      "issue": 269,
+      "url": "https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/issues/269",
+      "issue_state": "closed",
+      "criteria": [
+        {
+          "id": "C269-01",
+          "requirement": "Both adapters satisfy shared contracts",
+          "mapped_criteria": [
+            "P14",
+            "Q02"
+          ],
+          "status": "VERIFIED"
+        },
+        {
+          "id": "C269-02",
+          "requirement": "core works without either",
+          "mapped_criteria": [
+            "P01",
+            "P02"
+          ],
+          "status": "VERIFIED"
+        },
+        {
+          "id": "C269-03",
+          "requirement": "actual model/renderer identity is recorded",
+          "mapped_criteria": [
+            "P15"
+          ],
+          "status": "VERIFIED"
+        },
+        {
+          "id": "C269-04",
+          "requirement": "local-service readiness does not imply qualified SemanticTaskIR support",
+          "mapped_criteria": [
+            "Q03"
+          ],
+          "status": "VERIFIED"
+        },
+        {
+          "id": "C269-05",
+          "requirement": "no credential enters context/logs.",
+          "mapped_criteria": [
+            "T04"
+          ],
+          "status": "VERIFIED"
+        }
+      ]
+    },
+    {
+      "issue": 270,
+      "url": "https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/issues/270",
+      "issue_state": "closed",
+      "criteria": [
+        {
+          "id": "C270-01",
+          "requirement": "Each EPIC-06 criterion maps to tests",
+          "mapped_criteria": [
+            "Q01"
+          ],
+          "status": "VERIFIED"
+        },
+        {
+          "id": "C270-02",
+          "requirement": "two adapter paths pass conformance",
+          "mapped_criteria": [
+            "Q02"
+          ],
+          "status": "VERIFIED"
+        },
+        {
+          "id": "C270-03",
+          "requirement": "fixture and live evidence are clearly labelled",
+          "mapped_criteria": [
+            "Q03"
+          ],
+          "status": "VERIFIED"
+        },
+        {
+          "id": "C270-04",
+          "requirement": "deterministic replay cannot redispatch actions",
+          "mapped_criteria": [
+            "Q04"
+          ],
+          "status": "VERIFIED"
+        },
+        {
+          "id": "C270-05",
+          "requirement": "failed gates block qualification.",
+          "mapped_criteria": [
+            "Q05"
+          ],
+          "status": "VERIFIED"
+        },
+        {
+          "id": "C270-06",
+          "requirement": "Promotion gates use role-specific metric thresholds, not a single aggregate score.",
+          "mapped_criteria": [
+            "Q06"
+          ],
+          "status": "VERIFIED"
+        },
+        {
+          "id": "C270-07",
+          "requirement": "Schema-valid but semantically wrong output can fail qualification.",
+          "mapped_criteria": [
+            "Q07"
+          ],
+          "status": "VERIFIED"
+        },
+        {
+          "id": "C270-08",
+          "requirement": "Hallucination/unsupported-claim evidence is independently measured.",
+          "mapped_criteria": [
+            "Q08"
+          ],
+          "status": "VERIFIED"
+        },
+        {
+          "id": "C270-09",
+          "requirement": "Confidence-bearing models have calibration evidence or confidence is treated as an uncalibrated signal.",
+          "mapped_criteria": [
+            "Q09"
+          ],
+          "status": "VERIFIED"
+        },
+        {
+          "id": "C270-10",
+          "requirement": "Perplexity, when present, is labelled diagnostic and cannot independently pass a model.",
+          "mapped_criteria": [
+            "Q10"
+          ],
+          "status": "VERIFIED"
+        },
+        {
+          "id": "C270-11",
+          "requirement": "Qualification evidence is revision-bound to model, tokenizer, runtime, profile and dataset.",
+          "mapped_criteria": [
+            "Q11"
+          ],
+          "status": "VERIFIED"
+        }
+      ]
+    }
+  ],
+  "blockers": [
+    {
+      "id": "F01",
+      "requirement": "Both real adapter paths must accept the shipped host wire format",
+      "status": "RESOLVED",
+      "evidence": "Two-message canonical bridge and registered-role conformance verified in final source gates and real HTTP execution."
+    },
+    {
+      "id": "F02",
+      "requirement": "Complete quality qualification belongs to one stable current source snapshot",
+      "status": "RESOLVED",
+      "evidence": "target/epic06-host-live-final-accepted-20261018/qualification.json; all9 gates PASS; exact whole source fingerprint and fresh workspace1032/0/4 verified."
+    },
+    {
+      "id": "F03",
+      "requirement": "Successful real SLM role qualification through both HTTP adapters",
+      "status": "RESOLVED",
+      "evidence": "V12 LIVE_ROLE_PASS: both adapters each10/10 cases+6 probes; all metrics, exact immutable model/role/generation, private IR/wire/raw hashes and independent retained-case/evaluator reproduction verified."
+    }
+  ],
+  "next_verification": "None: technical acceptance is complete for the declared bounded role and final source snapshot.",
+  "workspace_verification": {
+    "status": "PASS",
+    "command": "cargo test --workspace --locked",
+    "log": "/tmp/epic06-final-accepted-workspace.log",
+    "retained_log": "docs/evidence/EPIC-06-parent-final-workspace.log.gz",
+    "log_sha256": "a5952d144922d8abb8f520235eafc669d31316e82a01c2c8c1911c3d37ed62c2",
+    "tests_passed": 1032,
+    "tests_failed": 0,
+    "tests_ignored": 4,
+    "source_component_report": "target/epic06-host-live-final-accepted-20261018/qualification.json",
+    "qualification": "Complete fresh workspace after final documentation and source freeze; all1032pass/0fail/4existingignored."
+  },
+  "live_candidate": {
+    "path": "/home/micro/.cache/epic06-host-live-qualification-v12/live-qualification.json",
+    "sha256": "82ca56bd0231465c237c8b0353c4f5ea1df264e5e4beaeb6f6d06c4f9ff74d1e",
+    "status": "LIVE_ROLE_PASS",
+    "completed_adapters": [
+      "local",
+      "chat-completions"
+    ],
+    "remaining_adapters": [],
+    "adapters": [
+      {
+        "adapter": "local",
+        "cases_verified": 10,
+        "probes_passed": 6,
+        "evaluator_exit_code": 0,
+        "gates_passed": true,
+        "eligible_for_promotion": true,
+        "failed_metrics": {}
+      },
+      {
+        "adapter": "chat-completions",
+        "cases_verified": 10,
+        "probes_passed": 6,
+        "evaluator_exit_code": 0,
+        "gates_passed": true,
+        "eligible_for_promotion": true,
+        "failed_metrics": {}
+      }
+    ],
+    "retained_local_evidence_independently_regraded": true,
+    "final_retained_two_adapter_review": "PASS",
+    "retained_execution_bundle": "docs/evidence/EPIC-06-parent-final-execution-bundle.json.gz",
+    "retained_execution_bundle_sha256": "bf4777978d73a726737cc2c43d215a13985458eb27758e5ee9fff451aa625514"
+  },
+  "final_requirement_source_refresh": {
+    "status": "VERIFIED_UNCHANGED",
+    "fetched_at": "2026-10-18 17:17:24 UTC",
+    "issues_checked": [
+      178,
+      261,
+      262,
+      263,
+      264,
+      265,
+      266,
+      267,
+      268,
+      269,
+      270
+    ],
+    "changed_issue_bodies": [],
+    "retained_snapshot": "docs/evidence/EPIC-06-parent-final-acceptance-sources.json.gz",
+    "snapshot_sha256": "5a7b39c4ba40ed27d014dae32b5aed3fa0736ff02ebaeb00c1fe819d4966361b",
+    "parent_issue_state": "open",
+    "note": "All 11 current issue bodies exactly match the reviewed and mapped acceptance requirements; issue state is recorded separately from technical acceptance."
+  },
+  "final_review_audit": {
+    "path": "docs/evidence/EPIC-06-parent-final-audit.json",
+    "sha256": "5447e73d6d80b5d6d9e8eb8662127e1f5abcf3adb2acb235301462df9d91bd17",
+    "status": "ACCEPTED",
+    "checks_passed": 279,
+    "failed_checks": [],
+    "component_report_sha256": "38c9e12be802f7bb1f235338d6c62886d8bee3857a472404eb177fb2891f08b8",
+    "live_report_sha256": "82ca56bd0231465c237c8b0353c4f5ea1df264e5e4beaeb6f6d06c4f9ff74d1e"
+  },
+  "acceptance_scope": {
+    "technical_epic_acceptance": "COMPLETE",
+    "registered_role": "FILE_REQUEST_EXTRACTION_V1",
+    "model_profile": "qwen3-4b-instruct2507-cpu-q8-t4-v1",
+    "structured_output_mode": "JSON",
+    "real_adapter_paths": [
+      "local canonical HTTP",
+      "Chat Completions HTTP (explicit legacy max_tokens mode)"
+    ],
+    "backend_independence": "NOT_CLAIMED: both adapters use the same isolated Docker SLM",
+    "gateway_catalog_promotion": "NOT_PERFORMED",
+    "general_task_sessions_and_effects": "Separate EPIC-08 responsibility",
+    "github_issue_closure": "NOT_PERFORMED: recorded separately from technical acceptance"
+  }
+}

@@ -546,13 +546,12 @@ impl SessionJournalPort for PostgresSessionStore {
         self.run(|j| {
             let i = j.index(owner, &transition.session)?;
             let current = j.sessions[i].typed()?;
-            if let Some(command) = &transition.command {
-                if j.commands
+            if let Some(command) = &transition.command
+                && j.commands
                     .iter()
                     .any(|c| c.key.owner == *owner && c.key.command == *command)
-                {
-                    return Err(SessionError::Duplicate);
-                }
+            {
+                return Err(SessionError::Duplicate);
             }
             transition.validate_against(&current)?;
             if transition.records.len() > 2

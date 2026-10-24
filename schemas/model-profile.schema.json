@@ -122,6 +122,11 @@
             "optional",
             "none"
           ]
+        },
+        "cpu_threads": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 256
         }
       }
     },

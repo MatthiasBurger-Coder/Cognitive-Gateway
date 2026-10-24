@@ -64,6 +64,21 @@ class LifecycleTests(unittest.TestCase):
         path.write_text(json.dumps(profile))
         return self.registry.install(path)
 
+    def test_snapshot_pins_context_for_native_and_chat_compatible_clients(self):
+        with self.registry.locked(), patch.object(self.runtime, 'call', wraps=self.runtime.call) as calls:
+            profile = self.install('explicit-context', context_limit=16384)
+            create = next(call.args[1] for call in calls.call_args_list if call.args[0] == '/api/create')
+            self.assertEqual(create['parameters'], {'num_ctx': profile['context_limit']})
+
+    def test_cpu_thread_limit_is_pinned_and_invalid_limits_are_rejected(self):
+        with self.registry.locked(), patch.object(self.runtime, 'call', wraps=self.runtime.call) as calls:
+            profile = self.install('bounded-cpu', resources={**self.profile['resources'], 'cpu_threads': 4})
+            create = next(call.args[1] for call in calls.call_args_list if call.args[0] == '/api/create')
+            self.assertEqual(create['parameters'], {'num_ctx': profile['context_limit'], 'num_thread': 4})
+            for index, invalid in enumerate([0, -1, 257, True, '4']):
+                with self.assertRaisesRegex(s.ModelError, 'contract_invalid'):
+                    self.install('invalid-cpu-'+str(index), resources={**self.profile['resources'], 'cpu_threads': invalid})
+
     def test_upgrade_rollback_and_audit_survive_restart(self):
         with self.registry.locked() as r:
             self.install('old')

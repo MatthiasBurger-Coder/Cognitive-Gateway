@@ -317,25 +317,25 @@ impl CodexHost for LocalCodexHost {
         }
         // Inline content is allowed only when it matches an admitted, classified
         // immutable source. Caller content cannot choose its own classification.
-        if let Some(source) = call.input.get("situation") {
-            if source["kind"] == "document" {
-                let admitted = self
-                    .resources
-                    .iter()
-                    .find(|r| {
-                        r["reference"]["contract"] == source["contract"]
-                            && r["reference"]["contract_version"] == source["contract_version"]
-                            && r["document"] == source["document"]
-                    })
-                    .ok_or(FacadeError::SensitivityDenied)?;
-                if admitted["provenance"]
-                    .as_array()
-                    .unwrap()
-                    .iter()
-                    .any(|p| p["sensitivity"] == "SECRET")
-                {
-                    return Err(FacadeError::SensitivityDenied);
-                }
+        if let Some(source) = call.input.get("situation")
+            && source["kind"] == "document"
+        {
+            let admitted = self
+                .resources
+                .iter()
+                .find(|r| {
+                    r["reference"]["contract"] == source["contract"]
+                        && r["reference"]["contract_version"] == source["contract_version"]
+                        && r["document"] == source["document"]
+                })
+                .ok_or(FacadeError::SensitivityDenied)?;
+            if admitted["provenance"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .any(|p| p["sensitivity"] == "SECRET")
+            {
+                return Err(FacadeError::SensitivityDenied);
             }
         }
         Ok(())
