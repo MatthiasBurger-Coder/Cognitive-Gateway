@@ -1,0 +1,359 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cognitive-gateway.local/schemas/connector-manifest-v1.schema.json",
+  "title": "ConnectorManifest v1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "manifest": {
+      "$ref": "#/$defs/definition"
+    },
+    "digest": {
+      "$ref": "#/$defs/digest"
+    }
+  },
+  "required": [
+    "manifest",
+    "digest"
+  ],
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9.-]{0,95}(?![\\s\\S])"
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}(?![\\s\\S])"
+    },
+    "version": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "major": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "minor": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "patch": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        }
+      },
+      "required": [
+        "major",
+        "minor",
+        "patch"
+      ]
+    },
+    "inventoryEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "tool",
+            "resource",
+            "prompt"
+          ]
+        },
+        "name": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.-]{1,96}(?![\\s\\S])"
+        },
+        "schema_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "capability_mapping_ref": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/id"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "source_mapping_ref": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/id"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "kind",
+        "name",
+        "schema_digest"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "tool"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "capability_mapping_ref"
+            ],
+            "properties": {
+              "capability_mapping_ref": {
+                "$ref": "#/$defs/id"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "resource"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "source_mapping_ref"
+            ],
+            "properties": {
+              "source_mapping_ref": {
+                "$ref": "#/$defs/id"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "prompt"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "capability_mapping_ref": {
+                "type": "null"
+              },
+              "source_mapping_ref": {
+                "type": "null"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "definition": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "manifest_version": {
+          "const": "1.0"
+        },
+        "connector_id": {
+          "$ref": "#/$defs/id"
+        },
+        "server_id": {
+          "$ref": "#/$defs/id"
+        },
+        "version": {
+          "$ref": "#/$defs/version"
+        },
+        "server_version": {
+          "$ref": "#/$defs/version"
+        },
+        "protocol": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "name": {
+              "const": "mcp"
+            },
+            "version": {
+              "const": "2025-11-25"
+            },
+            "rpc_version": {
+              "const": "2.0"
+            }
+          },
+          "required": [
+            "name",
+            "version",
+            "rpc_version"
+          ]
+        },
+        "transport": {
+          "enum": [
+            "stdio",
+            "streamable_http"
+          ]
+        },
+        "configuration_ref": {
+          "$ref": "#/$defs/id"
+        },
+        "inventory": {
+          "type": "array",
+          "maxItems": 256,
+          "items": {
+            "$ref": "#/$defs/inventoryEntry"
+          }
+        },
+        "profiles": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "authentication": {
+              "$ref": "#/$defs/id"
+            },
+            "trust": {
+              "$ref": "#/$defs/id"
+            },
+            "sensitivity": {
+              "$ref": "#/$defs/id"
+            }
+          },
+          "required": [
+            "authentication",
+            "trust",
+            "sensitivity"
+          ]
+        },
+        "health": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "contract_ref": {
+              "$ref": "#/$defs/id"
+            },
+            "interval_seconds": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 86400
+            },
+            "timeout_seconds": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 86400
+            }
+          },
+          "required": [
+            "contract_ref",
+            "interval_seconds",
+            "timeout_seconds"
+          ]
+        },
+        "lifecycle": {
+          "enum": [
+            "enabled",
+            "disabled",
+            "deprecated"
+          ]
+        },
+        "deprecation": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "replacement_connector_id": {
+                  "$ref": "#/$defs/id"
+                },
+                "sunset_gateway_minor": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 4294967295
+                }
+              },
+              "required": [
+                "replacement_connector_id",
+                "sunset_gateway_minor"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "compatibility": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "port_version": {
+              "const": "1"
+            },
+            "gateway_major": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 4294967295
+            },
+            "minimum_gateway_minor": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 4294967295
+            }
+          },
+          "required": [
+            "port_version",
+            "gateway_major",
+            "minimum_gateway_minor"
+          ]
+        }
+      },
+      "required": [
+        "manifest_version",
+        "connector_id",
+        "server_id",
+        "version",
+        "server_version",
+        "protocol",
+        "transport",
+        "configuration_ref",
+        "inventory",
+        "profiles",
+        "health",
+        "lifecycle",
+        "compatibility"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "lifecycle": {
+                "const": "deprecated"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "deprecation"
+            ],
+            "properties": {
+              "deprecation": {
+                "type": "object"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "deprecation": {
+                "type": "null"
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

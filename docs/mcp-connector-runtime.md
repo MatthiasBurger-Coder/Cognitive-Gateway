@@ -62,7 +62,8 @@ revision `CONNECTOR_PORT_VERSION = "1"`. Inbound and outbound port modules
 re-export the driving/driven traits. This is an in-process architecture contract,
 not a serialized manifest or an authorization token format. Breaking changes
 require a new revision and consumer migration. #225 owns the full identity,
-manifest, compatibility and configuration format; its fields must elaborate
+manifest, compatibility and configuration format, now defined in the
+[manifest v1 contract](connector-manifest-v1.md); its fields elaborate
 these instance/scope and inventory bindings without adding provider types.
 
 | Port | Methods | Preconditions and result |
