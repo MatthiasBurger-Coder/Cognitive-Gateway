@@ -29,7 +29,7 @@ class ModelAdaptersArchitecture(unittest.TestCase):
     def test_coverage_gate_is_required_and_rejects_invalid_reports(self):
         gate = next(g for g in json.loads((ROOT / 'scripts/quality-gates.json').read_text())
                     if g['name'].startswith('EPIC-06.09'))
-        for requirement in ('--test model_adapters', '--locked', '--fail-under=95', '--self-test'):
+        for requirement in ('--test model_adapters', '--test invocation_host', '--locked', '--fail-under=95', '--self-test'):
             self.assertIn(requirement, gate['command'])
         spec = importlib.util.spec_from_file_location('adapter_coverage', ROOT / 'scripts/check-model-adapters-coverage.py')
         module = importlib.util.module_from_spec(spec)
