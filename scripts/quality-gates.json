@@ -230,5 +230,9 @@
   {
     "name": "EPIC-06 live qualification runner regression coverage",
     "command": "COVERAGE_FILE=\"$EVIDENCE_DIR/live-runner-coverage.data\" \"$RUNNER_TEMP/local-model-python/bin/python\" -m coverage run -m unittest discover -s tests/architecture -p test_invocation_live.py\nCOVERAGE_FILE=\"$EVIDENCE_DIR/live-runner-coverage.data\" \"$RUNNER_TEMP/local-model-python/bin/python\" -m coverage json -o \"$EVIDENCE_DIR/live-runner-coverage.json\"\nCOVERAGE_FILE=\"$EVIDENCE_DIR/live-runner-coverage.data\" \"$RUNNER_TEMP/local-model-python/bin/python\" -m coverage report --include=\"*/qualify-invocation-live.py\" --fail-under=95"
+  },
+  {
+    "name": "EPIC-07.02 connector manifest contract coverage",
+    "command": "CARGO_BUILD_JOBS=1 CARGO_LLVM_COV_TARGET_DIR=target/connector-manifest-coverage cargo llvm-cov -p gateway-application --test connector_manifest --locked --json --output-path \"$EVIDENCE_DIR/connector-manifest-coverage.json\"\npython3 scripts/check-connector-manifest-coverage.py --self-test\npython3 scripts/check-connector-manifest-coverage.py \"$EVIDENCE_DIR/connector-manifest-coverage.json\""
   }
 ]

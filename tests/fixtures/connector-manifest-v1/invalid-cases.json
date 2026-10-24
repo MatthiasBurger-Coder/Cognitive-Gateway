@@ -1,0 +1,92 @@
+[
+  {
+    "file": "unknown-required-field.json",
+    "error": "Encoding",
+    "schema_valid": false
+  },
+  {
+    "file": "unsupported-version.json",
+    "error": "UnsupportedVersion",
+    "schema_valid": false
+  },
+  {
+    "file": "unsupported-protocol.json",
+    "error": "UnsupportedVersion",
+    "schema_valid": false
+  },
+  {
+    "file": "unsupported-port.json",
+    "error": "UnsupportedVersion",
+    "schema_valid": false
+  },
+  {
+    "file": "raw-secret-field.json",
+    "error": "Encoding",
+    "schema_valid": false
+  },
+  {
+    "file": "credential-url.json",
+    "error": "InvalidMetadata",
+    "schema_valid": false
+  },
+  {
+    "file": "secret-in-name.json",
+    "error": "InvalidMetadata",
+    "schema_valid": false
+  },
+  {
+    "file": "duplicate-inventory.json",
+    "error": "DuplicateInventory",
+    "schema_valid": true
+  },
+  {
+    "file": "conflicting-inventory.json",
+    "error": "DuplicateInventory",
+    "schema_valid": true
+  },
+  {
+    "file": "unmapped-tool.json",
+    "error": "InvalidMetadata",
+    "schema_valid": false
+  },
+  {
+    "file": "prompt-execution.json",
+    "error": "InvalidMetadata",
+    "schema_valid": false
+  },
+  {
+    "file": "invalid-digest.json",
+    "error": "DigestMismatch",
+    "schema_valid": false
+  },
+  {
+    "file": "tampered-digest.json",
+    "error": "DigestMismatch",
+    "schema_valid": true
+  },
+  {
+    "file": "health-timeout.json",
+    "error": "InvalidMetadata",
+    "schema_valid": true
+  },
+  {
+    "file": "missing-deprecation.json",
+    "error": "InvalidMetadata",
+    "schema_valid": false
+  },
+  {
+    "file": "deprecated-self.json",
+    "error": "InvalidMetadata",
+    "schema_valid": true
+  },
+  {
+    "file": "invalid-integer.json",
+    "error": "Encoding",
+    "schema_valid": false
+  },
+  {
+    "file": "duplicate-json-key.json",
+    "error": "Encoding",
+    "schema_valid": true
+  }
+]

@@ -1,0 +1,105 @@
+[
+  {
+    "name": "baseline",
+    "patch": {},
+    "gateway": {
+      "major": 0,
+      "minor": 1,
+      "patch": 0
+    },
+    "transports": [
+      "stdio"
+    ],
+    "expected": "Compatible"
+  },
+  {
+    "name": "older-gateway",
+    "patch": {},
+    "gateway": {
+      "major": 0,
+      "minor": 0,
+      "patch": 9
+    },
+    "transports": [
+      "stdio"
+    ],
+    "expected": "GatewayVersion"
+  },
+  {
+    "name": "other-major",
+    "patch": {},
+    "gateway": {
+      "major": 1,
+      "minor": 1,
+      "patch": 0
+    },
+    "transports": [
+      "stdio"
+    ],
+    "expected": "GatewayVersion"
+  },
+  {
+    "name": "unqualified-transport",
+    "patch": {},
+    "gateway": {
+      "major": 0,
+      "minor": 1,
+      "patch": 0
+    },
+    "transports": [],
+    "expected": "Transport"
+  },
+  {
+    "name": "disabled",
+    "patch": {
+      "lifecycle": "disabled"
+    },
+    "gateway": {
+      "major": 0,
+      "minor": 1,
+      "patch": 0
+    },
+    "transports": [
+      "stdio"
+    ],
+    "expected": "Disabled"
+  },
+  {
+    "name": "deprecated-before-sunset",
+    "patch": {
+      "lifecycle": "deprecated",
+      "deprecation": {
+        "replacement_connector_id": "example.next",
+        "sunset_gateway_minor": 3
+      }
+    },
+    "gateway": {
+      "major": 0,
+      "minor": 2,
+      "patch": 0
+    },
+    "transports": [
+      "stdio"
+    ],
+    "expected": "CompatibleDeprecated"
+  },
+  {
+    "name": "sunset-boundary",
+    "patch": {
+      "lifecycle": "deprecated",
+      "deprecation": {
+        "replacement_connector_id": "example.next",
+        "sunset_gateway_minor": 3
+      }
+    },
+    "gateway": {
+      "major": 0,
+      "minor": 3,
+      "patch": 0
+    },
+    "transports": [
+      "stdio"
+    ],
+    "expected": "Sunset"
+  }
+]
