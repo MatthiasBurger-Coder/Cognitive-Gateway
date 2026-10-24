@@ -3,9 +3,10 @@
 ## Status and scope
 
 **Normative architecture and compilable port foundation — EPIC-07.01 #224.**
-The external runtime remains **planned** under EPIC-07 #223. These contracts do
-not provide a shipped connection, policy gate, normalizer, credential store or
-live connector. ADR-022 records ownership; ADR-016 separates inbound Codex MCP
+The [protocol runtime and stdio transport](mcp-client-runtime.md) are implemented
+under EPIC-07.03 #226 behind a required admitted application host. Production
+canonical mapping, policy services, normalization, credentials and live reference
+connectors remain planned under EPIC-07 #223. ADR-022 records ownership; ADR-016 separates inbound Codex MCP
 (EPIC-04) from outbound CG → external systems (EPIC-07).
 
 MCP supplies protocol plumbing. CG owns planning, process legality, policy,
@@ -132,9 +133,10 @@ CG-09 uses the broader Mutate class. No changes to that domain enum are needed.
 
 ## MCP compatibility baseline and extension policy
 
-This architecture pins **MCP 2025-11-25**, JSON-RPC 2.0; this is an outbound target
-profile, not a claim of implemented support or a change to EPIC-04's existing
-inbound version. The versioned [MCP specification](https://modelcontextprotocol.io/specification/2025-11-25),
+This architecture pins **MCP 2025-11-25**, JSON-RPC 2.0; this is the implemented outbound protocol
+profile. It does not change EPIC-04's existing inbound version. The bounded
+scalar schema profile and runtime qualification are documented in the
+[client runtime contract](mcp-client-runtime.md). The versioned [MCP specification](https://modelcontextprotocol.io/specification/2025-11-25),
 [lifecycle](https://modelcontextprotocol.io/specification/2025-11-25/basic/lifecycle)
 and [transports](https://modelcontextprotocol.io/specification/2025-11-25/basic/transports)
 are the protocol authority (reviewed 2026-10-24).
