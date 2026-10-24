@@ -12,7 +12,7 @@
     "files_sha256": {
       "crates/gateway-application/src/connectors.rs": "33ec3996f594f1e219293886bcb70a169df4d52f00ac17dc27c07328be7c8d2f",
       "crates/gateway-application/src/lib.rs": "a34d7f3718617a97ec396a202a04d5239609506c195fd9478a9d0fe458489448",
-      "crates/gateway-application/src/ports/inbound.rs": "d440f01a77b419ebe9271b7d9b1a96809588bee5a287847e0d05f8aca1006304",
+      "crates/gateway-application/src/ports/inbound.rs": "c8286c3312bc9dbc1697ee7a3c0622cd42abd25afe77abbf59766f0d236ba34f",
       "crates/gateway-application/src/ports/outbound.rs": "7eb85d586ff298a980891afb937051a5e8082338938fd683a12502a504aef50d",
       "crates/gateway-application/tests/connectors.rs": "fc00f2dc56943e7c268a2f29865c317fcdb69774806bc23392a6e6853d49f018",
       "tests/architecture/test_connectors.py": "ee931ebe462c8c006473a547339fe6f17afd97e84d0c5cf1cd6b202dbdba0058",
@@ -22,13 +22,14 @@
       "docs/README.md": "ec686a487ab9601cbfca726af8b69b66c3e6325ed55c79271de4e9f272b96eba",
       "docs/arc42/05-building-block-view.md": "e69c3f27c23333bbad97bf5737c6886a958ef98584e9af93f51bc9e7cb990784",
       "docs/arc42/09-architecture-decisions.md": "c4d7b28569d53a080f17000afe2e464c38d221eaba50e14f6dcba88ccd49c181",
-      "scripts/check-dependencies.py": "135cd57c8e46e8414a856d79980912ac8fe5958ff2a83b01a30cc448a454721a",
+      "scripts/check-dependencies.py": "694e376953d73488bb2b1eacb936e0c8d5cfb3ab841733654c98d4bff4fd0d73",
       "scripts/check-architecture.sh": "a44c4633c828db0a4ea7f4539c3def28055172b4b72bde2db593737d61c9d136",
-      "Cargo.toml": "74a0a74f1f465084acc8468b80d014748f2760c931b068b305be825680487f07",
+      "Cargo.toml": "3c669b3d2cb91b2f43cd6d2ecc49843298ec12a18e7057cb67f4bc608913f6e5",
       "Cargo.lock": "a334788810b3894e9a1b7b21bb3c0e9202542e3123e73ed21b423616ee3ccf62",
-      "crates/gateway-application/Cargo.toml": "dd6f3ecfc160670aa5cfba677ec3a8a7e895d851799e41226521894972f4d05e",
+      "crates/gateway-application/Cargo.toml": "9249de4a8c35e6d613d64b0d9015b0c9f7d1e023bddd23f6c2d0d21c83c63a4a",
       "crates/gateway-domain/Cargo.toml": "4046090aa3a98ef50a46f25e9523cdd94dde5cd95856ac55ed97bf2f55d3730e"
-    }
+    },
+    "hash_format": "SHA-256 of Git repository blob bytes (checkout line-ending conversion excluded)"
   },
   "review": {
     "method": "Single implementing agent architecture/contract review; no independent reviewer or external approval claimed",
