@@ -721,3 +721,120 @@ fn stdio_owns_child_environment_working_directory_and_reaps_on_close() {
     assert!(!std::path::Path::new(&format!("/proc/{}", startup["pid"].as_u64().unwrap())).exists());
     std::fs::remove_file(log).unwrap();
 }
+
+struct FixtureNormalizer;
+impl mapping::ConnectorResultNormalizer for FixtureNormalizer {
+    fn normalize(
+        &self,
+        dispatch: &ConnectorDispatch,
+        source: Option<&SourceId>,
+        _: &mapping::MappingRecord,
+        result: ProtocolResult,
+    ) -> Result<ConnectorObservation, Error> {
+        Mapping { mode: "normal" }.normalize(dispatch, source, result)
+    }
+}
+fn canonical_host(authority: Arc<Authority>, mode: &'static str) -> McpConnectorHost {
+    let manifest = ConnectorManifest::from_json(include_bytes!(
+        "../../../tests/fixtures/connector-mapping-v1/manifest.json"
+    ))
+    .unwrap();
+    let mapper = mapping::DiscoveryMapper::new(
+        target(),
+        manifest.clone(),
+        mapping::MappingDocument::from_json(include_bytes!(
+            "../../../tests/fixtures/connector-mapping-v1/mapping.json"
+        ))
+        .unwrap(),
+    )
+    .unwrap();
+    McpConnectorHost::new(
+        HostConfig {
+            target: target(),
+            manifest,
+            profile: ConnectorCompatibilityProfile {
+                gateway: ConnectorVersion {
+                    major: 0,
+                    minor: 1,
+                    patch: 0,
+                },
+                transports: BTreeSet::from([ConnectorTransport::Stdio]),
+            },
+            limits: Limits::default(),
+        },
+        Box::new(config(mode)),
+        authority,
+        Box::new(mapping::CanonicalConnectorMapping::new(
+            mapper,
+            Box::new(FixtureNormalizer),
+        )),
+        Arc::new(()),
+    )
+    .unwrap()
+}
+#[test]
+fn canonical_mapping_drives_real_tool_and_resource_calls_but_never_grants_authority() {
+    let authority = Arc::new(Authority::default());
+    let host = canonical_host(authority.clone(), "normal");
+    host.lifecycle(&target(), ConnectorLifecycleCommand::Connect)
+        .unwrap();
+    let inventory = host.discover(&target()).unwrap();
+    assert_eq!(
+        inventory.revision.as_str(),
+        include_str!("../../../tests/fixtures/connector-mapping-v1/revision.txt").trim()
+    );
+    let mut request = request();
+    request.inventory_revision = inventory.revision;
+    host.invoke(&request).unwrap();
+    request.capability = CapabilityId::new("records.resource.read").unwrap();
+    request.arguments.clear();
+    host.read_resource(&request, &SourceId::new("records.one").unwrap())
+        .unwrap();
+    assert_eq!(
+        host.read_resource(&request, &SourceId::new("unmapped").unwrap())
+            .unwrap_err()
+            .effect,
+        ConnectorEffect::NotDispatched
+    );
+    authority.deny.store(2, Ordering::SeqCst);
+    assert_eq!(
+        host.read_resource(&request, &SourceId::new("records.one").unwrap())
+            .unwrap_err()
+            .code,
+        ConnectorFailureCode::PermissionDenied
+    );
+    authority.deny.store(3, Ordering::SeqCst);
+    assert_eq!(
+        host.read_resource(&request, &SourceId::new("records.one").unwrap())
+            .unwrap_err()
+            .code,
+        ConnectorFailureCode::PermissionDenied
+    );
+    authority.deny.store(1, Ordering::SeqCst);
+    assert_eq!(
+        host.discover(&target()).unwrap_err().code,
+        ConnectorFailureCode::PermissionDenied
+    );
+}
+#[test]
+fn canonical_mapping_blocks_unmapped_discovery_and_bad_output_before_normalization() {
+    // Additional discovered tools cannot silently broaden a configured inventory.
+    let host = canonical_host(Arc::new(Authority::default()), "pages");
+    host.lifecycle(&target(), ConnectorLifecycleCommand::Connect)
+        .unwrap();
+    assert_eq!(
+        host.discover(&target()).unwrap_err().code,
+        ConnectorFailureCode::SchemaMismatch
+    );
+    // Missing advertised outputSchema still uses the explicit Gateway-side contract.
+    let host = canonical_host(Arc::new(Authority::default()), "bad-structured");
+    host.lifecycle(&target(), ConnectorLifecycleCommand::Connect)
+        .unwrap();
+    let inventory = host.discover(&target()).unwrap();
+    let mut request = request();
+    request.inventory_revision = inventory.revision;
+    assert_eq!(
+        host.invoke(&request).unwrap_err().code,
+        ConnectorFailureCode::SchemaMismatch
+    );
+}

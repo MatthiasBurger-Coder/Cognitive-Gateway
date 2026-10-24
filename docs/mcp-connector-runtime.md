@@ -4,9 +4,9 @@
 
 **Normative architecture and compilable port foundation — EPIC-07.01 #224.**
 The [protocol runtime and stdio transport](mcp-client-runtime.md) are implemented
-under EPIC-07.03 #226 behind a required admitted application host. Production
-canonical mapping, policy services, normalization, credentials and live reference
-connectors remain planned under EPIC-07 #223. ADR-022 records ownership; ADR-016 separates inbound Codex MCP
+under EPIC-07.03 #226 behind a required admitted application host.
+[Canonical mapping](connector-mapping-v1.md) is implemented under EPIC-07.04 #227.
+Production policy services, normalization, credentials and live reference connectors remain planned under EPIC-07 #223. ADR-022 records ownership; ADR-016 separates inbound Codex MCP
 (EPIC-04) from outbound CG → external systems (EPIC-07).
 
 MCP supplies protocol plumbing. CG owns planning, process legality, policy,

@@ -2,6 +2,7 @@
 //! admitted application host; public wire discovery never confers authority.
 mod host;
 mod json;
+pub mod mapping;
 mod protocol;
 mod schema;
 pub mod transport;

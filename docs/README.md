@@ -305,3 +305,5 @@ Run `python3 scripts/quality-gate.py` for the complete CG-13 gate. See [the rele
 - [Local and independent model provider adapters](model-provider-adapters.md) — #269 conformance, runtime-only credentials and opt-in live transport qualification.
 
 - [Invocation trace, replay and role qualification](invocation-qualification.md) — EPIC-06.10 component evidence and live release boundary.
+
+- [Deterministic connector mapping v1](connector-mapping-v1.md) — EPIC-07.04 explicit capability/source mapping, schema validation, atomic inventory and runtime qualification.
