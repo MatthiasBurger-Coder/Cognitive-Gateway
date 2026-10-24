@@ -33,3 +33,6 @@ pub mod prompt_renderers;
 pub mod model_adapters;
 
 pub mod invocation_host;
+
+/// Outbound MCP client; separate from the inbound Codex server.
+pub mod mcp_client;

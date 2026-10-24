@@ -199,3 +199,21 @@ pub trait ConnectorRuntimePort {
         command: ConnectorLifecycleCommand,
     ) -> Result<ConnectorLifecycleState, ConnectorFailure>;
 }
+
+/// Trusted host authority injected at composition, never deserialized from a
+/// proposal. Implementations own current policy/consent, scope, source binding
+/// and durable aggregate budget checks. There is deliberately no permissive
+/// default. The runtime calls `revalidate` immediately before transport effects.
+pub trait ConnectorAdmissionPort: Send + Sync {
+    fn admit_target(&self, target: &ConnectorTarget) -> Result<(), ConnectorFailure>;
+    fn authorize(
+        &self,
+        request: &ConnectorRequest,
+        source: Option<&SourceId>,
+    ) -> Result<ConnectorDispatch, ConnectorFailure>;
+    fn revalidate(
+        &self,
+        dispatch: &ConnectorDispatch,
+        source: Option<&SourceId>,
+    ) -> Result<(), ConnectorFailure>;
+}
