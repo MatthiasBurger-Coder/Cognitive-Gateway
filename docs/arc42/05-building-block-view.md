@@ -221,8 +221,10 @@ integration remains separate. Optional model interpretation produces proposals o
 deterministic compiler/validator owns canonical semantics. See
 [semantic language and interpretation](../semantic-language-and-interpretation.md).
 
-## 5.6 MCP connector/plugin runtime (planned EPIC-07)
+## 5.6 MCP connector/plugin runtime (architecture foundation EPIC-07.01)
 
+The #224 application driving/driven ports are compilable; the external runtime
+implementation remains planned. ADR-022 defines core/adapter ownership.
 The MCP client/runtime is an outer infrastructure block. It owns transport,
 server lifecycle, discovery and invocation. Canonical source/capability
 mapping, scope, provenance, trust, sensitivity, authorization and retry

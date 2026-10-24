@@ -28,6 +28,8 @@ Current decisions:
 
 - [ADR-021 — Shared Structured-Session Ownership (Proposed)](../adr/ADR-021-shared-structured-session-ownership.md)
 
+- [ADR-022 — Outbound Connector Core and Adapter Ownership](../adr/ADR-022-outbound-connector-ownership.md)
+
 ADRs are append-only records of architectural intent. If a decision changes, a new ADR supersedes the old one rather than silently rewriting history.
 
 ## ADR-015 implementation refinement (2026-10-17)

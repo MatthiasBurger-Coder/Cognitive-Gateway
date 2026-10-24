@@ -1,5 +1,7 @@
 use gateway_domain::{ContextScopeId, Intent, execution_context::ExecutionContext};
 
+pub use crate::connectors::ConnectorApplicationPort;
+
 use crate::{
     context::ExecutionRequest,
     external_context::{ContextScope, IngestionReceipt, IngestionResult, ScopedObservationBatch},
