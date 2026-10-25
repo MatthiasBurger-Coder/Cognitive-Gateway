@@ -237,6 +237,7 @@ The approved CG-02 v2 handoff extension is documented in
 - [Connector manifest v1](connector-manifest-v1.md) — EPIC-07.02 identity, canonical serialization and deterministic compatibility contract.
 - [MCP connector/plugin runtime](mcp-connector-runtime.md) — EPIC-07 architecture, compilable ports and manifest contracts; links to the implemented protocol runtime and pending production integrations.
 - [Outbound MCP client runtime](mcp-client-runtime.md) — EPIC-07.03 Rust protocol, bounded stdio, private admitted dispatch, lifecycle and qualification boundary.
+- [Connector credential isolation](connector-credentials-v1.md) — EPIC-07.06 opaque profiles, runtime resolution, scope enforcement, rotation and secret disclosure denial.
 - [Local model runtime / SLM-LxM boundary](local-model-runtime.md) — CG-27 signal adapters and standalone CPU/GPU benchmark framework; CG-27.01 optional service and qualification lifecycle; Qwen3-8B is a reference candidate only.
 - [Learned procedures](learned-procedures.md) — CG-21 through CG-30 govern the complete reference learning/reflex lifecycle; see complete EPIC-03 acceptance.
 - [Learned procedure evaluation](procedure-evaluation.md) — CG-23 validation, replay, simulation and evaluation evidence.

@@ -6,7 +6,7 @@
 The [protocol runtime and stdio transport](mcp-client-runtime.md) are implemented
 under EPIC-07.03 #226 behind a required admitted application host.
 [Canonical mapping](connector-mapping-v1.md) is implemented under EPIC-07.04 #227.
-Canonical result normalization is implemented by #228. Production policy services, credentials and live reference connectors remain planned under EPIC-07 #223. ADR-022 records ownership; ADR-016 separates inbound Codex MCP
+Canonical result normalization is implemented by #228. Credential profile references, runtime secret resolution contracts, scoped environment binding and authentication failure typing are implemented under #229; current production policy services and live reference connectors remain planned under EPIC-07 #223. ADR-022 records ownership; ADR-016 separates inbound Codex MCP
 (EPIC-04) from outbound CG → external systems (EPIC-07).
 
 MCP supplies protocol plumbing. CG owns planning, process legality, policy,
@@ -51,7 +51,7 @@ and rejects cycles, aliases hiding SDKs and substituted workspace sources.
 | Tool invocation/resource access | Validate typed arguments, capability, scope, policy and budgets | Perform tools/call or resources/read | Render/parse provider representation |
 | Lifecycle | Own enable/disable and allowed retry decisions | Connect/negotiate/health/cancel/shutdown, bounded queues | Process/HTTP/socket mechanics |
 | Evidence/context | Own CG-06 validation, quality, sufficiency, CG-10 minimization | Preserve correlated acquisition metadata | Normalize payload into candidate lineage |
-| Credentials | Only opaque configured association, no secret values | Resolve via outer credential service; isolate/redact | Provider authentication and transport headers |
+| Credentials | Opaque profile association; no secret values or serialization | Resolve at connection time; isolate; reload on reconnect | Inject only narrowly named secret environment variables; provider authentication |
 | Diagnostics | Stable content-free failure/effect records | Correlate and bound protocol errors | Redact raw errors before any export |
 | Aggregate execution | EPIC-08 owns session persistence and aggregate budgets | Consume existing reservation; never reset on reconnect/retry | Report usage/effect uncertainty |
 

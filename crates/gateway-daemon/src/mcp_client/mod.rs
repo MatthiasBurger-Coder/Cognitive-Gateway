@@ -40,12 +40,20 @@ pub enum Error {
     InvalidState,
     InventoryChanged,
     Schema,
+    Authentication,
+    CredentialUnavailable,
+    CredentialScopeDenied,
+    SecretDisclosure,
 }
 impl Error {
     fn failure(self, correlation: &NonEmptyText, effect: ConnectorEffect) -> ConnectorFailure {
         use ConnectorFailureCode as C;
         let code = match self {
             Self::Unavailable => C::Unavailable,
+            Self::Authentication => C::AuthenticationFailed,
+            Self::CredentialUnavailable => C::CredentialUnavailable,
+            Self::CredentialScopeDenied => C::CredentialScopeDenied,
+            Self::SecretDisclosure => C::SecretDisclosure,
             Self::Timeout => C::Timeout,
             Self::Cancelled => C::Cancelled,
             Self::IncompatibleVersion => C::IncompatibleVersion,

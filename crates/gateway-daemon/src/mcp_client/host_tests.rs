@@ -84,6 +84,31 @@ fn configuration() -> HostConfig {
         limits: Limits::default(),
     }
 }
+
+#[test]
+fn protocol_result_secret_scan_covers_nested_tool_and_resource_values() {
+    let tool = ProtocolResult::Tool {
+        content: vec![serde_json::json!({"text":"token-canary"})],
+        structured: Some(serde_json::json!({"nested":["nested-secret"]})),
+        is_error: false,
+    };
+    let values = super::protocol_result_text(&tool);
+    assert!(values.contains("token-canary"));
+    assert!(values.contains("nested-secret"));
+    let split = ProtocolResult::Tool {
+        content: vec![
+            serde_json::json!({"text":"token-can"}),
+            serde_json::json!({"text":"ary"}),
+        ],
+        structured: None,
+        is_error: false,
+    };
+    assert!(super::protocol_result_text(&split).contains("token-canary"));
+    let resource = ProtocolResult::Resource {
+        contents: vec![serde_json::json!({"text":"resource-secret"})],
+    };
+    assert!(super::protocol_result_text(&resource).contains("resource-secret"));
+}
 fn build(config: HostConfig) -> Result<McpConnectorHost, Error> {
     McpConnectorHost::new(
         config,

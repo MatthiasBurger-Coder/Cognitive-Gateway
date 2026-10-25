@@ -244,6 +244,7 @@ impl Runtime {
             if error != Error::InvalidState {
                 state.session.failed(error, &context);
             }
+            self.factory.connection_closed();
             return Err(error.failure(&request.correlation, ConnectorEffect::NotDispatched));
         }
         let result = self.prepare(&state, dispatch, source);
@@ -267,6 +268,12 @@ impl Runtime {
         };
         match result {
             Ok(result) => {
+                if self.factory.contains_secret(&protocol_result_text(&result)) {
+                    state.canonical = None;
+                    state.session.failed(Error::SecretDisclosure, &context);
+                    self.factory.connection_closed();
+                    return Err(Error::SecretDisclosure.failure(&request.correlation, effect));
+                }
                 let observation = self
                     .mapping
                     .normalize(dispatch, source, result)
@@ -338,6 +345,11 @@ impl Runtime {
         let inventory = session.inventory.as_ref().ok_or(Error::InventoryChanged)?;
         match operation {
             WireOperation::Tool { name, arguments } => {
+                self.factory.permits_tool(
+                    self.target.connector.as_str(),
+                    self.manifest.server_id(),
+                    &name,
+                )?;
                 let tool = inventory
                     .tools
                     .iter()
@@ -401,6 +413,34 @@ impl Runtime {
             }
         }
     }
+}
+
+fn protocol_result_text(result: &ProtocolResult) -> String {
+    fn collect(value: &Value, output: &mut String) {
+        match value {
+            Value::String(text) => output.push_str(text),
+            Value::Array(values) => values.iter().for_each(|v| collect(v, output)),
+            Value::Object(values) => values.values().for_each(|v| collect(v, output)),
+            _ => {}
+        }
+    }
+    let mut output = String::new();
+    match result {
+        ProtocolResult::Tool {
+            content,
+            structured,
+            ..
+        } => {
+            content.iter().for_each(|v| collect(v, &mut output));
+            if let Some(value) = structured {
+                collect(value, &mut output);
+            }
+        }
+        ProtocolResult::Resource { contents } => {
+            contents.iter().for_each(|v| collect(v, &mut output))
+        }
+    }
+    output
 }
 pub(super) fn typed(value: &TypedValue) -> Result<Value, Error> {
     value.validate().map_err(|_| Error::Schema)?;
@@ -574,11 +614,13 @@ impl ConnectorRuntimePort for Runtime {
                     )
                 };
                 state.session.close(inner, &context);
+                self.factory.connection_closed();
                 Ok(outer)
             }
         };
         result.map_err(|error| {
             state.canonical = None;
+            self.factory.connection_closed();
             if error != Error::InvalidState && state.session.state != SessionState::Degraded {
                 state.session.failed(error, &context);
             }

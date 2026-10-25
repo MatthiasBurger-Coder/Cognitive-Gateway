@@ -78,7 +78,8 @@ for line in sys.stdin:
             if mode == "remote":
                 emit({"jsonrpc": "2.0", "id": ident, "error": {"code": -32603, "message": "SECRET_PROVIDER_MESSAGE", "data": "SECRET"}})
                 continue
-            result = {"content": [{"type": "text", "text": "fixture value"}], "structuredContent": {"value": "fixture value"}, "isError": mode == "tool-error"}
+            value = os.environ.get("TEST_TOKEN", "fixture value") if mode == "secret-echo" else "fixture value"
+            result = {"content": [{"type": "text", "text": value}], "structuredContent": {"value": value}, "isError": mode == "tool-error"}
             if mode == "output-mismatch":
                 result["structuredContent"]["value"] = 123
             if mode == "bad-iserror":

@@ -367,6 +367,60 @@ fn ready(host: &McpConnectorHost) {
     );
     host.discover(&target()).unwrap();
 }
+
+#[test]
+fn credential_echo_from_real_stdio_peer_is_rejected_before_normalization() {
+    let profile = CredentialProfileRef::new(text("profile.github"));
+    let resolver = Arc::new(ReloadableCredentialResolver::new());
+    resolver.replace(
+        &profile,
+        ResolvedCredential::new(
+            [("TEST_TOKEN".to_owned(), "credential-canary-229".to_owned())].into(),
+            CredentialScope {
+                connector: text("example.records"),
+                server: text("example.records.local"),
+                tools: BTreeSet::from([text("records.read")]),
+            },
+            1,
+        ),
+    );
+    let manifest = ConnectorManifest::from_json(include_bytes!(
+        "../../../tests/fixtures/connector-manifest-v1/valid-stdio.json"
+    ))
+    .unwrap();
+    let host = McpConnectorHost::new(
+        HostConfig {
+            target: target(),
+            manifest,
+            profile: ConnectorCompatibilityProfile {
+                gateway: ConnectorVersion {
+                    major: 0,
+                    minor: 1,
+                    patch: 0,
+                },
+                transports: BTreeSet::from([ConnectorTransport::Stdio]),
+            },
+            limits: Limits::default(),
+        },
+        Box::new(CredentialedStdioFactory::new(
+            config("secret-echo"),
+            resolver,
+            profile,
+            "example.records",
+            "example.records.local",
+        )),
+        Arc::new(Authority::default()),
+        Box::new(Mapping { mode: "normal" }),
+        Arc::new(Events::default()),
+    )
+    .unwrap();
+    ready(&host);
+    let failure = host.invoke(&request()).unwrap_err();
+    assert_eq!(failure.code, ConnectorFailureCode::SecretDisclosure);
+    assert_eq!(failure.effect, ConnectorEffect::NoMutation);
+    assert!(!format!("{failure:?}").contains("credential-canary-229"));
+}
+
 #[test]
 fn stdio_handshake_discovery_dispatch_health_and_reconnect() {
     let events = Arc::new(Events::default());

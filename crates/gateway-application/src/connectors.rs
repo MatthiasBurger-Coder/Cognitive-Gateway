@@ -14,6 +14,66 @@ use gateway_domain::{
 /// Architecture contract revision; independent of the external protocol version.
 pub const CONNECTOR_PORT_VERSION: &str = "2";
 
+/// Opaque operator-managed reference to credentials. This identifier is safe to
+/// persist; it must never contain a credential value or be treated as authority.
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct CredentialProfileRef(NonEmptyText);
+
+impl CredentialProfileRef {
+    pub fn new(value: NonEmptyText) -> Self {
+        Self(value)
+    }
+    pub fn as_str(&self) -> &str {
+        self.0.as_str()
+    }
+}
+
+/// Narrow credential use to one configured connector/server and optional tools.
+/// Empty tool set means no tool is authorized; wildcard expansion is forbidden.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct CredentialScope {
+    pub connector: NonEmptyText,
+    pub server: NonEmptyText,
+    pub tools: std::collections::BTreeSet<NonEmptyText>,
+}
+impl CredentialScope {
+    pub fn permits(&self, connector: &str, server: &str, tool: &str) -> bool {
+        self.connector.as_str() == connector
+            && self.server.as_str() == server
+            && self.tools.iter().any(|allowed| allowed.as_str() == tool)
+    }
+}
+
+/// Runtime-only resolved material. Kept in the outer adapter and deliberately
+/// has no Debug/serde representation. Never copy into requests or observations.
+pub struct ResolvedCredential {
+    pub environment: BTreeMap<String, String>,
+    pub scope: CredentialScope,
+    pub generation: u64,
+}
+impl ResolvedCredential {
+    pub fn new(
+        environment: BTreeMap<String, String>,
+        scope: CredentialScope,
+        generation: u64,
+    ) -> Self {
+        Self {
+            environment,
+            scope,
+            generation,
+        }
+    }
+}
+
+/// Environment/keyring/secret-manager adapters implement this outer boundary.
+/// Resolution is performed per connection so rotation takes effect on reconnect.
+pub trait ConnectorSecretResolver: Send + Sync {
+    fn resolve(
+        &self,
+        profile: &CredentialProfileRef,
+    ) -> Result<ResolvedCredential, ConnectorFailureCode>;
+}
+
 /// A mapped operation class. Unknown mappings have no executable representation.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ConnectorOperationClass {
@@ -114,6 +174,9 @@ pub enum ConnectorEffect {
 pub enum ConnectorFailureCode {
     Unavailable,
     AuthenticationFailed,
+    CredentialUnavailable,
+    CredentialScopeDenied,
+    SecretDisclosure,
     PermissionDenied,
     Timeout,
     Cancelled,
