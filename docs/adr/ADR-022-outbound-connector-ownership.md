@@ -72,3 +72,16 @@ requires port revision 2; old manifests must be regenerated and inventories
 rediscovered. Every host result reuses the application normalization validator;
 CG-06 ingestion and reference-only context adapters reject acknowledgements.
 Authentication, current policy and goal completion remain their existing owners.
+
+## EPIC-07.06 credential isolation — 2026-10-25
+
+Credentials are resolved by an outer `ConnectorSecretResolver` from an opaque
+`CredentialProfileRef`. The resolved value has no serialization/debug contract.
+`CredentialedStdioFactory` resolves on each connection, binds the result only to
+the configured connector and server, and gates each mapped tool against the
+profile allowlist. Unprofiled authentication environment keys are rejected.
+Provider results containing a resolved secret are denied before mapping or
+normalization. Rotation takes effect on an admitted reconnect; no domain record
+is mutated. Resolver/provider diagnostics are projected to fixed failure codes.
+This qualifies the component boundary and synthetic test adapter; it does not
+claim live provider or installed-binary qualification.

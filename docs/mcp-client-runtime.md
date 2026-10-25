@@ -13,8 +13,11 @@ raw call endpoint or model-visible transport handle.
 The host is an embeddable synchronous application boundary, not a new CLI or an
 EPIC-08 coordinator. Call from a blocking worker if the surrounding host uses an
 async executor. [Production canonical mapping](connector-mapping-v1.md) is
-implemented under #227. Normalization, credential service and policy/consent
-service remain #229/#230. #228 now supplies the [canonical normalizer](connector-result-v1.md). Injected conformance adapters establish protocol/runtime behavior, not those later integrations.
+implemented under #227. Credential profile resolution, scoped stdio composition,
+reload and secret-echo rejection are implemented by #229. Policy/consent remains
+#230. #228 supplies the [canonical normalizer](connector-result-v1.md). This
+runtime module is still an embeddable boundary; production external provider
+deployment and parent-epic qualification remain separate.
 
 `ConnectorAdmissionPort` is an additive driving-host authority contract in
 connector port v1. `admit_target` checks current admission for lifecycle/discovery
@@ -25,6 +28,21 @@ consent, task/step/execution, arguments/source, scope, inventory, durable budget
 reservation and deadline. Constructing a `ConnectorDispatch` does not grant access.
 These checks must be bounded and must not acquire the runtime lock recursively.
 No observer or mapping callback may perform blocking work or panic.
+
+Credential profile identifiers and `ConnectorSecretResolver` live in the
+application boundary as opaque references and a runtime-only resolution port.
+Resolved values have no `Debug` or serde implementation and must never enter
+requests, normalized observations, evidence, context or audit events. Credential
+scope binds connector, server and an explicit allowlist of tools; empty means
+deny all and wildcard expansion is unsupported. The stdio adapter accepts only
+uppercase secret-style variable names and rejects operator-config collisions.
+Resolution is per connection; rotation takes effect after an admitted reconnect
+and fresh discovery. `CredentialedStdioFactory` composes the resolver with the
+stdio transport, verifies connector/server identity, enforces the tool allowlist,
+rejects credentials configured outside a profile, and rejects any provider result
+that echoes a resolved secret before normalization. Authentication failures map
+to fixed typed codes without provider text. The shipped binaries do not yet
+compose a live outbound provider; this implementation is component-level.
 
 ## Lifecycle and protocol
 
