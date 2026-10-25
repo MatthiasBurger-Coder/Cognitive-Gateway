@@ -332,7 +332,7 @@ fn file_backed_host_both_transports_verify_persist_restart_and_replay_without_re
             "estimated"
         );
         let second = f.host("second").execute("invoke").unwrap();
-        assert_eq!(second["status"], "VERIFIED");
+        assert_eq!(second["status"], "VERIFIED", "{kind}: {second}");
         assert_eq!(second["budget"]["usage"]["attempts"], 2);
         s.join().unwrap();
         assert_eq!(
@@ -824,4 +824,47 @@ fn registered_role_refuses_wrong_agent_scope_shape_goal_and_oracle() {
             "{invalid}"
         );
     }
+}
+
+#[test]
+fn cached_oracle_acquisition_time_survives_resolution_across_a_second_boundary() {
+    use gateway_application::grounding::GroundingEvidencePort;
+    let f = Fixture::new();
+    let host = f.host("acquisition-time");
+    let ir = host.admitted_invocation().unwrap();
+    let citation = ResolvedReference {
+        id: EvidenceId::new("citation-0").unwrap(),
+        scope: f.a.scope.clone(),
+        contract: id("citation-0"),
+        contract_version: SchemaVersion::V1,
+        revision: id("1"),
+        digest: f.a.oracle_digest.clone(),
+    };
+    let first = host.resolve(&ir, &citation).unwrap();
+    let evaluated_at = UnixTimestamp::new((now() / 1000) as i64);
+    let next_second = (evaluated_at.seconds() as u64 + 1) * 1000;
+    while now() < next_second {
+        thread::sleep(Duration::from_millis(2));
+    }
+    let later = host.resolve(&ir, &citation).unwrap();
+    assert_eq!(later.observed_at, first.observed_at);
+    assert_eq!(
+        evaluate_freshness(
+            later.observed_at,
+            Some(evaluated_at),
+            FreshnessPolicy::new(30)
+        ),
+        Ok(FreshnessStatus::Fresh)
+    );
+    let expired_at = UnixTimestamp::new(later.observed_at.unwrap().seconds() + 31);
+    assert_eq!(
+        evaluate_freshness(
+            later.observed_at,
+            Some(expired_at),
+            FreshnessPolicy::new(30)
+        ),
+        Ok(FreshnessStatus::Stale)
+    );
+    fs::write(&f.a.oracle_file, b"changed").unwrap();
+    assert!(host.resolve(&ir, &citation).is_err());
 }
