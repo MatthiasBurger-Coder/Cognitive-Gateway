@@ -1,4 +1,4 @@
-//! EPIC-07.01 v1 architectural ports. No transport or authorization implementation.
+//! EPIC-07 v2 architectural ports with canonical result metadata.
 //!
 //! Requests are proposals until the application checks current policy. Public
 //! binding records are audit data, not unforgeable grants. See the normative
@@ -12,7 +12,7 @@ use gateway_domain::{
 };
 
 /// Architecture contract revision; independent of the external protocol version.
-pub const CONNECTOR_PORT_VERSION: &str = "1";
+pub const CONNECTOR_PORT_VERSION: &str = "2";
 
 /// A mapped operation class. Unknown mappings have no executable representation.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -80,6 +80,7 @@ pub struct ConnectorDispatch {
 /// Candidate lineage for CG-06 validation; no completion or trust assertion.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ConnectorObservation {
+    pub metadata: crate::connector_results::ConnectorResultMetadata,
     pub target: ConnectorTarget,
     pub inventory_revision: ContentDigest,
     pub correlation: NonEmptyText,

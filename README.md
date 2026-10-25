@@ -214,3 +214,9 @@ evidence, and continues or replans within explicit iteration and retry limits.
 The optional local model service can be started with `scripts/model.sh start`;
 see [the operator guide](docs/local-model-runtime.md) for installation, qualification,
 promotion, rollback and the independent Gateway container.
+
+EPIC-07.05 #228 implements [canonical connector result normalization](docs/connector-result-v1.md),
+with CG-06 lineage, scope/quality propagation, acknowledgement/read-back separation
+and reference-only context adapters. Application port revision 2 requires manifest
+and inventory regeneration. Production credentials/policy and live effects remain
+separate qualification work.

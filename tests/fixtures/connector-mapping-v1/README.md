@@ -12,3 +12,6 @@ must fail closed; hints grant neither classification nor permission. Unit tests
 also mutate the canonical inputs to cover conflicts, stale revisions, unsupported
 schemas and invalid metadata. See `docs/connector-mapping-v1.md` for ownership,
 encoding, diagnostics and qualification limits.
+
+EPIC-07.05 regenerates the manifest digest, snapshot and inventory revision for
+application port revision 2; discovery schemas and canonical mappings are unchanged.

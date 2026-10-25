@@ -291,7 +291,7 @@
           "additionalProperties": false,
           "properties": {
             "port_version": {
-              "const": "1"
+              "const": "2"
             },
             "gateway_major": {
               "type": "integer",

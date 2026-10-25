@@ -349,7 +349,10 @@ pub(super) fn evidence(
         knowledge: input(KnowledgeProvenance::new(location, Some("1")))?,
         lineage,
         quality: quality(&host.admission),
-        observed_at: Some(UnixTimestamp::new((now() / 1000) as i64)),
+        // This evidence describes the pinned bytes acquired at host load.
+        // Resolving that snapshot must not move acquisition past the manifest
+        // evaluation time, or refresh its age on repeated resolution.
+        observed_at: Some(host.oracle_observed_at),
         observed_effect: None,
     })
 }

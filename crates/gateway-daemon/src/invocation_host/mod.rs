@@ -103,6 +103,7 @@ pub struct InvocationHost {
     admission: HostAdmission,
     source: Vec<u8>,
     expected: Value,
+    oracle_observed_at: UnixTimestamp,
     handoff: PlannedContextHandoff,
     prepared: PreparedModelInvocation,
 }
@@ -147,6 +148,7 @@ impl InvocationHost {
         }
         let source = read(&a.source_file)?;
         let oracle = read(&a.oracle_file)?;
+        let oracle_observed_at = UnixTimestamp::new((now() / 1000) as i64);
         if context_content_digest(&source) != a.task.data().target.reference.digest
             || context_content_digest(&oracle) != a.oracle_digest
         {
@@ -164,6 +166,7 @@ impl InvocationHost {
             admission: a,
             source,
             expected,
+            oracle_observed_at,
             handoff,
             prepared,
         };

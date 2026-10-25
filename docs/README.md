@@ -307,3 +307,9 @@ Run `python3 scripts/quality-gate.py` for the complete CG-13 gate. See [the rele
 - [Invocation trace, replay and role qualification](invocation-qualification.md) — EPIC-06.10 component evidence and live release boundary.
 
 - [Deterministic connector mapping v1](connector-mapping-v1.md) — EPIC-07.04 explicit capability/source mapping, schema validation, atomic inventory and runtime qualification.
+
+EPIC-07.05 #228 implements [canonical connector result normalization](connector-result-v1.md),
+with CG-06 lineage, scope/quality propagation, acknowledgement/read-back separation
+and reference-only context adapters. Application port revision 2 requires manifest
+and inventory regeneration. Production credentials/policy and live effects remain
+separate qualification work.

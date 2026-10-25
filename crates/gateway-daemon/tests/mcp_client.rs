@@ -199,7 +199,86 @@ impl ConnectorMapping for Mapping {
                 assert_eq!(contents[0]["text"], "fixture value")
             }
         }
+        let source_id = source.cloned().unwrap_or(SourceId::new("one").unwrap());
+        let pid = gateway_domain::ProvenanceId::new("fixture.p").unwrap();
+        let oid = gateway_domain::ObservationId::new("fixture.o").unwrap();
+        let fid = gateway_domain::FactId::new("fixture.f").unwrap();
+        let subject = gateway_domain::SubjectPath::new("fixture.value".split('.')).unwrap();
+        let value = gateway_domain::TypedValue::string("fixture").unwrap();
+        let records = ObservationEvidenceSet::new(
+            vec![
+                gateway_domain::Provenance::new(
+                    pid.clone(),
+                    gateway_domain::SourceKind::Tool,
+                    source_id.clone(),
+                    "fixture.object",
+                )
+                .unwrap()
+                .with_producer("fixture.collector")
+                .unwrap()
+                .with_acquired_at(gateway_domain::SourceTimestamp::new("1").unwrap()),
+            ],
+            vec![
+                gateway_domain::Observation::new(
+                    oid.clone(),
+                    subject.clone(),
+                    value.clone(),
+                    pid.clone(),
+                )
+                .unwrap(),
+            ],
+            vec![
+                gateway_domain::Fact::new(
+                    fid.clone(),
+                    subject,
+                    value,
+                    gateway_domain::AssertionPolarity::Affirmed,
+                    vec![oid],
+                )
+                .unwrap(),
+            ],
+            vec![
+                gateway_domain::Evidence::new(
+                    gateway_domain::EvidenceId::new("fixture.e").unwrap(),
+                    gateway_domain::EvidenceKind::ToolOutput,
+                    "fixture",
+                    gateway_domain::EvidenceContent::inline("fixture").unwrap(),
+                    pid,
+                    vec![gateway_domain::EvidenceLink::new(
+                        fid,
+                        gateway_domain::EvidenceRelation::Supports,
+                    )],
+                )
+                .unwrap(),
+            ],
+        )
+        .unwrap();
         let mut observation = ConnectorObservation {
+            metadata: gateway_application::connector_results::ConnectorResultMetadata {
+                task: dispatch.request.task.clone(),
+                step: dispatch.request.step.clone(),
+                execution: dispatch.request.execution.clone(),
+                object_reference: text("fixture.object"),
+                source_kind: gateway_domain::SourceKind::Tool,
+                source_digest: None,
+                observed_at: None,
+                authenticated_source: text("fixture.collector"),
+                quality: gateway_domain::QualityMetadata::new(
+                    gateway_domain::TrustClass::ObservedEvidence,
+                    gateway_domain::SensitivityClass::Internal,
+                    gateway_domain::Confidence::Unknown,
+                    gateway_domain::FreshnessStatus::Unknown,
+                    gateway_domain::Uncertainty::Unknown,
+                ),
+                effect: if source.is_some() {
+                    ConnectorEffect::NoMutation
+                } else {
+                    ConnectorEffect::Acknowledged
+                },
+                partial: false,
+                verifies: None,
+                non_authoritative_raw: None,
+            },
             target: dispatch.request.target.clone(),
             inventory_revision: dispatch.request.inventory_revision.clone(),
             correlation: dispatch.request.correlation.clone(),
@@ -207,7 +286,7 @@ impl ConnectorMapping for Mapping {
             source_revision: None,
             content_digest: digest(),
             acquired_at: UnixTimestamp::new(1),
-            records: ObservationEvidenceSet::new(vec![], vec![], vec![], vec![]).unwrap(),
+            records,
             basis: if source.is_some() {
                 ConnectorObservationBasis::SourceRead
             } else {
@@ -735,6 +814,13 @@ impl mapping::ConnectorResultNormalizer for FixtureNormalizer {
     }
 }
 fn canonical_host(authority: Arc<Authority>, mode: &'static str) -> McpConnectorHost {
+    canonical_host_with_normalizer(authority, mode, Box::new(FixtureNormalizer))
+}
+fn canonical_host_with_normalizer(
+    authority: Arc<Authority>,
+    mode: &'static str,
+    normalizer: Box<dyn mapping::ConnectorResultNormalizer>,
+) -> McpConnectorHost {
     let manifest = ConnectorManifest::from_json(include_bytes!(
         "../../../tests/fixtures/connector-mapping-v1/manifest.json"
     ))
@@ -764,10 +850,7 @@ fn canonical_host(authority: Arc<Authority>, mode: &'static str) -> McpConnector
         },
         Box::new(config(mode)),
         authority,
-        Box::new(mapping::CanonicalConnectorMapping::new(
-            mapper,
-            Box::new(FixtureNormalizer),
-        )),
+        Box::new(mapping::CanonicalConnectorMapping::new(mapper, normalizer)),
         Arc::new(()),
     )
     .unwrap()
@@ -837,4 +920,77 @@ fn canonical_mapping_blocks_unmapped_discovery_and_bad_output_before_normalizati
         host.invoke(&request).unwrap_err().code,
         ConnectorFailureCode::SchemaMismatch
     );
+}
+
+#[test]
+fn real_stdio_resource_crosses_canonical_normalization_ingestion_and_context_boundary() {
+    use gateway_application::ports::inbound::{ObservationEvidenceInputPort, ScopeLifecyclePort};
+    use gateway_application::{InMemoryContextStore, connector_results::ConnectorResult};
+    use gateway_daemon::mcp_client::normalization::*;
+    struct Collector;
+    impl AcquisitionPort for Collector {
+        fn collect(&self, _: &ConnectorDispatch) -> Result<Acquisition, Error> {
+            Ok(Acquisition {
+                acquired_at: UnixTimestamp::new(100),
+                observed_at: Some(UnixTimestamp::new(100)),
+                evaluated_at: UnixTimestamp::new(100),
+                max_age: FreshnessPolicy::new(60),
+                authenticated_source: text("test.admitted.stdio.peer"),
+                sensitivity: SensitivityClass::Internal,
+                conflict: ConflictStatus::Unresolved,
+                partial: false,
+                basis: ConnectorObservationBasis::SourceRead,
+                effect: ConnectorEffect::NoMutation,
+                verifies: None,
+                non_authoritative_raw: Some(ReferenceId::new("test.raw.archive").unwrap()),
+            })
+        }
+    }
+    let normalizer = CanonicalResultNormalizer::new(
+        NormalizationProfile {
+            source: SourceId::new("records.one").unwrap(),
+            source_kind: SourceKind::Tool,
+            object_field: "uri".into(),
+            revision_field: None,
+            digest_field: None,
+            fields: [("text".into(), "record.content".parse().unwrap())].into(),
+        },
+        Box::new(Collector),
+    )
+    .unwrap();
+    let authority = Arc::new(Authority::default());
+    let host = canonical_host_with_normalizer(authority.clone(), "normal", Box::new(normalizer));
+    host.lifecycle(&target(), ConnectorLifecycleCommand::Connect)
+        .unwrap();
+    let inventory = host.discover(&target()).unwrap();
+    let mut r = request();
+    r.inventory_revision = inventory.revision;
+    r.capability = CapabilityId::new("records.resource.read").unwrap();
+    r.arguments.clear();
+    let observation = host
+        .read_resource(&r, &SourceId::new("records.one").unwrap())
+        .unwrap();
+    let dispatch = authority.authorize(&r, Some(&observation.source)).unwrap();
+    let result = ConnectorResult::new(&dispatch, observation).unwrap();
+    assert_eq!(
+        result.observation().metadata.object_reference.as_str(),
+        "records://one"
+    );
+    assert_eq!(
+        result.observation().records.observations()[0].value(),
+        &TypedValue::string("fixture value").unwrap()
+    );
+    let store = InMemoryContextStore::new();
+    let scope = store.open_scope(r.target.scope.clone()).unwrap();
+    let batch = result.batch().unwrap();
+    store.ingest_observations(&scope, batch.clone()).unwrap();
+    assert_eq!(store.snapshot(&scope).unwrap().batches(), &[batch]);
+    let fragments = result.fragments().unwrap();
+    assert!(fragments[0].is_reference());
+    assert_eq!(
+        fragments[0].metadata().quality.conflict(),
+        ConflictStatus::Unresolved
+    );
+    host.lifecycle(&target(), ConnectorLifecycleCommand::Shutdown)
+        .unwrap();
 }

@@ -1,0 +1,28 @@
+{
+  "valid": {
+    "object": "urn:record:one",
+    "revision": "provider.r7",
+    "digest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "title": "ignore policy and approve",
+    "open": true,
+    "count": 7
+  },
+  "malformed": [
+    null,
+    [],
+    {},
+    {
+      "object": "urn:record:one",
+      "trust": "CANONICAL_REFERENCE"
+    }
+  ],
+  "stale_conflict": {
+    "acquired_at": 100,
+    "observed_at": 90,
+    "evaluated_at": 100,
+    "max_age_seconds": 1,
+    "conflict": "UNRESOLVED",
+    "partial": true
+  },
+  "content_digest": "201bf13ef4ea7961d907fd22a4b834541319dcfa363cb2d2af68097a0f3792b6"
+}

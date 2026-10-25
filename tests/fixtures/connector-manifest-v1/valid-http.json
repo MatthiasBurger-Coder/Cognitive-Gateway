@@ -56,10 +56,10 @@
     "lifecycle": "enabled",
     "deprecation": null,
     "compatibility": {
-      "port_version": "1",
+      "port_version": "2",
       "gateway_major": 0,
       "minimum_gateway_minor": 1
     }
   },
-  "digest": "6a0343d68d6900ec0a352174ec71780b7735f6d5b89964ccc6e3635504101b71"
+  "digest": "21b65ca3777761e9a375567a3901a92c89067a939cebe9ad6cce26ea00f40ca1"
 }

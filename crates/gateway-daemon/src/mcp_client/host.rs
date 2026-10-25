@@ -274,7 +274,11 @@ impl Runtime {
                 context
                     .check()
                     .map_err(|e| e.failure(&request.correlation, effect))?;
-                if observation.records.validate().is_err()
+                if gateway_application::connector_results::ConnectorResult::validate(
+                    dispatch,
+                    &observation,
+                )
+                .is_err()
                     || observation.target != request.target
                     || observation.inventory_revision != request.inventory_revision
                     || observation.correlation != request.correlation
