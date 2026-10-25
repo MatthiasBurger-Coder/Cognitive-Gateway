@@ -21,6 +21,17 @@ Runtime memory, retrieved context, generated suggestions, issue text, and model 
 
 If two sources conflict, repository governance and architecture documentation win unless an explicit approved change updates that authority.
 
+## GitHub EPIC issue creation
+
+When creating a GitHub EPIC issue, the native sub-issue workflow in
+`.agents/skills/github-sub-issues/SKILL.md` is mandatory. Load and follow it
+for every EPIC creation: inspect existing issues and children, create actionable
+child issues where the EPIC scope calls for them, establish native GitHub parent
+relationships, and verify those relationships from GitHub data. A Markdown
+checklist or textual parent reference does not satisfy this requirement. If
+native sub-issue operations are unavailable or permissions prevent them, report
+the specific blocker and do not claim the EPIC has its required child links.
+
 ## Goal Lock
 
 Every hardening run MUST begin with one explicit hardening goal.
