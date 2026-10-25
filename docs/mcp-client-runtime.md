@@ -14,7 +14,7 @@ The host is an embeddable synchronous application boundary, not a new CLI or an
 EPIC-08 coordinator. Call from a blocking worker if the surrounding host uses an
 async executor. [Production canonical mapping](connector-mapping-v1.md) is
 implemented under #227. Normalization, credential service and policy/consent
-service remain #228/#229/#230. Injected conformance adapters establish protocol/runtime behavior, not those later integrations.
+service remain #229/#230. #228 now supplies the [canonical normalizer](connector-result-v1.md). Injected conformance adapters establish protocol/runtime behavior, not those later integrations.
 
 `ConnectorAdmissionPort` is an additive driving-host authority contract in
 connector port v1. `admit_target` checks current admission for lifecycle/discovery

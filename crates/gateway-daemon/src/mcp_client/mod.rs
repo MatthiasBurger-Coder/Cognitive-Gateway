@@ -3,6 +3,7 @@
 mod host;
 mod json;
 pub mod mapping;
+pub mod normalization;
 mod protocol;
 mod schema;
 pub mod transport;

@@ -1,10 +1,10 @@
 {
-  "digest": "2e60a24f895fee4a4339391a37dfb7ea387d455f761c2660532a6b40cb36194f",
+  "digest": "910662e5722488538d2d61ef45eead815d1b38f0bbcb592c4adf716dacc82065",
   "manifest": {
     "compatibility": {
       "gateway_major": 0,
       "minimum_gateway_minor": 1,
-      "port_version": "1"
+      "port_version": "2"
     },
     "configuration_ref": "config.records.local",
     "connector_id": "example.records",

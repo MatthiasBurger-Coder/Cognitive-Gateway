@@ -6,7 +6,7 @@
 The [protocol runtime and stdio transport](mcp-client-runtime.md) are implemented
 under EPIC-07.03 #226 behind a required admitted application host.
 [Canonical mapping](connector-mapping-v1.md) is implemented under EPIC-07.04 #227.
-Production policy services, normalization, credentials and live reference connectors remain planned under EPIC-07 #223. ADR-022 records ownership; ADR-016 separates inbound Codex MCP
+Canonical result normalization is implemented by #228. Production policy services, credentials and live reference connectors remain planned under EPIC-07 #223. ADR-022 records ownership; ADR-016 separates inbound Codex MCP
 (EPIC-04) from outbound CG → external systems (EPIC-07).
 
 MCP supplies protocol plumbing. CG owns planning, process legality, policy,
@@ -59,7 +59,7 @@ and rejects cycles, aliases hiding SDKs and substituted workspace sources.
 
 The public Rust surface is
 [`gateway_application::connectors`](../crates/gateway-application/src/connectors.rs),
-revision `CONNECTOR_PORT_VERSION = "1"`. Inbound and outbound port modules
+revision `CONNECTOR_PORT_VERSION = "2"`. Inbound and outbound port modules
 re-export the driving/driven traits. This is an in-process architecture contract,
 not a serialized manifest or an authorization token format. Breaking changes
 require a new revision and consumer migration. #225 owns the full identity,
@@ -196,8 +196,9 @@ sequenceDiagram
 `SourceTimestamp`, `ContentDigest` and `UnixTimestamp`; it does not invent another
 Evidence or ContextFragment. It binds instance, scope, inventory revision and
 correlation, plus source revision when available, content digest and acquisition
-time. #228 defines canonical payload normalization and preservation of object
-identity in provenance/source references. Unknown source revision stays absent;
+time. #228 implements [canonical result normalization](connector-result-v1.md) and
+preserves object identity in existing provenance/source references. Port revision 2
+requires its correlation, acquisition, handling and effect metadata. Unknown source revision stays absent;
 local acquisition time must never masquerade as provider revision.
 
 Application admission validates lineage, result schemas, scope/correlation and

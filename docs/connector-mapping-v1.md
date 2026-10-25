@@ -134,7 +134,7 @@ fail before transport. `CanonicalConnectorMapping` implements the existing host
 mapping trait using this resolver and a mandatory `ConnectorResultNormalizer`.
 There is no default/pass-through normalizer. The host's separate trusted
 `ConnectorAdmissionPort` must still admit discovery, authorize each proposal and
-revalidate immediately before effects. #228 owns canonical normalization; #230
+revalidate immediately before effects. #228 supplies [canonical normalization](connector-result-v1.md); #230
 owns production policy/consent services; #231 owns retry/reconciliation decisions.
 
 Failures are fixed `MappingError` variants: encoding/version/metadata, duplicate

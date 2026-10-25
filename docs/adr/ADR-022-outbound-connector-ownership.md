@@ -62,3 +62,13 @@ and data-flow diagrams, negative coupling examples, compatibility profile,
 acceptance traceability and completed single-agent review checklist. Compile
 fixtures and dependency regression tests qualify the foundation; live MCP and
 external effects are deferred to the runtime and qualification slices.
+
+## EPIC-07.05 contract revision — 2026-10-24
+
+Port revision 2 intentionally replaces the v1 foundation's observation record with
+mandatory [canonical result metadata](../connector-result-v1.md). The driving and
+driven method signatures and ownership remain the same. Manifest format 1.0 now
+requires port revision 2; old manifests must be regenerated and inventories
+rediscovered. Every host result reuses the application normalization validator;
+CG-06 ingestion and reference-only context adapters reject acknowledgements.
+Authentication, current policy and goal completion remain their existing owners.

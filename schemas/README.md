@@ -86,7 +86,7 @@ until the shared session API exists. See [the versioned contract](../docs/codex-
 [`semantic-task.schema.json`](semantic-task.schema.json) defines EPIC-05.02 SemanticTaskIR 1.0. Rust admission adds scope, identity and CG-06 invariants; external reference validation remains mandatory before handoff. See [the versioning contract](../docs/semantic-task-ir-v1.md) and [fixtures](../tests/fixtures/semantic-task-v1/).
 
 [`connector-manifest-v1.schema.json`](connector-manifest-v1.schema.json) defines the
-EPIC-07.02 reference-only connector manifest. Rust adds canonical digest, uniqueness,
+EPIC-07.02 reference-only connector manifest (application port revision 2 after EPIC-07.05). Rust adds canonical digest, uniqueness,
 compatibility and cross-field validation. See [the contract](../docs/connector-manifest-v1.md).
 
 `connector-mapping-v1.schema.json` defines strict explicit outbound tool/resource mapping records. Rust additionally enforces reference resolution, schema profile, effect/retry consistency and uniqueness; see [mapping v1](../docs/connector-mapping-v1.md).

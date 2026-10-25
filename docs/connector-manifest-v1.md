@@ -28,7 +28,7 @@ A manifest envelope contains `manifest` and `digest`. Its definition contains:
 | `health` | Opaque health contract reference plus interval/timeout seconds, `1 <= timeout <= interval <= 86400` |
 | `lifecycle` | Configured `enabled`, `disabled` or `deprecated`; live connection/health state belongs to runtime |
 | `deprecation` | Required for deprecated state only: replacement connector ID and inclusive Gateway minor-version sunset |
-| `compatibility` | Exact application port revision `1`, Gateway major and minimum minor |
+| `compatibility` | Exact application port revision `2`, Gateway major and minimum minor |
 
 All opaque IDs/references match `[a-z][a-z0-9.-]{0,95}` exactly, without case folding,
 trimming or Unicode normalization. They are lookup keys, never URIs or secret
@@ -197,3 +197,6 @@ cargo fmt --check
 The [evidence record](evidence/EPIC-07.02-manifest.json) binds this contract to the
 candidate files and actual results. No live connector, resolved credential/profile,
 application authorization or parent EPIC-07 completion is claimed.
+
+Port revision 2 adds mandatory [canonical result metadata](connector-result-v1.md);
+port-1 manifests and derived inventory digests require explicit regeneration.

@@ -11,3 +11,7 @@ Rust integration tests read raw fixture bytes (including duplicate JSON fields).
 Python contract tests independently validate the schema and recompute golden
 SHA-256 digests. Cross-field/digest/uniqueness rules belong to Rust; see the
 [contract](../../../docs/connector-manifest-v1.md).
+
+EPIC-07.05 migrates these manifest-format-1.0 vectors to application port revision 2.
+The unsupported-port fixture now represents legacy revision 1. Canonical manifest
+bytes and derived mapping inventory vectors are regenerated together.
