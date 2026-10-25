@@ -36,10 +36,30 @@ Sub-Issue nativ hinzufügen:
 ```bash
 gh api repos/OWNER/REPO/issues/PARENT_NUMBER/sub_issues \
   --method POST \
-  --input - <<'JSON'
-{"sub_issue_id": CHILD_DATABASE_ID}
-JSON
+  -F sub_issue_id=CHILD_DATABASE_ID \
+  --jq '{number,title}'
 ```
+
+`-F` (alternativ `--field`) übergibt das Feld als JSON-Zahl. Für diesen Endpunkt
+ist der Request-Body erforderlich. Ein Aufruf mit `--input -` ohne tatsächlich
+über stdin geliefertes JSON sendet einen leeren Body und endet mit HTTP 422
+(`Invalid input: data cannot be null`). Nicht den sichtbaren Child-Issue-Wert
+bei `sub_issue_id` einsetzen, sondern die zuvor aus genau diesem Child gelesene
+numerische `.id`.
+
+Beispiel für ein einzelnes Child:
+
+```bash
+CHILD_ID=$(gh api repos/OWNER/REPO/issues/CHILD_NUMBER --jq .id)
+gh api repos/OWNER/REPO/issues/PARENT_NUMBER/sub_issues \
+  --method POST \
+  -F sub_issue_id="$CHILD_ID" \
+  --jq '{number,title}'
+```
+
+Erwartet wird als Antwort das Parent-Issue. Danach trotzdem wie im Abschnitt
+„Verifizieren“ Parent-Liste, Child-`parent_issue_url` und Parent-Zusammenfassung
+erneut lesen. Mutationen für mehrere Childs einzeln und sequenziell ausführen.
 
 Nicht mehrere Mutationen parallel ausführen, solange nicht alle Child-IDs einzeln zweifelsfrei ermittelt wurden. Bei mehreren Items sequenziell verknüpfen. Ein HTTP-422-Fehler wie „Sub issue may only have one parent“ bedeutet, dass das Child bereits einem Parent zugeordnet ist. Nicht mit erzwungenen oder geratenen IDs wiederholen; Parent des Childs auslesen und den Konflikt korrekt behandeln.
 
