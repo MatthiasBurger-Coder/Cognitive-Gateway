@@ -232,6 +232,21 @@ pub struct MappedEntry {
     pub argument_schema_digest: ContentDigest,
     pub result_schema_digest: ContentDigest,
 }
+/// Complete invocation schemas recovered from the current validated discovery.
+/// The schemas are data for output validation and never grant connector access.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct MappedToolSchema {
+    pub target: ConnectorTarget,
+    pub capability: CapabilityId,
+    pub inventory_revision: ContentDigest,
+    /// Complete raw wire-schema digest, including documentation metadata.
+    pub argument_schema_digest: ContentDigest,
+    /// Complete wire-schema digest, including documentation metadata.
+    pub wire_argument_schema_digest: ContentDigest,
+    pub result_schema_digest: ContentDigest,
+    pub argument_schema: serde_json::Value,
+    pub result_schema: serde_json::Value,
+}
 /// Complete atomic snapshot; private fields prevent construction of an unchecked index.
 #[derive(Debug, Clone)]
 pub struct MappedInventory {
@@ -429,6 +444,55 @@ impl DiscoveryMapper {
             canonical: canonical(&audit),
         })
     }
+    /// Return full tool schemas only when the exact complete inventory revision
+    /// remains current and the manifest/mapping still bind the same schemas.
+    pub fn tool_schema(
+        &self,
+        wire: &ProtocolInventory,
+        capability: &CapabilityId,
+        expected_revision: &ContentDigest,
+    ) -> Result<MappedToolSchema, MappingError> {
+        let snapshot = self.snapshot(wire)?;
+        if &snapshot.inventory.revision != expected_revision {
+            return Err(MappingError::StaleInventory);
+        }
+        let entry = snapshot
+            .entries
+            .iter()
+            .find(|entry| {
+                entry.mapping.kind == InventoryKind::Tool && &entry.mapping.capability == capability
+            })
+            .ok_or(MappingError::UnknownEntry)?;
+        let wire_tool = wire
+            .tools
+            .iter()
+            .find(|tool| tool["name"].as_str() == Some(entry.mapping.name.as_str()))
+            .ok_or(MappingError::MissingEntry)?;
+        let argument_schema = wire_tool["inputSchema"].clone();
+        let result_schema = entry
+            .mapping
+            .result_schema
+            .clone()
+            .ok_or(MappingError::Schema)?;
+        let wire_argument_schema_digest = hash(&argument_schema);
+        let argument_schema_digest = hash(&argument_schema);
+        let result_schema_digest = hash(&result_schema);
+        if argument_schema_digest != entry.argument_schema_digest
+            || result_schema_digest != entry.result_schema_digest
+        {
+            return Err(MappingError::SchemaDigest);
+        }
+        Ok(MappedToolSchema {
+            target: snapshot.inventory.target,
+            capability: capability.clone(),
+            inventory_revision: snapshot.inventory.revision,
+            argument_schema_digest,
+            wire_argument_schema_digest,
+            result_schema_digest,
+            argument_schema,
+            result_schema,
+        })
+    }
     pub fn resolve(
         &self,
         dispatch: &ConnectorDispatch,
@@ -511,14 +575,50 @@ pub trait ConnectorResultNormalizer: Send + Sync {
         result: ProtocolResult,
     ) -> Result<ConnectorObservation, Error>;
 }
+/// Read-only data retained at the actual checked discovery mapping boundary.
+/// A matching snapshot is evidence data, never a current authorization grant.
+#[derive(Default)]
+pub(super) struct MappedInventoryCache(std::sync::Mutex<Option<MappedInventory>>);
+impl MappedInventoryCache {
+    pub(super) fn snapshot_for(
+        &self,
+        summary: &ConnectorInventory,
+    ) -> Result<MappedInventory, Error> {
+        let retained = self.0.lock().map_err(|_| Error::Unavailable)?;
+        retained
+            .as_ref()
+            .filter(|s| s.inventory() == summary)
+            .cloned()
+            .ok_or(Error::InventoryChanged)
+    }
+}
+
 /// Production mapping adapter for the existing admitted MCP host.
 pub struct CanonicalConnectorMapping {
     mapper: DiscoveryMapper,
     normalizer: Box<dyn ConnectorResultNormalizer>,
+    retained: Option<Arc<MappedInventoryCache>>,
 }
 impl CanonicalConnectorMapping {
     pub fn new(mapper: DiscoveryMapper, normalizer: Box<dyn ConnectorResultNormalizer>) -> Self {
-        Self { mapper, normalizer }
+        Self {
+            mapper,
+            normalizer,
+            retained: None,
+        }
+    }
+}
+impl CanonicalConnectorMapping {
+    pub(super) fn new_retaining(
+        mapper: DiscoveryMapper,
+        normalizer: Box<dyn ConnectorResultNormalizer>,
+        retained: Arc<MappedInventoryCache>,
+    ) -> Self {
+        Self {
+            mapper,
+            normalizer,
+            retained: Some(retained),
+        }
     }
 }
 impl ConnectorMapping for CanonicalConnectorMapping {
@@ -528,13 +628,24 @@ impl ConnectorMapping for CanonicalConnectorMapping {
         manifest: &ConnectorManifest,
         wire: &ProtocolInventory,
     ) -> Result<ConnectorInventory, Error> {
+        // Clear a prior snapshot even when this new mapping attempt is denied.
+        let mut retained = self
+            .retained
+            .as_ref()
+            .map(|r| r.0.lock().map_err(|_| Error::Unavailable))
+            .transpose()?;
+        if let Some(slot) = retained.as_mut() {
+            **slot = None;
+        }
         if *target != self.mapper.target || *manifest != self.mapper.manifest {
             return Err(Error::Configuration);
         }
-        self.mapper
-            .snapshot(wire)
-            .map(|s| s.inventory)
-            .map_err(|_| Error::Schema)
+        let snapshot = self.mapper.snapshot(wire).map_err(|_| Error::Schema)?;
+        let summary = snapshot.inventory.clone();
+        if let Some(slot) = retained.as_mut() {
+            **slot = Some(snapshot);
+        }
+        Ok(summary)
     }
     fn operation(
         &self,
@@ -577,6 +688,27 @@ impl ConnectorMapping for CanonicalConnectorMapping {
             _ => return Err(Error::Schema),
         }
         self.normalizer.normalize(dispatch, source, r, result)
+    }
+    fn tool_schema(
+        &self,
+        target: &ConnectorTarget,
+        manifest: &ConnectorManifest,
+        wire: &ProtocolInventory,
+        capability: &CapabilityId,
+        inventory_revision: &ContentDigest,
+    ) -> Result<MappedToolSchema, Error> {
+        if *target != self.mapper.target || *manifest != self.mapper.manifest {
+            return Err(Error::Configuration);
+        }
+        self.mapper
+            .tool_schema(wire, capability, inventory_revision)
+            .map_err(|error| {
+                if error == MappingError::StaleInventory {
+                    Error::InventoryChanged
+                } else {
+                    Error::Schema
+                }
+            })
     }
 }
 

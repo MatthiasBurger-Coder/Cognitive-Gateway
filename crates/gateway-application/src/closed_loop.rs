@@ -21,6 +21,8 @@ pub struct VerifiedOutcomeReceipt {
     execution: ReferenceId,
     source_snapshot: ReferenceId,
     source_digest: ContentDigest,
+    goal_digest: ContentDigest,
+    readset_digest: Option<ContentDigest>,
     validation: ReferenceId,
     outcome: OutcomeClass,
     facts: Vec<FactId>,
@@ -39,6 +41,12 @@ impl VerifiedOutcomeReceipt {
     }
     pub fn source_digest(&self) -> &ContentDigest {
         &self.source_digest
+    }
+    pub fn goal_digest(&self) -> &ContentDigest {
+        &self.goal_digest
+    }
+    pub fn readset_digest(&self) -> Option<&ContentDigest> {
+        self.readset_digest.as_ref()
     }
     pub fn validation(&self) -> &ReferenceId {
         &self.validation
@@ -192,6 +200,45 @@ impl ClosedLoop {
         }
         Ok(self.decision)
     }
+    pub fn goal_digest(intent: &Intent) -> ContentDigest {
+        context_content_digest(&serde_json::to_vec(intent).expect("native intent serializes"))
+    }
+
+    /// Pure assessment of a complete retained readset. It neither invents a
+    /// prior state nor executes an action. Strong receipts bind actual member
+    /// content and the complete original goal, independently of source claims.
+    pub fn verify_retained(
+        execution: ReferenceId,
+        scope: ContextScopeId,
+        intent: Intent,
+        readset: &crate::retained_observations::RetainedObservationReadset,
+        rules: LoopRules,
+    ) -> Result<Option<VerifiedOutcomeReceipt>, LoopError> {
+        if readset.scope() != &scope {
+            return Err(LoopError::ScopeMismatch);
+        }
+        let run = Self::start(
+            execution.clone(),
+            scope.clone(),
+            intent.clone(),
+            readset.batch().clone(),
+            rules,
+        )?;
+        Ok(if run.decision == LoopDecision::Success {
+            receipt(
+                &scope,
+                execution,
+                &intent,
+                readset.batch(),
+                &run.assessment,
+                OutcomeClass::Success,
+                Some(readset.digest().clone()),
+            )
+        } else {
+            None
+        })
+    }
+
     pub fn start(
         run_id: ReferenceId,
         scope: ContextScopeId,
@@ -429,6 +476,8 @@ impl ClosedLoop {
                     execution: outcome.execution,
                     source_snapshot,
                     source_digest,
+                    goal_digest: Self::goal_digest(&self.original_intent),
+                    readset_digest: None,
                     validation,
                     outcome: verdict,
                     facts,
@@ -610,4 +659,59 @@ fn assumptions_preserved(previous: &LoopAssessment, next: &LoopAssessment) -> bo
                             .find(|e| e.subject() == subject)
                 })
         })
+}
+
+fn receipt(
+    scope: &ContextScopeId,
+    execution: ReferenceId,
+    intent: &Intent,
+    batch: &ScopedObservationBatch,
+    assessment: &LoopAssessment,
+    verdict: OutcomeClass,
+    readset_digest: Option<ContentDigest>,
+) -> Option<VerifiedOutcomeReceipt> {
+    let trace = assessment.comparison.trace();
+    let source_digest = batch.snapshot().digest()?.clone();
+    if trace.facts().is_empty() || trace.evidence().is_empty() {
+        return None;
+    }
+    let identity = serde_json::to_vec(&(
+        scope,
+        &execution,
+        batch.snapshot().source_id(),
+        batch.ingestion_key().as_str(),
+        &source_digest,
+    ))
+    .expect("typed source identity serializes");
+    let source_snapshot =
+        ReferenceId::new(format!("execution-snapshot-{:x}", Sha256::digest(identity)))
+            .expect("SHA-256 source identity is valid");
+    let facts = trace.facts().to_vec();
+    let evidence = trace.evidence().to_vec();
+    let goal_digest = ClosedLoop::goal_digest(intent);
+    let bytes = serde_json::to_vec(&(
+        scope,
+        &execution,
+        &source_snapshot,
+        &goal_digest,
+        &readset_digest,
+        verdict,
+        &facts,
+        &evidence,
+    ))
+    .expect("typed verification identity serializes");
+    let validation = ReferenceId::new(format!("verification-{:x}", Sha256::digest(bytes)))
+        .expect("SHA-256 verification identity is valid");
+    Some(VerifiedOutcomeReceipt {
+        scope: scope.clone(),
+        execution,
+        source_snapshot,
+        source_digest,
+        goal_digest,
+        readset_digest,
+        validation,
+        outcome: verdict,
+        facts,
+        evidence,
+    })
 }

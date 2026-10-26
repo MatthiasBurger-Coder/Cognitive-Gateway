@@ -40,7 +40,7 @@ pub struct InitialAssessment {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SessionCheckpoint {
     pub owner: OwnerBinding,
-    pub goal: SupportedArtifactGoal,
+    pub goal: SupportedSessionGoal,
     pub execution: RequestedExecution,
     pub snapshot: SessionSnapshot,
     pub budget: SessionBudget,
@@ -51,6 +51,8 @@ pub struct SessionCheckpoint {
     pub artifact: Option<RecordRef>,
     pub lease_until_ms: Option<u64>,
     pub initial_assessment: Option<InitialAssessment>,
+    pub resource_ledger: Option<SessionResourceLedger>,
+    pub pre_execution_goal: Option<PreExecutionGoalRef>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -69,6 +71,67 @@ impl SessionCheckpoint {
     pub fn validate(&self) -> Result<(), SessionError> {
         self.snapshot.validate()?;
         self.budget.validate()?;
+        match (&self.goal, &self.resource_ledger) {
+            (SupportedSessionGoal::Artifact(_), None) if self.pre_execution_goal.is_none() => {}
+            (SupportedSessionGoal::Connector(goal), Some(ledger)) => {
+                ledger.validate()?;
+                if ledger.reservations().len() > 1
+                    || (self.snapshot.state == SessionState::Completed
+                        && self.pre_execution_goal.is_none())
+                    || self
+                        .lease_until_ms
+                        .is_some_and(|d| d == 0 || d > self.budget.deadline_ms)
+                {
+                    return Err(SessionError::InvalidState);
+                }
+                if self.pending.is_some()
+                    || self.accepted_consent.is_some()
+                    || self.selected_source.is_some()
+                    || self.artifact.is_some()
+                {
+                    return Err(SessionError::InvalidState);
+                }
+                for r in ledger.reservations() {
+                    let b = r.binding();
+                    if b.owner != self.owner
+                        || b.scope != *goal.scope()
+                        || b.session != self.snapshot.session
+                        || b.run != self.snapshot.run
+                        || !goal.steps().contains(&b.step)
+                        || b.revision > self.snapshot.revision
+                    {
+                        return Err(SessionError::InvalidState);
+                    }
+                }
+                if self.snapshot.state == SessionState::Dispatching {
+                    let r = ledger
+                        .reservations()
+                        .last()
+                        .ok_or(SessionError::InvalidState)?;
+                    if self.lease_until_ms.is_none()
+                        || self.snapshot.dispatch.as_ref() != Some(&r.binding().dispatch)
+                        || r.binding().revision != self.snapshot.revision
+                        || self.pre_execution_goal.is_some()
+                    {
+                        return Err(SessionError::InvalidState);
+                    }
+                }
+                if let Some(marker) = &self.pre_execution_goal {
+                    marker.validate_for(self)?;
+                    if !matches!(
+                        self.snapshot.state,
+                        SessionState::Runnable
+                            | SessionState::Completed
+                            | SessionState::Failed
+                            | SessionState::Cancelled
+                    ) || self.lease_until_ms.is_some()
+                    {
+                        return Err(SessionError::InvalidState);
+                    }
+                }
+            }
+            _ => return Err(SessionError::InvalidState),
+        }
         if let Some(assessment) = &self.initial_assessment {
             if assessment.goal
                 != content_reference(
@@ -91,14 +154,15 @@ impl SessionCheckpoint {
                 SessionState::PendingClarification,
                 Some(reference),
             ) => {
+                let artifact_basis = self.goal.artifact_basis()?;
                 if &question.pending != reference
                     || question.alternatives.is_empty()
                     || question.alternatives.len() > 256
-                    || question.basis != self.goal.basis().projection
+                    || question.basis != self.goal.artifact_basis()?.projection
                     || question
                         .alternatives
                         .iter()
-                        .any(|r| !self.goal.basis().sources.contains(r))
+                        .any(|r| !artifact_basis.sources.contains(r))
                     || question
                         .alternatives
                         .iter()
@@ -180,6 +244,7 @@ pub struct RecordWrite {
 pub enum RecordKind {
     Artifact,
     Evidence,
+    PreExecutionGoal,
 }
 
 pub trait SessionRepositoryPort: SessionJournalPort + ArtifactStoragePort {
@@ -224,6 +289,70 @@ impl JournalAppend {
                 .authority_events
                 .starts_with(&old.authority_events)
         {
+            return Err(SessionError::InvalidState);
+        }
+        match (&old.resource_ledger, &self.next.resource_ledger) {
+            (None, None) => {}
+            (Some(old_ledger), Some(new_ledger)) => {
+                new_ledger.validate_successor(old_ledger)?;
+                let added = new_ledger.reservations().len() - old_ledger.reservations().len();
+                if added > 1
+                    || (added == 1
+                        && (old.snapshot.state != SessionState::Runnable
+                            || old.pre_execution_goal.is_some()
+                            || self.next.snapshot.state != SessionState::Dispatching
+                            || new_ledger.reservations().last().unwrap().binding().revision
+                                != self.next.snapshot.revision))
+                {
+                    return Err(SessionError::InvalidState);
+                }
+            }
+            _ => return Err(SessionError::InvalidState),
+        }
+        if old.goal.as_connector().is_some()
+            && old.snapshot.state == SessionState::Dispatching
+            && self.next.snapshot.state == SessionState::Runnable
+            && self.next.pre_execution_goal.is_none()
+        {
+            return Err(SessionError::InvalidState);
+        }
+        match (&old.pre_execution_goal, &self.next.pre_execution_goal) {
+            (Some(a), Some(b)) if a == b => {}
+            (None, None) => {}
+            (None, Some(marker))
+                if old.snapshot.state == SessionState::Dispatching
+                    && self.next.snapshot.state == SessionState::Runnable
+                    && marker.binding.claim_revision == old.snapshot.revision
+                    && marker.committed_revision == self.next.snapshot.revision =>
+            {
+                if self
+                    .records
+                    .iter()
+                    .filter(|r| {
+                        r.kind == RecordKind::PreExecutionGoal
+                            && r.reference == marker.record
+                            && content_reference(r.reference.id().as_str(), &r.bytes)
+                                .ok()
+                                .as_ref()
+                                == Some(&r.reference)
+                    })
+                    .count()
+                    != 1
+                {
+                    return Err(SessionError::InvalidState);
+                }
+            }
+            _ => return Err(SessionError::InvalidState),
+        }
+        if self.records.iter().any(|r| {
+            r.kind == RecordKind::PreExecutionGoal
+                && (old.pre_execution_goal.is_some()
+                    || self
+                        .next
+                        .pre_execution_goal
+                        .as_ref()
+                        .is_none_or(|m| m.record != r.reference))
+        }) {
             return Err(SessionError::InvalidState);
         }
         match (&self.command, &self.next.snapshot.command_outcome) {

@@ -71,10 +71,13 @@ struct Rows {
 }
 #[derive(Default)]
 struct Repository {
-    rows: Mutex<Rows>,
+    rows: std::sync::Arc<Mutex<Rows>>,
     appends: AtomicUsize,
     fail_at: AtomicUsize,
     corrupt: AtomicUsize,
+    lookup_failure: AtomicUsize,
+    dispatch_append_hook: Mutex<Option<Box<dyn FnOnce() + Send>>>,
+    artifact_read_hook: Mutex<Option<Box<dyn FnOnce() + Send>>>,
 }
 impl SessionJournalPort for Repository {
     fn load(&self, owner: &OwnerBinding, id: &SessionId) -> Result<FencedSession, SessionError> {
@@ -87,6 +90,9 @@ impl SessionJournalPort for Repository {
             .ok_or(SessionError::ScopeDenied)
     }
     fn command_outcome(&self, key: &CommandKey) -> Result<CommandOutcome, SessionError> {
+        if self.lookup_failure.load(Ordering::SeqCst) != 0 {
+            return Err(SessionError::StorageUnavailable);
+        }
         self.rows
             .lock()
             .unwrap()
@@ -149,6 +155,11 @@ impl SessionJournalPort for Repository {
         rows.records
             .extend(transition.records.into_iter().map(|r| (owner.clone(), r)));
         rows.session = Some(fenced.clone());
+        if fenced.checkpoint.snapshot.state == SessionState::Dispatching
+            && let Some(hook) = self.dispatch_append_hook.lock().unwrap().take()
+        {
+            hook();
+        }
         Ok(fenced)
     }
 }
@@ -169,6 +180,9 @@ impl ArtifactStoragePort for Repository {
             .ok_or(SessionError::Unavailable)?;
         if self.corrupt.load(Ordering::SeqCst) == 1 {
             bytes.push(b' ');
+        }
+        if let Some(hook) = self.artifact_read_hook.lock().unwrap().take() {
+            hook();
         }
         Ok(bytes)
     }
@@ -193,7 +207,7 @@ impl SessionRepositoryPort for Repository {
     }
 }
 struct Host {
-    now: AtomicU64,
+    now: std::sync::Arc<AtomicU64>,
     prepares: AtomicUsize,
     change_at: AtomicUsize,
     change: AtomicUsize,
@@ -205,7 +219,7 @@ struct Host {
 impl Host {
     fn new(sources: bool) -> Self {
         Self {
-            now: AtomicU64::new(100),
+            now: std::sync::Arc::new(AtomicU64::new(100)),
             prepares: AtomicUsize::new(0),
             change_at: AtomicUsize::new(0),
             change: AtomicUsize::new(0),
@@ -608,4 +622,94 @@ fn initial_goal_assessment_is_real_retained_and_cannot_claim_observed_success() 
             .initial_assessment,
         cp.initial_assessment
     );
+}
+
+#[path = "support/goal_observation_cases.rs"]
+mod goal_observation_cases;
+
+#[path = "support/goal_observation_harness.rs"]
+mod goal_observation_harness;
+#[path = "support/retained_resource_adversarial.rs"]
+mod retained_resource_adversarial;
+#[test]
+fn shared_resource_harness_uses_actual_private_coordinator_mint() {
+    goal_observation_harness::with_preparation_resources(
+        ContextScopeId::new("project-a").unwrap(),
+        ReferenceId::new("credits").unwrap(),
+        SessionResourceAmounts {
+            connector_calls: 2,
+            ..Default::default()
+        },
+        |checkpoint, resources| {
+            let original = *resources.remaining();
+            assert_eq!(resources.phase(), SessionResourcePhase::Preparation);
+            assert_eq!(resources.cost_unit().as_str(), "credits");
+            assert_eq!(resources.claim_revision(), checkpoint.snapshot.revision);
+            assert_eq!(resources.binding().owner, checkpoint.owner);
+            assert!(resources.deadline() > std::time::Instant::now());
+            assert_eq!(
+                resources
+                    .allocate(SessionResourceAmounts::default())
+                    .unwrap_err(),
+                SessionError::InvalidInput
+            );
+            assert_eq!(*resources.remaining(), original);
+            let child = resources.allocate(SessionResourceAmounts {
+                connector_calls: 1,
+                ..Default::default()
+            })?;
+            assert_eq!(child.binding().owner, checkpoint.owner);
+            assert_eq!(child.claim_revision(), checkpoint.snapshot.revision);
+            assert_eq!(child.reservation_id(), resources.reservation_id());
+            assert_eq!(child.binding(), resources.binding());
+            assert_eq!(child.phase(), resources.phase());
+            assert_eq!(child.cost_unit(), resources.cost_unit());
+            assert_eq!(child.fence(), resources.fence());
+            assert_eq!(child.deadline(), resources.deadline());
+            assert_eq!(child.amounts().connector_calls, 1);
+            assert_eq!(resources.remaining().connector_calls, 1);
+            assert_eq!(
+                resources.allocate(original).unwrap_err(),
+                SessionError::LimitExceeded
+            );
+            assert_eq!(resources.remaining().connector_calls, 1);
+            drop(child);
+            let _second = resources.allocate(SessionResourceAmounts {
+                connector_calls: 1,
+                ..Default::default()
+            })?;
+            assert!(resources.remaining().is_zero());
+            Ok(())
+        },
+    );
+}
+
+#[test]
+fn legacy_artifact_deadline_is_checked_after_claim_commit_and_after_actual_readback() {
+    for after_read in [false, true] {
+        let c = coordinator(false);
+        let started = start(&c);
+        let deadline = c
+            .details(&owner(), &started.session)
+            .unwrap()
+            .budget
+            .deadline_ms;
+        let now = c.host.now.clone();
+        let hook: Box<dyn FnOnce() + Send> = Box::new(move || {
+            now.store(deadline, Ordering::SeqCst);
+        });
+        if after_read {
+            *c.repository.artifact_read_hook.lock().unwrap() = Some(hook);
+        } else {
+            *c.repository.dispatch_append_hook.lock().unwrap() = Some(hook);
+        }
+        assert_eq!(
+            continue_task(&c, &started).unwrap().state,
+            SessionState::Failed
+        );
+        let cp = c.details(&owner(), &started.session).unwrap();
+        assert_eq!(cp.artifact.is_some(), after_read);
+        assert!(cp.snapshot.final_evidence.is_none());
+        assert_eq!(cp.budget.actions, 1);
+    }
 }

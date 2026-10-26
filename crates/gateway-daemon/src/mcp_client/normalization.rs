@@ -7,7 +7,55 @@ use super::{
 use gateway_application::{connector_results::*, connectors::*};
 use gateway_domain::*;
 use sha2::{Digest, Sha256};
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
+
+const MAX_CANONICAL_INPUT_BYTES: usize = 262_144;
+
+/// Only an admitted scalar normalizer can construct this output proof.
+pub(super) struct ScalarBounds {
+    source: SourceId,
+    subjects: BTreeSet<SubjectPath>,
+}
+impl ScalarBounds {
+    pub(super) fn source(&self) -> &SourceId {
+        &self.source
+    }
+    pub(super) fn subjects(&self) -> &BTreeSet<SubjectPath> {
+        &self.subjects
+    }
+    pub(super) fn value_bytes(&self) -> u64 {
+        // Native TypedValue scalar serde adds {kind,value}, at most 32 bytes
+        // per field, to the same JSON scalar represented in the bounded input.
+        MAX_CANONICAL_INPUT_BYTES as u64 + 32 * self.subjects.len() as u64
+    }
+}
+
+fn bounds(profile: &NormalizationProfile) -> ScalarBounds {
+    ScalarBounds {
+        source: profile.source.clone(),
+        subjects: profile.fields.values().cloned().collect(),
+    }
+}
+
+fn validate_profile(profile: &NormalizationProfile) -> Result<(), Error> {
+    if profile.fields.is_empty()
+        || profile.fields.len() > 256
+        || profile
+            .fields
+            .keys()
+            .any(|k| k.is_empty() || k == &profile.object_field)
+        || profile.object_field.is_empty()
+        || profile
+            .fields
+            .values()
+            .collect::<std::collections::BTreeSet<_>>()
+            .len()
+            != profile.fields.len()
+    {
+        return Err(Error::Configuration);
+    }
+    Ok(())
+}
 
 /// Immutable CG-owned projection; names never come from server instructions.
 #[derive(Debug, Clone)]
@@ -19,6 +67,11 @@ pub struct NormalizationProfile {
     pub digest_field: Option<String>,
     pub fields: BTreeMap<String, SubjectPath>,
 }
+impl NormalizationProfile {
+    pub(crate) fn validate(&self) -> Result<(), Error> {
+        validate_profile(self)
+    }
+}
 /// Metadata from an admitted collector, separate from the provider payload.
 #[derive(Debug, Clone)]
 pub struct Acquisition {
@@ -28,6 +81,9 @@ pub struct Acquisition {
     pub max_age: FreshnessPolicy,
     pub authenticated_source: NonEmptyText,
     pub sensitivity: SensitivityClass,
+    /// Explicit host collector assessment; completeness alone never upgrades it.
+    pub confidence: Confidence,
+    pub uncertainty: Uncertainty,
     pub conflict: ConflictStatus,
     pub partial: bool,
     pub basis: ConnectorObservationBasis,
@@ -40,35 +96,141 @@ pub struct Acquisition {
 pub trait AcquisitionPort: Send + Sync {
     fn collect(&self, dispatch: &ConnectorDispatch) -> Result<Acquisition, Error>;
 }
+/// Trusted collector contract for the qualified direct acquisition path.
+/// Implementations perform bounded read-only host metadata lookups only: no
+/// connector/model/embedding I/O, no secret material in returned metadata.
+/// Implementing this trait is a source-owner assertion, never inferred from stdio.
+pub trait QualifiedAcquisitionPort: AcquisitionPort {}
+
+/// Immutable selector for a concrete qualified normalization profile. This is
+/// data only; exact source/request admission remains the collecting host's job.
+pub(crate) struct NormalizationRoute {
+    pub(crate) capability: CapabilityId,
+    pub(crate) source: SourceId,
+    pub(crate) arguments: BTreeMap<NonEmptyText, TypedValue>,
+    pub(crate) profile: NormalizationProfile,
+}
+
 pub struct CanonicalResultNormalizer {
     profile: NormalizationProfile,
+    routes: Option<Vec<NormalizationRoute>>,
     acquisition: Box<dyn AcquisitionPort>,
+    qualified: bool,
 }
 impl CanonicalResultNormalizer {
     pub fn new(
         profile: NormalizationProfile,
         acquisition: Box<dyn AcquisitionPort>,
     ) -> Result<Self, Error> {
-        if profile.fields.is_empty()
-            || profile.fields.len() > 256
-            || profile
-                .fields
-                .keys()
-                .any(|k| k.is_empty() || k == &profile.object_field)
-            || profile.object_field.is_empty()
-            || profile
-                .fields
-                .values()
-                .collect::<std::collections::BTreeSet<_>>()
-                .len()
-                != profile.fields.len()
-        {
-            return Err(Error::Configuration);
-        }
+        validate_profile(&profile)?;
         Ok(Self {
             profile,
+            routes: None,
             acquisition,
+            qualified: false,
         })
+    }
+    pub fn new_qualified(
+        profile: NormalizationProfile,
+        acquisition: Box<dyn QualifiedAcquisitionPort>,
+    ) -> Result<Self, Error> {
+        let mut value = Self::new(profile, acquisition)?;
+        value.qualified = true;
+        Ok(value)
+    }
+    pub(crate) fn new_qualified_routes(
+        routes: Vec<NormalizationRoute>,
+        acquisition: Box<dyn QualifiedAcquisitionPort>,
+    ) -> Result<Self, Error> {
+        if routes.is_empty() || routes.len() > 256 {
+            return Err(Error::Configuration);
+        }
+        let first = &routes[0];
+        for (index, route) in routes.iter().enumerate() {
+            validate_profile(&route.profile)?;
+            if route.source != route.profile.source
+                || route.capability != first.capability
+                || route.source != first.source
+                || route.arguments.len() > 256
+                || route
+                    .arguments
+                    .values()
+                    .any(|value| value.validate().is_err())
+                || routes[..index]
+                    .iter()
+                    .any(|previous| previous.arguments == route.arguments)
+            {
+                return Err(Error::Configuration);
+            }
+        }
+        Ok(Self {
+            profile: first.profile.clone(),
+            routes: Some(routes),
+            acquisition,
+            qualified: true,
+        })
+    }
+    /// Validate the complete concrete bundle before it is bound to the mapper.
+    pub(super) fn validate_mapping_binding(
+        &self,
+        capability: &CapabilityId,
+        source: &SourceId,
+    ) -> Result<(), Error> {
+        if !self.qualified {
+            return Err(Error::Unsupported);
+        }
+        if let Some(routes) = &self.routes {
+            if routes
+                .iter()
+                .any(|route| &route.capability != capability || &route.source != source)
+            {
+                return Err(Error::Configuration);
+            }
+        } else if self.resource_bounds()?.source() != source {
+            return Err(Error::Configuration);
+        }
+        Ok(())
+    }
+    fn select_profile(
+        &self,
+        capability: &CapabilityId,
+        arguments: &BTreeMap<NonEmptyText, TypedValue>,
+        source: &SourceId,
+    ) -> Result<&NormalizationProfile, Error> {
+        let Some(routes) = &self.routes else {
+            return if source == &self.profile.source {
+                Ok(&self.profile)
+            } else {
+                Err(Error::Schema)
+            };
+        };
+        let mut matching = routes.iter().filter(|route| {
+            &route.capability == capability
+                && &route.source == source
+                && &route.arguments == arguments
+        });
+        let route = matching.next().ok_or(Error::Schema)?;
+        if matching.next().is_some() {
+            return Err(Error::Configuration);
+        }
+        Ok(&route.profile)
+    }
+    pub(super) fn resource_bounds(&self) -> Result<ScalarBounds, Error> {
+        if !self.qualified || self.routes.is_some() {
+            return Err(Error::Unsupported);
+        }
+        Ok(bounds(&self.profile))
+    }
+    pub(super) fn resource_bounds_for_route(
+        &self,
+        capability: &CapabilityId,
+        arguments: &BTreeMap<NonEmptyText, TypedValue>,
+        source: &SourceId,
+    ) -> Result<ScalarBounds, Error> {
+        if !self.qualified {
+            return Err(Error::Unsupported);
+        }
+        Ok(bounds(self.select_profile(capability, arguments, source)?))
     }
     pub fn canonicalize(
         &self,
@@ -77,7 +239,11 @@ impl CanonicalResultNormalizer {
         mapping: &MappingRecord,
         result: ProtocolResult,
     ) -> Result<ConnectorResult, Error> {
-        let p = &self.profile;
+        let p = self.select_profile(
+            &d.request.capability,
+            &d.request.arguments,
+            mapping.source.as_ref().ok_or(Error::Schema)?,
+        )?;
         if mapping.source.as_ref() != Some(&p.source)
             || source.is_some_and(|s| s != &p.source)
             || mapping.capability != d.request.capability
@@ -116,7 +282,7 @@ impl CanonicalResultNormalizer {
             _ => return Err(Error::Schema),
         };
         let bytes = serde_json::to_vec(&value).map_err(|_| Error::Schema)?;
-        if bytes.len() > 262_144 {
+        if bytes.len() > MAX_CANONICAL_INPUT_BYTES {
             return Err(Error::Limit);
         }
         let string = |key: &str| value.get(key).and_then(|v| v.as_str()).ok_or(Error::Schema);
@@ -149,12 +315,12 @@ impl CanonicalResultNormalizer {
         let quality = QualityMetadata::new(
             TrustClass::ObservedEvidence,
             a.sensitivity,
-            Confidence::Unknown,
+            a.confidence,
             freshness,
             if a.partial {
                 Uncertainty::Incomplete
             } else {
-                Uncertainty::Unknown
+                a.uncertainty
             },
         )
         .with_conflict(a.conflict);

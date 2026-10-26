@@ -108,7 +108,9 @@ fn schema_keywords_are_supported(
     Ok(())
 }
 
-fn parse_connector_input_schema(schema: &Value) -> Result<OutputType, InvocationIrError> {
+/// Parse the supported closed scalar connector argument schema as data. This
+/// neither binds a capability/inventory nor admits an invocation or effect.
+pub fn parse_connector_input_schema(schema: &Value) -> Result<OutputType, InvocationIrError> {
     schema_keywords_are_supported(schema, true)?;
     if schema["type"] != "object" || schema["additionalProperties"] != false {
         return Err(InvocationIrError::InvalidBinding);

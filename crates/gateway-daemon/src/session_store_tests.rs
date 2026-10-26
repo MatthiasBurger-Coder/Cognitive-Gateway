@@ -46,7 +46,7 @@ fn checkpoint(repo: &PostgresSessionStore, id: &str) -> SessionCheckpoint {
     };
     SessionCheckpoint {
         owner: owner(),
-        goal,
+        goal: SupportedSessionGoal::artifact(goal),
         execution: RequestedExecution {
             mode: OperatingMode::Development,
             profile: ExecutionProfile::FullPath,
@@ -73,6 +73,8 @@ fn checkpoint(repo: &PostgresSessionStore, id: &str) -> SessionCheckpoint {
             max_retries: 1,
             deadline_ms: MAX_REVISION,
         },
+        resource_ledger: None,
+        pre_execution_goal: None,
         pending: None,
         accepted_consent: None,
         authority_events: vec![],
@@ -145,9 +147,11 @@ fn postgres_atomic_append_rejects_invalid_records_and_keeps_predecessor() {
     };
     let cp = checkpoint(&repo, "atomic");
     let mut foreign = cp.clone();
-    let mut basis = foreign.goal.basis().clone();
+    let mut basis = foreign.goal.as_artifact().unwrap().basis().clone();
     basis.scope = ContextScopeId::new("foreign").unwrap();
-    foreign.goal = SupportedArtifactGoal::validate(foreign.goal.intent().clone(), basis).unwrap();
+    foreign.goal = SupportedSessionGoal::artifact(
+        SupportedArtifactGoal::validate(foreign.goal.intent().clone(), basis).unwrap(),
+    );
     assert_eq!(
         repo.create(&CommandId::new("foreign").unwrap(), foreign),
         Err(SessionError::ScopeDenied)
@@ -539,3 +543,97 @@ fn terminal_revocation_updates_authority_audit_without_revising_the_task() {
         Err(SessionError::InvalidState)
     );
 }
+
+#[test]
+fn postgres_checkpoint_goal_wire_preserves_legacy_artifact_and_rejects_ambiguous_goals() {
+    let Some(repo) = repository() else { return };
+    let artifact = checkpoint(&repo, "legacy-goal-wire");
+    let legacy = serde_json::to_value(Checkpoint::from_typed(&artifact)).unwrap();
+    for new_field in ["connector_goal", "resource_ledger", "pre_execution_goal"] {
+        assert!(
+            legacy.get(new_field).is_none(),
+            "legacy artifact wire gained {new_field}"
+        );
+    }
+    assert!(legacy["basis"].is_object());
+    let decoded: Checkpoint = serde_json::from_value(legacy.clone()).unwrap();
+    assert_eq!(decoded.typed().unwrap(), artifact);
+    assert_eq!(serde_json::to_value(decoded).unwrap(), legacy);
+    let condition = artifact.goal.intent().desired_state().conditions()[0]
+        .id()
+        .clone();
+    let connector = SupportedConnectorGoal::from_host_registration(
+        artifact.goal.intent().clone(),
+        repo.store.scope().clone(),
+        reference("native-plan"),
+        vec![PlanStepId::new("native-read-step").unwrap()],
+        vec![
+            ConditionObservationMapping::new(
+                condition,
+                gateway_domain::SourceId::new("native-source").unwrap(),
+                gateway_domain::CapabilityId::new("native.inspect").unwrap(),
+                gateway_application::connectors::ConnectorOperationClass::Inspect,
+            )
+            .unwrap(),
+        ],
+    )
+    .unwrap();
+    let mut cp = artifact.clone();
+    cp.goal = SupportedSessionGoal::connector(connector);
+    cp.resource_ledger = Some(
+        SessionResourceLedger::new(SessionResourceLimits {
+            cost_unit: gateway_domain::ReferenceId::new("fixture-read-units").unwrap(),
+            amounts: SessionResourceAmounts {
+                connector_calls: 1,
+                ..Default::default()
+            },
+        })
+        .unwrap(),
+    );
+    let wire = serde_json::to_value(Checkpoint::from_typed(&cp)).unwrap();
+    assert!(wire.get("basis").is_none());
+    assert_eq!(
+        serde_json::from_value::<Checkpoint>(wire.clone())
+            .unwrap()
+            .typed()
+            .unwrap(),
+        cp
+    );
+    for fault in [
+        "both",
+        "neither",
+        "duplicate-step",
+        "foreign-condition",
+        "mutating-evidence",
+    ] {
+        let mut damaged = wire.clone();
+        match fault {
+            "both" => damaged["basis"] = legacy["basis"].clone(),
+            "neither" => {
+                damaged.as_object_mut().unwrap().remove("connector_goal");
+            }
+            "duplicate-step" => {
+                damaged["connector_goal"]["steps"] =
+                    serde_json::json!(["native-read-step", "native-read-step"])
+            }
+            "foreign-condition" => {
+                damaged["connector_goal"]["observations"][0]["condition"] =
+                    serde_json::json!("foreign-condition")
+            }
+            _ => {
+                damaged["connector_goal"]["observations"][0]["operation_class"] =
+                    serde_json::json!("mutate")
+            }
+        }
+        assert!(
+            serde_json::from_value::<Checkpoint>(damaged)
+                .map_err(|_| SessionError::StorageUnavailable)
+                .and_then(|wire| wire.typed())
+                .is_err(),
+            "{fault}"
+        );
+    }
+}
+
+#[path = "session_store_goal_tests.rs"]
+mod observed_goal_tests;

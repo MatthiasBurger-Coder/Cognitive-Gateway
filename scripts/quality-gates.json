@@ -40,6 +40,10 @@
     "command": "bash scripts/qualify-shared-sessions.sh \"$EVIDENCE_DIR/shared-sessions\""
   },
   {
+    "name": "EPIC-08.03.01 installed observed-goal sessions, PostgreSQL recovery and production coverage",
+    "command": "bash scripts/qualify-observed-goal-sessions.sh \"$EVIDENCE_DIR/observed-goal-sessions\""
+  },
+  {
     "name": "Install registry CLI",
     "command": "cargo install --path crates/gateway-daemon --bin cg-registry --locked --force --root \"$RUNNER_TEMP/cg-registry\""
   },

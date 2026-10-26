@@ -1,0 +1,164 @@
+{
+  "schema_version": 1,
+  "issue": 403,
+  "parent": 274,
+  "parent_acceptance": 271,
+  "status": "PARTIAL",
+  "decision": "REQUIRES_FINAL_QUALITY_GATES",
+  "candidate_base": "07d5fbd036970abb646d2cd38720f5dfb82537cb",
+  "local_changes": "uncommitted #403 delivery candidate",
+  "artifact_archive": "EPIC-08.03.01-installed-goal-validation.json.gz",
+  "artifact_archive_sha256": "593a095265f49baebe66d639ba117c421391bb558350a8d079f9df9fc629b494",
+  "source_snapshot_utc": "2026-10-26T16:15:50.344320+00:00",
+  "source_bindings": {
+    "crates/gateway-daemon/src/local_sessions/observed_goal/read_association.rs": "c4a4eeb07bd5cbef0453d3e1b7398745f41beeb5df92efd145a44e8cdf7c5fd7",
+    "crates/gateway-daemon/src/local_sessions/observed_goal/read_association_tests.rs": "5a616cba0df1cc0e1d48403f9f84b3abd20fecfe1b03154aa4b0e9f052b9bfff",
+    "crates/gateway-daemon/tests/observed_goal_sessions.rs": "6a6bcfa521b8bb7eea85fa43a798fa269c9222892dbc2f4251444ec8db2e697a",
+    "crates/gateway-daemon/tests/support/observed_goal_session.py": "3ad5a55879fa5f37a0ac719099935f8546d7fcc8af3906313d83eaa5527dfaa0",
+    "crates/gateway-daemon/src/local_sessions.rs": "963de031a9f6bd407af104be6a65c63d49deaded95728f5e69e487a55563e0b0",
+    "crates/gateway-daemon/src/local_sessions/observed_goal/mod.rs": "42b2206d388ad74c48150850304f21831cb420f12f6fe1189bede9637fc02b5e",
+    "crates/gateway-daemon/src/local_sessions/observed_goal/claim.rs": "5fed76df2e102fc642e9af7dc22d1ccc07f23742162891c8a02da1cd47b90b98",
+    "crates/gateway-daemon/src/local_sessions/observed_goal/verify.rs": "f55e97431711058d982af5fa5cde092aa3d7b1634ce2a4e2af270f48b1fe19d7",
+    "crates/gateway-daemon/src/local_sessions/observed_goal/source.rs": "6b1ee1c38fe754096cceb19012128ed52477283e4247da3f4b94f45f06ba9d4a",
+    "crates/gateway-daemon/src/local_sessions/observed_goal/target.rs": "2a3565a0e745ba467b2b8f2522f8ea0126c0886916c1584f2c37af17b4eb2f5c",
+    "crates/gateway-daemon/src/local_sessions/observed_goal/definitions.rs": "a07431a1a58c3288abd2a5d265d887edfa04a32d24c3d5ffa797870693245273",
+    "crates/gateway-daemon/src/session_store.rs": "a225795a23c1beaa962337cab98301c2c6a0520762f25dcff582558ec4d4efa7",
+    "crates/gateway-daemon/src/session_store_observation_audit.rs": "e7994e15ed123c16f84e670034cda183f38e69f367e2860fcb1a0b2dec54c302",
+    "crates/gateway-daemon/src/cognitive_store.rs": "80e48e0d4593833d2bf8b36e4bc24274ad650143a240ccf97a71aae0ac9e6a9f",
+    "crates/gateway-daemon/src/mcp_client/session_budget.rs": "c5f510ad3877216941bd0753b412166f6312e64c39bb36d2645537a84cd29283",
+    "crates/gateway-daemon/src/mcp_client/scalar_quotes.rs": "97c355356565b113416f82c4e2f731f9b2d939345ee5589192c765d9bac572f5",
+    "crates/gateway-daemon/src/mcp_client/normalization.rs": "dd519415654e67d8606a45b5c1a115657d6a110a2fe4a63afbe163453d112065",
+    "crates/gateway-daemon/src/mcp_client/credential_file.rs": "41ed4b1fe86b44d825b61e04b0f443aef855fb4f2fc0cdbb0269fb43ce3b28e3",
+    "crates/gateway-daemon/src/mcp_client/host.rs": "963baeafa6a79b1adba64bf75002dee211661d9cf6bf043faac519bc0953efdb",
+    "crates/gateway-daemon/src/mcp_client/mod.rs": "7cb15f069e14f14f83e9c6a17bac7268f7e4e2345d9cd36eeb9d8568147972f9",
+    "crates/gateway-daemon/src/mcp_client/protocol.rs": "ec04a104e2cb59339d54e5fa9dcbb48fb3fb5bc3032c54e15e7d5ded2e4470d3",
+    "crates/gateway-daemon/src/mcp_client/transport.rs": "510de6b35afdc9edd6896d649476fd1e34cc01acd41e0ec1b00b37ba9f7d0acc",
+    "crates/gateway-daemon/src/mcp_client/mapping.rs": "0522ddbe63890847935d40488c35d04d3a69b7508a59a65ae0e3b365a50c83b9",
+    "crates/gateway-application/src/sessions/coordinator.rs": "4ff211c9073ae2c2d74fb5b177718c0a231fe7748d4e1b225b50bbfe6c503cc6",
+    "crates/gateway-application/src/sessions/contracts.rs": "8bcd8c9a0b52c59ab14552823a7da0719d1c32ec690188b801aced84bef2d93a",
+    "crates/gateway-application/src/sessions/journal.rs": "9be5822318035771a5f10d877a09a1b88737ed53343dae4b2f354109ee8977d5",
+    "crates/gateway-application/src/sessions/resources.rs": "748100c03c1754b26620d3dd1c5a39a63016097070483ce780e5b2f83248b24c",
+    "crates/gateway-application/src/sessions/connector_goals.rs": "c4757a17f287e0452a4e174a743a553181f4bf6ca68e1783844e5c3ef428d486",
+    "crates/gateway-application/src/sessions/goal_observation.rs": "dbeb11127d5db6114cd4d49af3d67d65bf2cc9f838c14c109dc54b8d3c19d391",
+    "crates/gateway-application/src/sessions/pre_execution_goal.rs": "5abf3c3efba4b33b921a218098b073f7bc299757a386e26bf8547522dd100ac4",
+    "crates/gateway-application/src/sessions/pre_execution_source.rs": "5ded60cabcd6af8a0d41a471eccf9616f97330850beff9689204b67c98b394b3",
+    "crates/gateway-application/src/retained_observations.rs": "0a8a0b87d7abb33656dedd5d15e01acc0ba46155910793ab9302769ffec797fb",
+    "crates/gateway-application/src/closed_loop.rs": "c2b88956febb93cd5f218edacdbd9eb92e313eb34a82c1c558e929dc26d6ed73"
+  },
+  "installed_evidence_level": "EXECUTABLE: shipped cg-mcp with synthetic client, real native CLI records/PostgreSQL, controlled independent stdio MCP server; not an external installed Codex-client interoperability claim",
+  "criteria": [
+    {
+      "id": "AC1",
+      "status": "VERIFIED",
+      "evidence": [
+        "installed_seven"
+      ]
+    },
+    {
+      "id": "AC2",
+      "status": "VERIFIED",
+      "evidence": [
+        "installed_seven",
+        "current_pg_twelve",
+        "dispatching_kernel",
+        "read_association_ten"
+      ]
+    },
+    {
+      "id": "AC3",
+      "status": "VERIFIED",
+      "evidence": [
+        "installed_seven",
+        "dispatching_kernel",
+        "readonly_definitions",
+        "routed_normalizer"
+      ]
+    },
+    {
+      "id": "AC4",
+      "status": "VERIFIED",
+      "evidence": [
+        "installed_seven",
+        "current_pg_twelve",
+        "dispatching_kernel"
+      ]
+    },
+    {
+      "id": "AC5",
+      "status": "VERIFIED",
+      "evidence": [
+        "installed_seven",
+        "current_pg_twelve",
+        "dispatching_kernel",
+        "read_association_ten",
+        "protocol_polling"
+      ]
+    },
+    {
+      "id": "AC6",
+      "status": "VERIFIED",
+      "evidence": [
+        "installed_seven",
+        "dispatching_kernel"
+      ]
+    },
+    {
+      "id": "AC7",
+      "status": "PARTIAL",
+      "pending": [
+        "final >=95% production coverage gates",
+        "final workspace regression/clippy/architecture/contract reconciliation",
+        "operator documentation review and final source-binding reconciliation"
+      ]
+    }
+  ],
+  "reviews": {
+    "requirements_automation": "connector_phase_resources, actual installed seven and association ten",
+    "independent_architecture": "connector_gate_review: claim/runtime/verify/wiring, Source/Target joins, truthful Dispatching lifecycle and final resource-evidence fixture; scoped only",
+    "independent_host_protocol_audit": "connector_phase_resources reviewed Gate host guards, Budget slow-guard/OS-queued fix and native PG audit hook",
+    "independent_definitions_normalization": "Root scoped source inspection plus reported executed component logs; not a separate Root rerun",
+    "independent_error_taxonomy": "connector_phase_resources read-only review of Gate-authored exhaustive typed mapping; reported two tests passed"
+  },
+  "lifecycle": {
+    "wire_schema_diff": "ZERO: frozen schemas/codex/v2 common+response unchanged",
+    "acquisition": "Dispatching + Reserved; Preparation resource phase; current fenced claim",
+    "retained_marker": "Runnable + Prepared",
+    "completion": "Completed + Verified",
+    "interrupted_acquisition": "connector-specific recovery fails without another allocation/read; existing artifact Dispatching handling preserved"
+  },
+  "scope_remaining": [
+    "full #274/#271/#272\u2013#279 acceptance remains open",
+    "model preparation/execution and exact action consent/resume",
+    "complete dispatched-step Before/After snapshots and consistency/conflict qualification",
+    "independent post-effect readback, multi-grant consent and uncertainty recovery",
+    "operational/system qualification and actual operator MCP deployment prerequisites"
+  ],
+  "final_gate_results": null,
+  "automation_review": {
+    "reviewer": "connector_phase_resources; independent read-only review of Root-authored automation",
+    "status": "PARTIAL",
+    "verified": [
+      "32 explicit executable production owners use unchanged strict integer >=95% line engine",
+      "Missing/duplicate/zero/invalid counts and 94.99% rejected by executed self-test",
+      "Qualifier requires nonempty actual PostgreSQL environment before cargo/output creation; executed missing-authority negative passed",
+      "--all-targets --locked includes application/daemon integration tests without skip/filter flags",
+      "Shell syntax check passed; quality-gates registration present"
+    ],
+    "pending": [
+      "Remove inline test bodies in transport.rs and cfg(test)-only constructor in session_budget.rs from production-file line totals, then independently reconcile actual final coverage",
+      "Final actual qualification, coverage and workspace results are pending Root/Budget"
+    ],
+    "artifacts": {
+      "scripts/check-observed-goal-coverage.py": "f768ba48583c8c4999d4fcc2abe4ffd24ce2a8c31209d48d2f7d976b2bd42d38",
+      "scripts/qualify-observed-goal-sessions.sh": "ce2c8a6543154b3bf59b67ef0edac97cd653c42405970336381e758d9aa575e7",
+      "scripts/quality-gates.json": "9e11b81258a437a16d46ddfb22573e09b97ee5cdd7d5d4978b9ce566c8ca1810"
+    }
+  },
+  "source_reconciliation_pending": {
+    "crates/gateway-daemon/src/local_sessions.rs": {
+      "archived_sha256": "963de031a9f6bd407af104be6a65c63d49deaded95728f5e69e487a55563e0b0",
+      "observed_current_sha256": "fa5213f0bb8e9c4ee98922c05540dfb5d59fdfbb98f6c8878f327d222e95cf96",
+      "reason": "After installed-seven freeze: relative database path returns InvalidInput; wrong canonical scope returns ScopeDenied. Final current workspace/coverage reruns pending. Update archived snapshot after those evidence results, not retroactively."
+    }
+  }
+}

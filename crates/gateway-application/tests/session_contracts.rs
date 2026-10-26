@@ -698,7 +698,9 @@ fn diagnostic_mapping_is_sanitized_stable_and_unique() {
 fn checkpoint() -> SessionCheckpoint {
     SessionCheckpoint {
         owner: owner(),
-        goal: SupportedArtifactGoal::validate(intent(), basis()).unwrap(),
+        goal: SupportedArtifactGoal::validate(intent(), basis())
+            .unwrap()
+            .into(),
         execution: RequestedExecution {
             mode: OperatingMode::Development,
             profile: ExecutionProfile::FullPath,
@@ -718,6 +720,8 @@ fn checkpoint() -> SessionCheckpoint {
         artifact: None,
         lease_until_ms: None,
         initial_assessment: None,
+        resource_ledger: None,
+        pre_execution_goal: None,
     }
 }
 
@@ -918,7 +922,8 @@ fn conditional_append_refuses_fencing_scope_goal_and_budget_drift() {
                 wire["id"] = json!("other");
                 bad.next.goal =
                     SupportedArtifactGoal::validate(serde_json::from_value(wire).unwrap(), basis())
-                        .unwrap();
+                        .unwrap()
+                        .into();
             }
             "execution" => bad.next.execution.mode = OperatingMode::Hardening,
             "next_session" => {
