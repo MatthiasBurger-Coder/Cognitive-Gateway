@@ -72,6 +72,7 @@ fn fixture() -> (InvocationIr, Host) {
             (
                 id.clone(),
                 ToolDefinition {
+                    connector_inventory: None,
                     binding: pin.clone(),
                     description: NonEmptyText::new("Inspect").unwrap(),
                     input: gateway_domain::semantic_output::OutputType::String {},

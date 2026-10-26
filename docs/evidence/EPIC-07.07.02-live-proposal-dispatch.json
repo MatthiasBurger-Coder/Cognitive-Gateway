@@ -1,0 +1,143 @@
+{
+  "issue": 401,
+  "parent": 230,
+  "integration_prerequisite_for": 274,
+  "base_revision": "8c2a8722f482a0cb7fa5e152dc9e1bf44f5f65b9",
+  "status": "QUALIFIED_FOR_REVIEW",
+  "created_at": "2026-10-26T13:31:43.995362+00:00",
+  "scope": "Live admitted InvocationIr and VerifiedOutput to canonical connector request, current native CG-09 and controlled MCP transport.",
+  "evidence_level": "CONTROLLED_NATIVE_APPLICATION_AND_MCP_COMPONENT",
+  "verification": {
+    "workspace": {
+      "passed": 1164,
+      "failed": 0,
+      "ignored": 4,
+      "ignored_qualifications": [
+        "live_adapter_profile",
+        "complete::durable_cpu_release_restart_inference_supersession_and_rollback",
+        "postgres_round_trip_revalidates_and_preserves_negative_evidence",
+        "complete::durable_worker_restart_fencing_duplicate_commit_and_competing_coordinators"
+      ]
+    },
+    "output_and_dispatch_tests": 42,
+    "invocation_tests": 6,
+    "controlled_mcp_test_cases": 6,
+    "clippy": "PASS_WORKSPACE_ALL_TARGETS_DENY_WARNINGS",
+    "format": "PASS",
+    "architecture_guard": "PASS",
+    "architecture_tests": {
+      "passed_or_skipped": 83,
+      "platform_skips": 1
+    },
+    "contract_tests": 26,
+    "coverage_gates": "PASS_ALL_SIX_WITHOUT_LOWERING_THRESHOLDS",
+    "coverage": {
+      "crates/gateway-application/src/connector_policy.rs": {
+        "count": 190,
+        "covered": 190,
+        "percent": 100.0
+      },
+      "crates/gateway-application/src/connector_proposals.rs": {
+        "count": 235,
+        "covered": 224,
+        "percent": 95.31914893617022
+      },
+      "crates/gateway-application/src/connector_results.rs": {
+        "count": 183,
+        "covered": 183,
+        "percent": 100.0
+      },
+      "crates/gateway-application/src/connectors.rs": {
+        "count": 34,
+        "covered": 34,
+        "percent": 100.0
+      },
+      "crates/gateway-application/src/policy_application.rs": {
+        "count": 190,
+        "covered": 189,
+        "percent": 99.47368421052632
+      },
+      "crates/gateway-application/src/prompt_ir.rs": {
+        "count": 140,
+        "covered": 140,
+        "percent": 100.0
+      },
+      "crates/gateway-application/src/prompt_rendering.rs": {
+        "count": 212,
+        "covered": 212,
+        "percent": 100.0
+      },
+      "crates/gateway-policy/src/lib.rs": {
+        "count": 191,
+        "covered": 191,
+        "percent": 100.0
+      }
+    },
+    "commands": [
+      "CARGO_INCREMENTAL=0 CARGO_BUILD_JOBS=2 python3 scripts/cognitive-test-host.py cargo test --workspace --locked --target-dir /mnt/d/Projects/.codex-build/cg-399-build",
+      "CARGO_INCREMENTAL=0 CARGO_BUILD_JOBS=2 cargo clippy --workspace --all-targets --locked --target-dir /mnt/d/Projects/.codex-build/cg-399-build -- -D warnings",
+      "CARGO_INCREMENTAL=0 CARGO_BUILD_JOBS=2 CARGO_LLVM_COV_TARGET_DIR=/mnt/d/Projects/.codex-build/cg-401-cov-build python3 scripts/cognitive-test-host.py cargo llvm-cov -p gateway-domain -p gateway-application -p gateway-daemon -p gateway-policy --lib --test connectors --test connector_policy --test mcp_client --test connector_proposals --test output_verification --test prompt_ir --test prompt_rendering --test policy_application --test policy_engine --test invocation_host --test model_adapters --locked --json --output-path /tmp/cg401-final-coverage-v2.json"
+    ]
+  },
+  "acceptance": {
+    "AC1": {
+      "implementation": "connector_proposals live canonical binder/dispatcher plus existing ConnectorApplication and native CG-09/McpConnectorHost.",
+      "test": "admitted_and_verified_native_inspection_crosses_actual_mapper_cg09_and_stdio_once"
+    },
+    "AC2": {
+      "implementation": "Full raw schema content pin and strict native type parity; current full invocation/reference/target/step/execution checks after discovery.",
+      "test": "Actual peer inventory/schema/scope/reference/coordinate negatives and unverified proposal/foreign invocation negatives; missing pin; direct public binder required-field/type/extra-field/capability-pin substitution."
+    },
+    "AC3": {
+      "implementation": "Controlled source recaptures actual PolicyApplication.step_input from native registry/planner/process/resolution and current declared facts on each admission boundary.",
+      "test": "Actual peer authorization/consent/pre-effect-change denials and native Process evidence removal send zero tools/call."
+    },
+    "AC4": {
+      "implementation": "Ordered instance correlations, earlier validated results retained, first failure ordinal, typed uncertain outcomes.",
+      "test": "Actual peer ordered denial and EOF after second mutation call; application identical-proposal instance and invalid-result regressions."
+    },
+    "AC5": {
+      "implementation": "Raw mapped schema and exact digest retained in ToolDefinition and real IR identity; shared strict parser/type/content validation; ordinary None omitted from serialization.",
+      "test": "Annotated/reordered/omitted-required schema positives; raw/content/type tamper admission denial; unsupported keywords and native scalar representability negatives."
+    },
+    "AC6": {
+      "implementation": "Existing admission gate now also requires >=95% bridge coverage; existing required owners and thresholds retained; test bodies separated from measured production files.",
+      "test": "All six coverage gates, full frozen workspace, Clippy, format, architecture and contract checks passed; source snapshots/logs/raw coverage retained."
+    }
+  },
+  "independent_review": {
+    "requirements": "connector_phase_resources: bounded live-bridge admission and test implementation; not independent of authored tests.",
+    "architecture_and_evidence": "connector_gate_review: independent final actual source/peer/test review CLEAR plus supplemental public-binder negative review CLEAR.",
+    "qualification": "Root ran full frozen workspace and coverage; no reviewer build was invented."
+  },
+  "source_bindings": {
+    "crates/gateway-application/src/connector_proposals.rs": "4d02d2883e461cf9e5a61f94bf9c7b79ef427d21faed7fa1faeb8c73688b5991",
+    "crates/gateway-application/src/connector_proposals/tests.rs": "b6248e85bda62605503a31a9e429b6b86d1058f3e0a42714172b42886a367c72",
+    "crates/gateway-application/src/connector_results.rs": "b94a14aaa449dc4ba3cdf6994a4b944e6d1442cd745cc2d6c6665e61c5a8c87d",
+    "crates/gateway-application/src/lib.rs": "477835056d49343184a88ee50a95cbfa699eb9a5ecfbafb1e8b28a1c4d2b9512",
+    "crates/gateway-application/src/prompt_ir.rs": "97e11bfdfdc5d852a9e853a3e6a86438c8e1e9bf37260f3bbf3adaaff9642bab",
+    "crates/gateway-application/src/prompt_rendering.rs": "af54976ab43873acee335488772b83a7324d737440d22b0ea7d686b26c13e9bf",
+    "crates/gateway-application/src/prompt_rendering/connector_schema_tests.rs": "c4160e419a86fa0018102b607669056b9c6a1847dc7c3b4de7c20b6f8e0be8e4",
+    "crates/gateway-application/tests/invocation_qualification.rs": "c1b8edb52ae6e1613d027dd037a5c886e5dfb4a2af7f08f78fe21be25c5e9553",
+    "crates/gateway-application/tests/invocation_resilience.rs": "2de63ea7a9ba65d9332006f431c030822aaa3592f767a15be05bc2043c6df926",
+    "crates/gateway-application/tests/output_verification.rs": "479f1817d3b8e2bab740cae766b19f6b7200cdb2846f2d26bdea30be8032bdda",
+    "crates/gateway-application/tests/prompt_ir.rs": "514ecd287e6e496cb6ce37cb01a7b638286f261dff5d5d9e376ce520499379b8",
+    "crates/gateway-daemon/tests/connector_proposals.rs": "455d1f7a7e0ecd1ad3ca912097a34c7551744df299255e1846f42d6b23ff3d6c",
+    "crates/gateway-daemon/tests/prompt_rendering.rs": "fa0fe52a1ec8aec00965d3451a1e93d3d0fa45e6fdf280622b692931dbe5a5eb",
+    "crates/gateway-daemon/tests/support/connector_proposal_fixture.rs": "87fac4f6e1cc5ed225d466c29f4c338cb67c3e0e645c5289a73944a2c5bc377f",
+    "docs/README.md": "fb17f47f06b7e70dfc412f5466c5542211f6dd3abcd0624c43f85931923b62cd",
+    "docs/connector-proposal-dispatch-v1.md": "54c7020ca02663d27998a069fa9381dac2b02508d2453d264bb14812320395d7",
+    "scripts/check-connector-policy-coverage.py": "f5a4a9d789db285d30642f5e8c42c32c0dfa0144467c6d875cc6da9a2a2f3145",
+    "scripts/quality-gates.json": "41442f8f435b8023d83ce632e68fded26a8c474018bf26c75baf94faa5bc9b1c"
+  },
+  "limitations": [
+    "Controlled MCP peer and trusted fixture policy/consent/resource facts; no production operator ConnectorPolicySource or actual user consent owner is qualified.",
+    "No model inference, installed session prepare/execute, historical invocation reconstruction, durable connector consent continuation, complete scoped snapshots or whole #230/#274/#271 completion is claimed.",
+    "Four existing opt-in model-adapter/specialist PostgreSQL release qualifications remain ignored, not passed.",
+    "PR #400 / #399 is the canonical policy-input prerequisite; issue closure awaits reviewed merge."
+  ],
+  "retained_archive": {
+    "path": "docs/evidence/EPIC-07.07.02-live-proposal-dispatch-validation.json.gz",
+    "sha256": "a942ed4954b61b2b2c367c67287c45b7414a794208392918195651ff8da34281"
+  }
+}

@@ -97,6 +97,7 @@ fn tools(
             (
                 id.clone(),
                 ToolDefinition {
+                    connector_inventory: None,
                     binding: binding.clone(),
                     description: NonEmptyText::new("Inspect artifact").unwrap(),
                     input: gateway_domain::semantic_output::OutputType::Object {

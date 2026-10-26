@@ -316,3 +316,4 @@ and inventory regeneration. Production credentials/policy and live effects remai
 separate qualification work.
 
 - [Trusted connector admission (#369)](connector-admission-v1.md): current CG-09 policy/consent port, request binding, audit and coverage contract.
+- [Verified connector proposal dispatch (#401)](connector-proposal-dispatch-v1.md): live invocation/output binding, exact mapped schema pins, ordered policy-gated calls and controlled MCP qualification boundary.
