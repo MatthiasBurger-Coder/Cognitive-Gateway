@@ -28,7 +28,7 @@
       "result": "PASS",
       "passed": 1123,
       "ignored": 4,
-      "evidence": "Standard workspace tests and doctests through the actual disposable PostgreSQL test host; ignored live profiles are not qualified."
+      "evidence": "Standard workspace tests and doctests through the disposable PostgreSQL host. Four existing opt-in tests remain ignored: one live-adapter profile and three specialist PostgreSQL qualifications; none is claimed as passed."
     },
     "clippy": "PASS",
     "format": "PASS",
