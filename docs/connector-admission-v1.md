@@ -31,6 +31,27 @@ missing evidence or prerequisites, and every non-Allow policy outcome. Consent
 metadata only increases requirements. It cannot grant consent or turn an ordinary
 mutation approval into administrative permission.
 
+## Canonical resolved-step inputs — #399
+
+`PolicyApplication::step_input(resolved, context, step)` and
+`step_inputs(resolved, context)` expose the existing native input assembly.
+They validate the complete resolution and matching context before returning
+owned `ResolvedStepPolicyInput` data. Whole-plan `evaluate` uses the same private
+assembly, then passes each input to the existing `PolicyEngine`.
+
+A connector source can reuse the canonical capability closure, process readiness,
+structural prerequisites, constraints, preconditions and exact step facts rather
+than rebuilding them or inventing default approval facts. Ambiguous resolutions
+have no selected canonical capabilities. Foreign steps/facts, changed basis,
+mode/profile and forged resolutions retain the existing validation failures.
+
+The inputs are data, not decisions, current-authority witnesses or grants.
+They do not authenticate caller-supplied `StepFacts` and perform no provider I/O.
+A production source must obtain fresh authenticated facts at each authority
+boundary and check that its requested capability belongs to this exact native
+step. It must still enforce request/scope/inventory, consent, reservation and
+deadline bindings through the admission contract above.
+
 ## Dispatch and audit boundaries
 
 Authorization returns a request-bound `ConnectorDispatch`. That public data is
