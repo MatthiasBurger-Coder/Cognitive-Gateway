@@ -314,7 +314,9 @@ impl StructuredSessionHost for Host {
         let action_policy = StepPolicyReport {
             schema_version: 1,
             step: f.projection.mapping.step.clone(),
-            decision: if required {
+            decision: if change == 6 {
+                PolicyDecision::Deny
+            } else if required {
                 PolicyDecision::RequireConsent
             } else {
                 PolicyDecision::Allow
@@ -748,4 +750,23 @@ fn denied_or_withdrawn_consent_cannot_approve_or_consume_an_approval_command() {
         assert!(before.accepted_consent.is_none());
         assert!(before.artifact.is_none());
     }
+}
+
+#[test]
+fn an_additional_current_action_denial_cannot_be_converted_into_a_consent_question() {
+    let c = coordinator(false);
+    let started = start(&c);
+    let before = c.details(&owner(), &started.session).unwrap();
+    c.host.change.store(6, Ordering::SeqCst);
+    c.host
+        .change_at
+        .store(c.host.prepares.load(Ordering::SeqCst) + 1, Ordering::SeqCst);
+    assert_eq!(
+        continue_task(&c, &started),
+        Err(SessionError::AuthorityDenied)
+    );
+    assert_eq!(c.details(&owner(), &started.session).unwrap(), before);
+    assert!(before.pending.is_none());
+    assert!(before.artifact.is_none());
+    assert!(c.repository.rows.lock().unwrap().records.is_empty());
 }
