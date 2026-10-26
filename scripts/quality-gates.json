@@ -44,6 +44,10 @@
     "command": "bash scripts/qualify-observed-goal-sessions.sh \"$EVIDENCE_DIR/observed-goal-sessions\""
   },
   {
+    "name": "EPIC-08.03.02 complete scoped snapshot data, canonical reload and production coverage",
+    "command": "bash scripts/qualify-complete-snapshots.sh \"$EVIDENCE_DIR/complete-snapshots\""
+  },
+  {
     "name": "Install registry CLI",
     "command": "cargo install --path crates/gateway-daemon --bin cg-registry --locked --force --root \"$RUNNER_TEMP/cg-registry\""
   },

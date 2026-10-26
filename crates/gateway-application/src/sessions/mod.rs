@@ -21,6 +21,7 @@ mod goal_observation;
 mod pre_execution_goal;
 mod pre_execution_source;
 mod resources;
+pub mod scoped_snapshots;
 pub use connector_goals::*;
 pub use goal_observation::*;
 pub use pre_execution_goal::*;
