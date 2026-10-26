@@ -45,6 +45,10 @@ sensitivity and authenticated profile must match the admitted route. An exact
 qualified scalar read has nonprobabilistic confidence `NotApplicable`; legacy
 unknown quality remains unknown and cannot prove the goal.
 
+This profile requires an entirely `Inspect` native capability closure; a mixed
+or mutating closure remains unsupported even when the selected wire operation
+is a read.
+
 ## Credentials and storage
 
 `store_file` remains an absolute, private file containing the PostgreSQL
