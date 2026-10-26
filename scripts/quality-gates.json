@@ -120,6 +120,10 @@
     "command": "cargo llvm-cov -p gateway-policy -p gateway-application --test policy_engine --test policy_application --json --output-path \"$EVIDENCE_DIR/cg09-coverage.json\"\npython3 scripts/check-policy-coverage.py --self-test\npython3 scripts/check-policy-coverage.py \"$EVIDENCE_DIR/cg09-coverage.json\"\n"
   },
   {
+    "name": "EPIC-07.13 trusted connector admission coverage",
+    "command": "cargo llvm-cov -p gateway-application -p gateway-daemon --test connectors --test connector_policy --test mcp_client --locked --json --output-path \"$EVIDENCE_DIR/connector-policy-coverage.json\"\npython3 scripts/check-connector-policy-coverage.py --self-test\npython3 scripts/check-connector-policy-coverage.py \"$EVIDENCE_DIR/connector-policy-coverage.json\""
+  },
+  {
     "name": "CG-10 context coverage gate",
     "command": "cargo llvm-cov -p gateway-context -p gateway-application --test compiled_context --test budgeted_selection --test context_application --test context_compiler --test v2_handoff --json --output-path \"$EVIDENCE_DIR/cg10-coverage.json\"\npython3 scripts/check-context-coverage.py --self-test\npython3 scripts/check-context-coverage.py \"$EVIDENCE_DIR/cg10-coverage.json\"\n"
   },

@@ -1048,3 +1048,6 @@ fn real_stdio_resource_crosses_canonical_normalization_ingestion_and_context_bou
     host.lifecycle(&target(), ConnectorLifecycleCommand::Shutdown)
         .unwrap();
 }
+
+#[path = "support/connector_policy_cases.rs"]
+mod connector_policy_cases;

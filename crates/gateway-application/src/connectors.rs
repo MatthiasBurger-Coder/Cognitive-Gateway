@@ -269,6 +269,9 @@ pub trait ConnectorRuntimePort {
 /// and durable aggregate budget checks. There is deliberately no permissive
 /// default. The runtime calls `revalidate` immediately before transport effects.
 pub trait ConnectorAdmissionPort: Send + Sync {
+    /// Bounded, read-only current target admission, also used during transport
+    /// liveness polling. Must not dispatch effects, acquire grants or record
+    /// audit decisions; authorization owns those decision boundaries.
     fn admit_target(&self, target: &ConnectorTarget) -> Result<(), ConnectorFailure>;
     fn authorize(
         &self,
@@ -280,4 +283,19 @@ pub trait ConnectorAdmissionPort: Send + Sync {
         dispatch: &ConnectorDispatch,
         source: Option<&SourceId>,
     ) -> Result<(), ConnectorFailure>;
+    /// Validation-only current admission for bounded transport liveness polls.
+    /// Implementations must read current facts without recording a decision or
+    /// acquiring a new grant. Legacy admission sources deny this guarded route
+    /// until they explicitly implement a current validation boundary.
+    fn validate_current_dispatch(
+        &self,
+        dispatch: &ConnectorDispatch,
+        _source: Option<&SourceId>,
+    ) -> Result<(), ConnectorFailure> {
+        Err(ConnectorFailure {
+            code: ConnectorFailureCode::PermissionDenied,
+            effect: ConnectorEffect::NotDispatched,
+            correlation: dispatch.request.correlation.clone(),
+        })
+    }
 }
