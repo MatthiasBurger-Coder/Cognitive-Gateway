@@ -713,3 +713,39 @@ fn legacy_artifact_deadline_is_checked_after_claim_commit_and_after_actual_readb
         assert_eq!(cp.budget.actions, 1);
     }
 }
+
+#[test]
+fn denied_or_withdrawn_consent_cannot_approve_or_consume_an_approval_command() {
+    for status in [1, 2] {
+        let c = coordinator(false);
+        c.host.consent.store(1, Ordering::SeqCst);
+        let started = start(&c);
+        let pending = continue_task(&c, &started).unwrap();
+        assert_eq!(pending.state, SessionState::PendingConsent);
+        let before = c.details(&owner(), &started.session).unwrap();
+        c.host.revoked.store(status, Ordering::SeqCst);
+        let at = mutation(&pending, "denied-approval");
+        let key = CommandKey {
+            owner: owner(),
+            command: at.command.clone(),
+        };
+        assert_eq!(
+            c.execute(
+                &owner(),
+                SessionCommand::Approve {
+                    at,
+                    pending: pending.pending.unwrap().id,
+                    consent: ConsentRecordRef(reference("denied-consent")),
+                }
+            ),
+            Err(SessionError::AuthorityDenied)
+        );
+        assert_eq!(c.details(&owner(), &started.session).unwrap(), before);
+        assert_eq!(
+            c.repository.command_outcome(&key),
+            Err(SessionError::Unavailable)
+        );
+        assert!(before.accepted_consent.is_none());
+        assert!(before.artifact.is_none());
+    }
+}

@@ -195,7 +195,7 @@ impl Policy {
                 )
             })?;
         let e = self.state.expected.lock().unwrap();
-        let reservation = e.as_ref().unwrap().0.as_str();
+        let reservation = e.as_ref().unwrap().reservation.as_str();
         Ok(ConnectorPolicySnapshot {
             step: n.step,
             resolved: n.resolved,
