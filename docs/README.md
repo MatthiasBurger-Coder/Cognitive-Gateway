@@ -314,3 +314,5 @@ with CG-06 lineage, scope/quality propagation, acknowledgement/read-back separat
 and reference-only context adapters. Application port revision 2 requires manifest
 and inventory regeneration. Production credentials/policy and live effects remain
 separate qualification work.
+
+- [Trusted connector admission (#369)](connector-admission-v1.md): current CG-09 policy/consent port, request binding, audit and coverage contract.
