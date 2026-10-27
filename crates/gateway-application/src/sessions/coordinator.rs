@@ -479,6 +479,7 @@ impl<J: SessionRepositoryPort, H: StructuredSessionHost> SessionCoordinator<J, H
         let candidate = match preparation {
             ReadonlyPreparation::GoalSatisfied(candidate) => candidate,
             ReadonlyPreparation::BeforeCaptured(captured) => {
+                runtime.validate_before_basis(&claim.checkpoint, &captured)?;
                 let (reference, record) = prepare_before_record(&claim, &captured, now)?;
                 // Encoding and native validation can take time. The recorded
                 // validation instant stays immutable; admission checks use NOW.
@@ -505,6 +506,7 @@ impl<J: SessionRepositoryPort, H: StructuredSessionHost> SessionCoordinator<J, H
                     &persisted.checkpoint,
                     self.host.now_ms()?,
                 )?;
+                runtime.validate_before_basis(&persisted.checkpoint, &captured)?;
                 if self.load(
                     &persisted.checkpoint.owner,
                     &persisted.checkpoint.snapshot.session,

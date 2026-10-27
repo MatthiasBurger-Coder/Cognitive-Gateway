@@ -99,6 +99,24 @@ struct ObjectDescriptor {
     object_reference: NonEmptyText,
 }
 impl ScopeObjectDocument {
+    pub(super) fn kind(&self) -> &TargetKind {
+        &self.body.kind
+    }
+    pub(super) fn connector(&self) -> &NonEmptyText {
+        &self.body.connector
+    }
+    pub(super) fn parent(&self) -> Option<&Pin> {
+        self.body.parent_target.as_ref()
+    }
+    pub(super) fn subjects(&self) -> &[SubjectPath] {
+        &self.body.subjects
+    }
+    pub(super) fn coordinates(&self) -> &BTreeMap<String, TypedValue> {
+        &self.body.coordinates
+    }
+    pub(super) fn object_reference(&self) -> &NonEmptyText {
+        &self.body.object_reference
+    }
     /// Typed document dependencies only; discovering a pin grants no access.
     pub(in crate::local_sessions) fn reference_bindings(&self) -> Vec<Pin> {
         self.body.parent_target.iter().cloned().collect()
@@ -689,12 +707,12 @@ impl ReadAssociation {
         })
     }
 }
-fn required(schema: &Value, field: &str) -> bool {
+pub(super) fn required(schema: &Value, field: &str) -> bool {
     schema["required"]
         .as_array()
         .is_some_and(|values| values.iter().any(|value| value == field))
 }
-fn scalar_matches(shape: &OutputType, value: &TypedValue) -> bool {
+pub(super) fn scalar_matches(shape: &OutputType, value: &TypedValue) -> bool {
     matches!(
         (shape, value),
         (OutputType::String {}, TypedValue::String(_))
@@ -702,7 +720,7 @@ fn scalar_matches(shape: &OutputType, value: &TypedValue) -> bool {
             | (OutputType::Boolean {}, TypedValue::Boolean(_))
     )
 }
-fn schema_scalar_matches(schema: &Value, value: &TypedValue) -> bool {
+pub(super) fn schema_scalar_matches(schema: &Value, value: &TypedValue) -> bool {
     matches!(
         (schema["type"].as_str(), value),
         (Some("string"), TypedValue::String(_))
@@ -710,7 +728,7 @@ fn schema_scalar_matches(schema: &Value, value: &TypedValue) -> bool {
             | (Some("boolean"), TypedValue::Boolean(_))
     )
 }
-fn json_scalar_matches(value: &Value, expected: &TypedValue) -> bool {
+pub(super) fn json_scalar_matches(value: &Value, expected: &TypedValue) -> bool {
     match expected {
         TypedValue::String(v) => value.as_str() == Some(v.as_str()),
         TypedValue::Integer(v) => value.as_i64() == Some(*v),

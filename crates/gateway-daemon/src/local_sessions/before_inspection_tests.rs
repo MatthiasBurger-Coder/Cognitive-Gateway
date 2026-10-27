@@ -60,6 +60,15 @@ impl StructuredSessionHost for BeforeHost {
     }
 }
 impl ReadonlyGoalObservationRuntimePort for BeforeHost {
+    fn validate_before_basis(
+        &self,
+        _: &SessionCheckpoint,
+        _: &CapturedBefore,
+    ) -> Result<(), SessionError> {
+        // Component fixture only; the installed runtime rechecks actual live definitions.
+        Ok(())
+    }
+
     fn resource_limits(
         &self,
         c: &SessionCheckpoint,

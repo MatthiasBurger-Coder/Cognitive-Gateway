@@ -198,6 +198,7 @@ fn metadata_fixture() -> (PathBuf, ReadonlyRuntimeAdmission, LocalCodexHost) {
         access_profile: NonEmptyText::new("operator-profile").unwrap(),
         documents,
         goal_reads: vec![],
+        complete_before: None,
     };
     let intent_path = Path::new(env!("CARGO_MANIFEST_DIR"))
         .join("../../tests/fixtures/declarative-cli/intent.json");

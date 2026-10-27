@@ -20,6 +20,16 @@ pub trait ReadonlyGoalObservationRuntimePort {
         })
     }
 
+    /// Recheck the live definition basis around persistence, without provider I/O.
+    /// Before capture is an optional capability; older goal-only runtimes deny it.
+    fn validate_before_basis(
+        &self,
+        _cp: &SessionCheckpoint,
+        _captured: &CapturedBefore,
+    ) -> Result<(), SessionError> {
+        Err(SessionError::UnsupportedCapability)
+    }
+
     /// Pure current trusted registration; no provider/model/retrieval I/O.
     fn resource_limits(
         &self,
