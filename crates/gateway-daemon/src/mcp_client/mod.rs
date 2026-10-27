@@ -6,6 +6,8 @@ mod json;
 pub mod mapping;
 pub mod normalization;
 mod protocol;
+mod resilience;
+pub use resilience::ResilienceConfig;
 pub(crate) mod scalar_quotes;
 mod schema;
 pub mod session_budget;
@@ -37,6 +39,8 @@ pub enum Error {
     Configuration,
     Unavailable,
     Timeout,
+    /// Explicit adapter-profile rate limit; delay is a lower bound.
+    RateLimited(Duration),
     Cancelled,
     Protocol,
     IncompatibleVersion,
@@ -62,6 +66,7 @@ impl Error {
             Self::CredentialScopeDenied => C::CredentialScopeDenied,
             Self::SecretDisclosure => C::SecretDisclosure,
             Self::Timeout => C::Timeout,
+            Self::RateLimited(_) => C::RateLimited,
             Self::Cancelled => C::Cancelled,
             Self::IncompatibleVersion => C::IncompatibleVersion,
             Self::InventoryChanged => C::InventoryChanged,
@@ -90,8 +95,10 @@ pub enum SessionState {
     Disabled,
     Closing,
 }
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum EventKind {
+    Health(gateway_application::connector_resilience::HealthSnapshot),
+    Retry(gateway_application::connector_resilience::RetryDecision),
     State(SessionState),
     Sent,
     Completed,

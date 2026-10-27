@@ -1,5 +1,7 @@
 //! Real subprocess conformance tests. Authority/mapping are explicit test adapters;
 //! these tests do not qualify the future production policy service or providers.
+#[path = "support/connector_resilience_cases.rs"]
+mod connector_resilience_cases;
 use gateway_application::{connector_manifest::*, connectors::*};
 use gateway_daemon::mcp_client::{transport::*, *};
 use gateway_domain::*;
@@ -103,6 +105,43 @@ struct Mapping {
     mode: &'static str,
 }
 impl ConnectorMapping for Mapping {
+    fn recovery_support(
+        &self,
+        _: &ConnectorRequest,
+        _: Option<&SourceId>,
+        _: &ProtocolInventory,
+    ) -> Result<gateway_application::connector_resilience::RecoverySupport, Error> {
+        use gateway_application::connector_resilience::*;
+        let mut support = RecoverySupport::default();
+        match self.mode {
+            "meta-key-missing" => {
+                support.idempotency = ProviderIdempotency::Keyed {
+                    argument: text("missing"),
+                }
+            }
+            "meta-key-query" => {
+                support.idempotency = ProviderIdempotency::Keyed {
+                    argument: text("query"),
+                }
+            }
+            "meta-readback-write" => {
+                support.read_back =
+                    ReadBackSupport::Capability(CapabilityId::new("records.z-mutate").unwrap())
+            }
+            "meta-readback-missing" => {
+                support.read_back =
+                    ReadBackSupport::Capability(CapabilityId::new("missing").unwrap())
+            }
+            "meta-readback-read" => {
+                support.read_back =
+                    ReadBackSupport::Capability(CapabilityId::new("records.read").unwrap())
+            }
+            "meta-readonly" => support.retry = RetrySafety::ReadOnly,
+            "meta-error" => return Err(Error::Schema),
+            _ => (),
+        }
+        Ok(support)
+    }
     fn inventory(
         &self,
         target: &ConnectorTarget,

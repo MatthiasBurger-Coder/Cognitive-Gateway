@@ -600,3 +600,30 @@ fn guarded_discovery_reports_late_revocation_and_rechecks_target_before_frames()
         assert!(host.runtime.state.lock().unwrap().canonical.is_none());
     }
 }
+
+#[test]
+fn absent_recovery_contract_is_explicitly_unsafe_and_disabled_health_is_unavailable() {
+    let request = ConnectorRequest {
+        target: configuration().target,
+        capability: CapabilityId::new("read").unwrap(),
+        class: ConnectorOperationClass::Read,
+        inventory_revision: ContentDigest::new("a".repeat(64)).unwrap(),
+        arguments: BTreeMap::new(),
+        task: TaskId::new("task").unwrap(),
+        step: PlanStepId::new("step").unwrap(),
+        execution: NonEmptyText::new("execution").unwrap(),
+        correlation: NonEmptyText::new("correlation").unwrap(),
+    };
+    assert_eq!(
+        Deny.recovery_support(&request, None, &ProtocolInventory::default())
+            .unwrap(),
+        gateway_application::connector_resilience::RecoverySupport::default()
+    );
+    let host = build(configuration()).unwrap();
+    host.lifecycle(&request.target, ConnectorLifecycleCommand::Disable)
+        .unwrap();
+    assert_eq!(
+        host.health_snapshot().health,
+        gateway_application::connector_resilience::ConnectorHealth::Unavailable
+    );
+}
