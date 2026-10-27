@@ -43,3 +43,10 @@ pub mod mcp_client;
 pub(crate) mod goal_observation_test_harness;
 #[cfg(test)]
 pub(crate) mod native_policy_test_support;
+
+#[cfg(test)]
+#[path = "../../gateway-application/tests/support/complete_scoped_snapshot_fixture.rs"]
+pub(crate) mod complete_snapshot_fixture;
+#[cfg(test)]
+#[path = "../../gateway-application/tests/support/prepared_before_fixture.rs"]
+pub(crate) mod prepared_before_fixture;

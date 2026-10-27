@@ -42,40 +42,100 @@ impl CompleteScopedSnapshot {
         expected_profile: &SnapshotProfile,
         now_ms: u64,
     ) -> Result<Self> {
-        let value = strict_value(bytes)?;
-        let wire: Envelope =
-            serde_json::from_value(value).map_err(|_| SnapshotError::InvalidEncoding)?;
-        if wire.contract != CONTRACT || wire.contract_version != SchemaVersion::V1 {
-            return Err(SnapshotError::InvalidEncoding);
-        }
-        let data = wire.data.into_data()?;
-        if &data.binding != expected_binding {
-            return Err(SnapshotError::BindingMismatch);
-        }
+        let (data, digest) = decode_data(
+            bytes,
+            expected_binding,
+            &expected_universe.pin,
+            &expected_profile.pin,
+        )?;
         if &data.universe != expected_universe {
             return Err(SnapshotError::UniverseMismatch);
         }
         if &data.profile != expected_profile {
             return Err(SnapshotError::ProfileMismatch);
         }
-        let complete = Self::validate(
-            data.binding,
-            data.universe,
-            data.profile,
-            data.acquisitions,
-            data.object_reads,
-            data.consistency,
-            now_ms,
-        )?;
-        if complete.digest != wire.digest {
-            return Err(SnapshotError::DigestMismatch);
-        }
-        // One canonical persisted representation; whitespace, key-order and
-        // escaped-string aliases cannot acquire a second immutable byte identity.
-        if complete.encode()?.as_slice() != bytes {
-            return Err(SnapshotError::InvalidEncoding);
-        }
-        Ok(complete)
+        finish_decode(data, digest, bytes, now_ms)
+    }
+    /// Reload DATA selected by independently authenticated full definition pins.
+    /// The owning journal must authenticate these pins and the record bytes;
+    /// this function neither authenticates a caller nor grants current authority.
+    pub fn decode_bound(
+        bytes: &[u8],
+        expected_binding: &SnapshotBinding,
+        expected_universe: &SnapshotPin,
+        expected_profile: &SnapshotPin,
+        now_ms: u64,
+    ) -> Result<Self> {
+        let (data, digest) =
+            decode_data(bytes, expected_binding, expected_universe, expected_profile)?;
+        finish_decode(data, digest, bytes, now_ms)
+    }
+}
+
+fn decode_data(
+    bytes: &[u8],
+    binding: &SnapshotBinding,
+    universe: &SnapshotPin,
+    profile: &SnapshotPin,
+) -> Result<(SnapshotData, ContentDigest)> {
+    let value = strict_value(bytes)?;
+    let wire: Envelope =
+        serde_json::from_value(value).map_err(|_| SnapshotError::InvalidEncoding)?;
+    if wire.contract != CONTRACT || wire.contract_version != SchemaVersion::V1 {
+        return Err(SnapshotError::InvalidEncoding);
+    }
+    let data = wire.data.into_data()?;
+    if &data.binding != binding {
+        return Err(SnapshotError::BindingMismatch);
+    }
+    if &data.universe.pin != universe {
+        return Err(SnapshotError::UniverseMismatch);
+    }
+    if &data.profile.pin != profile {
+        return Err(SnapshotError::ProfileMismatch);
+    }
+    Ok((data, wire.digest))
+}
+fn finish_decode(
+    data: SnapshotData,
+    digest: ContentDigest,
+    bytes: &[u8],
+    now_ms: u64,
+) -> Result<CompleteScopedSnapshot> {
+    let complete = CompleteScopedSnapshot::validate(
+        data.binding,
+        data.universe,
+        data.profile,
+        data.acquisitions,
+        data.object_reads,
+        data.consistency,
+        now_ms,
+    )?;
+    if complete.digest != digest {
+        return Err(SnapshotError::DigestMismatch);
+    }
+    // A single persisted representation also covers native CG06 JSON strings.
+    if complete.encode()?.as_slice() != bytes {
+        return Err(SnapshotError::InvalidEncoding);
+    }
+    Ok(complete)
+}
+
+// SnapshotBinding is evidence DATA. Only this owning wire conversion defines
+// its fence/step representation; no live allocation or grant gains serde.
+impl Serialize for SnapshotBinding {
+    fn serialize<S: serde::Serializer>(
+        &self,
+        serializer: S,
+    ) -> std::result::Result<S::Ok, S::Error> {
+        BindingWire::from_binding(self).serialize(serializer)
+    }
+}
+impl<'de> Deserialize<'de> for SnapshotBinding {
+    fn deserialize<D: serde::Deserializer<'de>>(decoder: D) -> std::result::Result<Self, D::Error> {
+        BindingWire::deserialize(decoder)?
+            .into_binding()
+            .map_err(|_| D::Error::custom("invalid snapshot binding"))
     }
 }
 
@@ -103,7 +163,7 @@ fn bounded(bytes: Vec<u8>) -> Result<Vec<u8>> {
         Ok(bytes)
     }
 }
-fn canonical<T: Serialize>(value: &T) -> Result<Vec<u8>> {
+pub(in crate::sessions) fn canonical<T: Serialize>(value: &T) -> Result<Vec<u8>> {
     let value = serde_json::to_value(value).map_err(|_| SnapshotError::InvalidEncoding)?;
     serde_json::to_vec(&ordered(value)).map_err(|_| SnapshotError::InvalidEncoding)
 }
@@ -832,7 +892,7 @@ fn decode_records(raw: &str) -> Result<ObservationEvidenceSet> {
 
 /// Duplicate keys are rejected before serde can collapse them, including inside
 /// embedded native CG06 record strings. The same bound applies at every parse.
-fn strict_value(bytes: &[u8]) -> Result<Value> {
+pub(in crate::sessions) fn strict_value(bytes: &[u8]) -> Result<Value> {
     if bytes.len() > MAX_SNAPSHOT_BYTES {
         return Err(SnapshotError::LimitExceeded);
     }

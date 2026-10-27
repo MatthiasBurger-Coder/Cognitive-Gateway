@@ -75,6 +75,7 @@ fn checkpoint(repo: &PostgresSessionStore, id: &str) -> SessionCheckpoint {
         },
         resource_ledger: None,
         pre_execution_goal: None,
+        prepared_before: None,
         pending: None,
         accepted_consent: None,
         authority_events: vec![],
