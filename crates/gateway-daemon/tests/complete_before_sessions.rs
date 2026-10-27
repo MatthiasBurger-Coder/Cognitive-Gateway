@@ -40,6 +40,7 @@ fn installed_atomic_world_denies_partial_foreign_inconsistent_and_oversized_expo
         "extra",
         "type",
         "oversized",
+        "record-oversized",
     ] {
         run(case);
     }
@@ -68,4 +69,13 @@ fn installed_already_satisfied_goal_preserves_goal_path_without_world_export() {
 #[test]
 fn installed_before_remains_historical_after_freshness_expires_without_reacquisition() {
     run("age");
+}
+
+#[test]
+fn installed_before_lost_client_reply_recovers_actual_committed_bytes_without_reacquisition() {
+    run("lost-response");
+}
+#[test]
+fn installed_interrupted_uncommitted_export_fails_after_lease_without_reacquisition() {
+    run("interrupted");
 }

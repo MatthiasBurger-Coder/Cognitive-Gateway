@@ -169,6 +169,7 @@ fn native_world_definitions_bind_complete_universe_independent_of_goal_and_rejec
         "weak-source",
         "wrong-credential-profile",
         "wrong-age",
+        "no-revision",
     ] {
         f.mutate(case);
         let outcome = f.capture();
@@ -292,6 +293,7 @@ fn native_atomic_association_seals_exact_world_request_raw_schema_and_response_i
     for case in [
         "missing-mapping",
         "wrong-root",
+        "member-reference",
         "wrong-selector",
         "empty-selector",
         "selector-coordinate",
@@ -305,6 +307,9 @@ fn native_atomic_association_seals_exact_world_request_raw_schema_and_response_i
         let mut w = d.before.take().unwrap();
         match case {
             "missing-mapping" => w.read.mapping_reference = "foreign".into(),
+            "member-reference" => {
+                w.universe.objects[0].object_reference = NonEmptyText::new("foreign").unwrap();
+            }
             "wrong-root" => {
                 w.profile.anchor_route.object_reference = NonEmptyText::new("foreign").unwrap()
             }

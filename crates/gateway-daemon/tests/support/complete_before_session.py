@@ -51,6 +51,7 @@ for line in sys.stdin:
     elif fault=='extra':result['extra_member']=True
     elif fault=='type':result['hidden_bytes']='wrong-type'
     elif fault=='oversized':result['hidden_version']='x'*262145
+    elif fault=='record-oversized':result['hidden_version']='x'*240000
     else:raise AssertionError('unknown response fault')
   v={'content':[],'structuredContent':result,'isError':False}
  elif m=='ping':v={}
@@ -166,6 +167,7 @@ def mutate_case(root,case):
     elif case=='weak-source':normalization['acquisition']['source_kind']='SYNTHETIC'
     elif case=='wrong-credential-profile':normalization['acquisition']['authenticated_profile']='foreign-profile'
     elif case=='wrong-age':normalization['acquisition']['semantics']['max_age_seconds']=121
+    elif case=='no-revision':normalization['revision_field']=None
     else:raise AssertionError('unknown controlled mutation '+case)
     runtime=repin_registry(runtime,docs)
     for row in docs.values():row['path'].write_bytes(encoded(row['body']))
@@ -183,8 +185,8 @@ def run(case):
         environment=dict(legacy.canonical.CHILD_ENV)
         if 'LLVM_PROFILE_FILE' in os.environ:environment['LLVM_PROFILE_FILE']=os.environ['LLVM_PROFILE_FILE']
         if case=='age':mutate_case(root,'age')
-        negative=case in ('membership','epoch','version','object','identity','missing','extra','type','oversized','budget','commit-failure','revoke','cancel','config-drift','quote-drift','deadline','schema-drift','credential')
-        response_faults=('membership','epoch','version','object','identity','missing','extra','type','oversized')
+        negative=case in ('membership','epoch','version','object','identity','missing','extra','type','oversized','record-oversized','budget','commit-failure','revoke','cancel','config-drift','quote-drift','deadline','schema-drift','credential')
+        response_faults=('membership','epoch','version','object','identity','missing','extra','type','oversized','record-oversized')
         if case in response_faults:(root/'response-fault').write_text(case)
         if case=='credential':
             credentials=json.loads((root/'credentials.json').read_text());credentials['profiles']['records.local']['environment']['CG_WORLD_AUTH']='incorrect'
@@ -197,7 +199,7 @@ def run(case):
         if case=='satisfied':
             world=json.loads((root/'atomic-world.json').read_text());world['fields']['second']=True;write_world(root,world)
         race=case in ('revoke','cancel','config-drift','quote-drift','deadline')
-        if race:(root/'pause-world').touch()
+        if race or case=='interrupted':(root/'pause-world').touch()
         client=legacy.Client(launch,environment=environment)
         trigger=None
         try:
@@ -205,7 +207,42 @@ def run(case):
             started=legacy.call(client,request('start',{'command_id':'world-start','intent':{'kind':'document','contract':'cg.intent','contract_version':'1.0','document':intent}}))
             initial=started['result']['session'];assert initial['state']=='runnable'
             continued=request('continue',{'session_id':initial['session'],'command_id':'world-capture','expected_revision':initial['revision']})
-            if case=='commit-failure':
+            if case in ('lost-response','interrupted'):
+                # Submit an actual request but deliberately do not consume its
+                # reply. Recovery must resolve the real durable outcome.
+                client.next_id+=1
+                frame={'jsonrpc':'2.0','id':client.next_id,'method':'tools/call','params':{'name':'cg_session_continue_v2','arguments':continued}}
+                client.process.stdin.write(json.dumps(frame)+'\n');client.process.stdin.flush()
+                until=time.monotonic()+25
+                if case=='interrupted':
+                    while not (root/'world-waiting').exists():
+                        assert time.monotonic()<until,'interrupted export barrier not reached'
+                        time.sleep(.02)
+                    interrupted=journal(scope);claim=interrupted['sessions'][0]['checkpoint']
+                    assert not claim.get('prepared_before') and claim['snapshot']['state']=='dispatching'
+                    client.process.kill();assert client.close()!=0;(root/'release-world').touch()
+                    wire_before=(root/'wire.jsonl').read_bytes()
+                    time.sleep(max(0,(claim['lease_until_ms']-int(time.time()*1000))/1000)+.1)
+                    operator=root/'recover-interrupted.json';operator.write_bytes(encoded({'session_id':initial['session'],'issuer':admission['mappings'][0]['principal'],'decision':'recover'}))
+                    recovered=subprocess.run([str(BIN/'cg-local'),'--operation','session.authority','--request',str(operator),*launch],env=environment,capture_output=True,text=True,timeout=45)
+                    assert recovered.returncode==0,(recovered.stdout,recovered.stderr)
+                    actual=journal(scope);cp=actual['sessions'][0]['checkpoint']
+                    assert cp['snapshot']['state']=='failed' and not cp.get('prepared_before')
+                    assert cp['resource_ledger']==claim['resource_ledger']
+                    assert not any(r['kind']=='complete_before' for r in actual['records'])
+                    assert (root/'wire.jsonl').read_bytes()==wire_before
+                    client=legacy.Client(launch,environment=environment);client.initialize()
+                    print('INSTALLED_COMPLETE_BEFORE_QUALIFIED',case,flush=True)
+                    return
+                while True:
+                    committed=journal(scope)
+                    if committed['sessions'][0]['checkpoint'].get('prepared_before'):break
+                    assert time.monotonic()<until,'actual Before commit not observed'
+                    time.sleep(.02)
+                assert client.close()==0
+                client=legacy.Client(launch,environment=environment);client.initialize()
+                done=legacy.call(client,request('inspect',{'session_id':initial['session']}))
+            elif case=='commit-failure':
                 trigger='q408_'+scope.replace('-','')
                 legacy.sql("CREATE FUNCTION "+trigger+"() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN IF NEW.scope='"+scope+"' AND NEW.kind='task-sessions-v2' AND EXISTS (SELECT FROM jsonb_array_elements(NEW.payload::jsonb->'records') r WHERE r->>'kind'='complete_before') THEN RAISE EXCEPTION 'qualification before append rejected'; END IF; RETURN NEW; END $$; CREATE TRIGGER "+trigger+" BEFORE UPDATE ON cg_cognitive_journals FOR EACH ROW EXECUTE FUNCTION "+trigger+"();")
             if race:
@@ -236,7 +273,7 @@ def run(case):
                 reply=responses.get_nowait();assert isinstance(reply,dict),type(reply)
                 assert 'error' in reply or reply['result']['structuredContent']['status']=='error',reply
                 done=None
-            else:done=legacy.call(client,continued,'error' if negative else 'ok')
+            elif case not in ('lost-response','interrupted'):done=legacy.call(client,continued,'error' if negative else 'ok')
             if negative:
                 stored=journal(scope)
                 assert not any(r['kind']=='complete_before' for r in stored['records']),stored

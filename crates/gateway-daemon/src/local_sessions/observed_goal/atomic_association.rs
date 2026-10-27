@@ -161,7 +161,19 @@ impl BoundAtomicRead {
                 ))
             })
             .collect::<Result<BTreeMap<_, _>, SessionError>>()?;
-        if !required(&schema.result_schema, &world.provider.response.object_field)
+        if schema.result_schema["additionalProperties"] != false
+            || schema.result_schema["properties"]
+                .as_object()
+                .is_none_or(|properties| {
+                    properties.iter().any(|(key, definition)| {
+                        !required(&schema.result_schema, key)
+                            || !matches!(
+                                definition["type"].as_str(),
+                                Some("string" | "integer" | "boolean")
+                            )
+                    })
+                })
+            || !required(&schema.result_schema, &world.provider.response.object_field)
             || schema.result_schema["properties"][&world.provider.response.object_field]["type"]
                 != "string"
             || identities.iter().any(|(key, value)| {

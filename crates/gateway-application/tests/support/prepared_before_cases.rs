@@ -35,6 +35,8 @@ enum Mode {
     ForeignGoal,
     NoData,
     ReadOutage,
+    BasisBefore,
+    BasisAfter,
 }
 struct Host<'a> {
     owner: OwnerBinding,
@@ -136,10 +138,15 @@ fn amounts() -> SessionResourceAmounts {
 impl ReadonlyGoalObservationRuntimePort for Host<'_> {
     fn validate_before_basis(
         &self,
-        _: &SessionCheckpoint,
+        cp: &SessionCheckpoint,
         _: &CapturedBefore,
     ) -> Result<(), SessionError> {
-        // Component fixture only; the installed runtime rechecks actual live definitions.
+        // Component fault injection; installed code checks actual native definitions.
+        if matches!(self.mode, Mode::BasisBefore)
+            || (matches!(self.mode, Mode::BasisAfter) && cp.prepared_before.is_some())
+        {
+            return Err(SessionError::StaleRevision);
+        }
         Ok(())
     }
 
@@ -823,5 +830,37 @@ fn the_same_native_preparation_owner_preserves_goal_success_none_and_transport_o
         }
         assert_eq!(c.host.calls.get(), 1);
         assert_eq!(cp.budget.actions, 1);
+    }
+}
+
+#[test]
+fn live_before_basis_is_rechecked_before_commit_and_after_reload_without_reacquisition() {
+    let native = native();
+    let compiled = native.compile().unwrap();
+    for mode in [Mode::BasisBefore, Mode::BasisAfter] {
+        let c = coordinator(&compiled, &native, mode);
+        let start = begin(&c);
+        assert_eq!(acquire(&c, &start), Err(SessionError::StaleRevision));
+        let cp = stored(&c, &start.session).checkpoint;
+        assert_eq!(c.host.calls.get(), 1);
+        if matches!(mode, Mode::BasisBefore) {
+            assert!(cp.prepared_before.is_none());
+            assert!(records(&c.repository).is_empty());
+        } else {
+            let historical = load_prepared_before_historical(&c.repository, &cp).unwrap();
+            let reference = cp.prepared_before.as_ref().unwrap();
+            assert_eq!(historical.digest(), &reference.snapshot_digest);
+            struct GoalOnly;
+            impl ReadonlyGoalObservationRuntimePort for GoalOnly {}
+            let captured = CapturedBefore {
+                snapshot: historical,
+                runtime: reference.runtime.clone(),
+                native_context_digest: reference.native_context_digest.clone(),
+            };
+            assert_eq!(
+                GoalOnly.validate_before_basis(&cp, &captured),
+                Err(SessionError::UnsupportedCapability)
+            );
+        }
     }
 }

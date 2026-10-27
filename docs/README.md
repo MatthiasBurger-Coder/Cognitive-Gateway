@@ -321,3 +321,6 @@ separate qualification work.
 - [Connector policy integration (#230)](connector-policy-integration.md): installed current native CG-09 source, additive consent requirements, zero-call denial matrix and completion evidence.
 
 - [Connector resilience](connector-resilience-v1.md) — EPIC-07.08 bounded retries, aggregate budgets, provider recovery metadata, rate limits, health and circuit/backpressure semantics.
+
+- [Complete Before journal (#407)](complete-before-journal.md): coordinator-owned atomic persistence, exact immutable references and historical private inspection.
+- [Installed atomic Before (#408)](installed-atomic-before.md): complete independent world acquisition through credentialed MCP, current native authority, actual PostgreSQL and explicit supported profile/size boundaries.
