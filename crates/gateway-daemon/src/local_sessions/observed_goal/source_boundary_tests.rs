@@ -253,7 +253,7 @@ fn genuine_native_claim_and_source_reject_foreign_current_bindings_before_reads(
     let observed = Arc::new(std::sync::atomic::AtomicBool::new(false));
     let completed = observed.clone();
     INVENTORY_HOOK.with(|slot| {
-        *slot.borrow_mut() = Some(Box::new(move |source, _run, inventory| {
+        *slot.borrow_mut() = Some(Box::new(move |source, run, inventory| {
             assert_eq!(wire_calls(&root), 0, "discovery is not a goal read");
             let valid = request(source, inventory);
             source.route(&valid, None)?;
@@ -283,6 +283,27 @@ fn genuine_native_claim_and_source_reject_foreign_current_bindings_before_reads(
                     ),
                     Err(SessionError::ScopeDenied)
                 );
+            }
+            // Invoke through the actual budgeted mapped host after discovery.
+            // Neither discovered presence nor a substituted dispatch is a grant.
+            for field in [
+                "scope",
+                "capability",
+                "inventory",
+                "class-mutate",
+                "class-admin",
+            ] {
+                let mut changed = valid.clone();
+                match field {
+                    "scope" => changed.target.scope = ContextScopeId::new("foreign").unwrap(),
+                    "capability" => changed.capability = CapabilityId::new("foreign").unwrap(),
+                    "inventory" => changed.inventory_revision = context_content_digest(b"foreign"),
+                    "class-mutate" => changed.class = ConnectorOperationClass::Mutate,
+                    _ => changed.class = ConnectorOperationClass::Admin,
+                }
+                let failure = run.invoke(&changed).unwrap_err();
+                assert_eq!(failure.effect, ConnectorEffect::NotDispatched, "{field}");
+                assert_eq!(wire_calls(&root), 0, "{field}");
             }
             let empty = GoalSource::new(
                 source.claim.clone(),
