@@ -6,6 +6,9 @@ cd "$(dirname "$0")/.."
 output="${1:?Supply an evidence directory}"
 mkdir -p "$output"
 output="$(cd "$output" && pwd -P)"
+# Native complete-Before reads must run within the unchanged real deadlines.
+# Keep the Rust tests and the subsequent private CLI checks in one profile.
+export CARGO_PROFILE_DEV_OPT_LEVEL=1 CARGO_PROFILE_TEST_OPT_LEVEL=1
 export CG_SESSION_EVIDENCE_DIR="$output"
 : > "$output/transitions.jsonl"
 export CARGO_TARGET_DIR="${CARGO_LLVM_COV_TARGET_DIR:-$PWD/target/session-coverage}"
@@ -14,7 +17,7 @@ eval "$(cargo llvm-cov show-env --sh)"
 cargo test -p gateway-application -p gateway-daemon --lib --bin cg --bin cg-mcp --bin cg-local \
   --test session_contracts --test session_runtime --test context_application --test local_mcp --test codex_facade --test codex_isolation \
   --test codex_local_cli --test codex_qualification --test codex_canonical --test declarative_cli \
-  --test observed_goal_sessions --locked -- --test-threads=1
+  --test observed_goal_sessions --test complete_before_sessions --locked -- --test-threads=1
 cargo build -p gateway-daemon --bin cg --bin cg-mcp --bin cg-local --locked
 export CG_QUALIFICATION_BIN_DIR="${CARGO_TARGET_DIR:-$CARGO_LLVM_COV_TARGET_DIR}/debug"
 python3 -m unittest discover -s tests/codex-local -p test_sessions.py -v
