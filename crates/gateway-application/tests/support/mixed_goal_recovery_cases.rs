@@ -67,6 +67,27 @@ fn readonly_amounts() -> SessionResourceAmounts {
     }
 }
 impl ReadonlyGoalObservationRuntimePort for Host {
+    fn validate_before_basis(
+        &self,
+        _: &SessionCheckpoint,
+        captured: &CapturedBefore,
+    ) -> Result<(), SessionError> {
+        // This component host owns its actual native compiled fixture basis.
+        let native = &self
+            .connector
+            .as_ref()
+            .ok_or(SessionError::UnsupportedCapability)?
+            .compiled;
+        let compiled: serde_json::Value = serde_json::from_str(&native.to_json().unwrap()).unwrap();
+        let body = serde_json::json!({"contract":"cg.connector-observed-context/1.0", "compiled":compiled, "effective_source_policy":{"consent_required":false}});
+        if captured.native_context_digest
+            != context_content_digest(&serde_json::to_vec(&body).unwrap())
+        {
+            return Err(SessionError::StaleRevision);
+        }
+        Ok(())
+    }
+
     fn resource_limits(
         &self,
         _: &SessionCheckpoint,

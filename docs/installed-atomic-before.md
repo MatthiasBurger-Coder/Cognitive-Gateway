@@ -47,7 +47,7 @@ and private operator envelope limits. Discovery and all selected goal/world read
 share one cumulative reservation and spending cursor. Oversized/unsupported
 worlds fail; the universe is never truncated. Non-atomic live profiles and mixed
 or mutating native closures remain unsupported. Shipped RPC, runtime and claim
-deadlines remain unchanged. Qualification uses optimized binaries; a debug build
+deadlines remain unchanged. The workspace test profile and qualification use optimized binaries; an unoptimized development build
 can exceed those real deadlines on the larger complete-world fixture.
 
 `cg-local --operation session.authority` with the existing strict

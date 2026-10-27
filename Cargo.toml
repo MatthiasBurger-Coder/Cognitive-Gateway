@@ -28,3 +28,8 @@ unsafe_code = "forbid"
 
 [workspace.lints.clippy]
 all = "deny"
+
+# Installed session tests exercise the unchanged real RPC/runtime/claim deadlines.
+# Use optimized test binaries for the larger complete-world native admission path.
+[profile.test]
+opt-level = 1
