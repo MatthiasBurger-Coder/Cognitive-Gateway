@@ -44,6 +44,7 @@ for line in sys.stdin:
     fault=(root/'response-fault').read_text()
     if fault=='membership':result['membership']='0'*64
     elif fault=='epoch':result['epoch']='foreign-epoch'
+    elif fault=='numeric-epoch':result['epoch']=42
     elif fault=='version':result['hidden_version']=''
     elif fault=='object':result['object']='object-one'
     elif fault=='identity':result['id']='foreign'
@@ -153,7 +154,11 @@ def mutate_case(root,case):
     admission_path=Path(launch[13]);admission=json.loads(admission_path.read_text());runtime=admission['mappings'][0]['sessions']['observed_goal_runtime']
     docs={d['pin']['id']:{'pin':d['pin'],'path':Path(d['path']),'body':json.loads(Path(d['path']).read_text())} for d in runtime['documents']}
     universe=docs['atomic-universe']['body'];profile=docs['atomic-profile']['body'];provider=docs['atomic-provider']['body'];normalization=docs['atomic-normalization']['body'];route=docs['atomic-route']['body']
-    if case=='age':
+    if case=='numeric-epoch':
+        tool=json.loads((root/'wire-tool.json').read_text());tool['outputSchema']['properties']['epoch']['type']='integer';(root/'wire-tool.json').write_bytes(encoded(tool))
+        docs['manifest']['body']['inventory'][0]['schema_digest']=digest({'discovery_schema_version':'1.0','kind':'tool','entry':tool})
+        docs['mapping']['body']['records'][0]['result_schema']=tool['outputSchema']
+    elif case=='age':
         profile['max_age_seconds']=30;normalization['acquisition']['semantics']['max_age_seconds']=30
     elif case=='missing-member':universe['objects'].pop()
     elif case=='duplicate-subject':universe['objects'][0]['subjects'].append(universe['objects'][0]['subjects'][0])
@@ -198,10 +203,10 @@ def run(case):
         def request(op,inputs):return {'schema_version':'2.0','scope':base['scope'],'operation':'session.'+op,'correlation':{'request_id':'complete-before-qualification'},'execution':{'operating_mode':'DEVELOPMENT','execution_profile':'FULL_PATH'},'input':inputs}
         environment=dict(legacy.canonical.CHILD_ENV)
         if 'LLVM_PROFILE_FILE' in os.environ:environment['LLVM_PROFILE_FILE']=os.environ['LLVM_PROFILE_FILE']
-        if case=='age':mutate_case(root,'age')
+        if case in ('age','numeric-epoch'):mutate_case(root,case)
         pre_send=case in ('pre-revoke','pre-cancel','pre-config','pre-normalization')
-        negative=pre_send or case in ('membership','epoch','version','object','identity','missing','extra','type','oversized','record-oversized','budget','commit-failure','revoke','cancel','config-drift','quote-drift','deadline','schema-drift','credential')
-        response_faults=('membership','epoch','version','object','identity','missing','extra','type','oversized','record-oversized')
+        negative=pre_send or case in ('numeric-epoch','membership','epoch','version','object','identity','missing','extra','type','oversized','record-oversized','budget','commit-failure','revoke','cancel','config-drift','quote-drift','deadline','schema-drift','credential')
+        response_faults=('numeric-epoch','membership','epoch','version','object','identity','missing','extra','type','oversized','record-oversized')
         if case in response_faults:(root/'response-fault').write_text(case)
         if case=='credential':
             credentials=json.loads((root/'credentials.json').read_text());credentials['profiles']['records.local']['environment']['CG_WORLD_AUTH']='incorrect'

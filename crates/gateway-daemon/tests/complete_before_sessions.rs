@@ -88,3 +88,8 @@ fn installed_interrupted_uncommitted_export_fails_after_lease_without_reacquisit
 fn installed_atomic_export_keeps_one_generation_across_a_concurrent_complete_world_update() {
     run("atomic-update");
 }
+
+#[test]
+fn installed_atomic_epoch_rejects_non_string_observations_even_under_an_admitted_scalar_schema() {
+    run("numeric-epoch");
+}

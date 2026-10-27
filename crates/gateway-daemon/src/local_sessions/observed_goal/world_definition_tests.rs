@@ -347,3 +347,81 @@ fn native_atomic_association_seals_exact_world_request_raw_schema_and_response_i
         "association checks cannot dispatch"
     );
 }
+
+#[test]
+fn atomic_definitions_reject_foreign_pins_noncanonical_bodies_empty_worlds_and_mutating_routes() {
+    if std::env::var_os("CG_COGNITIVE_TEST_DATABASE").is_none() {
+        return;
+    }
+    let fixture = Fixture::new();
+    for case in [
+        "foreign-root-scope",
+        "selected-pin-drift",
+        "empty-universe",
+        "inline-route-substitution",
+        "noncanonical-subject-order",
+    ] {
+        let mut defs = fixture.capture().unwrap();
+        let mut admission = defs.runtime.complete_before.clone().unwrap();
+        match case {
+            "foreign-root-scope" => {
+                admission.profile.scope = ContextScopeId::new("foreign").unwrap()
+            }
+            "selected-pin-drift" => {
+                defs.documents
+                    .get_mut(&admission.profile.id)
+                    .unwrap()
+                    .0
+                    .revision = ReferenceId::new("foreign").unwrap()
+            }
+            "empty-universe" => {
+                defs.documents.get_mut(&admission.universe.id).unwrap().1["objects"] =
+                    serde_json::json!([])
+            }
+            "inline-route-substitution" => {
+                defs.documents.get_mut(&admission.universe.id).unwrap().1["objects"][0]["route"]["body"]
+                    ["class"] = serde_json::json!("inspect")
+            }
+            "noncanonical-subject-order" => {
+                defs.documents.get_mut(&admission.universe.id).unwrap().1["objects"][0]["subjects"]
+                    .as_array_mut()
+                    .unwrap()
+                    .reverse()
+            }
+            _ => unreachable!(),
+        }
+        assert!(admission.capture(&defs).is_err(), "{case}");
+    }
+    let defs = fixture.capture().unwrap();
+    let world = defs.before.as_ref().unwrap();
+    for (class, expected) in [
+        ("search", Some(ConnectorOperationClass::Search)),
+        ("inspect", Some(ConnectorOperationClass::Inspect)),
+        ("admin", None),
+    ] {
+        let mut body = defs
+            .document(&world.profile.anchor_route.pin)
+            .unwrap()
+            .clone();
+        body["class"] = serde_json::json!(class);
+        let mut selected = world.profile.anchor_route.pin.clone();
+        selected.digest = context_content_digest(&serde_json::to_vec(&body).unwrap());
+        let mut documents = defs.documents.clone();
+        documents.insert(selected.id.clone(), (selected.clone(), body.clone()));
+        let actual = Route {
+            pin: selected,
+            body,
+        }
+        .native(&documents, &defs.runtime.scope);
+        if let Some(expected) = expected {
+            assert_eq!(actual.unwrap().class, expected);
+        } else {
+            assert!(actual.is_err());
+        }
+    }
+    assert!(subject(Vec::new()).is_err());
+    assert!(
+        !fixture.root.join("wire.jsonl").exists(),
+        "definition validation cannot dispatch tools"
+    );
+}
