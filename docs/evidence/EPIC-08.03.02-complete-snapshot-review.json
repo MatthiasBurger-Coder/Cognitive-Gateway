@@ -1,0 +1,93 @@
+{
+  "schema_version": 1,
+  "issue": 405,
+  "parent": 274,
+  "epic": 271,
+  "status": "LOCAL_QUALIFIED",
+  "decision": "READY_FOR_REVIEW",
+  "evidence_level": "CONTRACT/COMPONENT: native CG06 data fixtures, no real provider/session consumer",
+  "candidate_base": "db7096dbf4f008d27ba9196abea607d677e60213",
+  "source_bindings": {
+    ".github/workflows/rust.yml": "7cf530c43c86b3102ac63f119c3fb08c6bf4e07df47d66ae4138c968a649a917",
+    "Cargo.lock": "eeb666f5718cc627e640d81d98a24d9bf909585a786869177063561a9cabbe33",
+    "crates/gateway-application/Cargo.toml": "9249de4a8c35e6d613d64b0d9015b0c9f7d1e023bddd23f6c2d0d21c83c63a4a",
+    "crates/gateway-application/src/sessions/mod.rs": "e91b40d401a538f818ceffb122707c537118632f44d0f5c725a67723328413e0",
+    "crates/gateway-application/src/sessions/scoped_snapshots/codec.rs": "b178e317bc96f58705fe4f075e25189694a3cc4d62882178baae1ad43eff7cd2",
+    "crates/gateway-application/src/sessions/scoped_snapshots/identity.rs": "7d41b4ed8732e87720df1cfea3c663bd986334e936517148c832c1fadddfd81f",
+    "crates/gateway-application/src/sessions/scoped_snapshots/mod.rs": "dbe5cf7aa775e674717bb4c395e26e3ddfde8fd761b865bc2bae62e4a99f9b53",
+    "crates/gateway-application/src/sessions/scoped_snapshots/types.rs": "e5867981fa58605d67c2adca2d65249dd0813d3a97f3d3a3160b357b6f95bf82",
+    "crates/gateway-application/src/sessions/scoped_snapshots/validation.rs": "538fb8561efd3764a9af665b9e73928b157a56ff745b8943ae873d59c7ad6c87",
+    "crates/gateway-application/tests/complete_scoped_snapshots.rs": "6917ff790fbd305e4add0baf03cd560a6763c2d5adf7a9cef8e324c98e3f3fd6",
+    "crates/gateway-application/tests/support/complete_scoped_snapshot_codec_cases.rs": "e5f6a669ded3d4444becb849d4fa0df7bbe966ec1598b200e928d87e34b2b356",
+    "crates/gateway-application/tests/support/complete_scoped_snapshot_fixture.rs": "394aa58349e90d87f16a2eaa4c0f7c2e6f599a5120afac49b86ac7bb06b50840",
+    "docs/complete-scoped-snapshots.md": "357a5dee6f40feaf822f3c30ffbf51eafc6dd91dbf2ad4fb5fad672008def753",
+    "scripts/check-complete-snapshot-coverage.py": "4b1b6f4a887feaa7f0291400c95dcff48cea3cc16706e2067997b9f69cd06fed",
+    "scripts/check-local-mcp-coverage.py": "b92deffac18408b80e13fe7e4c246a72f643f97caf358c319c3f7d6c5b61e0a0",
+    "scripts/qualify-complete-snapshots.sh": "f596f97503abfe3b6b795f3867a5d177ea49d5d6b21e311ffcf96c33814f2047",
+    "scripts/quality-gates.json": "c1a476b3706e13919361014292b4832394c09a8f25a8b75ad27e6f7ca93bd300"
+  },
+  "source_binding_count": 17,
+  "archive": "EPIC-08.03.02-complete-snapshot-validation.json.gz",
+  "archive_sha256": "d5fbf1376154a930f56b2f9fcc3045d6117aa7bc4559c087f38fe468df35d8c9",
+  "coverage_counts": [
+    "crates/gateway-application/src/sessions/scoped_snapshots/mod.rs: 52/53 lines (98.11%)",
+    "crates/gateway-application/src/sessions/scoped_snapshots/validation.rs: 409/427 lines (95.78%)",
+    "crates/gateway-application/src/sessions/scoped_snapshots/identity.rs: 104/105 lines (99.05%)",
+    "crates/gateway-application/src/sessions/scoped_snapshots/codec.rs: 523/538 lines (97.21%)"
+  ],
+  "declaration_only_file": "crates/gateway-application/src/sessions/scoped_snapshots/types.rs: no executable LLVM line entry, no invented coverage percentage",
+  "results": {
+    "native_contracts": 25,
+    "fresh_instrumented_contracts": 25,
+    "application_lib": 50,
+    "session_contracts": 10,
+    "session_runtime": 37,
+    "architecture_total": 83,
+    "architecture_skipped": 1,
+    "independent_contracts": 27,
+    "workspace_alltargets_clippy": "PASS -D warnings",
+    "format": "PASS",
+    "architecture_guard": "PASS",
+    "frozen_public_v2_schema_diff": "ZERO",
+    "normal_application_total": 122
+  },
+  "external_ci": "NOT_YET_RUN for this new issue branch; required separately before merge",
+  "parent_completion": "NOT_COMPLETE: actual MCP/PG complete Before consumer, model/action/consent, independent After and full #271/#272\u2013#279 gates remain required",
+  "reviews": {
+    "independent_production": "connector_gate_review SCOPED READY on all five production sources, including final source-kind/profile, bracket intervals and codec; authored tests are not claimed as independent test authorship",
+    "independent_automation_core": "connector_phase_resources independently reviewed Root automation/docs and Budget identity/validation, including bracket interval correction; own codec excluded from self-approval",
+    "requirement_boundary": "Root: all six #405 criteria locally verified at CONTRACT/COMPONENT level; no installed provider, PostgreSQL consumer, current authority, effect or goal-success claim"
+  },
+  "criteria": [
+    {
+      "id": "AC1",
+      "status": "VERIFIED_LOCAL",
+      "level": "CONTRACT/COMPONENT"
+    },
+    {
+      "id": "AC2",
+      "status": "VERIFIED_LOCAL",
+      "level": "CONTRACT/COMPONENT"
+    },
+    {
+      "id": "AC3",
+      "status": "VERIFIED_LOCAL",
+      "level": "CONTRACT/COMPONENT"
+    },
+    {
+      "id": "AC4",
+      "status": "VERIFIED_LOCAL",
+      "level": "CONTRACT/COMPONENT"
+    },
+    {
+      "id": "AC5",
+      "status": "VERIFIED_LOCAL",
+      "level": "CONTRACT/COMPONENT"
+    },
+    {
+      "id": "AC6",
+      "status": "VERIFIED_LOCAL",
+      "level": "CONTRACT/COMPONENT"
+    }
+  ]
+}
