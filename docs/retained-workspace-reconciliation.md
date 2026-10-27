@@ -21,3 +21,9 @@ the wider #271/#274/#277 model, effect, reconciliation and system criteria.
 
 After verified merges, the integration and delivery branch references can be
 removed without losing the preservation commit, since main retains its ancestry.
+
+The old credential-isolation branch was delivered by squash PR #368. Its original
+commit ancestry is also retained through a tree-preserving merge. The old
+sub-issue-skill branch (PR #370) is already an ancestor of the original integration
+snapshot. This allows removal of these stale branch references after their
+preservation reaches main, without dropping otherwise unreachable commits.

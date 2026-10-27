@@ -2517,5 +2517,19 @@
   "preservation_commit": "1b6c98902b5f0108b93c2ee30d07ecc5f8f7291b",
   "status": "ALL_INITIAL_FILES_PRESERVED_IN_GIT",
   "release_claim": false,
-  "policy": "Preserve the checkpoint as merged ancestry. Keep current main production tree; historical variants and unsupported prototypes do not replace newer qualified implementations. Broader #271/#274/#277 criteria remain open."
+  "policy": "Preserve the checkpoint as merged ancestry. Keep current main production tree; historical variants and unsupported prototypes do not replace newer qualified implementations. Broader #271/#274/#277 criteria remain open.",
+  "additional_preserved_ancestry": [
+    {
+      "branch": "issue-229-credential-isolation",
+      "commit": "808979a57162dd89363390c2da755139a366bf13",
+      "delivered_by_pr": 368,
+      "disposition": "squashed credential delivery; retain original ancestry without replacing current qualified tree"
+    },
+    {
+      "branch": "codex/github-sub-issues-skill",
+      "commit": "742c318b47b1e06ced615618fe7ac0c1d05f71ce",
+      "delivered_by_pr": 370,
+      "disposition": "already retained through original integration snapshot ancestry"
+    }
+  ]
 }
