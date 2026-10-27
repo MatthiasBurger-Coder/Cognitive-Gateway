@@ -181,3 +181,164 @@ fn native_world_definitions_bind_complete_universe_independent_of_goal_and_rejec
     }
     f.capture().unwrap();
 }
+
+#[test]
+fn native_atomic_association_seals_exact_world_request_raw_schema_and_response_identity() {
+    if std::env::var_os("CG_COGNITIVE_TEST_DATABASE").is_none() {
+        return;
+    }
+    use super::super::atomic_association::BoundAtomicRead;
+    use crate::mcp_client::{ProtocolInventory, ProtocolResult, mapping::DiscoveryMapper};
+    let fixture = Fixture::new();
+    let defs = fixture.capture().unwrap();
+    let tool: Value =
+        serde_json::from_slice(&std::fs::read(fixture.root.join("wire-tool.json")).unwrap())
+            .unwrap();
+    let wire = ProtocolInventory {
+        tools: vec![tool],
+        resources: vec![],
+        prompts: vec![],
+        templates: vec![],
+    };
+    let target = ConnectorTarget {
+        connector: defs.runtime.connector.clone(),
+        scope: defs.runtime.scope.clone(),
+    };
+    let mapper =
+        DiscoveryMapper::new(target.clone(), defs.manifest.clone(), defs.mapping.clone()).unwrap();
+    let inventory = mapper.snapshot(&wire).unwrap();
+    let world = defs.before.as_ref().unwrap();
+    let schema = mapper
+        .tool_schema(
+            &wire,
+            &world.read.capability,
+            &inventory.inventory().revision,
+        )
+        .unwrap();
+    let execution = NonEmptyText::new("atomic-test-execution").unwrap();
+    let admit = |d: &ReadonlyDefinitions,
+                 w: &AtomicBeforeDefinitions,
+                 s: &crate::mcp_client::mapping::MappedToolSchema| {
+        BoundAtomicRead::admit(d, w, &inventory, s, execution.clone())
+    };
+    let bound = admit(&defs, world, &schema).unwrap();
+    let request = ConnectorRequest {
+        target,
+        capability: world.read.capability.clone(),
+        class: ConnectorOperationClass::Read,
+        inventory_revision: inventory.inventory().revision.clone(),
+        arguments: world.read.arguments.clone(),
+        task: defs.task.data().id.clone(),
+        step: defs.native.step.clone(),
+        execution: execution.clone(),
+        correlation: NonEmptyText::new("atomic-association-test").unwrap(),
+    };
+    bound.validate(&request, None).unwrap();
+    for field in [
+        "target",
+        "revision",
+        "capability",
+        "arguments",
+        "task",
+        "step",
+        "execution",
+        "class",
+        "source",
+    ] {
+        let mut bad = request.clone();
+        match field {
+            "target" => bad.target.connector = NonEmptyText::new("foreign").unwrap(),
+            "revision" => bad.inventory_revision = context_content_digest(b"foreign"),
+            "capability" => bad.capability = CapabilityId::new("foreign").unwrap(),
+            "arguments" => bad.arguments.clear(),
+            "task" => bad.task = TaskId::new("foreign").unwrap(),
+            "step" => bad.step = PlanStepId::new("foreign").unwrap(),
+            "execution" => bad.execution = NonEmptyText::new("foreign").unwrap(),
+            "class" => bad.class = ConnectorOperationClass::Mutate,
+            _ => {}
+        }
+        assert_eq!(
+            bound.validate(&bad, (field == "source").then_some(&world.read.source)),
+            Err(SessionError::ScopeDenied),
+            "{field}"
+        );
+    }
+    let result = |value| ProtocolResult::Tool {
+        content: vec![],
+        structured: value,
+        is_error: false,
+    };
+    bound
+        .response(
+            &request,
+            &result(Some(
+                serde_json::json!({"object":"target-project","id":"project"}),
+            )),
+        )
+        .unwrap();
+    for value in [
+        None,
+        Some(serde_json::json!({"object":"foreign","id":"project"})),
+        Some(serde_json::json!({"object":"target-project","id":"foreign"})),
+        Some(serde_json::json!({"object":"target-project","id":3})),
+    ] {
+        let error = bound.response(&request, &result(value)).unwrap_err();
+        assert_eq!(error.code, ConnectorFailureCode::ScopeMismatch);
+        assert_eq!(error.effect, ConnectorEffect::NoMutation);
+    }
+    let mut bad = schema.clone();
+    bad.inventory_revision = context_content_digest(b"foreign");
+    assert!(admit(&defs, world, &bad).is_err());
+    for case in [
+        "missing-mapping",
+        "wrong-root",
+        "wrong-selector",
+        "empty-selector",
+        "selector-coordinate",
+        "response-alias",
+        "response-coordinate",
+        "argument-mismatch",
+        "missing-response",
+        "missing-normalized-field",
+    ] {
+        let mut d = fixture.capture().unwrap();
+        let mut w = d.before.take().unwrap();
+        match case {
+            "missing-mapping" => w.read.mapping_reference = "foreign".into(),
+            "wrong-root" => {
+                w.profile.anchor_route.object_reference = NonEmptyText::new("foreign").unwrap()
+            }
+            "wrong-selector" => w
+                .provider
+                .selector_arguments
+                .insert("query".into(), "foreign".into())
+                .map(|_| ())
+                .unwrap(),
+            "empty-selector" => w.provider.selector_arguments.clear(),
+            "selector-coordinate" => {
+                w.provider
+                    .selector_arguments
+                    .insert("foreign".into(), "id".into());
+            }
+            "response-alias" => w.provider.response.object_field = "id".into(),
+            "response-coordinate" => {
+                w.provider
+                    .response
+                    .identity_fields
+                    .insert("foreign".into(), "foreign".into());
+            }
+            "argument-mismatch" => w.read.arguments.clear(),
+            "missing-response" => w.provider.response.object_field = "foreign".into(),
+            "missing-normalized-field" => {
+                let subject = w.normalization.fields.values().next().unwrap().clone();
+                w.normalization.fields.insert("foreign".into(), subject);
+            }
+            _ => unreachable!(),
+        }
+        assert!(admit(&d, &w, &schema).is_err(), "{case}");
+    }
+    assert!(
+        !fixture.root.join("wire.jsonl").exists(),
+        "association checks cannot dispatch"
+    );
+}

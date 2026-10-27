@@ -27,3 +27,45 @@ fn run(case: &str) {
 fn installed_atomic_world_retains_three_same_source_objects_including_non_goal_data() {
     run("world");
 }
+
+#[test]
+fn installed_atomic_world_denies_partial_foreign_inconsistent_and_oversized_exports() {
+    for case in [
+        "membership",
+        "epoch",
+        "version",
+        "object",
+        "identity",
+        "missing",
+        "extra",
+        "type",
+        "oversized",
+    ] {
+        run(case);
+    }
+}
+#[test]
+fn installed_atomic_world_enforces_live_authority_budgets_claims_and_atomic_commit() {
+    for case in [
+        "budget",
+        "schema-drift",
+        "credential",
+        "commit-failure",
+        "revoke",
+        "cancel",
+        "config-drift",
+        "quote-drift",
+        "deadline",
+    ] {
+        run(case);
+    }
+}
+#[test]
+fn installed_already_satisfied_goal_preserves_goal_path_without_world_export() {
+    run("satisfied");
+}
+
+#[test]
+fn installed_before_remains_historical_after_freshness_expires_without_reacquisition() {
+    run("age");
+}

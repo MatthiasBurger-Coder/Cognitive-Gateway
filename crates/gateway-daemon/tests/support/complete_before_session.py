@@ -3,7 +3,7 @@
 This controlled provider qualifies one explicit AtomicCompleteExport profile.
 It is not evidence about any external production provider or installed client.
 """
-import copy, hashlib, json, os, subprocess, sys, tempfile, time
+import copy, hashlib, json, os, subprocess, sys, tempfile, time, threading, queue
 from pathlib import Path
 import observed_goal_session as legacy
 
@@ -34,6 +34,24 @@ for line in sys.stdin:
   # only selector=project implements the qualified complete-export operation.
   world=json.loads((root/'atomic-world.json').read_text())
   result=dict(world['fields']);result.update(object='target-project' if selector=='project' else 'object-'+selector,id=selector,revision=world['epoch'])
+  if selector=='project':
+   if (root/'pause-world').exists():
+    (root/'world-waiting').touch();until=time.monotonic()+20
+    while not (root/'release-world').exists():
+     assert time.monotonic()<until,'qualification world barrier timed out'
+     time.sleep(.01)
+   if (root/'response-fault').exists():
+    fault=(root/'response-fault').read_text()
+    if fault=='membership':result['membership']='0'*64
+    elif fault=='epoch':result['epoch']='foreign-epoch'
+    elif fault=='version':result['hidden_version']=''
+    elif fault=='object':result['object']='object-one'
+    elif fault=='identity':result['id']='foreign'
+    elif fault=='missing':del result['hidden_bytes']
+    elif fault=='extra':result['extra_member']=True
+    elif fault=='type':result['hidden_bytes']='wrong-type'
+    elif fault=='oversized':result['hidden_version']='x'*262145
+    else:raise AssertionError('unknown response fault')
   v={'content':[],'structuredContent':result,'isError':False}
  elif m=='ping':v={}
  else:raise AssertionError('unexpected method '+m)
@@ -76,6 +94,7 @@ def configure(root):
     for name,subjects in zip(objects[:2],subject_sets[:2]):docs[name]['body']['subjects']=subjects
     hidden=add('object-hidden','cg.connector-object',{'schema_version':'1.0','id':'object-hidden','revision':'1','scope':scope,'kind':'ARTIFACT','connector':'example.records','parent_target':target,'subjects':subject_sets[2],'coordinates':{'id':{'kind':'STRING','value':'hidden'}},'object_reference':'object-hidden'})
     docs['observed-read-task']['body']['inputs'].append({'role':'hidden','value':{'kind':'REFERENCE','value':hidden}})
+    docs['observed-read-task']['body']['inputs'].sort(key=lambda i:i['role'])
     domain=add('atomic-domain','cg.connector-atomic-version-domain',{'schema_version':'1.0','scope':scope,'scope_target':target,'version_contract':'NON_REUSED_ATOMIC_GLOBAL_EPOCH_V1'})
     def header(name,contract):return {'id':name,'scope':scope,'contract':contract,'contract_version':'1.0','revision':'1'}
     route_body={'definition':header('atomic-route','cg.scoped-snapshot-read-route'),'authority_domain':domain,'target':{'connector':'example.records','scope':scope},'capability':'architecture.dependency-analysis','class':'read','arguments':{'query':{'kind':'STRING','value':'project'}},'object_reference':'target-project','epoch_argument':None}
@@ -119,7 +138,9 @@ def mutate_case(root,case):
     admission_path=Path(launch[13]);admission=json.loads(admission_path.read_text());runtime=admission['mappings'][0]['sessions']['observed_goal_runtime']
     docs={d['pin']['id']:{'pin':d['pin'],'path':Path(d['path']),'body':json.loads(Path(d['path']).read_text())} for d in runtime['documents']}
     universe=docs['atomic-universe']['body'];profile=docs['atomic-profile']['body'];provider=docs['atomic-provider']['body'];normalization=docs['atomic-normalization']['body'];route=docs['atomic-route']['body']
-    if case=='missing-member':universe['objects'].pop()
+    if case=='age':
+        profile['max_age_seconds']=2;normalization['acquisition']['semantics']['max_age_seconds']=2
+    elif case=='missing-member':universe['objects'].pop()
     elif case=='duplicate-subject':universe['objects'][0]['subjects'].append(universe['objects'][0]['subjects'][0])
     elif case=='missing-version':universe['objects'][0]['version_subject']=['state','absent','version']
     elif case=='overlap-subject':universe['objects'][1]['subjects'].append(universe['objects'][0]['subjects'][0])
@@ -136,7 +157,7 @@ def mutate_case(root,case):
     elif case=='foreign-task':provider['task']=provider['scope_target']
     elif case=='foreign-target':provider['scope_target']=provider['objects'][0]
     elif case=='duplicate-member':provider['objects'].append(provider['objects'][0])
-    elif case=='unassociated-member':docs['observed-read-task']['body']['inputs'].pop()
+    elif case=='unassociated-member':docs['observed-read-task']['body']['inputs']=[i for i in docs['observed-read-task']['body']['inputs'] if i['role']!='hidden']
     elif case=='unknown-semantics':provider['semantics']='ATOMIC_TRUE'
     elif case=='missing-selector':provider['selector_arguments']={}
     elif case=='missing-identity':provider['response']['identity_fields']={}
@@ -161,12 +182,78 @@ def run(case):
         def request(op,inputs):return {'schema_version':'2.0','scope':base['scope'],'operation':'session.'+op,'correlation':{'request_id':'complete-before-qualification'},'execution':{'operating_mode':'DEVELOPMENT','execution_profile':'FULL_PATH'},'input':inputs}
         environment=dict(legacy.canonical.CHILD_ENV)
         if 'LLVM_PROFILE_FILE' in os.environ:environment['LLVM_PROFILE_FILE']=os.environ['LLVM_PROFILE_FILE']
+        if case=='age':mutate_case(root,'age')
+        negative=case in ('membership','epoch','version','object','identity','missing','extra','type','oversized','budget','commit-failure','revoke','cancel','config-drift','quote-drift','deadline','schema-drift','credential')
+        response_faults=('membership','epoch','version','object','identity','missing','extra','type','oversized')
+        if case in response_faults:(root/'response-fault').write_text(case)
+        if case=='credential':
+            credentials=json.loads((root/'credentials.json').read_text());credentials['profiles']['records.local']['environment']['CG_WORLD_AUTH']='incorrect'
+            (root/'credentials.json').write_bytes(encoded(credentials))
+        if case=='budget':
+            entry=admission['mappings'][0]['sessions'];entry['resource_limits']['amounts']['connector_calls']=3
+            Path(launch[13]).write_bytes(encoded(admission))
+        if case=='schema-drift':
+            tool=json.loads((root/'wire-tool.json').read_text());tool['outputSchema']['description']='unregistered schema revision';(root/'wire-tool.json').write_bytes(encoded(tool))
+        if case=='satisfied':
+            world=json.loads((root/'atomic-world.json').read_text());world['fields']['second']=True;write_world(root,world)
+        race=case in ('revoke','cancel','config-drift','quote-drift','deadline')
+        if race:(root/'pause-world').touch()
         client=legacy.Client(launch,environment=environment)
+        trigger=None
         try:
             assert 'result' in client.initialize()
             started=legacy.call(client,request('start',{'command_id':'world-start','intent':{'kind':'document','contract':'cg.intent','contract_version':'1.0','document':intent}}))
             initial=started['result']['session'];assert initial['state']=='runnable'
-            done=legacy.call(client,request('continue',{'session_id':initial['session'],'command_id':'world-capture','expected_revision':initial['revision']}))
+            continued=request('continue',{'session_id':initial['session'],'command_id':'world-capture','expected_revision':initial['revision']})
+            if case=='commit-failure':
+                trigger='q408_'+scope.replace('-','')
+                legacy.sql("CREATE FUNCTION "+trigger+"() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN IF NEW.scope='"+scope+"' AND NEW.kind='task-sessions-v2' AND EXISTS (SELECT FROM jsonb_array_elements(NEW.payload::jsonb->'records') r WHERE r->>'kind'='complete_before') THEN RAISE EXCEPTION 'qualification before append rejected'; END IF; RETURN NEW; END $$; CREATE TRIGGER "+trigger+" BEFORE UPDATE ON cg_cognitive_journals FOR EACH ROW EXECUTE FUNCTION "+trigger+"();")
+            if race:
+                responses=queue.Queue()
+                def continuing():
+                    try:responses.put(client.exchange('tools/call',{'name':'cg_session_continue_v2','arguments':continued}))
+                    except BaseException as error:responses.put(error)
+                worker=threading.Thread(target=continuing);worker.start();until=time.monotonic()+25
+                while not (root/'world-waiting').exists():
+                    assert time.monotonic()<until,'actual export barrier not reached'
+                    time.sleep(.01)
+                if case=='cancel':
+                    second=legacy.Client(launch,environment=environment)
+                    try:
+                        second.initialize();live=legacy.call(second,request('inspect',{'session_id':initial['session']}))['result']['session']
+                        cancelled=legacy.call(second,request('cancel',{'session_id':initial['session'],'command_id':'cancel-world','expected_revision':live['revision']}))
+                        assert cancelled['result']['session']['state']=='cancelled'
+                    finally:assert second.close()==0
+                elif case=='deadline':time.sleep(10.5)
+                else:
+                    changed=json.loads(Path(launch[13]).read_text())
+                    if case=='revoke':changed['mappings'][0]['sessions']['enabled']=False
+                    elif case=='config-drift':changed['mappings'][0]['sessions']['observed_goal_runtime']['revision']='changed'
+                    else:
+                        path=root/'quotes.json';doc=json.loads(path.read_text());doc['discovery']['connector_calls']+=1;path.write_bytes(encoded(doc))
+                    Path(launch[13]).write_bytes(encoded(changed))
+                (root/'release-world').touch();worker.join(timeout=45);assert not worker.is_alive()
+                reply=responses.get_nowait();assert isinstance(reply,dict),type(reply)
+                assert 'error' in reply or reply['result']['structuredContent']['status']=='error',reply
+                done=None
+            else:done=legacy.call(client,continued,'error' if negative else 'ok')
+            if negative:
+                stored=journal(scope)
+                assert not any(r['kind']=='complete_before' for r in stored['records']),stored
+                assert not stored['sessions'][0]['checkpoint'].get('prepared_before')
+                requests=[json.loads(l) for l in (root/'wire.jsonl').read_text().splitlines()] if (root/'wire.jsonl').exists() else []
+                calls=[r for r in requests if r['method']=='tools/call']
+                if case in ('budget','schema-drift','credential'):assert not calls,calls
+                assert len([r for r in calls if r['params']['arguments']['query']=='project'])<=1
+                assert not stored['grants']
+                print('INSTALLED_COMPLETE_BEFORE_QUALIFIED',case,flush=True)
+                return
+            if case=='satisfied':
+                assert done['result']['session']['state']=='completed',done
+                assert not any(r['kind']=='complete_before' for r in journal(scope)['records'])
+                assert all(json.loads(l).get('params',{}).get('arguments',{}).get('query')!='project' for l in (root/'wire.jsonl').read_text().splitlines())
+                print('INSTALLED_COMPLETE_BEFORE_QUALIFIED',case,flush=True)
+                return
             prepared=done['result']['session'];assert prepared['state']=='runnable' and prepared['dispatch_knowledge']=='prepared',done
             assert prepared.get('final_evidence') is None
             stored=journal(scope);cp=stored['sessions'][0]['checkpoint'];before=cp['prepared_before']
@@ -199,6 +286,7 @@ def run(case):
                     for item in value:no_model(item)
             no_model(cp['resource_ledger'])
             snapshot_before=copy.deepcopy(stored)
+            if case=='age':time.sleep(3)
             # The existing private operator discloses exactly saved DATA and
             # cannot issue authority, move revision or reacquire after restart.
             operator=root/'inspect-before.json';operator.write_bytes(encoded({'session_id':prepared['session'],'issuer':admission['mappings'][0]['principal'],'decision':'inspect-before'}))
@@ -207,7 +295,31 @@ def run(case):
             inspected=json.loads(inspection.stdout)['result'];assert inspected['historical'] is True
             assert inspected['before']==before and inspected['snapshot']==envelope['snapshot']
             assert journal(scope)==snapshot_before
-        finally:assert client.close()==0
+            # Replay of the exact capture command and unsupported marker Continue
+            # cannot reacquire or consume a second command/revision/reservation.
+            duplicate=legacy.call(client,continued);assert duplicate['result']['session']==prepared
+            rejected=legacy.call(client,request('continue',{'session_id':prepared['session'],'command_id':'marker-only','expected_revision':prepared['revision']}),'error')
+            assert rejected['diagnostics']==[{'code':'CG_UNSUPPORTED_CAPABILITY'}],rejected
+            assert journal(scope)==snapshot_before
+            wire_before=(root/'wire.jsonl').read_bytes()
+            assert client.close()==0
+            client=legacy.Client(launch,environment=environment);client.initialize()
+            reopened=legacy.call(client,request('inspect',{'session_id':prepared['session']}))['result']['session']
+            assert reopened==prepared
+            operator.write_bytes(encoded({'session_id':prepared['session'],'issuer':admission['mappings'][0]['principal'],'decision':'recover'}))
+            recovery=subprocess.run([str(BIN/'cg-local'),'--operation','session.authority','--request',str(operator),*launch],env=environment,capture_output=True,text=True,timeout=45)
+            assert recovery.returncode==0,(recovery.stdout,recovery.stderr)
+            assert journal(scope)==snapshot_before
+            assert (root/'wire.jsonl').read_bytes()==wire_before
+            operator.write_bytes(encoded({'session_id':prepared['session'],'issuer':'foreign-owner','decision':'inspect-before'}))
+            foreign=subprocess.run([str(BIN/'cg-local'),'--operation','session.authority','--request',str(operator),*launch],env=environment,capture_output=True,text=True,timeout=45)
+            assert foreign.returncode!=0 and 'snapshot' not in json.loads(foreign.stdout).get('result',{})
+            assert journal(scope)==snapshot_before
+        finally:
+            (root/'release-world').touch()
+            if trigger:legacy.sql('DROP TRIGGER IF EXISTS '+trigger+' ON cg_cognitive_journals; DROP FUNCTION IF EXISTS '+trigger+'();')
+            assert client.close()==0
+            if sys.exc_info()[0]:print(''.join(client.errors),file=sys.stderr)
         print('INSTALLED_COMPLETE_BEFORE_QUALIFIED',flush=True)
 
 if __name__=='__main__':run(sys.argv[1])

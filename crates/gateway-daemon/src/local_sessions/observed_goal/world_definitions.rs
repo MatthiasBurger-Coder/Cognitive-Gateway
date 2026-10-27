@@ -423,6 +423,7 @@ impl AtomicBeforeAdmission {
             || normalization.source != profile.anchor_source
             || normalization.acquisition.source_kind != SourceKind::Tool
             || normalization.acquisition.authenticated_profile != *access_profile
+            || normalization.revision_field.is_none()
             || normalization.schema_version != SchemaVersion::V1
             || normalization.object_field != provider.response.object_field
             || max_age_seconds != profile.max_age_seconds
@@ -430,6 +431,15 @@ impl AtomicBeforeAdmission {
             || self.read.arguments != profile.anchor_route.arguments
         {
             return Err(invalid());
+        }
+        if universe
+            .body_bytes()
+            .map_err(|_| invalid())?
+            .len()
+            .checked_add(profile.body_bytes().map_err(|_| invalid())?.len())
+            .is_none_or(|n| n >= gateway_application::sessions::MAX_BEFORE_RECORD_BYTES)
+        {
+            return Err(SessionError::LimitExceeded);
         }
         normalization.profile()?;
         Ok(AtomicBeforeDefinitions {

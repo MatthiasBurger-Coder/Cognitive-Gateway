@@ -1,4 +1,6 @@
 //! Native read-only connector observation for the existing session coordinator.
+mod atomic_association;
+mod atomic_capture;
 mod claim;
 pub(super) mod definitions;
 pub(super) mod read_association;
@@ -74,6 +76,37 @@ fn metadata(
 }
 
 impl ReadonlyGoalObservationRuntimePort for ObservedGoalRuntime {
+    fn prepare_readonly(
+        &self,
+        cp: &SessionCheckpoint,
+        resources: &mut SessionPhaseResources,
+    ) -> Result<Option<ReadonlyPreparation>, SessionError> {
+        target::prepare(Arc::clone(&self.access), cp, resources)
+    }
+    fn validate_before_basis(
+        &self,
+        cp: &SessionCheckpoint,
+        captured: &CapturedBefore,
+    ) -> Result<(), SessionError> {
+        let (host, defs) = metadata(&self.access, cp)?;
+        let world = defs
+            .before
+            .as_ref()
+            .ok_or(SessionError::UnsupportedCapability)?;
+        let consent = host
+            .sessions
+            .as_ref()
+            .ok_or(SessionError::UnsupportedCapability)?
+            .consent_required;
+        if defs.runtime.reference()? != captured.runtime
+            || world.universe.pin != captured.snapshot.universe().pin
+            || world.profile.pin != captured.snapshot.profile().pin
+            || context_digest(&defs, consent)? != captured.native_context_digest
+        {
+            return Err(SessionError::StaleRevision);
+        }
+        defs.validate_current_metadata(&self.access.current()?)
+    }
     fn resource_limits(
         &self,
         cp: &SessionCheckpoint,

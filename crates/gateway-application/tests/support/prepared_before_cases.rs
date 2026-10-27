@@ -134,6 +134,15 @@ fn amounts() -> SessionResourceAmounts {
     }
 }
 impl ReadonlyGoalObservationRuntimePort for Host<'_> {
+    fn validate_before_basis(
+        &self,
+        _: &SessionCheckpoint,
+        _: &CapturedBefore,
+    ) -> Result<(), SessionError> {
+        // Component fixture only; the installed runtime rechecks actual live definitions.
+        Ok(())
+    }
+
     fn resource_limits(
         &self,
         _: &SessionCheckpoint,
