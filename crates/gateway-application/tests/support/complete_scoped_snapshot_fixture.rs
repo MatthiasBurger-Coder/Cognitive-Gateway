@@ -24,8 +24,11 @@ pub fn string(value: &str) -> TypedValue {
     TypedValue::String(text(value))
 }
 pub fn pin(name: &str, contract: &str, body: &Value) -> Pin {
+    pin_in_scope(&scope(), name, contract, body)
+}
+fn pin_in_scope(scope: &ContextScopeId, name: &str, contract: &str, body: &Value) -> Pin {
     serde_json::from_value(json!({
-        "id":name,"scope":scope(),"contract":contract,"contract_version":"1.0",
+        "id":name,"scope":scope,"contract":contract,"contract_version":"1.0",
         "revision":"revision-1","digest":context_content_digest(&serde_json::to_vec(body).unwrap())
     }))
     .unwrap()
@@ -50,6 +53,25 @@ pub struct NativeRead {
 /// All fields originate in actual native records. Callers may later weaken or
 /// substitute fixture DATA to verify that the complete wrapper refuses it.
 pub fn native_read(
+    name: &str,
+    object: &str,
+    revision: &str,
+    acquired_seconds: i64,
+    arguments: BTreeMap<NonEmptyText, TypedValue>,
+    fields: Vec<(SubjectPath, TypedValue)>,
+) -> NativeRead {
+    native_read_in_scope(
+        scope(),
+        name,
+        object,
+        revision,
+        acquired_seconds,
+        arguments,
+        fields,
+    )
+}
+pub fn native_read_in_scope(
+    scope: ContextScopeId,
     name: &str,
     object: &str,
     revision: &str,
@@ -112,7 +134,7 @@ pub fn native_read(
     let request = ConnectorRequest {
         target: ConnectorTarget {
             connector: text("snapshot.provider"),
-            scope: scope(),
+            scope: scope.clone(),
         },
         capability: CapabilityId::new("snapshot.read").unwrap(),
         class: ConnectorOperationClass::Read,
@@ -151,7 +173,7 @@ pub fn native_read(
     };
     ConnectorResult::validate_for_request(&request, &observation).unwrap();
     let mut batch = ScopedObservationBatch::new(
-        scope(),
+        scope.clone(),
         SourceSnapshot::new(
             observation.source.clone(),
             observation.metadata.source_kind,
@@ -235,29 +257,40 @@ impl Fixture {
         }
         self.acquisitions[index] = value;
     }
+    pub fn in_scope(kind: SnapshotProfileKind, scope: ContextScopeId) -> Self {
+        Self::build_in_scope(kind, scope)
+    }
+    pub fn atomic_in_scope(scope: ContextScopeId) -> Self {
+        Self::build_in_scope(SnapshotProfileKind::AtomicCompleteExport, scope)
+    }
     fn build(kind: SnapshotProfileKind) -> Self {
+        Self::build_in_scope(kind, scope())
+    }
+    fn build_in_scope(kind: SnapshotProfileKind, scope: ContextScopeId) -> Self {
         let atomic = kind == SnapshotProfileKind::AtomicCompleteExport;
         let scoped = kind == SnapshotProfileKind::SnapshotScopedReads;
         let source = SourceId::new("shared-state-provider").unwrap();
-        let authority_domain = pin(
+        let authority_domain = pin_in_scope(
+            &scope,
             "global-epoch-authority",
             "cg.snapshot-global-authority",
-            &json!({"scope":scope(),"epoch_owner":"qualified-state-provider"}),
+            &json!({"scope":scope.clone(),"epoch_owner":"qualified-state-provider"}),
         );
         let mut export = SnapshotReadRoute {
-            pin: pin(
+            pin: pin_in_scope(
+                &scope,
                 "export-route",
                 "cg.scoped-snapshot-read-route",
                 &json!({"role":"export"}),
             ),
             target: ConnectorTarget {
                 connector: text("snapshot.provider"),
-                scope: scope(),
+                scope: scope.clone(),
             },
             authority_domain: authority_domain.clone(),
             capability: CapabilityId::new("snapshot.read").unwrap(),
             class: ConnectorOperationClass::Read,
-            arguments: BTreeMap::from([(text("scope"), string(scope().as_str()))]),
+            arguments: BTreeMap::from([(text("scope"), string(scope.clone().as_str()))]),
             object_reference: text("project-state-export"),
             epoch_argument: None,
         };
@@ -285,11 +318,12 @@ impl Fixture {
                 .map(|(s, _)| s.clone())
                 .collect::<BTreeSet<_>>();
             let object_reference = format!("object-{name}");
-            let object = pin(
+            let object = pin_in_scope(
+                &scope,
                 &object_reference,
                 "cg.connector-object",
                 &json!({
-                    "schema_version":"1.0","id":object_reference,"scope":scope(),"kind":"ENTITY",
+                    "schema_version":"1.0","id":object_reference,"scope":scope.clone(),"kind":"ENTITY",
                     "object_reference":object_reference,"observable_subjects":fields.iter().map(|(s,_)|
                         s.segments().iter().map(NonEmptyText::as_str).collect::<Vec<_>>()).collect::<Vec<_>>()
                 }),
@@ -298,7 +332,8 @@ impl Fixture {
                 export.clone()
             } else {
                 let mut route = SnapshotReadRoute {
-                    pin: pin(
+                    pin: pin_in_scope(
+                        &scope,
                         &format!("route-{name}"),
                         "cg.scoped-snapshot-read-route",
                         &json!({"object":name}),
@@ -326,19 +361,21 @@ impl Fixture {
             values.push(fields);
         }
         let mut universe = SnapshotUniverse {
-            pin: pin(
+            pin: pin_in_scope(
+                &scope,
                 "scope-universe",
                 "cg.scoped-snapshot-universe",
-                &json!({"scope":scope()}),
+                &json!({"scope":scope.clone()}),
             ),
             objects,
         };
         universe.pin.digest = context_content_digest(&universe.body_bytes().unwrap());
         let mut profile = SnapshotProfile {
-            pin: pin(
+            pin: pin_in_scope(
+                &scope,
                 "snapshot-profile",
                 "cg.scoped-snapshot-profile",
-                &json!({"scope":scope()}),
+                &json!({"scope":scope.clone()}),
             ),
             authority_domain,
             kind,
@@ -366,7 +403,8 @@ impl Fixture {
             if let Some(key) = &route.epoch_argument {
                 arguments.insert(key.clone(), string("epoch-42"));
             }
-            let native = native_read(
+            let native = native_read_in_scope(
+                scope.clone(),
                 name,
                 route.object_reference.as_str(),
                 version,
@@ -479,7 +517,7 @@ impl Fixture {
                         binding: BindingId::new("binding").unwrap(),
                         client_owner: ClientOwnerId::new("client").unwrap(),
                     },
-                    scope: scope(),
+                    scope: scope.clone(),
                     session: SessionId::new("snapshot-session").unwrap(),
                     run: RunId::new("snapshot-run").unwrap(),
                     revision: Revision::new(7).unwrap(),

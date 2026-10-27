@@ -1,5 +1,8 @@
 //! Launcher-owned current admission and v2 mapping. All lifecycle lives in application.
 #[cfg(test)]
+#[path = "local_sessions/before_inspection_tests.rs"]
+mod before_inspection_tests;
+#[cfg(test)]
 #[path = "local_sessions/boundary_tests.rs"]
 mod boundary_tests;
 mod definition_json;
@@ -232,6 +235,39 @@ impl LocalApplication {
         let owner = host.owner()?;
         host.issuer(&owner, issuer)?;
         let repository = host.access.selected_repository(&admitted)?;
+        if decision == "inspect-before" {
+            let current = repository.load(&owner, session)?;
+            let reference = current
+                .checkpoint
+                .prepared_before
+                .as_ref()
+                .ok_or(SessionError::Unavailable)?;
+            let historical = load_prepared_before_historical(&repository, &current.checkpoint)?;
+            let snapshot: Value = serde_json::from_slice(
+                &historical
+                    .encode()
+                    .map_err(|_| SessionError::InvalidInput)?,
+            )
+            .map_err(|_| SessionError::InvalidInput)?;
+            // Original capture DATA remains readable after freshness expiry.
+            // This query neither issues consent nor establishes current usage.
+            let result = json!({"contract":"cg.complete-before-inspection","contract_version":"1.0",
+                "historical":true,"before":reference,"snapshot":snapshot});
+            let frame = json!({"schema_version":"2.0","status":"ok","result":&result});
+            if !security::credential_free(&frame) {
+                return Err(SessionError::AuthorityDenied);
+            }
+            if serde_json::to_vec(&frame)
+                .map_err(|_| SessionError::InvalidInput)?
+                .len()
+                >= crate::local_mcp::MAX_FRAME_BYTES
+            {
+                return Err(SessionError::LimitExceeded);
+            }
+            host.issuer(&owner, issuer)?;
+            host.access.selected_repository(&host.current()?)?;
+            return Ok(result);
+        }
         if decision == "recover" {
             let c = SessionCoordinator::new(repository, host);
             return Ok(json!({"session":c.recover(&owner,session)?}));

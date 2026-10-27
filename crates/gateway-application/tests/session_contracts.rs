@@ -722,6 +722,7 @@ fn checkpoint() -> SessionCheckpoint {
         initial_assessment: None,
         resource_ledger: None,
         pre_execution_goal: None,
+        prepared_before: None,
     }
 }
 

@@ -215,6 +215,7 @@ struct Host {
     grant: Mutex<Option<VerifiedConsent>>,
     revoked: AtomicUsize,
     consent: AtomicUsize,
+    connector: Option<ConnectorRegistration>,
 }
 impl Host {
     fn new(sources: bool) -> Self {
@@ -227,6 +228,7 @@ impl Host {
             grant: Mutex::new(None),
             revoked: AtomicUsize::new(0),
             consent: AtomicUsize::new(0),
+            connector: None,
         }
     }
 }
@@ -287,6 +289,37 @@ impl StructuredSessionHost for Host {
                 deadline_ms: 1_000_000,
             },
         ))
+    }
+    fn register_goal(
+        &self,
+        authenticated: &OwnerBinding,
+        intent: Intent,
+        execution: RequestedExecution,
+    ) -> Result<(SupportedSessionGoal, SessionBudget), SessionError> {
+        let Some(connector) = &self.connector else {
+            return self
+                .register(authenticated, intent, execution)
+                .map(|(goal, budget)| (goal.into(), budget));
+        };
+        self.disclose(authenticated, &SessionId::new("connector-registration")?)?;
+        if &intent != connector.goal.intent() || execution != selection() {
+            return Err(SessionError::UnsupportedCapability);
+        }
+        Ok((
+            SupportedSessionGoal::Connector(connector.goal.clone()),
+            SessionBudget {
+                actions: 0,
+                retries: 0,
+                max_actions: 2,
+                max_retries: 1,
+                deadline_ms: self.now.load(Ordering::SeqCst) + 120_000,
+            },
+        ))
+    }
+    fn goal_observation_runtime(&self) -> Option<&dyn ReadonlyGoalObservationRuntimePort> {
+        self.connector
+            .as_ref()
+            .map(|_| self as &dyn ReadonlyGoalObservationRuntimePort)
     }
     fn prepare(&self, _: &SessionCheckpoint) -> Result<PreparedTask, SessionError> {
         let n = self.prepares.fetch_add(1, Ordering::SeqCst) + 1;
@@ -360,7 +393,10 @@ fn start(c: &SessionCoordinator<Repository, Host>) -> SessionSnapshot {
         &owner(),
         SessionCommand::Start {
             command: CommandId::new("start").unwrap(),
-            intent: goal(c.host.sources).intent().clone(),
+            intent: match &c.host.connector {
+                Some(connector) => connector.goal.intent().clone(),
+                None => goal(c.host.sources).intent().clone(),
+            },
             execution: selection(),
         },
     )
@@ -770,3 +806,14 @@ fn an_additional_current_action_denial_cannot_be_converted_into_a_consent_questi
     assert!(before.artifact.is_none());
     assert!(c.repository.rows.lock().unwrap().records.is_empty());
 }
+
+#[path = "support/complete_scoped_snapshot_fixture.rs"]
+pub mod complete_snapshot_fixture;
+#[path = "support/mixed_goal_recovery_cases.rs"]
+mod mixed_goal_recovery_cases;
+#[path = "support/prepared_before_fixture.rs"]
+mod prepared_before_fixture;
+use mixed_goal_recovery_cases::ConnectorRegistration;
+
+#[path = "support/legacy_default_host_cases.rs"]
+mod legacy_default_host_cases;

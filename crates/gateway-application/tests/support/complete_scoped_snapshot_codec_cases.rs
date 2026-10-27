@@ -324,3 +324,159 @@ fn encoded_effect_classes_acknowledgements_and_post_effect_claims_are_not_direct
         Err(SnapshotError::InvalidEvidence)
     );
 }
+
+#[test]
+fn pin_bound_reload_checks_full_immutable_definitions_without_current_runtime_loading() {
+    for f in [
+        Fixture::atomic(),
+        Fixture::versioned(),
+        Fixture::bracketed(),
+    ] {
+        let complete = f.validate().unwrap();
+        let encoded = complete.encode().unwrap();
+        assert_eq!(
+            CompleteScopedSnapshot::decode_bound(
+                &encoded,
+                &f.binding,
+                &f.universe.pin,
+                &f.profile.pin,
+                f.now_ms
+            )
+            .unwrap(),
+            complete
+        );
+        for field in [
+            "id",
+            "scope",
+            "contract",
+            "contract_version",
+            "revision",
+            "digest",
+        ] {
+            let mut pin = serde_json::to_value(&f.universe.pin).unwrap();
+            pin[field] = match field {
+                "contract_version" => json!("2.0"),
+                "digest" => {
+                    serde_json::to_value(context_content_digest(b"foreign definition")).unwrap()
+                }
+                _ => json!("foreign-definition"),
+            };
+            let foreign = serde_json::from_value::<SnapshotPin>(pin).unwrap();
+            assert_eq!(
+                CompleteScopedSnapshot::decode_bound(
+                    &encoded,
+                    &f.binding,
+                    &foreign,
+                    &f.profile.pin,
+                    f.now_ms
+                ),
+                Err(SnapshotError::UniverseMismatch)
+            );
+            assert_eq!(
+                CompleteScopedSnapshot::decode_bound(
+                    &encoded,
+                    &f.binding,
+                    &f.universe.pin,
+                    &foreign,
+                    f.now_ms
+                ),
+                Err(SnapshotError::ProfileMismatch)
+            );
+        }
+        let mut altered = document(&f);
+        altered["data"]["universe"]["objects"][0]["object_reference"] = json!("foreign leaf");
+        assert_eq!(
+            CompleteScopedSnapshot::decode_bound(
+                &bytes(&altered),
+                &f.binding,
+                &f.universe.pin,
+                &f.profile.pin,
+                f.now_ms
+            ),
+            Err(SnapshotError::UniverseMismatch)
+        );
+        let mut altered = document(&f);
+        altered["data"]["profile"]["max_age_seconds"] = json!(f.profile.max_age_seconds + 1);
+        assert_eq!(
+            CompleteScopedSnapshot::decode_bound(
+                &bytes(&altered),
+                &f.binding,
+                &f.universe.pin,
+                &f.profile.pin,
+                f.now_ms
+            ),
+            Err(SnapshotError::ProfileMismatch)
+        );
+    }
+}
+
+#[test]
+fn snapshot_binding_data_serde_reuses_exact_closed_fence_and_step_wire_contract() {
+    let mut f = Fixture::atomic();
+    f.binding.reservation = Some(SnapshotReservation {
+        reservation: context_content_digest(b"binding data only"),
+        fence: gateway_application::sessions::FenceToken::new(2).unwrap(),
+    });
+    let value = serde_json::to_value(&f.binding).unwrap();
+    assert_eq!(
+        serde_json::from_value::<SnapshotBinding>(value.clone()).unwrap(),
+        f.binding
+    );
+    assert_eq!(value["reservation"]["fence"], json!(2));
+    for (path, invalid) in [
+        ("/reservation/fence", json!(0)),
+        ("/capture/step", json!("")),
+    ] {
+        let mut altered = value.clone();
+        *altered.pointer_mut(path).unwrap() = invalid;
+        assert!(serde_json::from_value::<SnapshotBinding>(altered).is_err());
+    }
+    let mut unknown = value;
+    unknown["live_authority"] = json!(true);
+    assert!(serde_json::from_value::<SnapshotBinding>(unknown).is_err());
+}
+
+#[test]
+fn native_atomic_fixture_keeps_all_full_pin_and_evidence_bindings_in_actual_selected_scope() {
+    let original = Fixture::atomic();
+    let f = Fixture::atomic_in_scope(ContextScopeId::new("independent-snapshot-scope").unwrap());
+    let complete = f.validate().unwrap();
+    let encoded = complete.encode().unwrap();
+    assert_eq!(reload(&f, &encoded).unwrap(), complete);
+    assert_ne!(
+        complete.universe().membership_digest().unwrap(),
+        original.universe.membership_digest().unwrap()
+    );
+    assert!(
+        complete
+            .acquisitions()
+            .iter()
+            .all(|a| a.request.target.scope == f.binding.capture.scope
+                && a.batch.scope() == &f.binding.capture.scope)
+    );
+    assert_eq!(
+        reload(&original, &encoded),
+        Err(SnapshotError::BindingMismatch)
+    );
+}
+
+#[test]
+fn all_profile_fixture_definitions_preserve_actual_selected_scope_before_codec_admission() {
+    for kind in [
+        SnapshotProfileKind::AtomicCompleteExport,
+        SnapshotProfileKind::SnapshotScopedReads,
+        SnapshotProfileKind::BracketedNonReusedAnchor,
+    ] {
+        let f = Fixture::in_scope(kind, ContextScopeId::new("profile-selected-scope").unwrap());
+        let complete = f.validate().unwrap();
+        assert_eq!(reload(&f, &complete.encode().unwrap()).unwrap(), complete);
+        assert!(
+            complete
+                .universe()
+                .objects
+                .iter()
+                .all(|o| o.object.scope == f.binding.capture.scope
+                    && o.route.authority_domain.scope == f.binding.capture.scope)
+        );
+    }
+}

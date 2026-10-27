@@ -27,3 +27,6 @@ pub use goal_observation::*;
 pub use pre_execution_goal::*;
 pub use pre_execution_source::{ConnectorRequestIdentity, connector_request_digest};
 pub use resources::*;
+
+mod before_snapshot;
+pub use before_snapshot::*;

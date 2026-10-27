@@ -9,13 +9,13 @@ use std::{
     time::{SystemTime, UNIX_EPOCH},
 };
 #[derive(Default)]
-struct Rows {
+pub struct Rows {
     current: Option<FencedSession>,
     commands: BTreeMap<CommandKey, CommandOutcome>,
-    records: Vec<(OwnerBinding, RecordWrite)>,
+    pub records: Vec<(OwnerBinding, RecordWrite)>,
 }
 #[derive(Default)]
-struct MemoryJournal(Mutex<Rows>);
+pub struct MemoryJournal(pub Mutex<Rows>);
 impl SessionJournalPort for MemoryJournal {
     fn load(
         &self,
