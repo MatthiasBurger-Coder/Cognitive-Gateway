@@ -30,7 +30,7 @@ for line in sys.stdin:
    while not (root/'release-discovery').exists():
     assert time.monotonic()<until,'qualification barrier timed out'
     time.sleep(.01)
-  v={'tools':[tool]}
+  v={'tools':[json.loads((root/'wire-tool.json').read_text())]}
  elif m=='tools/call':
   assert r['params']['name']=='records.read'
   ident=r['params']['arguments']['query']; assert ident in ('one','two')
@@ -54,7 +54,7 @@ class Client(existing.Client):
         assert reply.get('id')==frame['id'],reply
         return reply
 
-def configure(root, multiple):
+def configure(root, multiple, policy_case=None):
     repository=root/'project';repository.mkdir()
     setup=root/'setup'
     subprocess.run(['python3',str(ROOT/'scripts/bootstrap-codex-local.py'),'--repository',str(repository),'--output',str(setup),'--bin-dir',str(BIN),'--client-name','codex','--client-version','1.0'],check=True,capture_output=True,timeout=20)
@@ -84,6 +84,9 @@ def configure(root, multiple):
     projection=json.loads((FIXTURE/'projection.json').read_text());projection.update(basis=basis,step=steps[0],id='observed-read-context');projection['task']['id']='observed-read-task'
     compiled=native('compile',plan=plan,catalog=catalog,rules=rules,process=process,policy=policy,projection=projection)
     assert compiled['execution_context']['id']=='observed-read-context',compiled
+    if policy_case=='policy-denied':policy['steps'][steps[0]]['authorizations']['architecture.dependency-analysis']='DENIED'
+    if policy_case=='missing-evidence':policy['steps'][steps[0]]['evidence']=[]
+    if policy_case=='forged-consent':policy['steps'][steps[0]]['consents']={'architecture.dependency-analysis':'GRANTED'}
     # The canonical inbound resources retain the existing frozen v1 contracts.
     references={}
     for name,contract,document in [('plan','cg.plan',plan),('rules','cg.composition-rules',rules),('process','cg.process-snapshot',process),('projection','cg.context-projection',projection)]:
@@ -115,6 +118,9 @@ def configure(root, multiple):
     manifest['inventory']=[{'kind':'tool','name':'records.read','capability_mapping_ref':'mapping.read','source_mapping_ref':'mapping.read','schema_digest':digest({'discovery_schema_version':'1.0','kind':'tool','entry':wire_tool})}]
     manifest_pin=doc('manifest','cg.connector-manifest',manifest)
     mapping={'mapping_version':'1.0','records':[{'capability':'architecture.dependency-analysis','class':'READ','consent':'policy','idempotency':'idempotent','idempotency_key':None,'kind':'tool','name':'records.read','reference':'mapping.read','result_schema':result_schema,'retry_safety':'read_only','side_effects':'none','source':'observed.state'}]}
+    if policy_case in ('mapping-consent','forged-consent'):mapping['records'][0]['consent']='required'
+    if policy_case in ('mutate-as-read','admin-as-read'):
+        mapping['records'][0].update({'class':'MUTATE' if policy_case=='mutate-as-read' else 'ADMIN','side_effects':'mutation' if policy_case=='mutate-as-read' else 'administrative','retry_safety':'never'})
     mapping_pin=doc('mapping','cg.connector-mapping',mapping)
     reads=[];operations=[]
     for i,obj in enumerate(objects):
@@ -135,6 +141,7 @@ def configure(root, multiple):
     for _ in objects:total=sum_amounts(total,amount())
     store=root/'store';store.write_text(os.environ['CG_COGNITIVE_TEST_DATABASE']);store.chmod(0o600)
     entry['sessions']={'store_file':str(store),'intent':intent,'connector_goal':{'plan':runtime['plan'],'steps':[steps[0]],'observations':[{'condition':c['id'],'source':'observed.state','capability':'architecture.dependency-analysis','operation_class':'read'} for c in conditions]},'resource_limits':{'cost_unit':'credits','amounts':total},'observed_goal_runtime':runtime,'execution':runtime['execution'],'max_actions':2,'max_retries':0,'ttl_ms':300000,'consent_required':False,'enabled':True,'issuers':[entry['principal']]}
+    if policy_case=='global-consent':entry['sessions']['consent_required']=True
     admission_path.write_text(json.dumps(admission))
     print('NATIVE_PLAN_POLICY_CONTEXT_COMPILED',flush=True)
     return launch,request,intent,root

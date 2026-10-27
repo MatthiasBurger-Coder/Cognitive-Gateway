@@ -129,7 +129,7 @@
   },
   {
     "name": "EPIC-07.13 trusted connector admission coverage",
-    "command": "cargo llvm-cov -p gateway-application -p gateway-daemon -p gateway-policy --lib --test connectors --test connector_policy --test mcp_client --test connector_proposals --test output_verification --test prompt_ir --test prompt_rendering --test policy_application --test policy_engine --locked --json --output-path \"$EVIDENCE_DIR/connector-policy-coverage.json\"\npython3 scripts/check-connector-policy-coverage.py --self-test\npython3 scripts/check-connector-policy-coverage.py \"$EVIDENCE_DIR/connector-policy-coverage.json\""
+    "command": "cargo llvm-cov -p gateway-application -p gateway-daemon -p gateway-policy --lib --test connectors --test connector_policy --test connector_policy_sessions --test observed_goal_sessions --test mcp_client --test connector_proposals --test output_verification --test prompt_ir --test prompt_rendering --test policy_application --test policy_engine --locked --json --output-path \"$EVIDENCE_DIR/connector-policy-coverage.json\"\npython3 scripts/check-connector-policy-coverage.py --self-test\npython3 scripts/check-connector-policy-coverage.py \"$EVIDENCE_DIR/connector-policy-coverage.json\""
   },
   {
     "name": "CG-10 context coverage gate",
