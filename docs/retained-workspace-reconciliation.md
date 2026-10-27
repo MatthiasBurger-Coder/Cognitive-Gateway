@@ -27,3 +27,10 @@ commit ancestry is also retained through a tree-preserving merge. The old
 sub-issue-skill branch (PR #370) is already an ancestor of the original integration
 snapshot. This allows removal of these stale branch references after their
 preservation reaches main, without dropping otherwise unreachable commits.
+
+The final production-tree basis is `a81ca8c` (merged #408 / PR #413), following
+#407 / PR #409 and #231 / PR #411. Relative to that qualified main tree, this
+reconciliation changes only this documentation, its hash manifest and the root
+profile ignore rule. The original seven-file #408 draft is also retained in
+commit `5edad65805fe037afe13a7b019f8165f1b37fadb`, now an ancestor of main.
+All 193 original byte hashes were reconstructed again before final delivery.

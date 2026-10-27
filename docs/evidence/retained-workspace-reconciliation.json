@@ -2531,5 +2531,26 @@
       "delivered_by_pr": 370,
       "disposition": "already retained through original integration snapshot ancestry"
     }
-  ]
+  ],
+  "qualified_delivery": {
+    "231": {
+      "pr": 411,
+      "merge": "16dd86f3b8d0a254bb7bc0ebaf85143bf9c519c7"
+    },
+    "407": {
+      "pr": 409,
+      "merge": "e917b9d84b447701429e548553ee3b3d38a86e10"
+    },
+    "408": {
+      "pr": 413,
+      "merge": "a81ca8cadc78d10d054b79c8dac5a4c91c03157a"
+    }
+  },
+  "additional_worktree_preservation": {
+    "issue": 408,
+    "draft_commit": "5edad65805fe037afe13a7b019f8165f1b37fadb",
+    "delivery_pr": 413,
+    "disposition": "original seven-file draft and subsequent implementation retained as ancestors of merged qualified delivery"
+  },
+  "production_tree_basis": "a81ca8cadc78d10d054b79c8dac5a4c91c03157a"
 }
