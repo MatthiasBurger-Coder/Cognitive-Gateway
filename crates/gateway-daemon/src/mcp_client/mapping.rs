@@ -493,6 +493,43 @@ impl DiscoveryMapper {
             result_schema,
         })
     }
+    /// Recovery metadata is derived from the same strict operator mapping and
+    /// exact current inventory identity as the executable operation.
+    pub fn recovery_support(
+        &self,
+        request: &ConnectorRequest,
+        source: Option<&SourceId>,
+        wire: &ProtocolInventory,
+    ) -> Result<gateway_application::connector_resilience::RecoverySupport, MappingError> {
+        use gateway_application::connector_resilience as recovery;
+        let snapshot = self.snapshot(wire)?;
+        if snapshot.inventory.revision != request.inventory_revision {
+            return Err(MappingError::StaleInventory);
+        }
+        let record = self.record_request(request, source)?;
+        Ok(recovery::RecoverySupport {
+            retry: match record.retry_safety {
+                RetrySafety::Never => recovery::RetrySafety::Never,
+                RetrySafety::ReadOnly => recovery::RetrySafety::ReadOnly,
+                RetrySafety::Idempotent => recovery::RetrySafety::Idempotent,
+            },
+            idempotency: match record.idempotency {
+                Idempotency::NonIdempotent => recovery::ProviderIdempotency::Unsupported,
+                Idempotency::Idempotent => recovery::ProviderIdempotency::Idempotent,
+                Idempotency::ProviderKey => recovery::ProviderIdempotency::Keyed {
+                    argument: NonEmptyText::new(
+                        record
+                            .idempotency_key
+                            .as_ref()
+                            .ok_or(MappingError::Metadata)?,
+                    )
+                    .map_err(|_| MappingError::Metadata)?,
+                },
+            },
+            // No provider read-back contract has been qualified by this mapper.
+            read_back: recovery::ReadBackSupport::Unsupported,
+        })
+    }
     pub fn resolve(
         &self,
         dispatch: &ConnectorDispatch,
@@ -548,14 +585,21 @@ impl DiscoveryMapper {
         dispatch: &ConnectorDispatch,
         source: Option<&SourceId>,
     ) -> Result<&MappingRecord, MappingError> {
+        self.record_request(&dispatch.request, source)
+    }
+    fn record_request(
+        &self,
+        request: &ConnectorRequest,
+        source: Option<&SourceId>,
+    ) -> Result<&MappingRecord, MappingError> {
         let r = self
             .document
             .records()
             .iter()
-            .find(|r| r.capability == dispatch.request.capability)
+            .find(|r| r.capability == request.capability)
             .ok_or(MappingError::Request)?;
-        if dispatch.request.target != self.target
-            || r.class.operation_class() != dispatch.request.class
+        if request.target != self.target
+            || r.class.operation_class() != request.class
             || (r.kind == InventoryKind::Resource && source != r.source.as_ref())
             || (r.kind == InventoryKind::Tool && source.is_some())
         {
@@ -622,6 +666,20 @@ impl CanonicalConnectorMapping {
     }
 }
 impl ConnectorMapping for CanonicalConnectorMapping {
+    fn recovery_support(
+        &self,
+        request: &ConnectorRequest,
+        source: Option<&SourceId>,
+        wire: &ProtocolInventory,
+    ) -> Result<gateway_application::connector_resilience::RecoverySupport, Error> {
+        self.mapper
+            .recovery_support(request, source, wire)
+            .map_err(|error| match error {
+                MappingError::StaleInventory => Error::InventoryChanged,
+                _ => Error::Schema,
+            })
+    }
+
     fn inventory(
         &self,
         target: &ConnectorTarget,
@@ -715,3 +773,7 @@ impl ConnectorMapping for CanonicalConnectorMapping {
 #[cfg(test)]
 #[path = "mapping_tests.rs"]
 mod tests;
+
+#[cfg(test)]
+#[path = "recovery_mapping_tests.rs"]
+mod recovery_tests;

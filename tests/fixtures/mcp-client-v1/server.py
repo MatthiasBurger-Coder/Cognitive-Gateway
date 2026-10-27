@@ -7,6 +7,7 @@ import time
 
 mode = sys.argv[1]
 initialized = False
+call_count = 0
 
 def emit(value):
     print(json.dumps(value, separators=(",", ":")), flush=True)
@@ -27,6 +28,9 @@ for line in sys.stdin:
     if "id" not in request:
         continue
     ident = request["id"]
+    if (mode, method) in (("rate-init", "initialize"), ("rate-discovery", "tools/list"), ("rate-health", "ping")):
+        emit({"jsonrpc": "2.0", "id": ident, "error": {"code": -32029, "message": "SECRET", "data": {"retryAfterMs": 1000}}})
+        continue
     if method == "initialize":
         if mode == "slow-init":
             time.sleep(2)
@@ -53,6 +57,13 @@ for line in sys.stdin:
         elif method == "prompts/list":
             result = {"prompts": [{"name": "summary"}]}
         elif method == "tools/call":
+            call_count += 1
+            if mode in ("rate-limit", "rate-once", "rate-long", "rate-invalid", "rate-default", "rate-policy-short") and (mode != "rate-once" or call_count == 1):
+                error = {"code": -32029, "message": "SECRET_PROVIDER_MESSAGE"}
+                if mode != "rate-default":
+                    error["data"] = {"retryAfterMs": "bad" if mode == "rate-invalid" else (4000 if mode == "rate-policy-short" else (1000 if mode == "rate-long" else 5))}
+                emit({"jsonrpc": "2.0", "id": ident, "error": error})
+                continue
             if mode in ("slow", "cancel", "uncertain"):
                 time.sleep(0.4)
             if mode == "eof":

@@ -13,7 +13,7 @@ fn target() -> ConnectorTarget {
         scope: ContextScopeId::new("scope-one").unwrap(),
     }
 }
-fn wire() -> ProtocolInventory {
+pub(super) fn wire() -> ProtocolInventory {
     let v: Value = serde_json::from_slice(DISCOVERY).unwrap();
     ProtocolInventory {
         tools: v["tools"].as_array().unwrap().clone(),
@@ -28,7 +28,7 @@ fn doc(v: &Value) -> Result<MappingDocument, MappingError> {
 fn document() -> Value {
     serde_json::from_slice(DOC).unwrap()
 }
-fn mapper() -> DiscoveryMapper {
+pub(super) fn mapper() -> DiscoveryMapper {
     DiscoveryMapper::new(
         target(),
         ConnectorManifest::from_json(MANIFEST).unwrap(),
@@ -52,7 +52,11 @@ fn rebind(mapper: &mut DiscoveryMapper, wire: &ProtocolInventory) {
     mapper.manifest =
         ConnectorManifest::from_definition_json(&serde_json::to_vec(&v).unwrap()).unwrap();
 }
-fn dispatch(m: &DiscoveryMapper, wire: &ProtocolInventory, resource: bool) -> ConnectorDispatch {
+pub(super) fn dispatch(
+    m: &DiscoveryMapper,
+    wire: &ProtocolInventory,
+    resource: bool,
+) -> ConnectorDispatch {
     ConnectorDispatch {
         request: ConnectorRequest {
             target: target(),

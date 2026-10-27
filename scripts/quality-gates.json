@@ -133,7 +133,7 @@
   },
   {
     "name": "EPIC-07.13 trusted connector admission coverage",
-    "command": "cargo llvm-cov -p gateway-application -p gateway-daemon -p gateway-policy --lib --test connectors --test connector_policy --test mcp_client --test connector_proposals --test output_verification --test prompt_ir --test prompt_rendering --test policy_application --test policy_engine --locked --json --output-path \"$EVIDENCE_DIR/connector-policy-coverage.json\"\npython3 scripts/check-connector-policy-coverage.py --self-test\npython3 scripts/check-connector-policy-coverage.py \"$EVIDENCE_DIR/connector-policy-coverage.json\""
+    "command": "cargo llvm-cov -p gateway-application -p gateway-daemon -p gateway-policy --lib --test connectors --test connector_policy --test connector_policy_sessions --test observed_goal_sessions --test mcp_client --test connector_proposals --test output_verification --test prompt_ir --test prompt_rendering --test policy_application --test policy_engine --locked --json --output-path \"$EVIDENCE_DIR/connector-policy-coverage.json\"\npython3 scripts/check-connector-policy-coverage.py --self-test\npython3 scripts/check-connector-policy-coverage.py \"$EVIDENCE_DIR/connector-policy-coverage.json\""
   },
   {
     "name": "CG-10 context coverage gate",
@@ -266,5 +266,13 @@
   {
     "name": "EPIC-07.06 credential isolation and secret disclosure regression",
     "command": "CARGO_BUILD_JOBS=1 CARGO_LLVM_COV_TARGET_DIR=target/mcp-client-coverage cargo llvm-cov -p gateway-daemon --lib --test mcp_client --test observed_goal_sessions --locked --json --output-path \"$EVIDENCE_DIR/epic-07-06-coverage.json\"\npython3 scripts/check-mcp-client-coverage.py --self-test\npython3 scripts/check-mcp-client-coverage.py \"$EVIDENCE_DIR/epic-07-06-coverage.json\""
+  },
+  {
+    "name": "EPIC-07.08 connector retries, health, circuit and aggregate budget coverage",
+    "command": "CARGO_BUILD_JOBS=1 CARGO_LLVM_COV_TARGET_DIR=target/mcp-client-coverage cargo llvm-cov -p gateway-application -p gateway-daemon --lib --test connector_resilience --test mcp_client --test observed_goal_sessions --locked --json --output-path \"$EVIDENCE_DIR/connector-resilience-coverage.json\" -- --test-threads=1\npython3 scripts/check-connector-resilience-coverage.py --self-test\npython3 scripts/check-connector-resilience-coverage.py \"$EVIDENCE_DIR/connector-resilience-coverage.json\""
+  },
+  {
+    "name": "EPIC-08.03.04 installed atomic Before capture and coverage",
+    "command": "CARGO_BUILD_JOBS=1 CARGO_LLVM_COV_TARGET_DIR=target/atomic-before-coverage python3 scripts/cognitive-test-host.py -- bash scripts/qualify-atomic-before.sh \"$EVIDENCE_DIR/atomic-before\""
   }
 ]
