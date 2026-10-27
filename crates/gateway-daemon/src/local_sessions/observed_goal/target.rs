@@ -152,6 +152,12 @@ fn bind_inventory(
     let subjects = defs
         .normalizations
         .iter()
+        .filter(|n| {
+            !defs
+                .before
+                .as_ref()
+                .is_some_and(|world| world.read == n.read)
+        })
         .map(|n| {
             Ok(ReadSubjectBinding {
                 mapping_reference: n.read.mapping_reference.clone(),
@@ -189,7 +195,16 @@ fn bind_inventory(
         objects: &objects,
         scope_export: source.export()?,
     })?;
-    source.install_association(bound)
+    source.install_association(bound)?;
+    if let Some(world) = &defs.before {
+        let schema = schemas
+            .get(&world.read.capability)
+            .ok_or(SessionError::InvalidInput)?;
+        source.install_atomic(super::atomic_association::BoundAtomicRead::admit(
+            defs, world, &inventory, schema, execution,
+        )?)?;
+    }
+    Ok(())
 }
 struct ReadResult {
     read: ReadAdmission,
@@ -203,6 +218,24 @@ pub(super) fn capture(
     checkpoint: &SessionCheckpoint,
     resources: &mut SessionPhaseResources,
 ) -> Result<Option<PreExecutionGoalCandidate>, SessionError> {
+    match capture_preparation(access, checkpoint, resources, false)? {
+        Some(ReadonlyPreparation::GoalSatisfied(candidate)) => Ok(Some(*candidate)),
+        _ => Ok(None),
+    }
+}
+pub(super) fn prepare(
+    access: Arc<LocalSessionAccess>,
+    checkpoint: &SessionCheckpoint,
+    resources: &mut SessionPhaseResources,
+) -> Result<Option<ReadonlyPreparation>, SessionError> {
+    capture_preparation(access, checkpoint, resources, true)
+}
+fn capture_preparation(
+    access: Arc<LocalSessionAccess>,
+    checkpoint: &SessionCheckpoint,
+    resources: &mut SessionPhaseResources,
+    capture_before: bool,
+) -> Result<Option<ReadonlyPreparation>, SessionError> {
     let claim = Arc::new(GoalClaim::capture(access, checkpoint)?);
     let host = claim.current()?;
     let goal = checkpoint
@@ -306,48 +339,13 @@ pub(super) fn capture(
     let execution = source.execution()?;
     let mut results = Vec::new();
     for (ordinal, n) in defs.normalizations.iter().enumerate() {
-        let record = defs
-            .mapping
-            .records()
-            .iter()
-            .find(|r| r.reference == n.read.mapping_reference)
-            .ok_or(SessionError::InvalidInput)?;
-        let correlation=context_content_digest(&serde_json::to_vec(&serde_json::json!({"purpose":"PRE_EXECUTION_GOAL","binding":source.view.allocation().binding(),"reservation":source.view.allocation().reservation_id(),"ordinal":ordinal,"read":n.read})).map_err(|_|SessionError::InvalidInput)?);
-        let request = ConnectorRequest {
-            target: source.target(),
-            capability: n.read.capability.clone(),
-            class: record.class.operation_class(),
-            inventory_revision: summary.revision.clone(),
-            arguments: n.read.arguments.clone(),
-            task: defs.task.data().id.clone(),
-            step: defs.native.step.clone(),
-            execution: execution.clone(),
-            correlation: NonEmptyText::new(format!("goal-read-{}", correlation.as_str()))
-                .map_err(|_| SessionError::InvalidInput)?,
-        };
-        let selected = if record.kind == InventoryKind::Resource {
-            Some(&n.read.source)
-        } else {
-            None
-        };
-        source.begin(&request, selected)?;
-        let observation = match selected {
-            Some(s) => run.read_resource(&request, s),
-            None => run.invoke(&request),
+        if !defs
+            .before
+            .as_ref()
+            .is_some_and(|world| world.read == n.read)
+        {
+            results.push(read_one(&source, &run, &summary, n, ordinal)?);
         }
-        .map_err(session_error)?;
-        source.current()?;
-        let batch = source.batch(&request, &observation)?;
-        let ReadSemantics::DirectCurrentReadProfile {
-            max_age_seconds, ..
-        } = n.document.acquisition.semantics;
-        results.push(ReadResult {
-            read: n.read.clone(),
-            request,
-            observation,
-            batch,
-            max_age: max_age_seconds,
-        });
     }
     source.current()?;
     let inputs = defs
@@ -399,7 +397,84 @@ pub(super) fn capture(
     )
     .map_err(|_| SessionError::InvalidInput)?;
     source.current()?;
-    proof
-        .map(|proof| PreExecutionGoalCandidate::new(data, &proof))
-        .transpose()
+    if let Some(proof) = proof {
+        return Ok(Some(ReadonlyPreparation::GoalSatisfied(Box::new(
+            PreExecutionGoalCandidate::new(data, &proof)?,
+        ))));
+    }
+    if capture_before && let Some(world) = &defs.before {
+        let route = defs
+            .normalizations
+            .iter()
+            .find(|n| n.read == world.read)
+            .ok_or(SessionError::InvalidInput)?;
+        let result = read_one(&source, &run, &summary, route, defs.normalizations.len())?;
+        let captured = super::atomic_capture::capture(
+            &source,
+            world,
+            result.request,
+            result.observation,
+            result.batch,
+        )?;
+        source.current()?;
+        drop(run);
+        claim.validate_durable()?;
+        return Ok(Some(ReadonlyPreparation::BeforeCaptured(Box::new(
+            captured,
+        ))));
+    }
+    Ok(None)
+}
+
+fn read_one(
+    source: &GoalSource,
+    run: &SessionConnectorRun,
+    summary: &ConnectorInventory,
+    n: &ReadNormalization,
+    ordinal: usize,
+) -> Result<ReadResult, SessionError> {
+    let defs = &source.defs;
+    let execution = source.execution()?;
+    let record = defs
+        .mapping
+        .records()
+        .iter()
+        .find(|r| r.reference == n.read.mapping_reference)
+        .ok_or(SessionError::InvalidInput)?;
+    let correlation=context_content_digest(&serde_json::to_vec(&serde_json::json!({"purpose":"PRE_EXECUTION_GOAL","binding":source.view.allocation().binding(),"reservation":source.view.allocation().reservation_id(),"ordinal":ordinal,"read":n.read})).map_err(|_|SessionError::InvalidInput)?);
+    let request = ConnectorRequest {
+        target: source.target(),
+        capability: n.read.capability.clone(),
+        class: record.class.operation_class(),
+        inventory_revision: summary.revision.clone(),
+        arguments: n.read.arguments.clone(),
+        task: defs.task.data().id.clone(),
+        step: defs.native.step.clone(),
+        execution: execution.clone(),
+        correlation: NonEmptyText::new(format!("goal-read-{}", correlation.as_str()))
+            .map_err(|_| SessionError::InvalidInput)?,
+    };
+    let selected = if record.kind == InventoryKind::Resource {
+        Some(&n.read.source)
+    } else {
+        None
+    };
+    source.begin(&request, selected)?;
+    let observation = match selected {
+        Some(s) => run.read_resource(&request, s),
+        None => run.invoke(&request),
+    }
+    .map_err(session_error)?;
+    source.current()?;
+    let batch = source.batch(&request, &observation)?;
+    let ReadSemantics::DirectCurrentReadProfile {
+        max_age_seconds, ..
+    } = n.document.acquisition.semantics;
+    Ok(ReadResult {
+        read: n.read.clone(),
+        request,
+        observation,
+        batch,
+        max_age: max_age_seconds,
+    })
 }

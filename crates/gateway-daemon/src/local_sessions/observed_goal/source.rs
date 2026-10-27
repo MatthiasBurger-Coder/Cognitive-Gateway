@@ -25,6 +25,7 @@ pub(super) struct GoalSource {
     pub(super) checkpoint: SessionCheckpoint,
     pub(super) view: ReadonlyAllocationView,
     association: OnceLock<BoundReadAssociation>,
+    atomic: OnceLock<super::atomic_association::BoundAtomicRead>,
     start: Mutex<Option<(ContentDigest, UnixTimestamp)>>,
     dispatched: Mutex<Option<ConnectorDispatch>>,
 }
@@ -41,6 +42,7 @@ impl GoalSource {
             checkpoint,
             view,
             association: OnceLock::new(),
+            atomic: OnceLock::new(),
             start: Mutex::new(None),
             dispatched: Mutex::new(None),
         }
@@ -90,6 +92,15 @@ impl GoalSource {
             .map_err(|_| SessionError::InvalidState)?;
         self.current()
     }
+    pub(super) fn install_atomic(
+        &self,
+        bound: super::atomic_association::BoundAtomicRead,
+    ) -> Result<(), SessionError> {
+        self.atomic
+            .set(bound)
+            .map_err(|_| SessionError::InvalidState)?;
+        self.current()
+    }
     fn check_allocation_identity(&self, a: &SessionResourceAllocation) -> Result<(), SessionError> {
         if !std::ptr::eq(a, self.view.allocation()) {
             return Err(SessionError::AuthorityDenied);
@@ -133,6 +144,18 @@ impl GoalSource {
             || (record.kind == InventoryKind::Tool && source.is_some())
         {
             return Err(SessionError::ScopeDenied);
+        }
+        if self
+            .defs
+            .before
+            .as_ref()
+            .is_some_and(|world| world.read == route.read)
+        {
+            self.atomic
+                .get()
+                .ok_or(SessionError::InvalidState)?
+                .validate(r, source)?;
+            return Ok(route);
         }
         let association = self.association.get().ok_or(SessionError::InvalidState)?;
         let scope_export =
@@ -376,6 +399,18 @@ impl ScalarResponseAdmission for GoalSource {
         let route = self
             .route(r, s)
             .map_err(|e| response_failure(e, &r.correlation))?;
+        if self
+            .defs
+            .before
+            .as_ref()
+            .is_some_and(|world| world.read == route.read)
+        {
+            return self
+                .atomic
+                .get()
+                .ok_or_else(|| response_failure(SessionError::InvalidState, &r.correlation))?
+                .response(r, result);
+        }
         let association = self
             .association
             .get()

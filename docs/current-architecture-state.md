@@ -244,3 +244,13 @@ with CG-06 lineage, scope/quality propagation, acknowledgement/read-back separat
 and reference-only context adapters. Application port revision 2 requires manifest
 and inventory regeneration. Production credentials/policy and live effects remain
 separate qualification work.
+
+The bounded installed [atomic Before consumer (#408)](installed-atomic-before.md)
+extends the existing readonly session preparation facet for an unfulfilled
+connector goal. It acquires a separately pinned complete world through a qualified
+atomic export, preserves the true export-root provenance, and persists/reloads it
+through the [coordinator-owned journal (#407)](complete-before-journal.md) before
+returning Runnable/Prepared. Current runtime/native context pins are checked
+around persistence. Its controlled executable qualification is distinct from an
+external production-provider qualification. General model/action/consent/After
+orchestration and parent #274/#271 acceptance remain incomplete.
