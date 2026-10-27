@@ -5,3 +5,6 @@ __pycache__/
 .idea/
 .vscode/
 /.env
+
+# Generated root LLVM profiles; historical captures are retained in Git ancestry.
+/default_*.profraw

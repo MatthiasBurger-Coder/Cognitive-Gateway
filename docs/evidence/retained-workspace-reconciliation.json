@@ -1,0 +1,2521 @@
+{
+  "base": "742c318b47b1e06ced615618fe7ac0c1d05f71ce",
+  "branch": "codex/epic-08-03-connector-session",
+  "files": {
+    "crates/gateway-application/src/closed_loop.rs": "c878027285e70448c8b646fef64f89a710e19f87db156764d3dddfc827691dc2",
+    "crates/gateway-application/src/codex/contracts.rs": "3de212ea66c98b2b16e859bff453a55b59e20a25dedaa39ba7f6aa3e7772ca66",
+    "crates/gateway-application/src/connector_results.rs": "b2a23c6205b7c0986ada2c93b15034d428a3be56f622a8dd81dfc3448b4120ca",
+    "crates/gateway-application/src/connectors.rs": "b3792ec052fbb3fd171f0fdbce5372dfba8ce394fb4431b3b2955872da30f67d",
+    "crates/gateway-application/src/context_planning.rs": "4ac66a90cd749d908adfc7cf15870224693613f75abb46542819887a10dfffef",
+    "crates/gateway-application/src/invocation_resilience.rs": "370659861e12cd73040e32af10dd7f49bd58e9b2c7ec0b49dfa7af4e41e71d01",
+    "crates/gateway-application/src/lib.rs": "3eeaecaf3047d348f191219f648f8e9921a400eae4b7779ab7a34e9fbf3ba5c8",
+    "crates/gateway-application/src/output_verification.rs": "374ce5c794ce38daadebb73bfbffd41062795810c91e0baa756ec49371726716",
+    "crates/gateway-application/src/policy_application.rs": "4bc27bb004be7d0996a429e524e58fbd864866c8a388e4de3057bac01ef6ded8",
+    "crates/gateway-application/src/prompt_ir.rs": "839633c3b04865468bdf18495b1fa45c1c29249a399886779af4cb5f09057c4d",
+    "crates/gateway-application/src/prompt_rendering.rs": "5915518f0f2c09916914b049391defb7491bae6af9c253e2c9ddbbf4c13415fa",
+    "crates/gateway-application/src/resolution_application.rs": "236536e96d78e1a591ba0b6c827b617cd057930138ba3676fe9dbc413d585f98",
+    "crates/gateway-application/src/sessions/admission.rs": "2a893becbf2829ee77a9acb17b4ea17b03688df78b29d574cca8a4d8a095be68",
+    "crates/gateway-application/src/sessions/authority.rs": "91eae72ebb29faf4948345bb246e93a48e7f197c0c53008ee94de80b51f4ec55",
+    "crates/gateway-application/src/sessions/boundary.rs": "ac96238155fde444b1af150c8d8fc3da9d4488cdfb3ff824b7fb990833aa75b9",
+    "crates/gateway-application/src/sessions/contracts.rs": "de19a8b35dc08ca6142dd1a6c310a86c7d3b25d1946a386559cc18a68f1e16f3",
+    "crates/gateway-application/src/sessions/coordinator.rs": "ff82cb879598e57dd30f2b0fb3cb6353157b538ef42c17fa006d2cad961ad58e",
+    "crates/gateway-application/src/sessions/journal.rs": "64e59cc16e9eec23628edc2d6c4bfd566305469c4f397ddbe13baf4c450ed521",
+    "crates/gateway-application/src/sessions/mod.rs": "6cc314580b962922374da74ff31a90095f746259a125480ae2387809db735992",
+    "crates/gateway-application/src/sessions/verification.rs": "13029c6196e7af36597e8ed13a568e56a1ce49a877f67d8bd56941361968d383",
+    "crates/gateway-application/tests/context_planning.rs": "79ba15e3e437ec7b98df32dbbb2c8cec3f44642c81537bd83baf94190c00d8ea",
+    "crates/gateway-application/tests/invocation_qualification.rs": "0b17c2b74b4bae74b14a7cfcd9ac222f815a63e8e8c696767bef3c4b0dcd6f36",
+    "crates/gateway-application/tests/invocation_resilience.rs": "149a40339dcc10c12aa8c84f00d5eae6ff70ae9490aed93bd0cb107ee8d1332d",
+    "crates/gateway-application/tests/output_verification.rs": "f67b0e8152087842efdd0c03d13c2b3e8c15183789c06528bab81ecf49f1e843",
+    "crates/gateway-application/tests/policy_application.rs": "6b77ff61a0fa40ddbfee4ad6b8fe65528a1ff00628b6e01ba0578016806e11db",
+    "crates/gateway-application/tests/prompt_ir.rs": "ca903ae173a12c2f05699be41dc4103ae555768b86f4e6d3eca17cd1b2a77878",
+    "crates/gateway-application/tests/resolution_application.rs": "e43e194a12f58e0f29f5481e1bd837b9e73ddab8a7dd7b90e5e05327524a3de0",
+    "crates/gateway-application/tests/session_contracts.rs": "b92fb11638436ea30bbe69c54312c33846159074c166b40119c092e2b8c47b21",
+    "crates/gateway-application/tests/session_runtime.rs": "f821b8d6073ff95655aa14c8a46af54277b4cac02412b9056cda77b5d04252fd",
+    "crates/gateway-application/tests/support/closed_loop.rs": "3e6356839105ce2a0e8e9adff729a784df5ad460036e2fb048d6d31bfecc4495",
+    "crates/gateway-context/src/planning.rs": "efb17c96586eaaaae1ad3f49eaf7ad3487f17d446f6e8c2da5ed6cce9bf2c024",
+    "crates/gateway-daemon/src/bin/cg.rs": "d18891834028d96d973de0cbf183529ce4cdee0f8e646ddd8c440894e0478120",
+    "crates/gateway-daemon/src/cognitive_store.rs": "f9da507fcdf12c30b712fde6d1e65429aed6b5c40c99bc514dc430519620483a",
+    "crates/gateway-daemon/src/declarative_cli/host_mapping.rs": "25d0ad6dab3f06e1d06382f61fa2e0b12a8f9d66308556b2689a407b24492359",
+    "crates/gateway-daemon/src/declarative_cli/inputs.rs": "f2209d6a5b6bdcb91f86c89272a2ecbaef060e5cf8a8e451e080ff0c92b2f1d7",
+    "crates/gateway-daemon/src/invocation_host/mod.rs": "1cfbd38f0c06e96fea313807ac6a970220c1222021e9a9a7d6630c08bc62c27b",
+    "crates/gateway-daemon/src/lib.rs": "bbf42a027d60a74d942f3bb45497dc11cb0bc7662b7c46562323873c121add95",
+    "crates/gateway-daemon/src/local_mcp/runtime.rs": "bf77ec9942288de227df3cd81b52fab768ef939b513955d1d651888a472698cf",
+    "crates/gateway-daemon/src/local_mcp/tests.rs": "cbef6f89015336156b0961408c754e9651dc0c883ebfac723ba2f4c397ea946f",
+    "crates/gateway-daemon/src/local_sessions.rs": "1d8e8297a4c1a711f31e319d1318ce326ddcd4c45f385136d173a46ffdb99042",
+    "crates/gateway-daemon/src/mcp_client/host.rs": "6e1eb0d17d88978c945fe045d9679e3703cef8da2bd7a178b72482cdba4387b6",
+    "crates/gateway-daemon/src/mcp_client/host_tests.rs": "c715795a65ed8bbbdf5e55541f4bd3fb2f389cc293678a0f01748d57409f68b3",
+    "crates/gateway-daemon/src/mcp_client/mapping.rs": "81d77dfbfbb4f411c5b0685d70b23249adcb624e9d73923d4852a50e9dd87a89",
+    "crates/gateway-daemon/src/mcp_client/mapping_tests.rs": "73f9ce7ae85ddb950a64a74bd3803151ea16d3e1be882046128606ccc1397d46",
+    "crates/gateway-daemon/src/mcp_client/mod.rs": "e828cd52fc47df08fb3b56c986fb15c7f74e390c5602c9e790f495a19aacfd37",
+    "crates/gateway-daemon/src/mcp_client/normalization.rs": "79a34192bf8b9b43a69eab98ff72b4d9c43775616a842011d718f68c838dfbf4",
+    "crates/gateway-daemon/src/mcp_client/normalization_tests.rs": "53918ecf9148aaa53f3536fb956bacbd193cdece3e4673b4eff49a630741ed95",
+    "crates/gateway-daemon/src/mcp_client/protocol.rs": "9de05f7efb6804a0d4259e3d86cc065c765650a424d17c8d434462ea456ce8c2",
+    "crates/gateway-daemon/src/mcp_client/protocol_tests.rs": "9f3511f4684869040385d1c0073b45a76344ec502ec62d6fbd0ef8fefe5fea94",
+    "crates/gateway-daemon/src/mcp_client/transport.rs": "1c860232d7fc942437774b52555d7473a225738747bfb7ba1c69a9ba76942619",
+    "crates/gateway-daemon/src/model_adapters.rs": "be013265e2da65033431d4d4a6db939d22760f0b6ffae889365369f2980a324a",
+    "crates/gateway-daemon/src/session_store.rs": "d018bb8862b585595528caa8c3bb1a51faf02d77498a34e21a1fd773809422a5",
+    "crates/gateway-daemon/src/session_store_tests.rs": "9a2fba23364f505c443848915686e2aae3930bb0c7140a0426fbd3bd106fcf4d",
+    "crates/gateway-daemon/tests/codex_canonical.rs": "7b0de24e6681ba4923a127fa39bb690856e19071400de810fb28d49540d43e5f",
+    "crates/gateway-daemon/tests/codex_isolation.rs": "25adc382870fa5eb59cee94a9e6a50916a1970b4146d32b5078c9eeeb277773f",
+    "crates/gateway-daemon/tests/declarative_cli.rs": "e4e18000e1807109d48c4ca30d50892211444eab022ff74e0977048714a27842",
+    "crates/gateway-daemon/tests/mcp_client.rs": "de5aa39e6b7ba126f522a761cf8ae5cedef695faa687990f321b170a82d97a8e",
+    "crates/gateway-daemon/tests/model_adapters.rs": "855b9cc5aa768f8630ed28af7890dddf2cd52db548593ac3fb089a586ea2e18c",
+    "crates/gateway-daemon/tests/prompt_rendering.rs": "54fd8b8069001779ed3a42210e8bf6766e4caf58a8a21aad74bfe8f9b1387fb7",
+    "crates/gateway-domain/src/semantic_task.rs": "091fdadb3f1d33badcfb1aa22fed08b5d44cfdb8d5d8fa43a87cc71d6e21e396",
+    "crates/gateway-domain/tests/semantic_task_v1.rs": "c79452ab4319ce8ca7e618dc559bbc8673749d0e2599ff81db50a5a2496beaf1",
+    "docs/README.md": "1ae635c466d26cf0e7d5c32ec92e59d04451c97aa432658003ccf445904e9482",
+    "docs/arc42/06-runtime-view.md": "1cc10817f7921ea08baf6b56c390d5d05349f9aca306076c038c6194e17facfc",
+    "docs/codex-runtime.md": "c1cf377f9349b3d9aa60c892461439064a6199dd8242873637239d110f4b699b",
+    "docs/current-architecture-state.md": "899f415cb67e2e260885eb991fb59691ebca30d3e266bf2c6423f5b3258ab046",
+    "docs/local-mcp-server.md": "e4be5e3d436af78df08494b80fb4d099239a0dd4015ca655cf69c1832928de18",
+    "docs/mcp-connector-runtime.md": "f671cb8b6833981b85dbdd8c122119989e8ed0c3916a71ce44e6a07ee9c34830",
+    "docs/shared-session-contract.md": "5a06397821247100beb20e7372824ce8094bea2058bbed4b2952f889a09d0c66",
+    "docs/shared-session-implementation.md": "4492460208db684e51749da8679f5344026a324bbf5e7cf8c2e307b7434f7ec2",
+    "schemas/codex/v2/common.schema.json": "42e37ee7c880a8d9d65637a8a6193eaffc33360306aa730d7577fcd084039f28",
+    "schemas/codex/v2/request.schema.json": "47d9f0dd18d1f6b259b3b9929f0287d61ca3145efbac361b9858b3ecd9aab7eb",
+    "schemas/codex/v2/response.schema.json": "69a0a80c67a9cd514c4f58042041230c68acdf5d90a56539eeee012a11ebec9f",
+    "scripts/check-mcp-client-coverage.py": "4e9502f8ee01d881c6023f8e651f3e83c2ac0ebd55d747f354fd53ea996fb86b",
+    "scripts/check-session-runtime-coverage.py": "f6a1e9e5347cf9a2b2129aaf64d005624cfcc4e87a62c2871bb14ae6eb39749c",
+    "scripts/qualify-shared-sessions.sh": "791eb2a3b77fa5501025d67e7a2658fa8924304772d14a6c9b81e15253c97335",
+    "scripts/quality-gates.json": "afcac90f1727598c7afee34df589971b036a8c43a572eceb719c286831b0da37",
+    "tests/fixtures/mcp-client-v1/server.py": "6beb06c4505c26a0435a620d44e9d46dd0fcb4c3a7a420576e9184cb46d37969",
+    "crates/gateway-application/src/connector_policy.rs": "db8dbd0990d2891132d5b78a2817d51e8bde71c307ad7e3a3a09e2b5b3ac881f",
+    "crates/gateway-application/src/connector_proposals.rs": "4a16e63e8a9956c26505609687f12a4a80bdac1f5f7148d618d8b117cdd117d8",
+    "crates/gateway-application/src/connector_resilience.rs": "51ba56c277eee5936f0d3f09e6228760c6c94a52113b75257a6e9eac4998a188",
+    "crates/gateway-application/src/retained_observations.rs": "0a8a0b87d7abb33656dedd5d15e01acc0ba46155910793ab9302769ffec797fb",
+    "crates/gateway-application/src/sessions/connector_execution.rs": "1348127d0ecc39acee1103bf7e82297253ca1dcc5084170c7b8eee2ad44318eb",
+    "crates/gateway-application/src/sessions/connector_goals.rs": "b8800bd5b391992af1d586676b2fefda397393322d309be64f690e9ef7cb458a",
+    "crates/gateway-application/src/sessions/pre_execution_goal.rs": "a93736f4ff32392327303a992066383372f31325e965d9afaf2a4d9e5f2077ca",
+    "crates/gateway-application/src/sessions/readback_storage.rs": "4976aa50327aa4cbd0ae0272cbffbe7ee0a4fffcb3ba90d6d08eb577abe258bc",
+    "crates/gateway-application/src/sessions/resources.rs": "c691ee9e717f87dd41633da29c9aba4437da62e7bf1e63cdde4ecc01980b3dad",
+    "crates/gateway-application/tests/connector_batch_record_contracts.rs": "7c23cce3a6ba1e4485bd69bdbee8de962973f8c611de37870e330336d1a8c245",
+    "crates/gateway-application/tests/connector_consent.rs": "d9dbb98242aa2f6b6adde2f05a6dd3773332d07cf1964b0d2a7264eaee106ddf",
+    "crates/gateway-application/tests/connector_goal_contracts.rs": "b4fb378c6f995500004ebbbe686a91842bd03ba0361c4ccd2402e863c8874856",
+    "crates/gateway-application/tests/connector_goal_verification.rs": "cbb696a399d28525a4cf793318293f73a349b40367882d45c4048b721baf991d",
+    "crates/gateway-application/tests/connector_policy.rs": "5b75b726cce541b5fe4553e3a4d2fbabe7b4e052e56b42fe3d283e3298efec70",
+    "crates/gateway-application/tests/connector_resilience.rs": "a80ec7632f9aa2aa76098eb47263b9fe40a605b7ec3ff16cbdac361bc951ab82",
+    "crates/gateway-application/tests/connector_result_contracts.rs": "dc0ca82fa2130936434211e1f93599089f47c4018c03bd17fca377dfa2ccf9f5",
+    "crates/gateway-application/tests/connector_session_turn_validation.rs": "224ba406c96d36e51390f05b4bfd0646fe60a4cbd2442ca82e3407a8162cba5e",
+    "crates/gateway-application/tests/session_resources.rs": "cd31a5e79f6b8ed72a2bbb3da5a91bc3c525f0c8f30b02845c4d8d94d7f1a328",
+    "crates/gateway-application/tests/support/pre_execution_goal.rs": "a5c181977d49b2bc26c11f73842d61db9a66664ba1059c49f3eeaf9216650c0b",
+    "crates/gateway-daemon/src/declarative_cli/host_mapping/native_producer_fixture.rs": "78c096843291c9f3809e0f9b01a2bc1faa010d73eb7953a5af64da2abe0a78f7",
+    "crates/gateway-daemon/src/invocation_host/session_tools.rs": "8745e3d0ae130457c4e36199a283ecf5063b2bb2a13f73f2d4ea6f2bfa463b6d",
+    "crates/gateway-daemon/src/local_sessions/capability_alias.rs": "3b7c6a390edf021a9b7f7596f76fc82a6a77c74e9407338dc5446a4f946e367b",
+    "crates/gateway-daemon/src/local_sessions/goal_verifier.rs": "896f94300efd7ba56dbb74f6b7dd116463645b457df9117abf3f7d5244eb186e",
+    "crates/gateway-daemon/src/local_sessions/runtime_admission.rs": "2a3ab1d411b0597f8eb1a0e2a4702dd6f33fbfcb452a862b94c4386f18a8ace5",
+    "crates/gateway-daemon/src/local_sessions/runtime_admission/before_goal.rs": "42d4fa0517482b693ba6ab45e9a07c5accfe1832ff1e41bfbfab104b0d8648e7",
+    "crates/gateway-daemon/src/local_sessions/runtime_admission/before_goal/tests.rs": "009a783ae186365f5976430da6acbc0b9e105f100628bbb162d7738b02b21d5f",
+    "crates/gateway-daemon/src/local_sessions/runtime_admission/connector_source.rs": "2f4a67cd86bba72d36b982c5994838108a7774249e39641748e46746fcbd32ab",
+    "crates/gateway-daemon/src/local_sessions/runtime_admission/consent_preparation.rs": "fe0d215d6d7d03eb6109b475d8808848f74c25f8adac74c9147ff4c66d9e67bf",
+    "crates/gateway-daemon/src/local_sessions/runtime_admission/consent_preparation/tests.rs": "74d94a968d9e5d999d7235a92e0c6a52a644c1dbf25bd6783c8650616fd57591",
+    "crates/gateway-daemon/src/local_sessions/runtime_admission/current_producer_definitions.rs": "07deeed72fde29264610dcd121f0de562f78aa176f5e43aa34602f12cb4ec802",
+    "crates/gateway-daemon/src/local_sessions/runtime_admission/current_producer_definitions/tests.rs": "57773292a4252d9d520d8b8216bf6fe969859ad91c07732fdd4d3ffc33067163",
+    "crates/gateway-daemon/src/local_sessions/runtime_admission/historical_inventory.rs": "ce6c9d21043869ccd5d61b8c520372806d21111e61db516b9e6ce8779818b11d",
+    "crates/gateway-daemon/src/local_sessions/runtime_admission/model_documents.rs": "2aad46952b6a327e68e8c53328eb77afebb9284c807f71307d8eec902497e9f9",
+    "crates/gateway-daemon/src/local_sessions/runtime_admission/model_documents/tests.rs": "aebbd57fee4d30fd4449a8f54ba0bff1672a6600b678ded47eafd89ecdc957ad",
+    "crates/gateway-daemon/src/local_sessions/runtime_admission/model_factory.rs": "0cf84a3279dbed20bbb7ed0584cb1939fdc8eb2c9c52150ca1cd979a42720793",
+    "crates/gateway-daemon/src/local_sessions/runtime_admission/model_factory/tests.rs": "36210fa31164ee2443b7601a005b1eecfb7e77f07d26e38d75efa25c63e9a81e",
+    "crates/gateway-daemon/src/local_sessions/runtime_admission/phase_planning.rs": "05f6994e4ca824823c45f01b2eb068b1c3a2e8f9d9275e3b06529bbb057fda87",
+    "crates/gateway-daemon/src/local_sessions/runtime_admission/phase_planning/tests.rs": "96f461948dc346f561dc956affc16eff271af153db20efeac4ade7d30b807bf6",
+    "crates/gateway-daemon/src/local_sessions/runtime_admission/preparing_test_support.rs": "e6b66af9bf66eefa4e39ecfead53db93f9efc38d907af76b2a4afe6829756d22",
+    "crates/gateway-daemon/src/local_sessions/runtime_admission/profiling.rs": "afdf4e84b95a5d885f978ca3c87e3c52267565a00db65a6ef6f467a45724eefa",
+    "crates/gateway-daemon/src/local_sessions/runtime_admission/retained_model_producer.rs": "4aaa5a3108801bf7db8c48a8097b55735d91d3f6a59cf3a8d73f4ecda291010f",
+    "crates/gateway-daemon/src/local_sessions/runtime_admission/retained_model_producer/tests.rs": "eca89a86e0583cef98d5ee311c47a7633fe9b03b8aafb978d18c1de4b6ca8ea4",
+    "crates/gateway-daemon/src/local_sessions/runtime_admission/source_context.rs": "cf0ac6fc4cd6cb2b221bbc7b93a7bb95dbeaa15d0689edf75515d88430cbbe6c",
+    "crates/gateway-daemon/src/local_sessions/runtime_admission/source_context/tests.rs": "6b2c62a2bcbb36d207b94b66346c9de3948be17b33b6e762ee4fbe570b0e0258",
+    "crates/gateway-daemon/src/local_sessions/runtime_admission/target_factory.rs": "a483a2902bc7bcea281db54d3bdc671f377680f608c2d3cc2e76860959cba992",
+    "crates/gateway-daemon/src/local_sessions/runtime_admission/target_factory/tests.rs": "cfecb850caca51174983869592333573b4a1a34184fd9159d3192b0ec0d69723",
+    "crates/gateway-daemon/src/local_sessions/selector_association.rs": "f24d9fc456fb4af466ac7003a8c83a0683083d175b1d3d5b0bf80fdbd1b887d8",
+    "crates/gateway-daemon/src/mcp_client/context_tests.rs": "e6438cb078d6b97411cf2ccc1be74dbe70352ea0b57c9b9dcca083513be43a5c",
+    "crates/gateway-daemon/src/mcp_client/credential_file.rs": "5660ce704faad0b1816b2d8539de8bc080dd6842b1e6e97cf5a2d250add59146",
+    "crates/gateway-daemon/src/mcp_client/recovery_mapping_tests.rs": "821c4f610673466f670bddf4e061002f68803c9efd95d8b8de7e9d495dd4e3da",
+    "crates/gateway-daemon/src/mcp_client/resilience.rs": "a0f004bb83903f5184daae8650d62ae66a7c7e1c16f08043cc44861d69a1fbbd",
+    "crates/gateway-daemon/src/mcp_client/resilience_tests.rs": "d66b20ab7882e45dd067bbd9032528fb971db13a75c34297ac3fbf4cadc6db1f",
+    "crates/gateway-daemon/src/mcp_client/scalar_quotes.rs": "7d20ce304579bfe72b3630372e2d1aa18990803f8df37797e386651c12726e09",
+    "crates/gateway-daemon/src/mcp_client/scalar_quotes_tests.rs": "8639952e66e88c638dacfcc0b29ef6d0c72c8fa288ae57a3fdcdcac47ff5c536",
+    "crates/gateway-daemon/src/mcp_client/session_budget.rs": "f0959d67fa203a073afcfc995b92356f8412f11f36fb6e07b818f90f13e5fc10",
+    "crates/gateway-daemon/src/mcp_client/session_budget_factory_tests.rs": "80772489af981afbb085946f8625753afa3e2385b8b25f24e0ff5bba0c96148a",
+    "crates/gateway-daemon/src/session_store/connector_policy_audit.rs": "34c78a631700df97961d03d349a1a34a1075a162082927ac77b9101a0229c8b4",
+    "crates/gateway-daemon/src/session_store/connector_policy_audit/tests.rs": "a138e4798175db464ca315965385c57eb94bdd0b2d0274031773727bb8113f2a",
+    "crates/gateway-daemon/tests/session_tool_invocation.rs": "2d04a05c9fa8778500d46001e9e1d9ef493bccacbc2ac9b3a24a65d2a450358f",
+    "crates/gateway-daemon/tests/support/connector_resilience_cases.rs": "d81ee568c84ac2e294b04c86a738730cf19801c08f75c51bfd0033e741c64b75",
+    "crates/gateway-daemon/tests/support/session_connector_budget_cases.rs": "7fa97ebb7836af8471f35043d922bedee6b71abbe3660da88ba088c88a2ed678",
+    "crates/gateway-daemon/tests/support/session_resource_allocation.rs": "1725d5558c0e375d44384272dd7b69710665a850c31ec43f5a13db3e121b5dbc",
+    "default_18105939341307542186_0_2128402.profraw": "3e2ead925be2065edb9b18667fcdf923568d83f9550b873032592216ca9dd187",
+    "default_18414950288573714300_0_2128394.profraw": "e6501575d19ab1d5af907a3db7e12eabe4f3287606c9188e8cbb195b77ec3e85",
+    "docs/connector-policy-v1.md": "9ed74e6ad22b256852d37541ef00929614f5944fee42e1ae8f75eafa78b2e66e",
+    "docs/connector-proposal-dispatch-v1.md": "c013d79f0643540572f7a46055882f65ea6ba8104529f13b7cc4dae37c92351b",
+    "docs/connector-resilience-v1.md": "a0592ec44c95cd5158b498e476545e7f87866e9bd072e40124649130be13b51a",
+    "docs/evidence/EPIC-07.07-policy.json": "97fdca3387c6bdaacab8029a82d567ae632258b3c7e34439a4ca615954153c12",
+    "docs/evidence/EPIC-07.08-resilience-coverage.json.gz": "76bfc1a3e31c4482af0d1ab3f1333d83bd5e281d90726c1a0a0d60d66a2f9fa3",
+    "docs/evidence/EPIC-07.08-resilience.json": "87d3baedd2b7b94a034013e2d36397349976a04031b51e8c6826f32ea5bdcd2e",
+    "docs/evidence/EPIC-07.08-source-bindings.json.gz": "4ec0400aab4e81bb23111e53efde7631fcf938bc52e6f6f9415339b402e1b6d6",
+    "docs/evidence/EPIC-07.08-three-amigos-gate.md": "d654c98bba108e32c8dfe44e5e4cafc7708eb1da11e291d291580d4a37b4eff3",
+    "docs/evidence/EPIC-07.08-validation.json.gz": "45fdf5974b174247700dc4205925a266a2cf6440c52cffe84b0649f1e2a357a5",
+    "docs/evidence/EPIC-08-child-acceptance.md": "458c6da1a0e432d7909086671fa3e02153647968d4e30a58f95535f0d061ad6b",
+    "docs/evidence/EPIC-08-parent-acceptance.md": "bc7365c5688e416b0fb8f47a13f9cf5f4355860e1cc65442e0dbd129c749165b",
+    "docs/evidence/EPIC-08.03-application-final18-coverage.json.gz": "830cbf29a81d2f032c74a7456be146b9b2fa2dc8a956865ec88e5ddadae02df5",
+    "docs/evidence/EPIC-08.03-application-final18-source-bindings.json.gz": "6672fcea7522d0ab7422ac01893e331a77e0af757f979463e7af5b404d91a312",
+    "docs/evidence/EPIC-08.03-application-final18-validation.log.gz": "04e5a2faf1ee6f0ab840bb86398af468c77ac5d651d07a0f80abc952eae431af",
+    "docs/evidence/EPIC-08.03-application-validation.log.gz": "9315d6c3972bf09610773f6b1d87b006c20d6ce7ac5f77ef7304ec8b32248c52",
+    "docs/evidence/EPIC-08.03-canonical-policy-followup-validation.json.gz": "0b13e7ec3056d7871fd7b919cbebe5e6978b4ccc622e7a9a51c105992e78879c",
+    "docs/evidence/EPIC-08.03-complete-callback-proof-validation.json.gz": "a983fed187dd74c35178308f165fadecf2e0e56630940daacbbaadb6fae8c569",
+    "docs/evidence/EPIC-08.03-connection-reuse-validation.json.gz": "c2e2f5303078bc0e2349ed42a666857be0b4c94da29b6a2d8c89c15c7b2641b8",
+    "docs/evidence/EPIC-08.03-connector-factory-view-validation.json.gz": "a8ed1f1c7af5c3054d79ef5ab2d815bae1d70e2abfb8da451ef3eb8fb68bb051",
+    "docs/evidence/EPIC-08.03-connector-producer-input-contract-validation.json.gz": "16ab571f9c88f5f65aa76a82fd5c5d468b42a0f92a6c488ddfd7ab606e725c40",
+    "docs/evidence/EPIC-08.03-connector-proposals-coverage.json.gz": "bb4b3d9611782caa80919524583e6c2d306af32415a0944c0c9e16e6606a169d",
+    "docs/evidence/EPIC-08.03-connector-proposals.json": "f344937eab6969f2964e71aadb180a55aa2be93c645dac698d341544e41d579e",
+    "docs/evidence/EPIC-08.03-current-native-definitions-validation.json.gz": "bf145bd69377c50e05f29ed8beb65ddbde1e8393d758a80b6df6508b7e521b0a",
+    "docs/evidence/EPIC-08.03-daemon-coverage.json.gz": "a2b8bc12de6ece6f3dbf07be50db4a37c8e763174b87fb729e8c5c0185d2373c",
+    "docs/evidence/EPIC-08.03-daemon-final18-coverage.json.gz": "f0b6937a5cc2be6617f903662eddfedebe1d8bbd76d103afadc301cf4c0d4456",
+    "docs/evidence/EPIC-08.03-daemon-final18-source-bindings.json.gz": "160c9ba24b018d30743d8f141a8057b56c10c3d05ee01595a4ae739c7681bc4c",
+    "docs/evidence/EPIC-08.03-daemon-final18-validation.log.gz": "2cd0b6ffe890503fab8f6635689b52b708f503bb1d68de902075cd97c40bbe3c",
+    "docs/evidence/EPIC-08.03-daemon-validation.log.gz": "2ec9f19964e172363d55d43e9d0b445700d571b6b69f7f8fea3f93d1eb50b7b3",
+    "docs/evidence/EPIC-08.03-exact-output-retention-validation.json.gz": "02d14b6a8d8dcc155ec51e7eca0ee0d51d465d4cc1a07511e78ae15f660a1a96",
+    "docs/evidence/EPIC-08.03-fresh-access-factorization-validation.json.gz": "6ddd2e937ce886fc30e719b29d0b2feee2ee83235ed6a7cb1d0a666efed8a170",
+    "docs/evidence/EPIC-08.03-goal-current-store-validation.json.gz": "1f25ce1d589e19827fb169a7e4eebf126096286e75da1e40e126e04d3663e628",
+    "docs/evidence/EPIC-08.03-historical-render-compile-checkpoint.json.gz": "1af0e1ccf256e3abf02126872461c6befe51ae6388eaadd3ff6392f61a8d9f06",
+    "docs/evidence/EPIC-08.03-invocation-resilience-coverage.json.gz": "d143b608cc5fff8e72dea5745c9b126d17b3fd6d0cc95dd791f06d6e2696e963",
+    "docs/evidence/EPIC-08.03-native-basis-access-validation.json.gz": "b2bd9cf543f9b85a095ee60cdc0ddf699025126914b54cf7878c753e56676091",
+    "docs/evidence/EPIC-08.03-native-consent-preparation-component-validation.json.gz": "b15b72751516baf70f4fe344012d16b6e2f8fb52da53f95e1269ee1866e29eec",
+    "docs/evidence/EPIC-08.03-native-policy-source-validation.json.gz": "835b2a603f21b87087bbd8e5808b754ee9f13ab0e7438b2206c2c808185748cb",
+    "docs/evidence/EPIC-08.03-native-pre-execution-goal-component-validation.json.gz": "d6c50e9973bc8288e617ef20b549773f0a2b9d62c139bb9dbd8c0d6f6904ec1b",
+    "docs/evidence/EPIC-08.03-native-pre-execution-goal-component.json": "2441c55622e519fda645d7127947805de5c475a176959f21ac80d301bcfd8754",
+    "docs/evidence/EPIC-08.03-native-reference-discovery-validation.json.gz": "5d579902f9348d75b444efbfce48f7a3b933b12e6b41386315f6a0559d5b4677",
+    "docs/evidence/EPIC-08.03-observed-mcp-context-validation.json.gz": "6192dfdd15615bd64e1402b1b4f6b810c2fc6a20d46ff55b4c0e4b511f3f9bd2",
+    "docs/evidence/EPIC-08.03-policy-preview-validation.json.gz": "cca878b9aef2e5bb44eac9399b9f69f4dfeaf5fd637c47716acd2d698a761258",
+    "docs/evidence/EPIC-08.03-portable-model-transport-validation.json.gz": "78f143c91a26a9f5c0725d5472e9250ce3d9cd8dde4c084d30d548e3eecb17fd",
+    "docs/evidence/EPIC-08.03-postgres-fresh-read-validation.json.gz": "34c465798aa30adff53ae9dd1e245ab772861a4479330a174db96a636562e775",
+    "docs/evidence/EPIC-08.03-pre-execution-goal-application-validation.json.gz": "6e8125ce15c05988c53c1ca93745eaee6bd15c277f91d283fa5900f9a8aafe2a",
+    "docs/evidence/EPIC-08.03-quality-validation.log.gz": "7680245c07cc79567080948cec9aa9878f97aed846b24d24deaec71882251d7b",
+    "docs/evidence/EPIC-08.03-resource-only-boundary-validation.json.gz": "c83c1ebd925bc54e7a253ca5d6dff599ae83dc4e67c867c1bfe96b12b75774d8",
+    "docs/evidence/EPIC-08.03-retained-consent-preflight-validation.json.gz": "98252eec4d8c80f96e42c761cff6ad221420a18c8a1c19c6bf082586e66f542b",
+    "docs/evidence/EPIC-08.03-retained-ir-data-validation.json.gz": "4c6e9a56b776b6738230446c64007aff664373285fa01909c80bbaa900e852a6",
+    "docs/evidence/EPIC-08.03-retained-verifier-followup-validation.json.gz": "1e7bba68355aa2372bc997c47a1ae1e43ed05af168ca48bf63a148427db01a7e",
+    "docs/evidence/EPIC-08.03-runtime-reference-followup-validation.json.gz": "2fc6b0385910cbf7c95e899d1ed51d6bae7cdb332c6e498f98a2bf067679fc53",
+    "docs/evidence/EPIC-08.03-three-amigos-gate.md": "5ada7a48f6dedcea6af6636c4406ae9011d1441b343684d371c75835b6b2f6e5",
+    "scripts/check-connector-resilience-coverage.py": "fe0394496abf567d38ae611b56ef6666a5fd05fb9091ff0c0681825038e0fcd5"
+  },
+  "secret_findings": [],
+  "preserved_files": {
+    "crates/gateway-application/src/closed_loop.rs": {
+      "worktree_sha256": "c878027285e70448c8b646fef64f89a710e19f87db156764d3dddfc827691dc2",
+      "blob": "6578bbad364d49ab9ac5771948fb575fd1020ef5",
+      "stored_sha256": "c878027285e70448c8b646fef64f89a710e19f87db156764d3dddfc827691dc2",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-application/src/codex/contracts.rs": {
+      "worktree_sha256": "3de212ea66c98b2b16e859bff453a55b59e20a25dedaa39ba7f6aa3e7772ca66",
+      "blob": "4a90f5c2b044d212daaf125e2a25067dde740900",
+      "stored_sha256": "3de212ea66c98b2b16e859bff453a55b59e20a25dedaa39ba7f6aa3e7772ca66",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-application/src/connector_results.rs": {
+      "worktree_sha256": "b2a23c6205b7c0986ada2c93b15034d428a3be56f622a8dd81dfc3448b4120ca",
+      "blob": "1ba83ba0d97a3980443cc46c65cccf2eeb0d1483",
+      "stored_sha256": "b2a23c6205b7c0986ada2c93b15034d428a3be56f622a8dd81dfc3448b4120ca",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-application/src/connectors.rs": {
+      "worktree_sha256": "b3792ec052fbb3fd171f0fdbce5372dfba8ce394fb4431b3b2955872da30f67d",
+      "blob": "8121efbe953accbae496d9c6a4400f599bc28dc0",
+      "stored_sha256": "b3792ec052fbb3fd171f0fdbce5372dfba8ce394fb4431b3b2955872da30f67d",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-application/src/context_planning.rs": {
+      "worktree_sha256": "4ac66a90cd749d908adfc7cf15870224693613f75abb46542819887a10dfffef",
+      "blob": "dab690ad2e20225be22cf871bf0aa33895266f71",
+      "stored_sha256": "4ac66a90cd749d908adfc7cf15870224693613f75abb46542819887a10dfffef",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-application/src/invocation_resilience.rs": {
+      "worktree_sha256": "370659861e12cd73040e32af10dd7f49bd58e9b2c7ec0b49dfa7af4e41e71d01",
+      "blob": "8ed32b0a583b85920966284756032ecc3c2f05f9",
+      "stored_sha256": "370659861e12cd73040e32af10dd7f49bd58e9b2c7ec0b49dfa7af4e41e71d01",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-application/src/lib.rs": {
+      "worktree_sha256": "3eeaecaf3047d348f191219f648f8e9921a400eae4b7779ab7a34e9fbf3ba5c8",
+      "blob": "0352349c1ef066a737a7cd2a5a76ae8b166fdda5",
+      "stored_sha256": "3eeaecaf3047d348f191219f648f8e9921a400eae4b7779ab7a34e9fbf3ba5c8",
+      "disposition": "already_on_main",
+      "successor_tracking": []
+    },
+    "crates/gateway-application/src/output_verification.rs": {
+      "worktree_sha256": "374ce5c794ce38daadebb73bfbffd41062795810c91e0baa756ec49371726716",
+      "blob": "cdedf94b6b1af23b2144bd53791ac62983bdd055",
+      "stored_sha256": "374ce5c794ce38daadebb73bfbffd41062795810c91e0baa756ec49371726716",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-application/src/policy_application.rs": {
+      "worktree_sha256": "4bc27bb004be7d0996a429e524e58fbd864866c8a388e4de3057bac01ef6ded8",
+      "blob": "4a048303fd0a396969e8939c398fb098d5ad78b6",
+      "stored_sha256": "4bc27bb004be7d0996a429e524e58fbd864866c8a388e4de3057bac01ef6ded8",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-application/src/prompt_ir.rs": {
+      "worktree_sha256": "839633c3b04865468bdf18495b1fa45c1c29249a399886779af4cb5f09057c4d",
+      "blob": "80fa2766b6c6c8adbf310e67e49e8ffd140715aa",
+      "stored_sha256": "839633c3b04865468bdf18495b1fa45c1c29249a399886779af4cb5f09057c4d",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-application/src/prompt_rendering.rs": {
+      "worktree_sha256": "5915518f0f2c09916914b049391defb7491bae6af9c253e2c9ddbbf4c13415fa",
+      "blob": "07185e441636e399fa5597e0e2ccc18ca4772a2c",
+      "stored_sha256": "5915518f0f2c09916914b049391defb7491bae6af9c253e2c9ddbbf4c13415fa",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-application/src/resolution_application.rs": {
+      "worktree_sha256": "236536e96d78e1a591ba0b6c827b617cd057930138ba3676fe9dbc413d585f98",
+      "blob": "1a94f5dc1084eb44d3ca342ddf7ea186aeead00b",
+      "stored_sha256": "236536e96d78e1a591ba0b6c827b617cd057930138ba3676fe9dbc413d585f98",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-application/src/sessions/admission.rs": {
+      "worktree_sha256": "2a893becbf2829ee77a9acb17b4ea17b03688df78b29d574cca8a4d8a095be68",
+      "blob": "64489a2392821ddd6db4f723337dff7f44a0bf3a",
+      "stored_sha256": "2a893becbf2829ee77a9acb17b4ea17b03688df78b29d574cca8a4d8a095be68",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-application/src/sessions/authority.rs": {
+      "worktree_sha256": "91eae72ebb29faf4948345bb246e93a48e7f197c0c53008ee94de80b51f4ec55",
+      "blob": "be99b1d3bd3b54258112e60059277e7689f5c9ea",
+      "stored_sha256": "91eae72ebb29faf4948345bb246e93a48e7f197c0c53008ee94de80b51f4ec55",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-application/src/sessions/boundary.rs": {
+      "worktree_sha256": "ac96238155fde444b1af150c8d8fc3da9d4488cdfb3ff824b7fb990833aa75b9",
+      "blob": "929480cc453f9d1b214eea33a5fa05ad9457ba21",
+      "stored_sha256": "ac96238155fde444b1af150c8d8fc3da9d4488cdfb3ff824b7fb990833aa75b9",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-application/src/sessions/contracts.rs": {
+      "worktree_sha256": "de19a8b35dc08ca6142dd1a6c310a86c7d3b25d1946a386559cc18a68f1e16f3",
+      "blob": "09c1e4db2c5be6a26f87cc9f6e06ba40ed5c9f63",
+      "stored_sha256": "de19a8b35dc08ca6142dd1a6c310a86c7d3b25d1946a386559cc18a68f1e16f3",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-application/src/sessions/coordinator.rs": {
+      "worktree_sha256": "ff82cb879598e57dd30f2b0fb3cb6353157b538ef42c17fa006d2cad961ad58e",
+      "blob": "48d7408cfa4f27c6463b021a0d07dce175bf08b2",
+      "stored_sha256": "ff82cb879598e57dd30f2b0fb3cb6353157b538ef42c17fa006d2cad961ad58e",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-application/src/sessions/journal.rs": {
+      "worktree_sha256": "64e59cc16e9eec23628edc2d6c4bfd566305469c4f397ddbe13baf4c450ed521",
+      "blob": "3978ea155537d19663fea753bb690b58008d37e8",
+      "stored_sha256": "64e59cc16e9eec23628edc2d6c4bfd566305469c4f397ddbe13baf4c450ed521",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-application/src/sessions/mod.rs": {
+      "worktree_sha256": "6cc314580b962922374da74ff31a90095f746259a125480ae2387809db735992",
+      "blob": "d6b704dbe828a5e8dd0f83c4b7225dd32571ab68",
+      "stored_sha256": "6cc314580b962922374da74ff31a90095f746259a125480ae2387809db735992",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-application/src/sessions/verification.rs": {
+      "worktree_sha256": "13029c6196e7af36597e8ed13a568e56a1ce49a877f67d8bd56941361968d383",
+      "blob": "671bae5a5745735d7e2c8ad3357ab8ca2e3d5ada",
+      "stored_sha256": "13029c6196e7af36597e8ed13a568e56a1ce49a877f67d8bd56941361968d383",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-application/tests/context_planning.rs": {
+      "worktree_sha256": "79ba15e3e437ec7b98df32dbbb2c8cec3f44642c81537bd83baf94190c00d8ea",
+      "blob": "19210eebe6d70a375c5b9304efdffaae535ae4f5",
+      "stored_sha256": "79ba15e3e437ec7b98df32dbbb2c8cec3f44642c81537bd83baf94190c00d8ea",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-application/tests/invocation_qualification.rs": {
+      "worktree_sha256": "0b17c2b74b4bae74b14a7cfcd9ac222f815a63e8e8c696767bef3c4b0dcd6f36",
+      "blob": "bd42274aec619b6260864df6f1f3a39fdf642eff",
+      "stored_sha256": "0b17c2b74b4bae74b14a7cfcd9ac222f815a63e8e8c696767bef3c4b0dcd6f36",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-application/tests/invocation_resilience.rs": {
+      "worktree_sha256": "149a40339dcc10c12aa8c84f00d5eae6ff70ae9490aed93bd0cb107ee8d1332d",
+      "blob": "30a865429575ebce4526c99c05fc2dd353a21915",
+      "stored_sha256": "149a40339dcc10c12aa8c84f00d5eae6ff70ae9490aed93bd0cb107ee8d1332d",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-application/tests/output_verification.rs": {
+      "worktree_sha256": "f67b0e8152087842efdd0c03d13c2b3e8c15183789c06528bab81ecf49f1e843",
+      "blob": "47f3a15dd1095b8245d6e2f64aa6db2ca8316031",
+      "stored_sha256": "f67b0e8152087842efdd0c03d13c2b3e8c15183789c06528bab81ecf49f1e843",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-application/tests/policy_application.rs": {
+      "worktree_sha256": "6b77ff61a0fa40ddbfee4ad6b8fe65528a1ff00628b6e01ba0578016806e11db",
+      "blob": "c6cd045d87a7ea0d76698ba13dd5decf71e0d8d3",
+      "stored_sha256": "6b77ff61a0fa40ddbfee4ad6b8fe65528a1ff00628b6e01ba0578016806e11db",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-application/tests/prompt_ir.rs": {
+      "worktree_sha256": "ca903ae173a12c2f05699be41dc4103ae555768b86f4e6d3eca17cd1b2a77878",
+      "blob": "4928d4cfd453abb5c4054ff24235fe0d252dc3e2",
+      "stored_sha256": "ca903ae173a12c2f05699be41dc4103ae555768b86f4e6d3eca17cd1b2a77878",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-application/tests/resolution_application.rs": {
+      "worktree_sha256": "e43e194a12f58e0f29f5481e1bd837b9e73ddab8a7dd7b90e5e05327524a3de0",
+      "blob": "8d892ff24da685a3e93b2f1797da9d6cbdacf901",
+      "stored_sha256": "e43e194a12f58e0f29f5481e1bd837b9e73ddab8a7dd7b90e5e05327524a3de0",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-application/tests/session_contracts.rs": {
+      "worktree_sha256": "b92fb11638436ea30bbe69c54312c33846159074c166b40119c092e2b8c47b21",
+      "blob": "abbe5a5d0d851b63e978560943b05bafed63b9b1",
+      "stored_sha256": "b92fb11638436ea30bbe69c54312c33846159074c166b40119c092e2b8c47b21",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-application/tests/session_runtime.rs": {
+      "worktree_sha256": "f821b8d6073ff95655aa14c8a46af54277b4cac02412b9056cda77b5d04252fd",
+      "blob": "11508ac96e43768155e244b04db1d58c45e9f6d3",
+      "stored_sha256": "f821b8d6073ff95655aa14c8a46af54277b4cac02412b9056cda77b5d04252fd",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-application/tests/support/closed_loop.rs": {
+      "worktree_sha256": "3e6356839105ce2a0e8e9adff729a784df5ad460036e2fb048d6d31bfecc4495",
+      "blob": "c0ceae151789d6921334d6166ab45153b75ad453",
+      "stored_sha256": "3e6356839105ce2a0e8e9adff729a784df5ad460036e2fb048d6d31bfecc4495",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-context/src/planning.rs": {
+      "worktree_sha256": "efb17c96586eaaaae1ad3f49eaf7ad3487f17d446f6e8c2da5ed6cce9bf2c024",
+      "blob": "2ca5484e9bb260b2fb5edbe257b6f83817c66189",
+      "stored_sha256": "efb17c96586eaaaae1ad3f49eaf7ad3487f17d446f6e8c2da5ed6cce9bf2c024",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-daemon/src/bin/cg.rs": {
+      "worktree_sha256": "d18891834028d96d973de0cbf183529ce4cdee0f8e646ddd8c440894e0478120",
+      "blob": "d4aed274dfcb708475ea3935bd82d754f4f8c265",
+      "stored_sha256": "d18891834028d96d973de0cbf183529ce4cdee0f8e646ddd8c440894e0478120",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-daemon/src/cognitive_store.rs": {
+      "worktree_sha256": "f9da507fcdf12c30b712fde6d1e65429aed6b5c40c99bc514dc430519620483a",
+      "blob": "65772c8053eb3c0be8387d34d51b9b741ee4224f",
+      "stored_sha256": "f9da507fcdf12c30b712fde6d1e65429aed6b5c40c99bc514dc430519620483a",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-daemon/src/declarative_cli/host_mapping.rs": {
+      "worktree_sha256": "25d0ad6dab3f06e1d06382f61fa2e0b12a8f9d66308556b2689a407b24492359",
+      "blob": "f44fb982d68180af6c68483d9d6ce2437f88c392",
+      "stored_sha256": "25d0ad6dab3f06e1d06382f61fa2e0b12a8f9d66308556b2689a407b24492359",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-daemon/src/declarative_cli/inputs.rs": {
+      "worktree_sha256": "f2209d6a5b6bdcb91f86c89272a2ecbaef060e5cf8a8e451e080ff0c92b2f1d7",
+      "blob": "291048601e98774c866294f22d06f3a8e51c86a2",
+      "stored_sha256": "f2209d6a5b6bdcb91f86c89272a2ecbaef060e5cf8a8e451e080ff0c92b2f1d7",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-daemon/src/invocation_host/mod.rs": {
+      "worktree_sha256": "1cfbd38f0c06e96fea313807ac6a970220c1222021e9a9a7d6630c08bc62c27b",
+      "blob": "104ccdde40cfbb6cc6c45ee8080c8d2440bfd9b2",
+      "stored_sha256": "1cfbd38f0c06e96fea313807ac6a970220c1222021e9a9a7d6630c08bc62c27b",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-daemon/src/lib.rs": {
+      "worktree_sha256": "bbf42a027d60a74d942f3bb45497dc11cb0bc7662b7c46562323873c121add95",
+      "blob": "dc832ebbecd5c6f635c6922b2e6785a0c5477647",
+      "stored_sha256": "bbf42a027d60a74d942f3bb45497dc11cb0bc7662b7c46562323873c121add95",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-daemon/src/local_mcp/runtime.rs": {
+      "worktree_sha256": "bf77ec9942288de227df3cd81b52fab768ef939b513955d1d651888a472698cf",
+      "blob": "d1353fdd78d1b9b24c0fb71fe4ecd6737c956339",
+      "stored_sha256": "bf77ec9942288de227df3cd81b52fab768ef939b513955d1d651888a472698cf",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-daemon/src/local_mcp/tests.rs": {
+      "worktree_sha256": "cbef6f89015336156b0961408c754e9651dc0c883ebfac723ba2f4c397ea946f",
+      "blob": "f2602584362a5d49d0db71211a7f171903e8462f",
+      "stored_sha256": "cbef6f89015336156b0961408c754e9651dc0c883ebfac723ba2f4c397ea946f",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-daemon/src/local_sessions.rs": {
+      "worktree_sha256": "1d8e8297a4c1a711f31e319d1318ce326ddcd4c45f385136d173a46ffdb99042",
+      "blob": "2dba252381416e3062534c785d39d9c6fd01c231",
+      "stored_sha256": "1d8e8297a4c1a711f31e319d1318ce326ddcd4c45f385136d173a46ffdb99042",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-daemon/src/mcp_client/host.rs": {
+      "worktree_sha256": "6e1eb0d17d88978c945fe045d9679e3703cef8da2bd7a178b72482cdba4387b6",
+      "blob": "1f558f08867a2e0e845f66ad114e6fc910391fc8",
+      "stored_sha256": "6e1eb0d17d88978c945fe045d9679e3703cef8da2bd7a178b72482cdba4387b6",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-daemon/src/mcp_client/host_tests.rs": {
+      "worktree_sha256": "c715795a65ed8bbbdf5e55541f4bd3fb2f389cc293678a0f01748d57409f68b3",
+      "blob": "76d1c79d92340f38deae68193f2cef04f320d6ee",
+      "stored_sha256": "c715795a65ed8bbbdf5e55541f4bd3fb2f389cc293678a0f01748d57409f68b3",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-daemon/src/mcp_client/mapping.rs": {
+      "worktree_sha256": "81d77dfbfbb4f411c5b0685d70b23249adcb624e9d73923d4852a50e9dd87a89",
+      "blob": "5eefd75b1f97d3731ab2643115ee974ccbc249c1",
+      "stored_sha256": "81d77dfbfbb4f411c5b0685d70b23249adcb624e9d73923d4852a50e9dd87a89",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-daemon/src/mcp_client/mapping_tests.rs": {
+      "worktree_sha256": "73f9ce7ae85ddb950a64a74bd3803151ea16d3e1be882046128606ccc1397d46",
+      "blob": "708dfda854e4848ab0ceaf19a4d689bf76b71f25",
+      "stored_sha256": "73f9ce7ae85ddb950a64a74bd3803151ea16d3e1be882046128606ccc1397d46",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-daemon/src/mcp_client/mod.rs": {
+      "worktree_sha256": "e828cd52fc47df08fb3b56c986fb15c7f74e390c5602c9e790f495a19aacfd37",
+      "blob": "5cfba4b8a596c035e0e398ccb5e11e4f3f9eecc6",
+      "stored_sha256": "e828cd52fc47df08fb3b56c986fb15c7f74e390c5602c9e790f495a19aacfd37",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-daemon/src/mcp_client/normalization.rs": {
+      "worktree_sha256": "79a34192bf8b9b43a69eab98ff72b4d9c43775616a842011d718f68c838dfbf4",
+      "blob": "739db184c5b8d7b5cfffd4b4e8a2e3aa1249cedd",
+      "stored_sha256": "79a34192bf8b9b43a69eab98ff72b4d9c43775616a842011d718f68c838dfbf4",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-daemon/src/mcp_client/normalization_tests.rs": {
+      "worktree_sha256": "53918ecf9148aaa53f3536fb956bacbd193cdece3e4673b4eff49a630741ed95",
+      "blob": "49d07a493d08b6cf0e45e65ed93035f16051dc6d",
+      "stored_sha256": "53918ecf9148aaa53f3536fb956bacbd193cdece3e4673b4eff49a630741ed95",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-daemon/src/mcp_client/protocol.rs": {
+      "worktree_sha256": "9de05f7efb6804a0d4259e3d86cc065c765650a424d17c8d434462ea456ce8c2",
+      "blob": "6b58acce58e1d5e377dd4ec49ea62b2734f912ca",
+      "stored_sha256": "9de05f7efb6804a0d4259e3d86cc065c765650a424d17c8d434462ea456ce8c2",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-daemon/src/mcp_client/protocol_tests.rs": {
+      "worktree_sha256": "9f3511f4684869040385d1c0073b45a76344ec502ec62d6fbd0ef8fefe5fea94",
+      "blob": "ca47814e35bcbee30c0a29cdefeba220e011c04a",
+      "stored_sha256": "9f3511f4684869040385d1c0073b45a76344ec502ec62d6fbd0ef8fefe5fea94",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-daemon/src/mcp_client/transport.rs": {
+      "worktree_sha256": "1c860232d7fc942437774b52555d7473a225738747bfb7ba1c69a9ba76942619",
+      "blob": "b6e5dd774ca582795608164b24b8d511f026a51c",
+      "stored_sha256": "1c860232d7fc942437774b52555d7473a225738747bfb7ba1c69a9ba76942619",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-daemon/src/model_adapters.rs": {
+      "worktree_sha256": "be013265e2da65033431d4d4a6db939d22760f0b6ffae889365369f2980a324a",
+      "blob": "8991a152adfff329207efdd97f7e6a10cc8333fb",
+      "stored_sha256": "be013265e2da65033431d4d4a6db939d22760f0b6ffae889365369f2980a324a",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-daemon/src/session_store.rs": {
+      "worktree_sha256": "d018bb8862b585595528caa8c3bb1a51faf02d77498a34e21a1fd773809422a5",
+      "blob": "f5d07d43e272714eb2d46428a1d1ad14b3b3a31e",
+      "stored_sha256": "d018bb8862b585595528caa8c3bb1a51faf02d77498a34e21a1fd773809422a5",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-daemon/src/session_store_tests.rs": {
+      "worktree_sha256": "9a2fba23364f505c443848915686e2aae3930bb0c7140a0426fbd3bd106fcf4d",
+      "blob": "7347c1ee06c36d3a65150e52d33b7c0c5751bd4d",
+      "stored_sha256": "9a2fba23364f505c443848915686e2aae3930bb0c7140a0426fbd3bd106fcf4d",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-daemon/tests/codex_canonical.rs": {
+      "worktree_sha256": "7b0de24e6681ba4923a127fa39bb690856e19071400de810fb28d49540d43e5f",
+      "blob": "bf1259b632f9ba07cca195ff3447c5d9e9474071",
+      "stored_sha256": "7b0de24e6681ba4923a127fa39bb690856e19071400de810fb28d49540d43e5f",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-daemon/tests/codex_isolation.rs": {
+      "worktree_sha256": "25adc382870fa5eb59cee94a9e6a50916a1970b4146d32b5078c9eeeb277773f",
+      "blob": "f1c287e4294fcc77dcc135504af6b094fa8afcf6",
+      "stored_sha256": "25adc382870fa5eb59cee94a9e6a50916a1970b4146d32b5078c9eeeb277773f",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-daemon/tests/declarative_cli.rs": {
+      "worktree_sha256": "e4e18000e1807109d48c4ca30d50892211444eab022ff74e0977048714a27842",
+      "blob": "4347e25723fd03fd2f7f9aae5bda0cdb7e6dfd65",
+      "stored_sha256": "e4e18000e1807109d48c4ca30d50892211444eab022ff74e0977048714a27842",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-daemon/tests/mcp_client.rs": {
+      "worktree_sha256": "de5aa39e6b7ba126f522a761cf8ae5cedef695faa687990f321b170a82d97a8e",
+      "blob": "80cd6d949e64cfabda2f1b858ecef9230793da24",
+      "stored_sha256": "de5aa39e6b7ba126f522a761cf8ae5cedef695faa687990f321b170a82d97a8e",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-daemon/tests/model_adapters.rs": {
+      "worktree_sha256": "855b9cc5aa768f8630ed28af7890dddf2cd52db548593ac3fb089a586ea2e18c",
+      "blob": "f123da6f70877c016080d0f10c09cb9742455b1c",
+      "stored_sha256": "855b9cc5aa768f8630ed28af7890dddf2cd52db548593ac3fb089a586ea2e18c",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-daemon/tests/prompt_rendering.rs": {
+      "worktree_sha256": "54fd8b8069001779ed3a42210e8bf6766e4caf58a8a21aad74bfe8f9b1387fb7",
+      "blob": "d6b82c31826893d9bd40abf5dc226b1f760021bc",
+      "stored_sha256": "54fd8b8069001779ed3a42210e8bf6766e4caf58a8a21aad74bfe8f9b1387fb7",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-domain/src/semantic_task.rs": {
+      "worktree_sha256": "091fdadb3f1d33badcfb1aa22fed08b5d44cfdb8d5d8fa43a87cc71d6e21e396",
+      "blob": "8dfb1f0ace2b2a7eb41a2fb5390bfdeccff029ff",
+      "stored_sha256": "0a11f84fe87f6e18be30eae4145b121c98ea7a45f666fc1f90abe4bcf2f0ace7",
+      "restore_crlf_lines": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57,
+        58,
+        59,
+        60,
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68,
+        69,
+        70,
+        71,
+        72,
+        73,
+        74,
+        75,
+        76,
+        77,
+        78,
+        79,
+        80,
+        81,
+        82,
+        83,
+        84,
+        85,
+        86,
+        87,
+        88,
+        89,
+        90,
+        91,
+        92,
+        93,
+        94,
+        95,
+        96,
+        97,
+        98,
+        99,
+        100,
+        101,
+        102,
+        103,
+        104,
+        105,
+        106,
+        107,
+        108,
+        109,
+        110,
+        111,
+        112,
+        113,
+        114,
+        115,
+        116,
+        117,
+        118,
+        119,
+        120,
+        121,
+        122,
+        123,
+        124,
+        125,
+        126,
+        127,
+        128,
+        129,
+        130,
+        131,
+        132,
+        133,
+        134,
+        135,
+        136,
+        137,
+        138,
+        139,
+        140,
+        141,
+        142,
+        143,
+        144,
+        145,
+        146,
+        147,
+        148,
+        149,
+        150,
+        151,
+        152,
+        153,
+        154,
+        155,
+        156,
+        157,
+        158,
+        159,
+        160,
+        161,
+        162,
+        163,
+        164,
+        165,
+        166,
+        167,
+        168,
+        169,
+        170,
+        171,
+        172,
+        173,
+        174,
+        175,
+        176,
+        177,
+        178,
+        179,
+        180,
+        181,
+        182,
+        183,
+        184,
+        185,
+        186,
+        187,
+        188,
+        189,
+        190,
+        191,
+        192,
+        193,
+        194,
+        195,
+        196,
+        197,
+        198,
+        199,
+        200,
+        201,
+        202,
+        203,
+        204,
+        205,
+        206,
+        207,
+        208,
+        209,
+        210,
+        211,
+        212,
+        213,
+        214,
+        215,
+        216,
+        217,
+        218,
+        219,
+        220,
+        221,
+        222,
+        223,
+        224,
+        225,
+        226,
+        227,
+        228,
+        229,
+        230,
+        231,
+        232,
+        233,
+        234,
+        235,
+        236,
+        237,
+        238,
+        239,
+        240,
+        241,
+        242,
+        243,
+        244,
+        245,
+        246,
+        247,
+        248,
+        249,
+        250,
+        251,
+        252,
+        253,
+        254,
+        255,
+        256,
+        257,
+        258,
+        259,
+        260,
+        261,
+        262,
+        263,
+        264,
+        265,
+        266,
+        267,
+        268,
+        269,
+        270,
+        271,
+        272,
+        273,
+        274,
+        275,
+        276,
+        277,
+        278,
+        279,
+        280,
+        281,
+        282,
+        283,
+        284,
+        285,
+        286,
+        287,
+        288,
+        289,
+        290,
+        291,
+        292,
+        293,
+        294,
+        295,
+        296,
+        297,
+        298,
+        299,
+        300,
+        301,
+        302,
+        303,
+        304,
+        305,
+        306,
+        307,
+        308,
+        309,
+        310,
+        311,
+        312,
+        313,
+        314,
+        315,
+        316,
+        317,
+        318,
+        319,
+        320,
+        321,
+        322,
+        323,
+        324,
+        325,
+        326,
+        327,
+        328,
+        329,
+        330,
+        331,
+        332,
+        333,
+        334,
+        335,
+        336,
+        337,
+        338,
+        339,
+        340,
+        341,
+        342,
+        343,
+        344,
+        345,
+        346,
+        347,
+        348,
+        349,
+        350,
+        351,
+        352,
+        353,
+        354,
+        355,
+        356,
+        357,
+        358,
+        359,
+        360,
+        361,
+        362,
+        363,
+        364,
+        365,
+        366,
+        367,
+        368,
+        369,
+        370,
+        371,
+        372,
+        373,
+        374,
+        375,
+        376,
+        377,
+        378,
+        379,
+        380,
+        381,
+        382,
+        383,
+        384,
+        385,
+        386,
+        387,
+        388,
+        389,
+        390,
+        391,
+        392,
+        393,
+        394,
+        395,
+        396,
+        397,
+        398,
+        399,
+        400,
+        401,
+        402,
+        403,
+        404,
+        405,
+        406,
+        407,
+        408,
+        409,
+        410,
+        411,
+        412,
+        413,
+        414,
+        415,
+        416,
+        417,
+        418,
+        419,
+        420,
+        421
+      ],
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-domain/tests/semantic_task_v1.rs": {
+      "worktree_sha256": "c79452ab4319ce8ca7e618dc559bbc8673749d0e2599ff81db50a5a2496beaf1",
+      "blob": "15097a5b2907d491fc0680ac68abd9858e116895",
+      "stored_sha256": "c79452ab4319ce8ca7e618dc559bbc8673749d0e2599ff81db50a5a2496beaf1",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "docs/README.md": {
+      "worktree_sha256": "1ae635c466d26cf0e7d5c32ec92e59d04451c97aa432658003ccf445904e9482",
+      "blob": "2f678697f17c1187dbc84fda35efef7878371390",
+      "stored_sha256": "1ae635c466d26cf0e7d5c32ec92e59d04451c97aa432658003ccf445904e9482",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "docs/arc42/06-runtime-view.md": {
+      "worktree_sha256": "1cc10817f7921ea08baf6b56c390d5d05349f9aca306076c038c6194e17facfc",
+      "blob": "6e519487af209ab81eda662f08ac629280deb98e",
+      "stored_sha256": "1cc10817f7921ea08baf6b56c390d5d05349f9aca306076c038c6194e17facfc",
+      "disposition": "already_on_main",
+      "successor_tracking": []
+    },
+    "docs/codex-runtime.md": {
+      "worktree_sha256": "c1cf377f9349b3d9aa60c892461439064a6199dd8242873637239d110f4b699b",
+      "blob": "841deb84c5e678524cc0371bf1e8c6728688a74d",
+      "stored_sha256": "c1cf377f9349b3d9aa60c892461439064a6199dd8242873637239d110f4b699b",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "docs/current-architecture-state.md": {
+      "worktree_sha256": "899f415cb67e2e260885eb991fb59691ebca30d3e266bf2c6423f5b3258ab046",
+      "blob": "7d1df719c7cb5bb5d8fccee74eaaa759cbc8894d",
+      "stored_sha256": "899f415cb67e2e260885eb991fb59691ebca30d3e266bf2c6423f5b3258ab046",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "docs/local-mcp-server.md": {
+      "worktree_sha256": "e4be5e3d436af78df08494b80fb4d099239a0dd4015ca655cf69c1832928de18",
+      "blob": "209cb74685bf328b24b56f4876d130aa82c6e75d",
+      "stored_sha256": "e4be5e3d436af78df08494b80fb4d099239a0dd4015ca655cf69c1832928de18",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "docs/mcp-connector-runtime.md": {
+      "worktree_sha256": "f671cb8b6833981b85dbdd8c122119989e8ed0c3916a71ce44e6a07ee9c34830",
+      "blob": "9d3bfec30550a99b915ddba8cfcd5769157110ec",
+      "stored_sha256": "f671cb8b6833981b85dbdd8c122119989e8ed0c3916a71ce44e6a07ee9c34830",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "docs/shared-session-contract.md": {
+      "worktree_sha256": "5a06397821247100beb20e7372824ce8094bea2058bbed4b2952f889a09d0c66",
+      "blob": "dcbbacb70d77e80c7d70710cf3910d0ecfa3122d",
+      "stored_sha256": "5a06397821247100beb20e7372824ce8094bea2058bbed4b2952f889a09d0c66",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "docs/shared-session-implementation.md": {
+      "worktree_sha256": "4492460208db684e51749da8679f5344026a324bbf5e7cf8c2e307b7434f7ec2",
+      "blob": "acb3d4c7284ee9cfc2e74b3197d57b441e609983",
+      "stored_sha256": "4492460208db684e51749da8679f5344026a324bbf5e7cf8c2e307b7434f7ec2",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "schemas/codex/v2/common.schema.json": {
+      "worktree_sha256": "42e37ee7c880a8d9d65637a8a6193eaffc33360306aa730d7577fcd084039f28",
+      "blob": "8766cb4886a9f8633bfcec0b5ad7dab633e9c18b",
+      "stored_sha256": "42e37ee7c880a8d9d65637a8a6193eaffc33360306aa730d7577fcd084039f28",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "schemas/codex/v2/request.schema.json": {
+      "worktree_sha256": "47d9f0dd18d1f6b259b3b9929f0287d61ca3145efbac361b9858b3ecd9aab7eb",
+      "blob": "922f5884a594baf0ba309df1bd3c3d3eabd4d64d",
+      "stored_sha256": "47d9f0dd18d1f6b259b3b9929f0287d61ca3145efbac361b9858b3ecd9aab7eb",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "schemas/codex/v2/response.schema.json": {
+      "worktree_sha256": "69a0a80c67a9cd514c4f58042041230c68acdf5d90a56539eeee012a11ebec9f",
+      "blob": "90483a64d026189bcd313eb3cdd2fd4d7b38f76b",
+      "stored_sha256": "69a0a80c67a9cd514c4f58042041230c68acdf5d90a56539eeee012a11ebec9f",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "scripts/check-mcp-client-coverage.py": {
+      "worktree_sha256": "4e9502f8ee01d881c6023f8e651f3e83c2ac0ebd55d747f354fd53ea996fb86b",
+      "blob": "fec5c0afd018808e023884a8ba09748cde277a84",
+      "stored_sha256": "4e9502f8ee01d881c6023f8e651f3e83c2ac0ebd55d747f354fd53ea996fb86b",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "scripts/check-session-runtime-coverage.py": {
+      "worktree_sha256": "f6a1e9e5347cf9a2b2129aaf64d005624cfcc4e87a62c2871bb14ae6eb39749c",
+      "blob": "264e69e2cb622f27d55e06a918d7638eab6d6e5e",
+      "stored_sha256": "f6a1e9e5347cf9a2b2129aaf64d005624cfcc4e87a62c2871bb14ae6eb39749c",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "scripts/qualify-shared-sessions.sh": {
+      "worktree_sha256": "791eb2a3b77fa5501025d67e7a2658fa8924304772d14a6c9b81e15253c97335",
+      "blob": "7b83b0c7fc2cc028f1c4c72eb33f061b292c953e",
+      "stored_sha256": "791eb2a3b77fa5501025d67e7a2658fa8924304772d14a6c9b81e15253c97335",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "scripts/quality-gates.json": {
+      "worktree_sha256": "afcac90f1727598c7afee34df589971b036a8c43a572eceb719c286831b0da37",
+      "blob": "3f2f078b8943ac3577ae7b1f647119d80e4654ba",
+      "stored_sha256": "afcac90f1727598c7afee34df589971b036a8c43a572eceb719c286831b0da37",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "tests/fixtures/mcp-client-v1/server.py": {
+      "worktree_sha256": "6beb06c4505c26a0435a620d44e9d46dd0fcb4c3a7a420576e9184cb46d37969",
+      "blob": "10a0ff703bb08d73af323e5b603fb788e4c39749",
+      "stored_sha256": "6beb06c4505c26a0435a620d44e9d46dd0fcb4c3a7a420576e9184cb46d37969",
+      "disposition": "already_on_main",
+      "successor_tracking": []
+    },
+    "crates/gateway-application/src/connector_policy.rs": {
+      "worktree_sha256": "db8dbd0990d2891132d5b78a2817d51e8bde71c307ad7e3a3a09e2b5b3ac881f",
+      "blob": "5f636953ee7af105ee0cff2c2d21806b3843d9c6",
+      "stored_sha256": "db8dbd0990d2891132d5b78a2817d51e8bde71c307ad7e3a3a09e2b5b3ac881f",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-application/src/connector_proposals.rs": {
+      "worktree_sha256": "4a16e63e8a9956c26505609687f12a4a80bdac1f5f7148d618d8b117cdd117d8",
+      "blob": "1080f8b3b2d0b6c1c6f57842fe83d382f5402a61",
+      "stored_sha256": "4a16e63e8a9956c26505609687f12a4a80bdac1f5f7148d618d8b117cdd117d8",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-application/src/connector_resilience.rs": {
+      "worktree_sha256": "51ba56c277eee5936f0d3f09e6228760c6c94a52113b75257a6e9eac4998a188",
+      "blob": "2e59af6a07eacd6a7b68ef5aa16e2f937c8f98f5",
+      "stored_sha256": "51ba56c277eee5936f0d3f09e6228760c6c94a52113b75257a6e9eac4998a188",
+      "disposition": "already_on_main",
+      "successor_tracking": []
+    },
+    "crates/gateway-application/src/retained_observations.rs": {
+      "worktree_sha256": "0a8a0b87d7abb33656dedd5d15e01acc0ba46155910793ab9302769ffec797fb",
+      "blob": "d7de414c0ad69a03f62063100797d5fa6b520eda",
+      "stored_sha256": "0a8a0b87d7abb33656dedd5d15e01acc0ba46155910793ab9302769ffec797fb",
+      "disposition": "already_on_main",
+      "successor_tracking": []
+    },
+    "crates/gateway-application/src/sessions/connector_execution.rs": {
+      "worktree_sha256": "1348127d0ecc39acee1103bf7e82297253ca1dcc5084170c7b8eee2ad44318eb",
+      "blob": "ea899c14a4a25302d748e590c98042f65a576e11",
+      "stored_sha256": "1348127d0ecc39acee1103bf7e82297253ca1dcc5084170c7b8eee2ad44318eb",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-application/src/sessions/connector_goals.rs": {
+      "worktree_sha256": "b8800bd5b391992af1d586676b2fefda397393322d309be64f690e9ef7cb458a",
+      "blob": "fdf2335405c3906669b644ce20c6c4cc1bb4e9a0",
+      "stored_sha256": "b8800bd5b391992af1d586676b2fefda397393322d309be64f690e9ef7cb458a",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-application/src/sessions/pre_execution_goal.rs": {
+      "worktree_sha256": "a93736f4ff32392327303a992066383372f31325e965d9afaf2a4d9e5f2077ca",
+      "blob": "ccb7529f900e1174feb48e544fa0ff5e94f44172",
+      "stored_sha256": "a93736f4ff32392327303a992066383372f31325e965d9afaf2a4d9e5f2077ca",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-application/src/sessions/readback_storage.rs": {
+      "worktree_sha256": "4976aa50327aa4cbd0ae0272cbffbe7ee0a4fffcb3ba90d6d08eb577abe258bc",
+      "blob": "ec55d7adc97240d32002ab3dc47b828ef8deacf2",
+      "stored_sha256": "4976aa50327aa4cbd0ae0272cbffbe7ee0a4fffcb3ba90d6d08eb577abe258bc",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-application/src/sessions/resources.rs": {
+      "worktree_sha256": "c691ee9e717f87dd41633da29c9aba4437da62e7bf1e63cdde4ecc01980b3dad",
+      "blob": "01919d18593d489c2d5f5c5a5626582d5c327ef9",
+      "stored_sha256": "c691ee9e717f87dd41633da29c9aba4437da62e7bf1e63cdde4ecc01980b3dad",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-application/tests/connector_batch_record_contracts.rs": {
+      "worktree_sha256": "7c23cce3a6ba1e4485bd69bdbee8de962973f8c611de37870e330336d1a8c245",
+      "blob": "75e46f526e3d783d9ecc50edef69e4f7d88b7250",
+      "stored_sha256": "7c23cce3a6ba1e4485bd69bdbee8de962973f8c611de37870e330336d1a8c245",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-application/tests/connector_consent.rs": {
+      "worktree_sha256": "d9dbb98242aa2f6b6adde2f05a6dd3773332d07cf1964b0d2a7264eaee106ddf",
+      "blob": "eb3144bd4ac0625193515e93c3236ae9ae151fd3",
+      "stored_sha256": "d9dbb98242aa2f6b6adde2f05a6dd3773332d07cf1964b0d2a7264eaee106ddf",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-application/tests/connector_goal_contracts.rs": {
+      "worktree_sha256": "b4fb378c6f995500004ebbbe686a91842bd03ba0361c4ccd2402e863c8874856",
+      "blob": "1018566e3804d2cee45c2248e2c91bdd768a4197",
+      "stored_sha256": "b4fb378c6f995500004ebbbe686a91842bd03ba0361c4ccd2402e863c8874856",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-application/tests/connector_goal_verification.rs": {
+      "worktree_sha256": "cbb696a399d28525a4cf793318293f73a349b40367882d45c4048b721baf991d",
+      "blob": "76d419518d42a97e03d135bb2713ac5f111be7ff",
+      "stored_sha256": "cbb696a399d28525a4cf793318293f73a349b40367882d45c4048b721baf991d",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-application/tests/connector_policy.rs": {
+      "worktree_sha256": "5b75b726cce541b5fe4553e3a4d2fbabe7b4e052e56b42fe3d283e3298efec70",
+      "blob": "413192801b6a29b93e56417c73d02e38673c641c",
+      "stored_sha256": "5b75b726cce541b5fe4553e3a4d2fbabe7b4e052e56b42fe3d283e3298efec70",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-application/tests/connector_resilience.rs": {
+      "worktree_sha256": "a80ec7632f9aa2aa76098eb47263b9fe40a605b7ec3ff16cbdac361bc951ab82",
+      "blob": "444447a1408024c25f83358890a2355ca1c94f5f",
+      "stored_sha256": "a80ec7632f9aa2aa76098eb47263b9fe40a605b7ec3ff16cbdac361bc951ab82",
+      "disposition": "already_on_main",
+      "successor_tracking": []
+    },
+    "crates/gateway-application/tests/connector_result_contracts.rs": {
+      "worktree_sha256": "dc0ca82fa2130936434211e1f93599089f47c4018c03bd17fca377dfa2ccf9f5",
+      "blob": "80301139b91c6bc04954e23abf2bce4e0f98da1a",
+      "stored_sha256": "dc0ca82fa2130936434211e1f93599089f47c4018c03bd17fca377dfa2ccf9f5",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-application/tests/connector_session_turn_validation.rs": {
+      "worktree_sha256": "224ba406c96d36e51390f05b4bfd0646fe60a4cbd2442ca82e3407a8162cba5e",
+      "blob": "112e68b4faeeca0b2588667a2b9860fb880112a0",
+      "stored_sha256": "224ba406c96d36e51390f05b4bfd0646fe60a4cbd2442ca82e3407a8162cba5e",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-application/tests/session_resources.rs": {
+      "worktree_sha256": "cd31a5e79f6b8ed72a2bbb3da5a91bc3c525f0c8f30b02845c4d8d94d7f1a328",
+      "blob": "778c6b7f9fa685eb101b0e67385448b8101bcb4c",
+      "stored_sha256": "cd31a5e79f6b8ed72a2bbb3da5a91bc3c525f0c8f30b02845c4d8d94d7f1a328",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-application/tests/support/pre_execution_goal.rs": {
+      "worktree_sha256": "a5c181977d49b2bc26c11f73842d61db9a66664ba1059c49f3eeaf9216650c0b",
+      "blob": "7bceef6e3293977ac2a89ef86eb37e2ff843503f",
+      "stored_sha256": "a5c181977d49b2bc26c11f73842d61db9a66664ba1059c49f3eeaf9216650c0b",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-daemon/src/declarative_cli/host_mapping/native_producer_fixture.rs": {
+      "worktree_sha256": "78c096843291c9f3809e0f9b01a2bc1faa010d73eb7953a5af64da2abe0a78f7",
+      "blob": "136d7d46c093c8fd50aafa1b9b416dee16f7b98b",
+      "stored_sha256": "78c096843291c9f3809e0f9b01a2bc1faa010d73eb7953a5af64da2abe0a78f7",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-daemon/src/invocation_host/session_tools.rs": {
+      "worktree_sha256": "8745e3d0ae130457c4e36199a283ecf5063b2bb2a13f73f2d4ea6f2bfa463b6d",
+      "blob": "3c96ec2b31a59f644ccf397633c69f6a0b5a3890",
+      "stored_sha256": "8745e3d0ae130457c4e36199a283ecf5063b2bb2a13f73f2d4ea6f2bfa463b6d",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-daemon/src/local_sessions/capability_alias.rs": {
+      "worktree_sha256": "3b7c6a390edf021a9b7f7596f76fc82a6a77c74e9407338dc5446a4f946e367b",
+      "blob": "47a197087df88241f389cb950c60d908ae986c97",
+      "stored_sha256": "3b7c6a390edf021a9b7f7596f76fc82a6a77c74e9407338dc5446a4f946e367b",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-daemon/src/local_sessions/goal_verifier.rs": {
+      "worktree_sha256": "896f94300efd7ba56dbb74f6b7dd116463645b457df9117abf3f7d5244eb186e",
+      "blob": "1cc3fa63cf75d00a02a242b2c6c886d21aac9c4c",
+      "stored_sha256": "896f94300efd7ba56dbb74f6b7dd116463645b457df9117abf3f7d5244eb186e",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-daemon/src/local_sessions/runtime_admission.rs": {
+      "worktree_sha256": "2a3ab1d411b0597f8eb1a0e2a4702dd6f33fbfcb452a862b94c4386f18a8ace5",
+      "blob": "ab06eb4bbbe70274f3b7a1a1d37680413a2effb4",
+      "stored_sha256": "2a3ab1d411b0597f8eb1a0e2a4702dd6f33fbfcb452a862b94c4386f18a8ace5",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-daemon/src/local_sessions/runtime_admission/before_goal.rs": {
+      "worktree_sha256": "42d4fa0517482b693ba6ab45e9a07c5accfe1832ff1e41bfbfab104b0d8648e7",
+      "blob": "9ea2ac7d8246c795d2afc41b95953fbe0ec9b112",
+      "stored_sha256": "42d4fa0517482b693ba6ab45e9a07c5accfe1832ff1e41bfbfab104b0d8648e7",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-daemon/src/local_sessions/runtime_admission/before_goal/tests.rs": {
+      "worktree_sha256": "009a783ae186365f5976430da6acbc0b9e105f100628bbb162d7738b02b21d5f",
+      "blob": "82094df90aa7075aa582298d90ef3115ea777519",
+      "stored_sha256": "009a783ae186365f5976430da6acbc0b9e105f100628bbb162d7738b02b21d5f",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-daemon/src/local_sessions/runtime_admission/connector_source.rs": {
+      "worktree_sha256": "2f4a67cd86bba72d36b982c5994838108a7774249e39641748e46746fcbd32ab",
+      "blob": "79cec4bb46a8ca8cf292987526874c681e4889fd",
+      "stored_sha256": "2f4a67cd86bba72d36b982c5994838108a7774249e39641748e46746fcbd32ab",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-daemon/src/local_sessions/runtime_admission/consent_preparation.rs": {
+      "worktree_sha256": "fe0d215d6d7d03eb6109b475d8808848f74c25f8adac74c9147ff4c66d9e67bf",
+      "blob": "018d8494a891cb5b11a412f25c34d592d97423b5",
+      "stored_sha256": "fe0d215d6d7d03eb6109b475d8808848f74c25f8adac74c9147ff4c66d9e67bf",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-daemon/src/local_sessions/runtime_admission/consent_preparation/tests.rs": {
+      "worktree_sha256": "74d94a968d9e5d999d7235a92e0c6a52a644c1dbf25bd6783c8650616fd57591",
+      "blob": "0f6dc67f5013a5c17d9afb866c96cc9e2a3d8f11",
+      "stored_sha256": "74d94a968d9e5d999d7235a92e0c6a52a644c1dbf25bd6783c8650616fd57591",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-daemon/src/local_sessions/runtime_admission/current_producer_definitions.rs": {
+      "worktree_sha256": "07deeed72fde29264610dcd121f0de562f78aa176f5e43aa34602f12cb4ec802",
+      "blob": "ba31741162c1c12d1599116facb76561c857b054",
+      "stored_sha256": "07deeed72fde29264610dcd121f0de562f78aa176f5e43aa34602f12cb4ec802",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-daemon/src/local_sessions/runtime_admission/current_producer_definitions/tests.rs": {
+      "worktree_sha256": "57773292a4252d9d520d8b8216bf6fe969859ad91c07732fdd4d3ffc33067163",
+      "blob": "dea1a5b05a1a9907d2f48f5cc331f6bce55101ba",
+      "stored_sha256": "57773292a4252d9d520d8b8216bf6fe969859ad91c07732fdd4d3ffc33067163",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-daemon/src/local_sessions/runtime_admission/historical_inventory.rs": {
+      "worktree_sha256": "ce6c9d21043869ccd5d61b8c520372806d21111e61db516b9e6ce8779818b11d",
+      "blob": "2ca6f9856002ca15a6d219fde250a1192d404c59",
+      "stored_sha256": "ce6c9d21043869ccd5d61b8c520372806d21111e61db516b9e6ce8779818b11d",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-daemon/src/local_sessions/runtime_admission/model_documents.rs": {
+      "worktree_sha256": "2aad46952b6a327e68e8c53328eb77afebb9284c807f71307d8eec902497e9f9",
+      "blob": "6a99b428d67f05175c1767c1900853171047832b",
+      "stored_sha256": "2aad46952b6a327e68e8c53328eb77afebb9284c807f71307d8eec902497e9f9",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-daemon/src/local_sessions/runtime_admission/model_documents/tests.rs": {
+      "worktree_sha256": "aebbd57fee4d30fd4449a8f54ba0bff1672a6600b678ded47eafd89ecdc957ad",
+      "blob": "efb0f8833b00d92085b0a3842deb6bcc5d561ecc",
+      "stored_sha256": "aebbd57fee4d30fd4449a8f54ba0bff1672a6600b678ded47eafd89ecdc957ad",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-daemon/src/local_sessions/runtime_admission/model_factory.rs": {
+      "worktree_sha256": "0cf84a3279dbed20bbb7ed0584cb1939fdc8eb2c9c52150ca1cd979a42720793",
+      "blob": "0f3e4f95b7ab6edc12694575150f942cc5c21f96",
+      "stored_sha256": "0cf84a3279dbed20bbb7ed0584cb1939fdc8eb2c9c52150ca1cd979a42720793",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-daemon/src/local_sessions/runtime_admission/model_factory/tests.rs": {
+      "worktree_sha256": "36210fa31164ee2443b7601a005b1eecfb7e77f07d26e38d75efa25c63e9a81e",
+      "blob": "191352b6e2b3678450d16b724bccbccb708d25af",
+      "stored_sha256": "36210fa31164ee2443b7601a005b1eecfb7e77f07d26e38d75efa25c63e9a81e",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-daemon/src/local_sessions/runtime_admission/phase_planning.rs": {
+      "worktree_sha256": "05f6994e4ca824823c45f01b2eb068b1c3a2e8f9d9275e3b06529bbb057fda87",
+      "blob": "e0648f81f6df8b43a94d2a0d4755984ba1f07b4e",
+      "stored_sha256": "05f6994e4ca824823c45f01b2eb068b1c3a2e8f9d9275e3b06529bbb057fda87",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-daemon/src/local_sessions/runtime_admission/phase_planning/tests.rs": {
+      "worktree_sha256": "96f461948dc346f561dc956affc16eff271af153db20efeac4ade7d30b807bf6",
+      "blob": "5446b175e9c8bd5271068b563c91b0c08264efb9",
+      "stored_sha256": "96f461948dc346f561dc956affc16eff271af153db20efeac4ade7d30b807bf6",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-daemon/src/local_sessions/runtime_admission/preparing_test_support.rs": {
+      "worktree_sha256": "e6b66af9bf66eefa4e39ecfead53db93f9efc38d907af76b2a4afe6829756d22",
+      "blob": "4cf168d19d9f65586924d8a4df850070bd9ad2ac",
+      "stored_sha256": "e6b66af9bf66eefa4e39ecfead53db93f9efc38d907af76b2a4afe6829756d22",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-daemon/src/local_sessions/runtime_admission/profiling.rs": {
+      "worktree_sha256": "afdf4e84b95a5d885f978ca3c87e3c52267565a00db65a6ef6f467a45724eefa",
+      "blob": "598a26e9b549e719bf4cd444eb765dca043d9410",
+      "stored_sha256": "afdf4e84b95a5d885f978ca3c87e3c52267565a00db65a6ef6f467a45724eefa",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-daemon/src/local_sessions/runtime_admission/retained_model_producer.rs": {
+      "worktree_sha256": "4aaa5a3108801bf7db8c48a8097b55735d91d3f6a59cf3a8d73f4ecda291010f",
+      "blob": "a9677cb15e9d51222d864049d3af1868a0eea740",
+      "stored_sha256": "4aaa5a3108801bf7db8c48a8097b55735d91d3f6a59cf3a8d73f4ecda291010f",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-daemon/src/local_sessions/runtime_admission/retained_model_producer/tests.rs": {
+      "worktree_sha256": "eca89a86e0583cef98d5ee311c47a7633fe9b03b8aafb978d18c1de4b6ca8ea4",
+      "blob": "70bd84c8a880f1a5d92ff8f7bfe133f564ed0db0",
+      "stored_sha256": "eca89a86e0583cef98d5ee311c47a7633fe9b03b8aafb978d18c1de4b6ca8ea4",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-daemon/src/local_sessions/runtime_admission/source_context.rs": {
+      "worktree_sha256": "cf0ac6fc4cd6cb2b221bbc7b93a7bb95dbeaa15d0689edf75515d88430cbbe6c",
+      "blob": "980c038821aa7740d288bcdfaeb5c672b4a2cc1f",
+      "stored_sha256": "cf0ac6fc4cd6cb2b221bbc7b93a7bb95dbeaa15d0689edf75515d88430cbbe6c",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-daemon/src/local_sessions/runtime_admission/source_context/tests.rs": {
+      "worktree_sha256": "6b2c62a2bcbb36d207b94b66346c9de3948be17b33b6e762ee4fbe570b0e0258",
+      "blob": "f5aaf3f595dd397638522bee11bc2ad653a75ff2",
+      "stored_sha256": "6b2c62a2bcbb36d207b94b66346c9de3948be17b33b6e762ee4fbe570b0e0258",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-daemon/src/local_sessions/runtime_admission/target_factory.rs": {
+      "worktree_sha256": "a483a2902bc7bcea281db54d3bdc671f377680f608c2d3cc2e76860959cba992",
+      "blob": "5cc0a6e2c2ddf72892f98446411090e861b64c8d",
+      "stored_sha256": "a483a2902bc7bcea281db54d3bdc671f377680f608c2d3cc2e76860959cba992",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-daemon/src/local_sessions/runtime_admission/target_factory/tests.rs": {
+      "worktree_sha256": "cfecb850caca51174983869592333573b4a1a34184fd9159d3192b0ec0d69723",
+      "blob": "b76d05c7d175a640aed77b11221d173596c40001",
+      "stored_sha256": "cfecb850caca51174983869592333573b4a1a34184fd9159d3192b0ec0d69723",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-daemon/src/local_sessions/selector_association.rs": {
+      "worktree_sha256": "f24d9fc456fb4af466ac7003a8c83a0683083d175b1d3d5b0bf80fdbd1b887d8",
+      "blob": "0b185be0658df88c3672a2b0b81d6b94dcf6f297",
+      "stored_sha256": "f24d9fc456fb4af466ac7003a8c83a0683083d175b1d3d5b0bf80fdbd1b887d8",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-daemon/src/mcp_client/context_tests.rs": {
+      "worktree_sha256": "e6438cb078d6b97411cf2ccc1be74dbe70352ea0b57c9b9dcca083513be43a5c",
+      "blob": "1100e8a823a906f3a9c766456e6e1824f74bb6de",
+      "stored_sha256": "e6438cb078d6b97411cf2ccc1be74dbe70352ea0b57c9b9dcca083513be43a5c",
+      "disposition": "already_on_main",
+      "successor_tracking": []
+    },
+    "crates/gateway-daemon/src/mcp_client/credential_file.rs": {
+      "worktree_sha256": "5660ce704faad0b1816b2d8539de8bc080dd6842b1e6e97cf5a2d250add59146",
+      "blob": "69bca62c05a92a09210b836b1bbb16c61837d578",
+      "stored_sha256": "5660ce704faad0b1816b2d8539de8bc080dd6842b1e6e97cf5a2d250add59146",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-daemon/src/mcp_client/recovery_mapping_tests.rs": {
+      "worktree_sha256": "821c4f610673466f670bddf4e061002f68803c9efd95d8b8de7e9d495dd4e3da",
+      "blob": "631f7a870af54be94d18de47a047cb2bef07f1f0",
+      "stored_sha256": "821c4f610673466f670bddf4e061002f68803c9efd95d8b8de7e9d495dd4e3da",
+      "disposition": "already_on_main",
+      "successor_tracking": []
+    },
+    "crates/gateway-daemon/src/mcp_client/resilience.rs": {
+      "worktree_sha256": "a0f004bb83903f5184daae8650d62ae66a7c7e1c16f08043cc44861d69a1fbbd",
+      "blob": "3f7879f083c096f771d989ca3ca7ce6ba322eb4f",
+      "stored_sha256": "a0f004bb83903f5184daae8650d62ae66a7c7e1c16f08043cc44861d69a1fbbd",
+      "disposition": "already_on_main",
+      "successor_tracking": []
+    },
+    "crates/gateway-daemon/src/mcp_client/resilience_tests.rs": {
+      "worktree_sha256": "d66b20ab7882e45dd067bbd9032528fb971db13a75c34297ac3fbf4cadc6db1f",
+      "blob": "92bad2d62c93bb9bd00216fbc7562ef081af9fde",
+      "stored_sha256": "d66b20ab7882e45dd067bbd9032528fb971db13a75c34297ac3fbf4cadc6db1f",
+      "disposition": "already_on_main",
+      "successor_tracking": []
+    },
+    "crates/gateway-daemon/src/mcp_client/scalar_quotes.rs": {
+      "worktree_sha256": "7d20ce304579bfe72b3630372e2d1aa18990803f8df37797e386651c12726e09",
+      "blob": "fb98b2c3393541e2ab88517358929c25db220daf",
+      "stored_sha256": "7d20ce304579bfe72b3630372e2d1aa18990803f8df37797e386651c12726e09",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-daemon/src/mcp_client/scalar_quotes_tests.rs": {
+      "worktree_sha256": "8639952e66e88c638dacfcc0b29ef6d0c72c8fa288ae57a3fdcdcac47ff5c536",
+      "blob": "bc7bb843d8e10c050e18f3205de18704cb58ea9c",
+      "stored_sha256": "8639952e66e88c638dacfcc0b29ef6d0c72c8fa288ae57a3fdcdcac47ff5c536",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-daemon/src/mcp_client/session_budget.rs": {
+      "worktree_sha256": "f0959d67fa203a073afcfc995b92356f8412f11f36fb6e07b818f90f13e5fc10",
+      "blob": "f78aed668073b7844377792e892a301026eb624e",
+      "stored_sha256": "f0959d67fa203a073afcfc995b92356f8412f11f36fb6e07b818f90f13e5fc10",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-daemon/src/mcp_client/session_budget_factory_tests.rs": {
+      "worktree_sha256": "80772489af981afbb085946f8625753afa3e2385b8b25f24e0ff5bba0c96148a",
+      "blob": "46222e4320537af8770ebd4f28c9f169cbec6e8f",
+      "stored_sha256": "80772489af981afbb085946f8625753afa3e2385b8b25f24e0ff5bba0c96148a",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-daemon/src/session_store/connector_policy_audit.rs": {
+      "worktree_sha256": "34c78a631700df97961d03d349a1a34a1075a162082927ac77b9101a0229c8b4",
+      "blob": "7a9f78bdc61cf269f8c4cb2e2fdd2cad2cc70e08",
+      "stored_sha256": "34c78a631700df97961d03d349a1a34a1075a162082927ac77b9101a0229c8b4",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-daemon/src/session_store/connector_policy_audit/tests.rs": {
+      "worktree_sha256": "a138e4798175db464ca315965385c57eb94bdd0b2d0274031773727bb8113f2a",
+      "blob": "468545fd51a4ed8598cc3379c9af758a654a611b",
+      "stored_sha256": "a138e4798175db464ca315965385c57eb94bdd0b2d0274031773727bb8113f2a",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-daemon/tests/session_tool_invocation.rs": {
+      "worktree_sha256": "2d04a05c9fa8778500d46001e9e1d9ef493bccacbc2ac9b3a24a65d2a450358f",
+      "blob": "72524adcc9e54969540730cde0c1a468ba73b7e7",
+      "stored_sha256": "2d04a05c9fa8778500d46001e9e1d9ef493bccacbc2ac9b3a24a65d2a450358f",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-daemon/tests/support/connector_resilience_cases.rs": {
+      "worktree_sha256": "d81ee568c84ac2e294b04c86a738730cf19801c08f75c51bfd0033e741c64b75",
+      "blob": "865941008ca63b8e3b4f42987e8045e4cb2c56cc",
+      "stored_sha256": "d81ee568c84ac2e294b04c86a738730cf19801c08f75c51bfd0033e741c64b75",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-daemon/tests/support/session_connector_budget_cases.rs": {
+      "worktree_sha256": "7fa97ebb7836af8471f35043d922bedee6b71abbe3660da88ba088c88a2ed678",
+      "blob": "ea703bbfa1bded6e13bdf8d452e9852eb59e6fb4",
+      "stored_sha256": "7fa97ebb7836af8471f35043d922bedee6b71abbe3660da88ba088c88a2ed678",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "crates/gateway-daemon/tests/support/session_resource_allocation.rs": {
+      "worktree_sha256": "1725d5558c0e375d44384272dd7b69710665a850c31ec43f5a13db3e121b5dbc",
+      "blob": "34a6a1de252d7753736efd1253a89b153fdb905e",
+      "stored_sha256": "1725d5558c0e375d44384272dd7b69710665a850c31ec43f5a13db3e121b5dbc",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "default_18105939341307542186_0_2128402.profraw": {
+      "worktree_sha256": "3e2ead925be2065edb9b18667fcdf923568d83f9550b873032592216ca9dd187",
+      "blob": "14f18d15bad95d01879deaf8e3c724c1172c63a0",
+      "stored_sha256": "3e2ead925be2065edb9b18667fcdf923568d83f9550b873032592216ca9dd187",
+      "disposition": "historical_generated_profile",
+      "successor_tracking": []
+    },
+    "default_18414950288573714300_0_2128394.profraw": {
+      "worktree_sha256": "e6501575d19ab1d5af907a3db7e12eabe4f3287606c9188e8cbb195b77ec3e85",
+      "blob": "f6e4d626e007382afe02bc8f3089ee70d901f387",
+      "stored_sha256": "e6501575d19ab1d5af907a3db7e12eabe4f3287606c9188e8cbb195b77ec3e85",
+      "disposition": "historical_generated_profile",
+      "successor_tracking": []
+    },
+    "docs/connector-policy-v1.md": {
+      "worktree_sha256": "9ed74e6ad22b256852d37541ef00929614f5944fee42e1ae8f75eafa78b2e66e",
+      "blob": "27b21dab058268f5b25b1a6def59a2fc40bcd8f6",
+      "stored_sha256": "9ed74e6ad22b256852d37541ef00929614f5944fee42e1ae8f75eafa78b2e66e",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "docs/connector-proposal-dispatch-v1.md": {
+      "worktree_sha256": "c013d79f0643540572f7a46055882f65ea6ba8104529f13b7cc4dae37c92351b",
+      "blob": "9a81e924c13a53e2a70debbfc45c45224e57468a",
+      "stored_sha256": "c013d79f0643540572f7a46055882f65ea6ba8104529f13b7cc4dae37c92351b",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "docs/connector-resilience-v1.md": {
+      "worktree_sha256": "a0592ec44c95cd5158b498e476545e7f87866e9bd072e40124649130be13b51a",
+      "blob": "d3333570f9da1967039bc422ff4295cddc629861",
+      "stored_sha256": "a0592ec44c95cd5158b498e476545e7f87866e9bd072e40124649130be13b51a",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "docs/evidence/EPIC-07.07-policy.json": {
+      "worktree_sha256": "97fdca3387c6bdaacab8029a82d567ae632258b3c7e34439a4ca615954153c12",
+      "blob": "f0344c6c0da12967004de92e91bc10b0b71e9a0b",
+      "stored_sha256": "97fdca3387c6bdaacab8029a82d567ae632258b3c7e34439a4ca615954153c12",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "docs/evidence/EPIC-07.08-resilience-coverage.json.gz": {
+      "worktree_sha256": "76bfc1a3e31c4482af0d1ab3f1333d83bd5e281d90726c1a0a0d60d66a2f9fa3",
+      "blob": "671285bab27ff705be35ae7c78747a005664e2ed",
+      "stored_sha256": "76bfc1a3e31c4482af0d1ab3f1333d83bd5e281d90726c1a0a0d60d66a2f9fa3",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "docs/evidence/EPIC-07.08-resilience.json": {
+      "worktree_sha256": "87d3baedd2b7b94a034013e2d36397349976a04031b51e8c6826f32ea5bdcd2e",
+      "blob": "38687b4e75454b0f93433412b68a6420b41eea3e",
+      "stored_sha256": "87d3baedd2b7b94a034013e2d36397349976a04031b51e8c6826f32ea5bdcd2e",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "docs/evidence/EPIC-07.08-source-bindings.json.gz": {
+      "worktree_sha256": "4ec0400aab4e81bb23111e53efde7631fcf938bc52e6f6f9415339b402e1b6d6",
+      "blob": "00b4c893fc558be953e8875638bb0852bc2ce815",
+      "stored_sha256": "4ec0400aab4e81bb23111e53efde7631fcf938bc52e6f6f9415339b402e1b6d6",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "docs/evidence/EPIC-07.08-three-amigos-gate.md": {
+      "worktree_sha256": "d654c98bba108e32c8dfe44e5e4cafc7708eb1da11e291d291580d4a37b4eff3",
+      "blob": "b89d6608b7b8489c070a9c18fe31f36c7e4b33fe",
+      "stored_sha256": "d654c98bba108e32c8dfe44e5e4cafc7708eb1da11e291d291580d4a37b4eff3",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "docs/evidence/EPIC-07.08-validation.json.gz": {
+      "worktree_sha256": "45fdf5974b174247700dc4205925a266a2cf6440c52cffe84b0649f1e2a357a5",
+      "blob": "394eac5bdeb2d248df79478753dab58ca9529da9",
+      "stored_sha256": "45fdf5974b174247700dc4205925a266a2cf6440c52cffe84b0649f1e2a357a5",
+      "disposition": "historical_variant",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "docs/evidence/EPIC-08-child-acceptance.md": {
+      "worktree_sha256": "458c6da1a0e432d7909086671fa3e02153647968d4e30a58f95535f0d061ad6b",
+      "blob": "b63eed2b47e3d9667b2b13d6a3a657b8349ba6dc",
+      "stored_sha256": "458c6da1a0e432d7909086671fa3e02153647968d4e30a58f95535f0d061ad6b",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "docs/evidence/EPIC-08-parent-acceptance.md": {
+      "worktree_sha256": "bc7365c5688e416b0fb8f47a13f9cf5f4355860e1cc65442e0dbd129c749165b",
+      "blob": "91827b19a1b3f200e7a76f9eac7f561e9d4df66d",
+      "stored_sha256": "bc7365c5688e416b0fb8f47a13f9cf5f4355860e1cc65442e0dbd129c749165b",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "docs/evidence/EPIC-08.03-application-final18-coverage.json.gz": {
+      "worktree_sha256": "830cbf29a81d2f032c74a7456be146b9b2fa2dc8a956865ec88e5ddadae02df5",
+      "blob": "05f68b515d7badd01be9d85aa18b6e19db5d74ff",
+      "stored_sha256": "830cbf29a81d2f032c74a7456be146b9b2fa2dc8a956865ec88e5ddadae02df5",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "docs/evidence/EPIC-08.03-application-final18-source-bindings.json.gz": {
+      "worktree_sha256": "6672fcea7522d0ab7422ac01893e331a77e0af757f979463e7af5b404d91a312",
+      "blob": "356435d7301bb4b6ccb13d7edbb8d32b0f8d8223",
+      "stored_sha256": "6672fcea7522d0ab7422ac01893e331a77e0af757f979463e7af5b404d91a312",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "docs/evidence/EPIC-08.03-application-final18-validation.log.gz": {
+      "worktree_sha256": "04e5a2faf1ee6f0ab840bb86398af468c77ac5d651d07a0f80abc952eae431af",
+      "blob": "103ab458983dede847c43ead152b5dcf5a8a1fe7",
+      "stored_sha256": "04e5a2faf1ee6f0ab840bb86398af468c77ac5d651d07a0f80abc952eae431af",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "docs/evidence/EPIC-08.03-application-validation.log.gz": {
+      "worktree_sha256": "9315d6c3972bf09610773f6b1d87b006c20d6ce7ac5f77ef7304ec8b32248c52",
+      "blob": "b9883d74a6a0417618beb83f83a71b8070e1351f",
+      "stored_sha256": "9315d6c3972bf09610773f6b1d87b006c20d6ce7ac5f77ef7304ec8b32248c52",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "docs/evidence/EPIC-08.03-canonical-policy-followup-validation.json.gz": {
+      "worktree_sha256": "0b13e7ec3056d7871fd7b919cbebe5e6978b4ccc622e7a9a51c105992e78879c",
+      "blob": "c4d748339406133749f79f16eee4f140c7b83f98",
+      "stored_sha256": "0b13e7ec3056d7871fd7b919cbebe5e6978b4ccc622e7a9a51c105992e78879c",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "docs/evidence/EPIC-08.03-complete-callback-proof-validation.json.gz": {
+      "worktree_sha256": "a983fed187dd74c35178308f165fadecf2e0e56630940daacbbaadb6fae8c569",
+      "blob": "24734fb6152b898fee5060258856214409b7c376",
+      "stored_sha256": "a983fed187dd74c35178308f165fadecf2e0e56630940daacbbaadb6fae8c569",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "docs/evidence/EPIC-08.03-connection-reuse-validation.json.gz": {
+      "worktree_sha256": "c2e2f5303078bc0e2349ed42a666857be0b4c94da29b6a2d8c89c15c7b2641b8",
+      "blob": "cd91cb22a5b4e4bbe63f6c67984b9751707bb7b7",
+      "stored_sha256": "c2e2f5303078bc0e2349ed42a666857be0b4c94da29b6a2d8c89c15c7b2641b8",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "docs/evidence/EPIC-08.03-connector-factory-view-validation.json.gz": {
+      "worktree_sha256": "a8ed1f1c7af5c3054d79ef5ab2d815bae1d70e2abfb8da451ef3eb8fb68bb051",
+      "blob": "8b59c0c6105723f281b636137a3749a45c67032b",
+      "stored_sha256": "a8ed1f1c7af5c3054d79ef5ab2d815bae1d70e2abfb8da451ef3eb8fb68bb051",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "docs/evidence/EPIC-08.03-connector-producer-input-contract-validation.json.gz": {
+      "worktree_sha256": "16ab571f9c88f5f65aa76a82fd5c5d468b42a0f92a6c488ddfd7ab606e725c40",
+      "blob": "d9aad33e7299eaaf5a45ca281d02a5344e54037e",
+      "stored_sha256": "16ab571f9c88f5f65aa76a82fd5c5d468b42a0f92a6c488ddfd7ab606e725c40",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "docs/evidence/EPIC-08.03-connector-proposals-coverage.json.gz": {
+      "worktree_sha256": "bb4b3d9611782caa80919524583e6c2d306af32415a0944c0c9e16e6606a169d",
+      "blob": "e120b105383c26c5b322ab6f722d4a6dcadae762",
+      "stored_sha256": "bb4b3d9611782caa80919524583e6c2d306af32415a0944c0c9e16e6606a169d",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "docs/evidence/EPIC-08.03-connector-proposals.json": {
+      "worktree_sha256": "f344937eab6969f2964e71aadb180a55aa2be93c645dac698d341544e41d579e",
+      "blob": "659e35cfed59d76506c7a00b4412da7ae1bccb1a",
+      "stored_sha256": "f344937eab6969f2964e71aadb180a55aa2be93c645dac698d341544e41d579e",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "docs/evidence/EPIC-08.03-current-native-definitions-validation.json.gz": {
+      "worktree_sha256": "bf145bd69377c50e05f29ed8beb65ddbde1e8393d758a80b6df6508b7e521b0a",
+      "blob": "14760962544584b0b99ae42072f7f2439e17b13b",
+      "stored_sha256": "bf145bd69377c50e05f29ed8beb65ddbde1e8393d758a80b6df6508b7e521b0a",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "docs/evidence/EPIC-08.03-daemon-coverage.json.gz": {
+      "worktree_sha256": "a2b8bc12de6ece6f3dbf07be50db4a37c8e763174b87fb729e8c5c0185d2373c",
+      "blob": "c72a296e982938fd23063c6fde7057a362bea9ca",
+      "stored_sha256": "a2b8bc12de6ece6f3dbf07be50db4a37c8e763174b87fb729e8c5c0185d2373c",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "docs/evidence/EPIC-08.03-daemon-final18-coverage.json.gz": {
+      "worktree_sha256": "f0b6937a5cc2be6617f903662eddfedebe1d8bbd76d103afadc301cf4c0d4456",
+      "blob": "b2b2c0b6b88baa572d9974762bbee40e71103987",
+      "stored_sha256": "f0b6937a5cc2be6617f903662eddfedebe1d8bbd76d103afadc301cf4c0d4456",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "docs/evidence/EPIC-08.03-daemon-final18-source-bindings.json.gz": {
+      "worktree_sha256": "160c9ba24b018d30743d8f141a8057b56c10c3d05ee01595a4ae739c7681bc4c",
+      "blob": "b09e1083b5d03a5648ce16949398f744d24e7049",
+      "stored_sha256": "160c9ba24b018d30743d8f141a8057b56c10c3d05ee01595a4ae739c7681bc4c",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "docs/evidence/EPIC-08.03-daemon-final18-validation.log.gz": {
+      "worktree_sha256": "2cd0b6ffe890503fab8f6635689b52b708f503bb1d68de902075cd97c40bbe3c",
+      "blob": "f4aac65a205d559acfc4808c755b5e30628bfa0b",
+      "stored_sha256": "2cd0b6ffe890503fab8f6635689b52b708f503bb1d68de902075cd97c40bbe3c",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "docs/evidence/EPIC-08.03-daemon-validation.log.gz": {
+      "worktree_sha256": "2ec9f19964e172363d55d43e9d0b445700d571b6b69f7f8fea3f93d1eb50b7b3",
+      "blob": "08b54d46380541ae65a49f36cd3815fb296c5b7e",
+      "stored_sha256": "2ec9f19964e172363d55d43e9d0b445700d571b6b69f7f8fea3f93d1eb50b7b3",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "docs/evidence/EPIC-08.03-exact-output-retention-validation.json.gz": {
+      "worktree_sha256": "02d14b6a8d8dcc155ec51e7eca0ee0d51d465d4cc1a07511e78ae15f660a1a96",
+      "blob": "eaaf89ee240cf124db97ee78aff28424ab2e889f",
+      "stored_sha256": "02d14b6a8d8dcc155ec51e7eca0ee0d51d465d4cc1a07511e78ae15f660a1a96",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "docs/evidence/EPIC-08.03-fresh-access-factorization-validation.json.gz": {
+      "worktree_sha256": "6ddd2e937ce886fc30e719b29d0b2feee2ee83235ed6a7cb1d0a666efed8a170",
+      "blob": "f5065481a02bb3fa0f136976592a10bb7e5124f9",
+      "stored_sha256": "6ddd2e937ce886fc30e719b29d0b2feee2ee83235ed6a7cb1d0a666efed8a170",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "docs/evidence/EPIC-08.03-goal-current-store-validation.json.gz": {
+      "worktree_sha256": "1f25ce1d589e19827fb169a7e4eebf126096286e75da1e40e126e04d3663e628",
+      "blob": "07edc76f21129f6cad2fda28503604634c92f331",
+      "stored_sha256": "1f25ce1d589e19827fb169a7e4eebf126096286e75da1e40e126e04d3663e628",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "docs/evidence/EPIC-08.03-historical-render-compile-checkpoint.json.gz": {
+      "worktree_sha256": "1af0e1ccf256e3abf02126872461c6befe51ae6388eaadd3ff6392f61a8d9f06",
+      "blob": "d07373f690ab2a87d36364adc8ce7f687582cba4",
+      "stored_sha256": "1af0e1ccf256e3abf02126872461c6befe51ae6388eaadd3ff6392f61a8d9f06",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "docs/evidence/EPIC-08.03-invocation-resilience-coverage.json.gz": {
+      "worktree_sha256": "d143b608cc5fff8e72dea5745c9b126d17b3fd6d0cc95dd791f06d6e2696e963",
+      "blob": "47745507006d94b027b50e4a1d01e207c4f6a5b2",
+      "stored_sha256": "d143b608cc5fff8e72dea5745c9b126d17b3fd6d0cc95dd791f06d6e2696e963",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "docs/evidence/EPIC-08.03-native-basis-access-validation.json.gz": {
+      "worktree_sha256": "b2bd9cf543f9b85a095ee60cdc0ddf699025126914b54cf7878c753e56676091",
+      "blob": "885633a8898af30e968e1c962fb362753e6f7286",
+      "stored_sha256": "b2bd9cf543f9b85a095ee60cdc0ddf699025126914b54cf7878c753e56676091",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "docs/evidence/EPIC-08.03-native-consent-preparation-component-validation.json.gz": {
+      "worktree_sha256": "b15b72751516baf70f4fe344012d16b6e2f8fb52da53f95e1269ee1866e29eec",
+      "blob": "d60fe1ca687e70c33b301e58fb2ccad0212f90ee",
+      "stored_sha256": "b15b72751516baf70f4fe344012d16b6e2f8fb52da53f95e1269ee1866e29eec",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "docs/evidence/EPIC-08.03-native-policy-source-validation.json.gz": {
+      "worktree_sha256": "835b2a603f21b87087bbd8e5808b754ee9f13ab0e7438b2206c2c808185748cb",
+      "blob": "d26aed0e91ac6b689895b607ef79cb4d54f660b4",
+      "stored_sha256": "835b2a603f21b87087bbd8e5808b754ee9f13ab0e7438b2206c2c808185748cb",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "docs/evidence/EPIC-08.03-native-pre-execution-goal-component-validation.json.gz": {
+      "worktree_sha256": "d6c50e9973bc8288e617ef20b549773f0a2b9d62c139bb9dbd8c0d6f6904ec1b",
+      "blob": "c3837b43dc6e25abd8d1e4bf8f6009669371db34",
+      "stored_sha256": "d6c50e9973bc8288e617ef20b549773f0a2b9d62c139bb9dbd8c0d6f6904ec1b",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "docs/evidence/EPIC-08.03-native-pre-execution-goal-component.json": {
+      "worktree_sha256": "2441c55622e519fda645d7127947805de5c475a176959f21ac80d301bcfd8754",
+      "blob": "83bc0f0675e225865564e9601ae381f7057f0ba7",
+      "stored_sha256": "2441c55622e519fda645d7127947805de5c475a176959f21ac80d301bcfd8754",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "docs/evidence/EPIC-08.03-native-reference-discovery-validation.json.gz": {
+      "worktree_sha256": "5d579902f9348d75b444efbfce48f7a3b933b12e6b41386315f6a0559d5b4677",
+      "blob": "56df0bc88ef3c9e65da2fc801c0187699c25f578",
+      "stored_sha256": "5d579902f9348d75b444efbfce48f7a3b933b12e6b41386315f6a0559d5b4677",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "docs/evidence/EPIC-08.03-observed-mcp-context-validation.json.gz": {
+      "worktree_sha256": "6192dfdd15615bd64e1402b1b4f6b810c2fc6a20d46ff55b4c0e4b511f3f9bd2",
+      "blob": "7c3ad62348150a56369a3b7b3a85827a0ca3806c",
+      "stored_sha256": "6192dfdd15615bd64e1402b1b4f6b810c2fc6a20d46ff55b4c0e4b511f3f9bd2",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "docs/evidence/EPIC-08.03-policy-preview-validation.json.gz": {
+      "worktree_sha256": "cca878b9aef2e5bb44eac9399b9f69f4dfeaf5fd637c47716acd2d698a761258",
+      "blob": "8103c9c5f2d7e2b80653de08a81ff97f8b1a153e",
+      "stored_sha256": "cca878b9aef2e5bb44eac9399b9f69f4dfeaf5fd637c47716acd2d698a761258",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "docs/evidence/EPIC-08.03-portable-model-transport-validation.json.gz": {
+      "worktree_sha256": "78f143c91a26a9f5c0725d5472e9250ce3d9cd8dde4c084d30d548e3eecb17fd",
+      "blob": "8e433c75f8063eae13e0d3c1d3a355358636a4b2",
+      "stored_sha256": "78f143c91a26a9f5c0725d5472e9250ce3d9cd8dde4c084d30d548e3eecb17fd",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "docs/evidence/EPIC-08.03-postgres-fresh-read-validation.json.gz": {
+      "worktree_sha256": "34c465798aa30adff53ae9dd1e245ab772861a4479330a174db96a636562e775",
+      "blob": "0525dedc26edde1a824c45d745517faed8d24dc9",
+      "stored_sha256": "34c465798aa30adff53ae9dd1e245ab772861a4479330a174db96a636562e775",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "docs/evidence/EPIC-08.03-pre-execution-goal-application-validation.json.gz": {
+      "worktree_sha256": "6e8125ce15c05988c53c1ca93745eaee6bd15c277f91d283fa5900f9a8aafe2a",
+      "blob": "d746a21c339e1d4327c54d01f2f3795a21f0cc0f",
+      "stored_sha256": "6e8125ce15c05988c53c1ca93745eaee6bd15c277f91d283fa5900f9a8aafe2a",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "docs/evidence/EPIC-08.03-quality-validation.log.gz": {
+      "worktree_sha256": "7680245c07cc79567080948cec9aa9878f97aed846b24d24deaec71882251d7b",
+      "blob": "4b6f37550cfbd1ca42e2c0c308714713ded139be",
+      "stored_sha256": "7680245c07cc79567080948cec9aa9878f97aed846b24d24deaec71882251d7b",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "docs/evidence/EPIC-08.03-resource-only-boundary-validation.json.gz": {
+      "worktree_sha256": "c83c1ebd925bc54e7a253ca5d6dff599ae83dc4e67c867c1bfe96b12b75774d8",
+      "blob": "6cfc4bf6c6b44ce3f0a209b4f2826bd3c2cc2114",
+      "stored_sha256": "c83c1ebd925bc54e7a253ca5d6dff599ae83dc4e67c867c1bfe96b12b75774d8",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "docs/evidence/EPIC-08.03-retained-consent-preflight-validation.json.gz": {
+      "worktree_sha256": "98252eec4d8c80f96e42c761cff6ad221420a18c8a1c19c6bf082586e66f542b",
+      "blob": "314eec99fb374e5fcfb1dc772142bda62db94b71",
+      "stored_sha256": "98252eec4d8c80f96e42c761cff6ad221420a18c8a1c19c6bf082586e66f542b",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "docs/evidence/EPIC-08.03-retained-ir-data-validation.json.gz": {
+      "worktree_sha256": "4c6e9a56b776b6738230446c64007aff664373285fa01909c80bbaa900e852a6",
+      "blob": "bf8274b7b8b5a0aa439b41f14945d29ec94e52f1",
+      "stored_sha256": "4c6e9a56b776b6738230446c64007aff664373285fa01909c80bbaa900e852a6",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "docs/evidence/EPIC-08.03-retained-verifier-followup-validation.json.gz": {
+      "worktree_sha256": "1e7bba68355aa2372bc997c47a1ae1e43ed05af168ca48bf63a148427db01a7e",
+      "blob": "12ad8bd0b44cb82cde26912f785aa551b8902a3d",
+      "stored_sha256": "1e7bba68355aa2372bc997c47a1ae1e43ed05af168ca48bf63a148427db01a7e",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "docs/evidence/EPIC-08.03-runtime-reference-followup-validation.json.gz": {
+      "worktree_sha256": "2fc6b0385910cbf7c95e899d1ed51d6bae7cdb332c6e498f98a2bf067679fc53",
+      "blob": "ad8b16d4cb50ac1bcaa4e8da74248cfd4c79481a",
+      "stored_sha256": "2fc6b0385910cbf7c95e899d1ed51d6bae7cdb332c6e498f98a2bf067679fc53",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "docs/evidence/EPIC-08.03-three-amigos-gate.md": {
+      "worktree_sha256": "5ada7a48f6dedcea6af6636c4406ae9011d1441b343684d371c75835b6b2f6e5",
+      "blob": "9af050f6f42a5776ac1cdfebf8dd5d6bc71788ba",
+      "stored_sha256": "5ada7a48f6dedcea6af6636c4406ae9011d1441b343684d371c75835b6b2f6e5",
+      "disposition": "historical_prototype_or_diagnostic",
+      "successor_tracking": [
+        274,
+        277
+      ]
+    },
+    "scripts/check-connector-resilience-coverage.py": {
+      "worktree_sha256": "fe0394496abf567d38ae611b56ef6666a5fd05fb9091ff0c0681825038e0fcd5",
+      "blob": "1a7a0cfa1b639ee713fd9bcedfa8cfd87277151f",
+      "stored_sha256": "fe0394496abf567d38ae611b56ef6666a5fd05fb9091ff0c0681825038e0fcd5",
+      "disposition": "already_on_main",
+      "successor_tracking": []
+    }
+  },
+  "preservation_commit": "1b6c98902b5f0108b93c2ee30d07ecc5f8f7291b",
+  "status": "ALL_INITIAL_FILES_PRESERVED_IN_GIT",
+  "release_claim": false,
+  "policy": "Preserve the checkpoint as merged ancestry. Keep current main production tree; historical variants and unsupported prototypes do not replace newer qualified implementations. Broader #271/#274/#277 criteria remain open."
+}
