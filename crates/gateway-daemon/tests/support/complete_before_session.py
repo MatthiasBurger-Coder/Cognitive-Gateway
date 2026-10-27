@@ -34,6 +34,7 @@ for line in sys.stdin:
   # only selector=project implements the qualified complete-export operation.
   world=json.loads((root/'atomic-world.json').read_text())
   result=dict(world['fields']);result.update(object='target-project' if selector=='project' else 'object-'+selector,id=selector,revision=world['epoch'])
+  if (root/'response-fault').exists() and (root/'response-fault').read_text()=='numeric-epoch':result['epoch']=42
   if selector=='project':
    if (root/'pause-world').exists():
     (root/'world-waiting').touch();until=time.monotonic()+20
@@ -315,7 +316,9 @@ def run(case):
                 requests=[json.loads(l) for l in (root/'wire.jsonl').read_text().splitlines()] if (root/'wire.jsonl').exists() else []
                 calls=[r for r in requests if r['method']=='tools/call']
                 if pre_send or case in ('budget','schema-drift','credential'):assert not calls,calls
-                assert len([r for r in calls if r['params']['arguments']['query']=='project'])<=1
+                exports=len([r for r in calls if r['params']['arguments']['query']=='project'])
+                assert exports<=1
+                if case=='numeric-epoch':assert exports==1,'numeric-epoch denial must reach the actual world capture'
                 assert not stored['grants']
                 print('INSTALLED_COMPLETE_BEFORE_QUALIFIED',case,flush=True)
                 return
