@@ -16,6 +16,14 @@ impl Transport for Peer {
     fn receive(&mut self, _: &CallContext) -> Result<Vec<u8>, Error> {
         self.input.pop_front().unwrap_or(Err(Error::Timeout))
     }
+    fn receive_with_wait_deadline(
+        &mut self,
+        context: &CallContext,
+        _: Instant,
+    ) -> Result<Vec<u8>, Error> {
+        context.check()?;
+        self.receive(context)
+    }
     fn close(&mut self) {}
 }
 fn context() -> CallContext {

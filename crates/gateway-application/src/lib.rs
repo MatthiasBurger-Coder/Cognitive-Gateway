@@ -48,6 +48,7 @@ pub mod resolution_explain;
 pub mod resolution_process;
 pub mod resolution_skills;
 pub mod resolution_snapshot;
+pub mod retained_observations;
 pub mod retrieval_pipeline;
 pub mod semantic_planning;
 pub mod sessions;

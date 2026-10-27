@@ -1,0 +1,487 @@
+{
+  "schema_version": 2,
+  "issue": 403,
+  "parent": 274,
+  "parent_acceptance": 271,
+  "status": "LOCAL_QUALIFIED",
+  "decision": "READY_FOR_REVIEW",
+  "candidate_base": "07d5fbd036970abb646d2cd38720f5dfb82537cb",
+  "candidate_revision": "4a6c5e53ecf02c1fa91d15f6f1f194592a9756d7",
+  "pull_request": {
+    "number": 404,
+    "url": "https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/pull/404",
+    "state": "OPEN",
+    "draft": true,
+    "merged": false
+  },
+  "source_snapshot_utc": "2026-10-26T18:16:01.643602+00:00",
+  "source_binding_count": 79,
+  "source_bindings": {
+    ".github/workflows/rust.yml": "7cf530c43c86b3102ac63f119c3fb08c6bf4e07df47d66ae4138c968a649a917",
+    "crates/gateway-application/src/closed_loop.rs": "c2b88956febb93cd5f218edacdbd9eb92e313eb34a82c1c558e929dc26d6ed73",
+    "crates/gateway-application/src/lib.rs": "8b3dd812f0f03569c66430c573c4fe158cf6c38aae8ed3012bd9daf81f79d551",
+    "crates/gateway-application/src/prompt_rendering.rs": "11b5bfeb56b2d666f5234bded440bdcc90b5fb35ace7735b5910a4187b7b42a4",
+    "crates/gateway-application/src/retained_observations.rs": "0a8a0b87d7abb33656dedd5d15e01acc0ba46155910793ab9302769ffec797fb",
+    "crates/gateway-application/src/sessions/connector_goals.rs": "c4757a17f287e0452a4e174a743a553181f4bf6ca68e1783844e5c3ef428d486",
+    "crates/gateway-application/src/sessions/coordinator.rs": "5d6c1534bc8753029794b23151b36a4a88268f8262bcf4e3d71b9c361f8d99a8",
+    "crates/gateway-application/src/sessions/goal_observation.rs": "dbeb11127d5db6114cd4d49af3d67d65bf2cc9f838c14c109dc54b8d3c19d391",
+    "crates/gateway-application/src/sessions/journal.rs": "9be5822318035771a5f10d877a09a1b88737ed53343dae4b2f354109ee8977d5",
+    "crates/gateway-application/src/sessions/mod.rs": "b3a09e23169e88be78820bd3072ef612ccf0bb7db41535691028b5a10aee221d",
+    "crates/gateway-application/src/sessions/pre_execution_goal.rs": "5abf3c3efba4b33b921a218098b073f7bc299757a386e26bf8547522dd100ac4",
+    "crates/gateway-application/src/sessions/pre_execution_source.rs": "5ded60cabcd6af8a0d41a471eccf9616f97330850beff9689204b67c98b394b3",
+    "crates/gateway-application/src/sessions/resources.rs": "748100c03c1754b26620d3dd1c5a39a63016097070483ce780e5b2f83248b24c",
+    "crates/gateway-application/src/sessions/verification.rs": "30132ebdd5353652a786c05354c69052bc6d24cccb8f58ebbfcec7b43a791940",
+    "crates/gateway-application/tests/session_contracts.rs": "60818a491368a6b54472d5418a8df7733e900a8b2f6397d877046bb294897b5a",
+    "crates/gateway-application/tests/session_runtime.rs": "5fb1b833ad8700785a672678fcee7632f98254e0bb0970d7ed547829cccd917f",
+    "crates/gateway-application/tests/support/goal_observation_cases.rs": "f2fcfb60fb913507fa1ff606e2758f5434a33892d9d129a8f77e88f0ddd7603a",
+    "crates/gateway-application/tests/support/goal_observation_harness.rs": "9e09fa2a99977f69cafba318be64a2c39cddbb9f14e6e71aefca66f8d1eb090f",
+    "crates/gateway-application/tests/support/pre_execution_goal.rs": "1a0a7dc177143bae2ba517f2200f65aed51dbf1e5e8e627c804c460a620865bc",
+    "crates/gateway-application/tests/support/retained_resource_adversarial.rs": "ca6dbd233dea57828cf3d5663c9fd1ffbfabd6da7e5e6834ec7890bc65ea0f93",
+    "crates/gateway-daemon/src/cognitive_store.rs": "80e48e0d4593833d2bf8b36e4bc24274ad650143a240ccf97a71aae0ac9e6a9f",
+    "crates/gateway-daemon/src/cognitive_store_connection_tests.rs": "aebadf9d72b7077dc7d7c8d467dae8ac36a7c7b584914779ed690c3b9360f4ea",
+    "crates/gateway-daemon/src/lib.rs": "39e98e9acc22d78c2d0cebfe3a88bebf4cc4f7e9c59c100552a0ea9d6f024700",
+    "crates/gateway-daemon/src/local_sessions.rs": "3dd615d10999e6868176da981106ecd63563674e1556e11334763df4ef7b6ff1",
+    "crates/gateway-daemon/src/local_sessions/boundary_tests.rs": "4059555599258375560f0c48168218e3ea3977eae63cad8b15eac1c6437e89e3",
+    "crates/gateway-daemon/src/local_sessions/definition_json.rs": "398adfae1d1633dc313924ad5979095bbd56807faee3c3f339359b0494edc422",
+    "crates/gateway-daemon/src/local_sessions/definition_json/tests.rs": "ede79e3ae01f83fade80f7988b7ae502e9a60c739d7578262953b74885fbf10d",
+    "crates/gateway-daemon/src/local_sessions/observed_goal/claim.rs": "5fed76df2e102fc642e9af7dc22d1ccc07f23742162891c8a02da1cd47b90b98",
+    "crates/gateway-daemon/src/local_sessions/observed_goal/definitions.rs": "6fdd7dc17c3d561a5ddff35e67783e30e0cb69469aecc4b8b6e26bd276c2e427",
+    "crates/gateway-daemon/src/local_sessions/observed_goal/definitions_tests.rs": "3bf5cb9088e5e230785c56ad0d323d4276a458092ddf1fcb138fdba8b6ea82e5",
+    "crates/gateway-daemon/src/local_sessions/observed_goal/mod.rs": "7471fdf030e233904538833eace5720a3075d98d40ec9e2c4bfd0b64accc85d1",
+    "crates/gateway-daemon/src/local_sessions/observed_goal/read_association.rs": "c4a4eeb07bd5cbef0453d3e1b7398745f41beeb5df92efd145a44e8cdf7c5fd7",
+    "crates/gateway-daemon/src/local_sessions/observed_goal/read_association_tests.rs": "21dd978e9b5d98725b8cce4ab09224d24a2297f4fe386d1c31fdc3800c89e12b",
+    "crates/gateway-daemon/src/local_sessions/observed_goal/source.rs": "0faeed327476ae8be89697ed27b73e88b89b3e0969bd6378787d26ea625fcf7f",
+    "crates/gateway-daemon/src/local_sessions/observed_goal/source_boundary_tests.rs": "c0f522d8141970846447167b4abe90a4916a5630f2fe6b84f9ebeeee44731c52",
+    "crates/gateway-daemon/src/local_sessions/observed_goal/target.rs": "2ccbb5fbe5f8c6391a7241b09380b8336f09de93d5bf5ec364ef1eed92bb4092",
+    "crates/gateway-daemon/src/local_sessions/observed_goal/target_error_tests.rs": "942d23cd20a87d6f9465e984252c064394e1bbd9f7e3ee3fc85e4b579f2f54ff",
+    "crates/gateway-daemon/src/local_sessions/observed_goal/verify.rs": "f55e97431711058d982af5fa5cde092aa3d7b1634ce2a4e2af270f48b1fe19d7",
+    "crates/gateway-daemon/src/mcp_client/context_tests.rs": "e6438cb078d6b97411cf2ccc1be74dbe70352ea0b57c9b9dcca083513be43a5c",
+    "crates/gateway-daemon/src/mcp_client/credential_file.rs": "41ed4b1fe86b44d825b61e04b0f443aef855fb4f2fc0cdbb0269fb43ce3b28e3",
+    "crates/gateway-daemon/src/mcp_client/credential_file_tests.rs": "11fd1972ee71f12a7aadd755d162e8b2949614af9cf512c62e3569de64dfba93",
+    "crates/gateway-daemon/src/mcp_client/host.rs": "963baeafa6a79b1adba64bf75002dee211661d9cf6bf043faac519bc0953efdb",
+    "crates/gateway-daemon/src/mcp_client/host_tests.rs": "20019416c4f189b223756100d56e7f5beec5d77a93eb9a1862baf0e4c225e72c",
+    "crates/gateway-daemon/src/mcp_client/mapping.rs": "0522ddbe63890847935d40488c35d04d3a69b7508a59a65ae0e3b365a50c83b9",
+    "crates/gateway-daemon/src/mcp_client/mapping_tests.rs": "2bacea45abb737aa755b31e444c9259d02e9e2f8ec3cb6abd428d5bcd24d13ff",
+    "crates/gateway-daemon/src/mcp_client/mod.rs": "7cb15f069e14f14f83e9c6a17bac7268f7e4e2345d9cd36eeb9d8568147972f9",
+    "crates/gateway-daemon/src/mcp_client/normalization.rs": "dd519415654e67d8606a45b5c1a115657d6a110a2fe4a63afbe163453d112065",
+    "crates/gateway-daemon/src/mcp_client/normalization_tests.rs": "3ab777541d4804b193799ba2de95cad994a06e22d6ba68813b1dea1314e12b38",
+    "crates/gateway-daemon/src/mcp_client/protocol.rs": "ec04a104e2cb59339d54e5fa9dcbb48fb3fb5bc3032c54e15e7d5ded2e4470d3",
+    "crates/gateway-daemon/src/mcp_client/protocol_guard_tests.rs": "9f4938425c38449fe52354694d2af0b92f896276952877dec377ed1f8cef3419",
+    "crates/gateway-daemon/src/mcp_client/protocol_polling_tests.rs": "bc4962f5596b487427d19cfb6a5b586f8d9e3cf24988743dca59958450bfb9e7",
+    "crates/gateway-daemon/src/mcp_client/protocol_tests.rs": "3e43e207a68168c42f179958b7592e112e75bb81e2230121131ee50bfcef432e",
+    "crates/gateway-daemon/src/mcp_client/scalar_quotes.rs": "97c355356565b113416f82c4e2f731f9b2d939345ee5589192c765d9bac572f5",
+    "crates/gateway-daemon/src/mcp_client/scalar_quotes_tests.rs": "af403b0fb067d261aa18f427c22c32fe62ec0596335c95585614b886b4c70b18",
+    "crates/gateway-daemon/src/mcp_client/session_budget.rs": "ea449ba634feb5b0d80fa1937adff2946e67ab36ed2bcf7fa22768dc5272dc19",
+    "crates/gateway-daemon/src/mcp_client/session_budget_boundary_tests.rs": "4c11472576fa0c621cec699f4046631db9b88c8d5080bfe7a8ac0d06b09dcce4",
+    "crates/gateway-daemon/src/mcp_client/session_budget_test_support.rs": "dede885a424edf384b6675cb6ef21f4de12b94ff6bc6e7fddb58cd87cc09a389",
+    "crates/gateway-daemon/src/mcp_client/transport.rs": "e9405bc756626e14869052ea72990722bb6c147d731e7ac478a26603186c03b8",
+    "crates/gateway-daemon/src/mcp_client/transport_credential_tests.rs": "2bfaaa7ce035f5eb5f10f4d9fce5e5728a9b80409d7810142a183caa8363e071",
+    "crates/gateway-daemon/src/mcp_client/transport_polling_tests.rs": "671989c0033e89022e2515a25d3281600d2b415308f57eb63935560a7161d35a",
+    "crates/gateway-daemon/src/native_policy_test_support.rs": "916595f53bbc4941dfd24dec6b48e9d3c91ef811f91f3cfee70fe61a8cd99ffa",
+    "crates/gateway-daemon/src/session_store.rs": "a225795a23c1beaa962337cab98301c2c6a0520762f25dcff582558ec4d4efa7",
+    "crates/gateway-daemon/src/session_store_audit_tests.rs": "4f1a1718393b6a2f614360f7b138dc8cf6687205d4544d7f8459753873c49e82",
+    "crates/gateway-daemon/src/session_store_goal_tests.rs": "05140317a5e356efce1baede8fb69dab5989c0bcddb72760a3c44c0e1ba8be11",
+    "crates/gateway-daemon/src/session_store_observation_audit.rs": "e7994e15ed123c16f84e670034cda183f38e69f367e2860fcb1a0b2dec54c302",
+    "crates/gateway-daemon/src/session_store_tests.rs": "801823a8c8a8342f2122a48377848bfa90568735d7f89d6f4f538e5b5aa49a75",
+    "crates/gateway-daemon/tests/mcp_client.rs": "b850e048f76b13159b2937e2ef5ad3dc8bf85fa8b14ca282684c7ac821b73379",
+    "crates/gateway-daemon/tests/observed_goal_sessions.rs": "6a6bcfa521b8bb7eea85fa43a798fa269c9222892dbc2f4251444ec8db2e697a",
+    "crates/gateway-daemon/tests/support/connector_proposal_fixture.rs": "dfb8931184e2064265ce8c107af04c25c291906d5bdcbc6e4d34b62b41b70be0",
+    "crates/gateway-daemon/tests/support/observed_goal_session.py": "3ad5a55879fa5f37a0ac719099935f8546d7fcc8af3906313d83eaa5527dfaa0",
+    "docs/connector-observed-goal-sessions.md": "987a2f8293966625d5ac9080b2d5418861391a05d97e9a782f34c92339abf9fa",
+    "docs/shared-session-implementation.md": "3689e766b27a07c5a35ad1b565032cf3489ef1b4eebe7276584286f2ac3f7e4b",
+    "scripts/bootstrap-codex-local.py": "99adb0d7305e205b624cd340b7897ec865a2f5c2d126cc08a32e619dba3bfaf6",
+    "scripts/check-local-mcp-coverage.py": "b92deffac18408b80e13fe7e4c246a72f643f97caf358c319c3f7d6c5b61e0a0",
+    "scripts/check-observed-goal-coverage.py": "26da9323d0172359560f446379a31546b4162f2a4065b8c64cf627a59d3e3964",
+    "scripts/cognitive-test-host.py": "d25cd8d428a0c3e8ade5a81934c689edff9b87f942739b7751ead13beb78f845",
+    "scripts/qualify-observed-goal-sessions.sh": "296c29d5339857b654852d965c98684429850efd4a65468d6c9b79dbc99aa9b5",
+    "scripts/quality-gates.json": "9e11b81258a437a16d46ddfb22573e09b97ee5cdd7d5d4978b9ce566c8ca1810",
+    "tests/contracts/test_session_contracts_v2.py": "9cff8b1e0ed14fbbc4b5b943bf2b89fae897c67e4c7f34ba5cd19a9ea12d6335"
+  },
+  "source_note": "79 changed source/test/script/documentation files and unchanged CI/coverage-engine/bootstrap prerequisites. Self-referential review/archive files are excluded. Production source is bound to PR404 head; the operator-document line and this review are a documentation-only follow-up.",
+  "artifact_archive": "EPIC-08.03.01-installed-goal-validation.json.gz",
+  "artifact_archive_sha256": "eddeb199edfec522d30ebdca762d9a0444eb2baa5bad450c447b05a92b7a0a79",
+  "coverage_artifacts": {
+    "report": "EPIC-08.03.01-installed-goal-coverage.json.gz",
+    "report_gzip_sha256": "ba26472684fa0b20cbf476020c513fd055ee19c13baad0606eba8bade1564297",
+    "raw_report_sha256": "b7405e13d84b21799ccec60f40fa1cf9470c61982dae9b02c04b4ffab52fd57a",
+    "counts": "EPIC-08.03.01-installed-goal-coverage-counts.txt",
+    "counts_sha256": "804d838ba930319d76c7711332eb143e1052e09c726865dc4eadb44281abe7bd"
+  },
+  "installed_evidence_level": "EXECUTABLE: shipped cg-mcp with synthetic client, actual native CLI records/PostgreSQL and a controlled independent stdio MCP server. No external installed Codex-client interoperability claim.",
+  "criteria": [
+    {
+      "id": "AC1",
+      "status": "VERIFIED_LOCAL",
+      "evidence": [
+        "final_alltargets"
+      ]
+    },
+    {
+      "id": "AC2",
+      "status": "VERIFIED_LOCAL",
+      "evidence": [
+        "final_alltargets",
+        "final_module_deduplication",
+        "source_same_host"
+      ]
+    },
+    {
+      "id": "AC3",
+      "status": "VERIFIED_LOCAL",
+      "evidence": [
+        "final_alltargets",
+        "final_kernel_denials",
+        "definitions_native_denials",
+        "association_boundaries"
+      ]
+    },
+    {
+      "id": "AC4",
+      "status": "VERIFIED_LOCAL",
+      "evidence": [
+        "final_alltargets",
+        "final_module_deduplication",
+        "command_ledger"
+      ]
+    },
+    {
+      "id": "AC5",
+      "status": "VERIFIED_LOCAL",
+      "evidence": [
+        "final_alltargets",
+        "local_boundaries",
+        "source_same_host",
+        "final_kernel_denials"
+      ]
+    },
+    {
+      "id": "AC6",
+      "status": "VERIFIED_LOCAL",
+      "evidence": [
+        "final_alltargets",
+        "final_kernel_denials"
+      ]
+    },
+    {
+      "id": "AC7",
+      "status": "VERIFIED_LOCAL",
+      "external_status": "PENDING_GITHUB_QUALITY",
+      "evidence": [
+        "final_alltargets",
+        "final_module_deduplication",
+        "final_kernel_denials",
+        "clippy",
+        "architecture",
+        "contracts",
+        "architecture_guard",
+        "format"
+      ],
+      "production_files_gated": 32,
+      "minimum_line_percent": 95,
+      "pending": [
+        "GitHub quality run40375224317; issue403 remains in progress and PR404 is not merged"
+      ]
+    }
+  ],
+  "final_gate_results": {
+    "alltargets": {
+      "passed": 792,
+      "failed": 0,
+      "ignored": 4,
+      "binaries": 73,
+      "installed_cases": 7
+    },
+    "module_deduplication": {
+      "application_passed": 50,
+      "daemon_passed": 165
+    },
+    "latest_kernel_passed": 37,
+    "session_contracts_passed": 10,
+    "local_boundary_passed": 4,
+    "definition_json_passed": 4,
+    "production_coverage": {
+      "status": "PASS",
+      "files": 32,
+      "minimum_percent": 95,
+      "conservative_target_hook": "one covered fixture point is subtracted from covered count; denominator is retained",
+      "counts": [
+        {
+          "path": "crates/gateway-application/src/closed_loop.rs",
+          "covered": 507,
+          "count": 526,
+          "percent": 96.38783269961978
+        },
+        {
+          "path": "crates/gateway-application/src/prompt_rendering.rs",
+          "covered": 212,
+          "count": 212,
+          "percent": 100.0
+        },
+        {
+          "path": "crates/gateway-application/src/retained_observations.rs",
+          "covered": 134,
+          "count": 134,
+          "percent": 100.0
+        },
+        {
+          "path": "crates/gateway-application/src/sessions/connector_goals.rs",
+          "covered": 131,
+          "count": 134,
+          "percent": 97.76119402985074
+        },
+        {
+          "path": "crates/gateway-application/src/sessions/coordinator.rs",
+          "covered": 731,
+          "count": 769,
+          "percent": 95.05851755526658
+        },
+        {
+          "path": "crates/gateway-application/src/sessions/goal_observation.rs",
+          "covered": 26,
+          "count": 26,
+          "percent": 100.0
+        },
+        {
+          "path": "crates/gateway-application/src/sessions/journal.rs",
+          "covered": 223,
+          "count": 230,
+          "percent": 96.95652173913044
+        },
+        {
+          "path": "crates/gateway-application/src/sessions/pre_execution_goal.rs",
+          "covered": 370,
+          "count": 384,
+          "percent": 96.35416666666667
+        },
+        {
+          "path": "crates/gateway-application/src/sessions/pre_execution_source.rs",
+          "covered": 382,
+          "count": 402,
+          "percent": 95.02487562189054
+        },
+        {
+          "path": "crates/gateway-application/src/sessions/resources.rs",
+          "covered": 316,
+          "count": 322,
+          "percent": 98.13664596273291
+        },
+        {
+          "path": "crates/gateway-application/src/sessions/verification.rs",
+          "covered": 179,
+          "count": 185,
+          "percent": 96.75675675675676
+        },
+        {
+          "path": "crates/gateway-daemon/src/cognitive_store.rs",
+          "covered": 69,
+          "count": 70,
+          "percent": 98.57142857142857
+        },
+        {
+          "path": "crates/gateway-daemon/src/local_sessions.rs",
+          "covered": 567,
+          "count": 582,
+          "percent": 97.42268041237114
+        },
+        {
+          "path": "crates/gateway-daemon/src/local_sessions/definition_json.rs",
+          "covered": 61,
+          "count": 61,
+          "percent": 100.0
+        },
+        {
+          "path": "crates/gateway-daemon/src/local_sessions/observed_goal/claim.rs",
+          "covered": 150,
+          "count": 157,
+          "percent": 95.54140127388536
+        },
+        {
+          "path": "crates/gateway-daemon/src/local_sessions/observed_goal/definitions.rs",
+          "covered": 630,
+          "count": 655,
+          "percent": 96.18320610687023
+        },
+        {
+          "path": "crates/gateway-daemon/src/local_sessions/observed_goal/mod.rs",
+          "covered": 110,
+          "count": 114,
+          "percent": 96.49122807017544
+        },
+        {
+          "path": "crates/gateway-daemon/src/local_sessions/observed_goal/read_association.rs",
+          "covered": 583,
+          "count": 610,
+          "percent": 95.57377049180327
+        },
+        {
+          "path": "crates/gateway-daemon/src/local_sessions/observed_goal/source.rs",
+          "covered": 398,
+          "count": 412,
+          "percent": 96.60194174757281
+        },
+        {
+          "path": "crates/gateway-daemon/src/local_sessions/observed_goal/target.rs",
+          "covered": 312,
+          "count": 323,
+          "percent": 96.59442724458205
+        },
+        {
+          "path": "crates/gateway-daemon/src/local_sessions/observed_goal/verify.rs",
+          "covered": 105,
+          "count": 110,
+          "percent": 95.45454545454545
+        },
+        {
+          "path": "crates/gateway-daemon/src/mcp_client/credential_file.rs",
+          "covered": 75,
+          "count": 76,
+          "percent": 98.6842105263158
+        },
+        {
+          "path": "crates/gateway-daemon/src/mcp_client/host.rs",
+          "covered": 676,
+          "count": 705,
+          "percent": 95.88652482269504
+        },
+        {
+          "path": "crates/gateway-daemon/src/mcp_client/mapping.rs",
+          "covered": 513,
+          "count": 520,
+          "percent": 98.65384615384616
+        },
+        {
+          "path": "crates/gateway-daemon/src/mcp_client/mod.rs",
+          "covered": 113,
+          "count": 116,
+          "percent": 97.41379310344827
+        },
+        {
+          "path": "crates/gateway-daemon/src/mcp_client/normalization.rs",
+          "covered": 341,
+          "count": 347,
+          "percent": 98.27089337175792
+        },
+        {
+          "path": "crates/gateway-daemon/src/mcp_client/protocol.rs",
+          "covered": 302,
+          "count": 314,
+          "percent": 96.17834394904459
+        },
+        {
+          "path": "crates/gateway-daemon/src/mcp_client/scalar_quotes.rs",
+          "covered": 334,
+          "count": 342,
+          "percent": 97.6608187134503
+        },
+        {
+          "path": "crates/gateway-daemon/src/mcp_client/session_budget.rs",
+          "covered": 476,
+          "count": 492,
+          "percent": 96.7479674796748
+        },
+        {
+          "path": "crates/gateway-daemon/src/mcp_client/transport.rs",
+          "covered": 304,
+          "count": 316,
+          "percent": 96.20253164556962
+        },
+        {
+          "path": "crates/gateway-daemon/src/session_store.rs",
+          "covered": 612,
+          "count": 624,
+          "percent": 98.07692307692308
+        },
+        {
+          "path": "crates/gateway-daemon/src/session_store_observation_audit.rs",
+          "covered": 222,
+          "count": 233,
+          "percent": 95.27896995708154
+        }
+      ]
+    },
+    "clippy": "PASS; Root confirmed handle74367 terminal0",
+    "architecture": {
+      "passed": 83,
+      "skipped": 1
+    },
+    "contract_fixtures": {
+      "passed": 27
+    },
+    "format": "PASS",
+    "architecture_guard": "PASS",
+    "diff_check": "PASS; Root confirmed"
+  },
+  "automation_review": {
+    "status": "VERIFIED_LOCAL",
+    "reviewer": "connector_phase_resources independent read-only review of Root-authored scripts",
+    "proof": [
+      "unchanged strict integer >=95% engine; all32 actual files pass",
+      "test modules/helpers reside outside production-file totals; Target single test point is conservatively charged uncovered without denominator reduction",
+      "self-tests reject missing/duplicate/invalid counts and a fixture-assisted threshold pass",
+      "real PostgreSQL required; no skip/filter flags; --all-targets --locked --test-threads=1",
+      "qualifier registered in quality-gates.json and CI source snapshotted"
+    ]
+  },
+  "reviews": {
+    "requirements_automation": "connector_phase_resources: native Definitions11 and Association15 normal passes plus final instrumented all-targets evidence",
+    "independent_architecture": "connector_gate_review final READY_FOR_REVIEW; scoped code/lifecycle/ownership review, strengthened coverage checker and marker-command ledger fix reviewed",
+    "independent_definitions_normalization": "Root scoped inspection plus executed component and final all-target logs; no author self-approval",
+    "independent_host_protocol_audit_and_error_taxonomy": "connector_phase_resources reviewed Gate host/diagnostics and Budget queued-poll/PG audit changes",
+    "source_performance": "Gate independent scoped CLEAR: pure routing/allocation identity checks then fresh current validation; same validated Host snapshot; final fresh validation remains, no cross-callback authority cache or deadline extension"
+  },
+  "lifecycle": {
+    "frozen_v2_schema_diff": "ZERO against feature base",
+    "acquisition": "Dispatching + Reserved with Preparation resource phase",
+    "marker": "Runnable + Prepared",
+    "completion": "Completed + Verified",
+    "interrupted_dispatch": "connector branch fails/reconciles without reacquisition; existing ArtifactGoal branch preserved",
+    "marker_command_ledger": "terminal success/failure append records the actual continuation command atomically; InspectByCommand and exact duplicate commands cause no additional reads"
+  },
+  "supported_boundary": {
+    "native_closure": "entirely Inspect; mixed/mutating unsupported even when selected wire operation is read-only",
+    "installed_profile": "10s RPC / unchanged30s claim; seven current instrumented cases pass",
+    "component_profile": "selected native Source boundary cases explicitly configure20s RPC / unchanged30s claim; component result is not substituted for installed qualification"
+  },
+  "external_ci": {
+    "observed_utc": "2026-10-26T18:16:01.643602+00:00",
+    "pull_request": {
+      "headRefOid": "4a6c5e53ecf02c1fa91d15f6f1f194592a9756d7",
+      "isDraft": true,
+      "state": "OPEN",
+      "statusCheckRollup": [
+        {
+          "__typename": "CheckRun",
+          "completedAt": "0001-01-01T00:00:00Z",
+          "conclusion": "",
+          "detailsUrl": "https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/actions/runs/40375224317/job/121756337528",
+          "name": "quality",
+          "startedAt": "2026-10-26T18:09:30Z",
+          "status": "IN_PROGRESS",
+          "workflowName": "Rust Quality"
+        },
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-10-26T18:09:37Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/actions/runs/40375224320/job/121756337040",
+          "name": "closure",
+          "startedAt": "2026-10-26T18:09:30Z",
+          "status": "COMPLETED",
+          "workflowName": "EPIC-04 closure acceptance"
+        }
+      ],
+      "url": "https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/pull/404"
+    },
+    "status": "PENDING_EXTERNAL_QUALITY",
+    "issue_closed": false,
+    "merged": false
+  },
+  "scope_remaining": [
+    "Issue403 stays open/in progress until required external CI and authorized merge; PR404 was Draft/Open at capture",
+    "Full #274/#271/#272\u2013#279 remain open",
+    "Installed model preparation/execution and exact action consent/resume",
+    "Complete dispatched-step Before/After snapshots with consistency/conflict rules",
+    "Independent post-effect readback, multi-grant consent, uncertainty recovery and remaining operational/system qualification"
+  ],
+  "diagnostic_policy": "Older failed/partial reports and previous CI failures are diagnostics only; current local acceptance uses the final source-bound reports. The earlier1240-test whole-workspace run predates the marker-command fix and is not current regression acceptance."
+}

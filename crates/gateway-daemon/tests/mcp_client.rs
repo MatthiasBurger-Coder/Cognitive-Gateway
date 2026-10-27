@@ -991,6 +991,8 @@ fn real_stdio_resource_crosses_canonical_normalization_ingestion_and_context_bou
                 max_age: FreshnessPolicy::new(60),
                 authenticated_source: text("test.admitted.stdio.peer"),
                 sensitivity: SensitivityClass::Internal,
+                confidence: Confidence::Unknown,
+                uncertainty: Uncertainty::Unknown,
                 conflict: ConflictStatus::Unresolved,
                 partial: false,
                 basis: ConnectorObservationBasis::SourceRead,

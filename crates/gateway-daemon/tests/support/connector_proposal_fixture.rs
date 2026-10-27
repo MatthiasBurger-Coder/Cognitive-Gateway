@@ -506,6 +506,8 @@ impl AcquisitionPort for Collector {
             max_age: FreshnessPolicy::new(60),
             authenticated_source: text("controlled-peer-profile"),
             sensitivity: SensitivityClass::Internal,
+            confidence: Confidence::Unknown,
+            uncertainty: Uncertainty::Unknown,
             conflict: ConflictStatus::None,
             partial: false,
             basis: ConnectorObservationBasis::ProviderAcknowledgement,

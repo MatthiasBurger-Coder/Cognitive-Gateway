@@ -36,3 +36,10 @@ pub mod invocation_host;
 
 /// Outbound MCP client; separate from the inbound Codex server.
 pub mod mcp_client;
+
+// Shared native test data and the one actual coordinator allocation harness.
+#[cfg(test)]
+#[path = "../../gateway-application/tests/support/goal_observation_harness.rs"]
+pub(crate) mod goal_observation_test_harness;
+#[cfg(test)]
+pub(crate) mod native_policy_test_support;

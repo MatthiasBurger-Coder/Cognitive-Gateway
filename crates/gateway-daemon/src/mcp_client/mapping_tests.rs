@@ -637,3 +637,71 @@ fn server_annotations_never_override_explicit_mutation_metadata() {
         ConnectorOperationClass::Mutate
     );
 }
+
+#[test]
+fn current_tool_schema_keeps_actual_raw_description_digest_and_refuses_old_revision() {
+    let mut mapper = mapper();
+    let mut wire = wire();
+    wire.tools[0]["inputSchema"]["description"] = json!("Pinned operator-described query");
+    wire.tools[0]["inputSchema"]["properties"]["query"]["description"] = json!("Exact selector");
+    rebind(&mut mapper, &wire);
+    let summary = mapper.snapshot(&wire).unwrap();
+    let cap = CapabilityId::new("records.read").unwrap();
+    let schema = mapper
+        .tool_schema(&wire, &cap, &summary.inventory.revision)
+        .unwrap();
+    assert_eq!(schema.argument_schema, wire.tools[0]["inputSchema"]);
+    assert_eq!(
+        schema.argument_schema_digest,
+        hash(&wire.tools[0]["inputSchema"])
+    );
+    assert_eq!(
+        schema.wire_argument_schema_digest,
+        schema.argument_schema_digest
+    );
+    assert_eq!(
+        schema.argument_schema_digest,
+        summary.entries()[0].argument_schema_digest
+    );
+    wire.tools[0]["inputSchema"]["description"] =
+        json!("Changed description changes actual wire pin");
+    rebind(&mut mapper, &wire);
+    assert_eq!(
+        mapper.tool_schema(&wire, &cap, &summary.inventory.revision),
+        Err(MappingError::StaleInventory)
+    );
+}
+struct NoResult;
+impl ConnectorResultNormalizer for NoResult {
+    fn normalize(
+        &self,
+        _: &ConnectorDispatch,
+        _: Option<&SourceId>,
+        _: &MappingRecord,
+        _: ProtocolResult,
+    ) -> Result<ConnectorObservation, Error> {
+        Err(Error::Unsupported)
+    }
+}
+#[test]
+fn retained_inventory_is_exact_checked_evidence_and_cannot_authorize_current_changed_wire() {
+    let mapper = mapper();
+    let wire = wire();
+    let dispatch = dispatch(&mapper, &wire, false);
+    let manifest = mapper.manifest.clone();
+    let cache = Arc::new(MappedInventoryCache::default());
+    let mapping =
+        CanonicalConnectorMapping::new_retaining(mapper, Box::new(NoResult), cache.clone());
+    let summary = mapping.inventory(&target(), &manifest, &wire).unwrap();
+    assert_eq!(cache.snapshot_for(&summary).unwrap().inventory(), &summary);
+    let mut forged = summary.clone();
+    forged.capabilities[0].argument_schema_digest = hash(&json!("foreign"));
+    assert!(cache.snapshot_for(&forged).is_err());
+    let mut changed = wire.clone();
+    changed.tools[0]["description"] = json!("Changed provider inventory");
+    assert!(mapping.operation(&dispatch, None, &changed).is_err());
+    // A retained summary is historical data while the current mapper refuses it.
+    assert!(cache.snapshot_for(&summary).is_ok());
+    assert!(mapping.inventory(&target(), &manifest, &changed).is_err());
+    assert!(cache.snapshot_for(&summary).is_err());
+}

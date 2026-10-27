@@ -4,10 +4,14 @@ use gateway_domain::ContextScopeId;
 use postgres::{Client, NoTls};
 use serde::{Serialize, de::DeserializeOwned};
 use sha2::{Digest, Sha256};
-use std::{sync::Mutex, time::Duration};
+use std::{
+    sync::{Arc, Mutex},
+    time::Duration,
+};
 
+#[derive(Clone)]
 pub struct CognitiveStore {
-    client: Mutex<Client>,
+    client: Arc<Mutex<Client>>,
     scope: ContextScopeId,
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -41,7 +45,7 @@ impl CognitiveStore {
             )
             .map_err(|_| StoreError::Storage)?;
         Ok(Self {
-            client: Mutex::new(client),
+            client: Arc::new(Mutex::new(client)),
             scope,
         })
     }
@@ -94,3 +98,7 @@ impl CognitiveStore {
         Ok(result)
     }
 }
+
+#[cfg(test)]
+#[path = "cognitive_store_connection_tests.rs"]
+mod connection_tests;

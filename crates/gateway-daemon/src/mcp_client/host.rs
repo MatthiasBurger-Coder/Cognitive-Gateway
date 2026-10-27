@@ -4,7 +4,7 @@ use gateway_application::{
     connector_manifest::{CompatibilityDecision, ConnectorCompatibilityProfile, ConnectorManifest},
     connectors::*,
 };
-use gateway_domain::{SourceId, TypedValue};
+use gateway_domain::{CapabilityId, SourceId, TypedValue};
 use serde_json::{Value, json};
 use std::{
     collections::BTreeMap,
@@ -34,6 +34,18 @@ pub trait ConnectorMapping: Send + Sync {
         source: Option<&SourceId>,
         result: ProtocolResult,
     ) -> Result<ConnectorObservation, Error>;
+    /// Providers that cannot prove a complete mapped schema remain unavailable
+    /// to tool-capable invocation adapters by default.
+    fn tool_schema(
+        &self,
+        _target: &ConnectorTarget,
+        _manifest: &ConnectorManifest,
+        _wire: &ProtocolInventory,
+        _capability: &CapabilityId,
+        _inventory_revision: &gateway_domain::ContentDigest,
+    ) -> Result<super::mapping::MappedToolSchema, Error> {
+        Err(Error::Unsupported)
+    }
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum WireOperation {
@@ -58,6 +70,9 @@ pub enum ProtocolResult {
         contents: Vec<Value>,
     },
 }
+
+type DispatchPreflight<'a> = dyn Fn(&ConnectorDispatch) -> Result<(), ConnectorFailure> + 'a;
+
 struct Active<'a>(&'a Mutex<Option<CallContext>>);
 impl Drop for Active<'_> {
     fn drop(&mut self) {
@@ -148,6 +163,26 @@ impl McpConnectorHost {
         source: Option<&SourceId>,
         context: &CallContext,
     ) -> Result<ConnectorObservation, ConnectorFailure> {
+        self.invoke_guarded(request, source, context, None)
+    }
+
+    pub(crate) fn invoke_with_context_and_preflight(
+        &self,
+        request: &ConnectorRequest,
+        source: Option<&SourceId>,
+        context: &CallContext,
+        preflight: &DispatchPreflight<'_>,
+    ) -> Result<ConnectorObservation, ConnectorFailure> {
+        self.invoke_guarded(request, source, context, Some(preflight))
+    }
+
+    fn invoke_guarded(
+        &self,
+        request: &ConnectorRequest,
+        source: Option<&SourceId>,
+        context: &CallContext,
+        preflight: Option<&DispatchPreflight<'_>>,
+    ) -> Result<ConnectorObservation, ConnectorFailure> {
         context
             .check()
             .map_err(|e| e.failure(&request.correlation, ConnectorEffect::NotDispatched))?;
@@ -164,7 +199,20 @@ impl McpConnectorHost {
                 Error::Configuration.failure(&request.correlation, ConnectorEffect::NotDispatched)
             );
         }
-        self.runtime.dispatch(&dispatch, source, context)
+        if let Some(preflight) = preflight {
+            preflight(&dispatch)?;
+        }
+        self.runtime
+            .dispatch_guarded(&dispatch, source, context, preflight)
+    }
+    pub(crate) fn discover_with_context_and_preflight(
+        &self,
+        target: &ConnectorTarget,
+        context: &CallContext,
+        preflight: &dyn Fn() -> Result<(), ConnectorFailure>,
+    ) -> Result<ConnectorInventory, ConnectorFailure> {
+        self.runtime
+            .discover_guarded(target, context, Some(preflight), true)
     }
     pub fn session_state(&self) -> Result<SessionState, Error> {
         self.runtime
@@ -172,6 +220,21 @@ impl McpConnectorHost {
             .try_lock()
             .map(|s| s.session.state)
             .map_err(|_| Error::InvalidState)
+    }
+    pub(crate) fn configured_target(&self) -> &ConnectorTarget {
+        &self.runtime.target
+    }
+
+    /// Retrieve a tool's complete schemas from the exact current canonical
+    /// inventory. This exposes no transport handle and conveys no permission.
+    pub fn tool_schema(
+        &self,
+        target: &ConnectorTarget,
+        capability: &CapabilityId,
+        inventory_revision: &gateway_domain::ContentDigest,
+    ) -> Result<super::mapping::MappedToolSchema, Error> {
+        self.runtime
+            .tool_schema(target, capability, inventory_revision)
     }
 }
 impl Runtime {
@@ -181,6 +244,47 @@ impl Runtime {
             context.cancel();
         }
         Active(&self.active)
+    }
+
+    fn tool_schema(
+        &self,
+        target: &ConnectorTarget,
+        capability: &CapabilityId,
+        expected_revision: &gateway_domain::ContentDigest,
+    ) -> Result<super::mapping::MappedToolSchema, Error> {
+        let context = self.context(target.connector.clone());
+        if target != &self.target {
+            return Err(Error::Configuration);
+        }
+        context.check()?;
+        let state = self
+            .lock(&context)
+            .map_err(|failure| tool_schema_lock_error(failure.code))?;
+        state.session.ready()?;
+        let inventory = state.canonical.as_ref().ok_or(Error::InventoryChanged)?;
+        if inventory.target != *target || &inventory.revision != expected_revision {
+            return Err(Error::InventoryChanged);
+        }
+        let wire = state
+            .session
+            .inventory
+            .as_ref()
+            .ok_or(Error::InventoryChanged)?;
+        let schema = self.mapping.tool_schema(
+            target,
+            &self.manifest,
+            wire,
+            capability,
+            expected_revision,
+        )?;
+        context.check()?;
+        if schema.target != *target
+            || schema.capability != *capability
+            || &schema.inventory_revision != expected_revision
+        {
+            return Err(Error::InventoryChanged);
+        }
+        Ok(schema)
     }
     fn context(&self, correlation: NonEmptyText) -> CallContext {
         CallContext::new(correlation, Instant::now() + self.limits.call_timeout)
@@ -215,8 +319,31 @@ impl Runtime {
         source: Option<&SourceId>,
         supplied: &CallContext,
     ) -> Result<ConnectorObservation, ConnectorFailure> {
+        self.dispatch_guarded(dispatch, source, supplied, None)
+    }
+
+    fn dispatch_guarded(
+        &self,
+        dispatch: &ConnectorDispatch,
+        source: Option<&SourceId>,
+        supplied: &CallContext,
+        preflight: Option<&DispatchPreflight<'_>>,
+    ) -> Result<ConnectorObservation, ConnectorFailure> {
         let request = &dispatch.request;
         let mut context = supplied.clone();
+        if preflight.is_some() {
+            let admission = self.admission.clone();
+            let dispatch = dispatch.clone();
+            let source = source.cloned();
+            // Preserve the outer resource/quote guard, then validate current
+            // CG-09 facts last. No source callback may silently revoke policy
+            // between that validation and the next bounded I/O operation.
+            context = context.with_guard(Arc::new(move || {
+                admission
+                    .validate_current_dispatch(&dispatch, source.as_ref())
+                    .map_err(|failure| Error::SessionDenied(failure.code))
+            }));
+        }
         let remaining = u64::try_from(dispatch.deadline.seconds())
             .ok()
             .and_then(|s| UNIX_EPOCH.checked_add(Duration::from_secs(s)))
@@ -230,6 +357,9 @@ impl Runtime {
             .deadline
             .min(Instant::now() + remaining.unwrap_or_default().min(self.limits.call_timeout));
         self.check_target(&request.target, &request.correlation)?;
+        if let Some(preflight) = preflight {
+            preflight(dispatch)?;
+        }
         let mut state = self.lock(&context)?;
         state.session.sent = false;
         if self.disabled.load(Ordering::Acquire) {
@@ -251,6 +381,9 @@ impl Runtime {
         let operation =
             result.map_err(|e| e.failure(&request.correlation, ConnectorEffect::NotDispatched))?;
         self.admission.revalidate(dispatch, source)?;
+        if let Some(preflight) = preflight {
+            preflight(dispatch)?;
+        }
         context
             .check()
             .map_err(|e| e.failure(&request.correlation, ConnectorEffect::NotDispatched))?;
@@ -415,6 +548,14 @@ impl Runtime {
     }
 }
 
+fn tool_schema_lock_error(code: ConnectorFailureCode) -> Error {
+    match code {
+        ConnectorFailureCode::Backpressure => Error::InvalidState,
+        ConnectorFailureCode::Timeout => Error::Timeout,
+        _ => Error::Unavailable,
+    }
+}
+
 fn protocol_result_text(result: &ProtocolResult) -> String {
     fn collect(value: &Value, output: &mut String) {
         match value {
@@ -506,41 +647,7 @@ impl ConnectorRuntimePort for Runtime {
         )
     }
     fn discover(&self, target: &ConnectorTarget) -> Result<ConnectorInventory, ConnectorFailure> {
-        let context = self.context(target.connector.clone());
-        self.check_target(target, &context.correlation)?;
-        let mut state = self.lock(&context)?;
-        let _active = self.activate(&context);
-        state.canonical = None;
-        let result = state
-            .session
-            .discover(&context)
-            .and_then(|wire| self.mapping.inventory(target, &self.manifest, &wire))
-            .and_then(|inventory| {
-                context.check()?;
-                Ok(inventory)
-            });
-        match result {
-            Ok(inventory)
-                if inventory.target == *target
-                    && inventory.capabilities.len() <= self.limits.items
-                    && inventory.resources.len() <= self.limits.items
-                    && inventory
-                        .capabilities
-                        .windows(2)
-                        .all(|p| p[0].capability < p[1].capability)
-                    && inventory.resources.windows(2).all(|p| p[0] < p[1]) =>
-            {
-                state.canonical = Some(inventory.clone());
-                Ok(inventory)
-            }
-            Ok(_) => {
-                Err(Error::Schema.failure(&context.correlation, ConnectorEffect::NotDispatched))
-            }
-            Err(error) => {
-                state.session.failed(error, &context);
-                Err(error.failure(&context.correlation, ConnectorEffect::NotDispatched))
-            }
-        }
+        self.discover_guarded(target, &self.context(target.connector.clone()), None, false)
     }
     fn lifecycle(
         &self,
@@ -548,7 +655,23 @@ impl ConnectorRuntimePort for Runtime {
         command: ConnectorLifecycleCommand,
     ) -> Result<ConnectorLifecycleState, ConnectorFailure> {
         let context = self.context(target.connector.clone());
-        self.check_target(target, &context.correlation)?;
+        let draining = matches!(
+            command,
+            ConnectorLifecycleCommand::Disable | ConnectorLifecycleCommand::Shutdown
+        );
+        if draining {
+            // Revocation must not prevent cleanup of this exact configured
+            // target. Cleanup grants no new protocol/application operation.
+            if *target != self.target {
+                return Err(ConnectorFailure {
+                    code: ConnectorFailureCode::ScopeMismatch,
+                    effect: ConnectorEffect::NotDispatched,
+                    correlation: context.correlation.clone(),
+                });
+            }
+        } else {
+            self.check_target(target, &context.correlation)?;
+        }
         if matches!(
             command,
             ConnectorLifecycleCommand::Disable | ConnectorLifecycleCommand::Shutdown
@@ -563,10 +686,6 @@ impl ConnectorRuntimePort for Runtime {
                 active.cancel();
             }
         }
-        let draining = matches!(
-            command,
-            ConnectorLifecycleCommand::Disable | ConnectorLifecycleCommand::Shutdown
-        );
         let until = Instant::now() + self.limits.shutdown * 4;
         let mut state = loop {
             match self.lock(&context) {
@@ -626,6 +745,107 @@ impl ConnectorRuntimePort for Runtime {
             }
             error.failure(&context.correlation, ConnectorEffect::NotDispatched)
         })
+    }
+}
+
+impl Runtime {
+    fn discover_guarded(
+        &self,
+        target: &ConnectorTarget,
+        supplied: &CallContext,
+        preflight: Option<&dyn Fn() -> Result<(), ConnectorFailure>>,
+        bootstrap: bool,
+    ) -> Result<ConnectorInventory, ConnectorFailure> {
+        let mut context = supplied.clone();
+        if preflight.is_some() {
+            let admission = self.admission.clone();
+            let target = target.clone();
+            // Current target admission runs after quote callbacks and before
+            // the final exact resource join on every bounded I/O check.
+            context = context.with_guard(Arc::new(move || {
+                admission
+                    .admit_target(&target)
+                    .map_err(|failure| Error::SessionDenied(failure.code))
+            }));
+        }
+        context.deadline = context
+            .deadline
+            .min(Instant::now() + self.limits.call_timeout);
+        context
+            .check()
+            .map_err(|e| e.failure(&context.correlation, ConnectorEffect::NotDispatched))?;
+        self.check_target(target, &context.correlation)?;
+        if let Some(preflight) = preflight {
+            preflight()?;
+        }
+        let mut state = self.lock(&context)?;
+        if self.disabled.load(Ordering::Acquire) {
+            return Err(
+                Error::InvalidState.failure(&context.correlation, ConnectorEffect::NotDispatched)
+            );
+        }
+        let _active = self.activate(&context);
+        let initial_send_attempts = state.session.send_attempts;
+        let effect = |session: &Session| {
+            if bootstrap && session.send_attempts != initial_send_attempts {
+                ConnectorEffect::NoMutation
+            } else {
+                ConnectorEffect::NotDispatched
+            }
+        };
+        state.canonical = None;
+        if bootstrap {
+            state
+                .session
+                .connect(self.factory.as_ref(), &context)
+                .map_err(|e| e.failure(&context.correlation, effect(&state.session)))?;
+        }
+        if let Some(preflight) = preflight {
+            preflight().map_err(|mut failure| {
+                failure.effect = effect(&state.session);
+                failure
+            })?;
+        }
+        context
+            .check()
+            .map_err(|e| e.failure(&context.correlation, effect(&state.session)))?;
+        let result = state
+            .session
+            .discover(&context)
+            .and_then(|wire| self.mapping.inventory(target, &self.manifest, &wire))
+            .and_then(|inventory| {
+                context.check()?;
+                Ok(inventory)
+            });
+        match result {
+            Ok(inventory)
+                if inventory.target == *target
+                    && inventory.capabilities.len() <= self.limits.items
+                    && inventory.resources.len() <= self.limits.items
+                    && inventory
+                        .capabilities
+                        .windows(2)
+                        .all(|p| p[0].capability < p[1].capability)
+                    && inventory.resources.windows(2).all(|p| p[0] < p[1]) =>
+            {
+                if let Some(preflight) = preflight {
+                    preflight().map_err(|mut failure| {
+                        failure.effect = effect(&state.session);
+                        failure
+                    })?;
+                }
+                context
+                    .check()
+                    .map_err(|e| e.failure(&context.correlation, effect(&state.session)))?;
+                state.canonical = Some(inventory.clone());
+                Ok(inventory)
+            }
+            Ok(_) => Err(Error::Schema.failure(&context.correlation, effect(&state.session))),
+            Err(error) => {
+                state.session.failed(error, &context);
+                Err(error.failure(&context.correlation, effect(&state.session)))
+            }
+        }
     }
 }
 

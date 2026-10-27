@@ -15,3 +15,14 @@ pub use contracts::*;
 pub use coordinator::*;
 pub use journal::*;
 pub use verification::*;
+
+mod connector_goals;
+mod goal_observation;
+mod pre_execution_goal;
+mod pre_execution_source;
+mod resources;
+pub use connector_goals::*;
+pub use goal_observation::*;
+pub use pre_execution_goal::*;
+pub use pre_execution_source::{ConnectorRequestIdentity, connector_request_digest};
+pub use resources::*;

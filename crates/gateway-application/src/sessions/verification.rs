@@ -28,7 +28,7 @@ pub fn assess_initial_goal(
 ) -> Result<InitialAssessment, SessionError> {
     // A new, owner-command-unique task has no released artifact. Empty captured
     // observations preserve UNKNOWN; no synthetic successful fact is supplied.
-    let scope = checkpoint.goal.basis().scope.clone();
+    let scope = checkpoint.goal.artifact_basis()?.scope.clone();
     let records = ObservationEvidenceSet::new(vec![], vec![], vec![], vec![])
         .map_err(|_| SessionError::InvalidInput)?;
     let capture = serde_json::to_vec(&records).map_err(|_| SessionError::InvalidInput)?;
@@ -102,7 +102,7 @@ pub fn verify_artifact(
     {
         return Err(SessionError::InvalidInput);
     }
-    let goal = checkpoint.goal.basis();
+    let goal = checkpoint.goal.artifact_basis()?;
     if expected.basis().scope != goal.scope
         || inputs.projection.mapping.step != goal.step
         || expected.basis() != &inputs.resolved.report.basis

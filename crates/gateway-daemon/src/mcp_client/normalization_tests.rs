@@ -10,6 +10,8 @@ impl AcquisitionPort for Collector {
         Ok(self.0.clone())
     }
 }
+// This fixture collector returns immutable metadata without provider I/O.
+impl QualifiedAcquisitionPort for Collector {}
 fn text(s: &str) -> NonEmptyText {
     NonEmptyText::new(s).unwrap()
 }
@@ -44,6 +46,8 @@ fn acquisition() -> Acquisition {
         max_age: FreshnessPolicy::new(20),
         authenticated_source: text("authenticated.collector"),
         sensitivity: SensitivityClass::Confidential,
+        confidence: Confidence::Unknown,
+        uncertainty: Uncertainty::Unknown,
         conflict: ConflictStatus::None,
         partial: false,
         basis: ConnectorObservationBasis::SourceRead,
@@ -621,4 +625,225 @@ fn optional_provider_revision_and_digest_remain_absent_when_not_supplied() {
     assert!(r.observation().source_revision.is_none());
     assert!(r.observation().metadata.source_digest.is_none());
     assert!(r.batch().unwrap().snapshot().change_token().is_none());
+}
+
+#[test]
+fn quality_requires_explicit_collector_assessment_and_partial_cannot_claim_certainty() {
+    let unassessed = normalizer(acquisition())
+        .canonicalize(&dispatch(), None, &mapping(), tool(payload()))
+        .unwrap();
+    assert_eq!(
+        unassessed.observation().metadata.quality.confidence(),
+        Confidence::Unknown
+    );
+    assert_eq!(
+        unassessed.observation().metadata.quality.uncertainty(),
+        Uncertainty::Unknown
+    );
+    for partial in [false, true] {
+        let mut qualified = acquisition();
+        qualified.confidence = Confidence::NotApplicable;
+        qualified.uncertainty = Uncertainty::None;
+        qualified.partial = partial;
+        let result = normalizer(qualified)
+            .canonicalize(&dispatch(), None, &mapping(), tool(payload()))
+            .unwrap();
+        let quality = result.observation().metadata.quality;
+        assert_eq!(quality.confidence(), Confidence::NotApplicable);
+        assert_eq!(
+            quality.uncertainty(),
+            if partial {
+                Uncertainty::Incomplete
+            } else {
+                Uncertainty::None
+            }
+        );
+        let batch = result.batch().unwrap();
+        assert!(
+            batch
+                .quality_metadata()
+                .values()
+                .all(|items| items == &[quality])
+        );
+        assert!(
+            result
+                .fragments()
+                .unwrap()
+                .iter()
+                .all(|fragment| fragment.metadata().quality == quality)
+        );
+    }
+}
+
+#[test]
+fn scalar_accounting_requires_qualified_collector_and_bounds_canonical_typed_values() {
+    assert!(matches!(
+        normalizer(acquisition()).resource_bounds(),
+        Err(Error::Unsupported)
+    ));
+    let normalizer =
+        CanonicalResultNormalizer::new_qualified(profile(), Box::new(Collector(acquisition())))
+            .unwrap();
+    let bound = normalizer.resource_bounds().unwrap();
+    assert_eq!(bound.source(), &profile().source);
+    assert_eq!(
+        bound.subjects(),
+        &profile().fields.values().cloned().collect()
+    );
+    assert_eq!(bound.value_bytes(), 262_144 + 32 * 3);
+    let mut input = payload();
+    input["title"] = json!("é\\\"".repeat(2_000));
+    let result = normalizer
+        .canonicalize(&dispatch(), None, &mapping(), tool(input))
+        .unwrap();
+    let actual: usize = result
+        .batch()
+        .unwrap()
+        .records()
+        .facts()
+        .iter()
+        .map(|fact| serde_json::to_vec(fact.value()).unwrap().len())
+        .sum();
+    assert!(actual as u64 <= bound.value_bytes());
+    let mut oversized = payload();
+    oversized["title"] = json!("x".repeat(262_145));
+    assert!(matches!(
+        normalizer.canonicalize(&dispatch(), None, &mapping(), tool(oversized)),
+        Err(Error::Limit)
+    ));
+}
+
+#[test]
+fn exact_argument_routes_select_matching_native_subjects_and_resource_bounds() {
+    let mut first = profile();
+    first.fields = BTreeMap::from([(
+        "title".into(),
+        SubjectPath::new(["object", "one", "title"]).unwrap(),
+    )]);
+    let mut second = profile();
+    second.fields = BTreeMap::from([
+        (
+            "open".into(),
+            SubjectPath::new(["object", "two", "open"]).unwrap(),
+        ),
+        (
+            "count".into(),
+            SubjectPath::new(["object", "two", "count"]).unwrap(),
+        ),
+    ]);
+    let args = |id: &str| BTreeMap::from([(text("query"), TypedValue::string(id).unwrap())]);
+    let cap = dispatch().request.capability;
+    let source = first.source.clone();
+    let normalizer = CanonicalResultNormalizer::new_qualified_routes(
+        vec![
+            NormalizationRoute {
+                capability: cap.clone(),
+                source: source.clone(),
+                arguments: args("one"),
+                profile: first,
+            },
+            NormalizationRoute {
+                capability: cap.clone(),
+                source: source.clone(),
+                arguments: args("two"),
+                profile: second,
+            },
+        ],
+        Box::new(Collector(acquisition())),
+    )
+    .unwrap();
+    assert!(
+        normalizer.resource_bounds().is_err(),
+        "routed proof must never fall back to first profile"
+    );
+    for (id, expected) in [
+        ("one", vec!["object.one.title"]),
+        ("two", vec!["object.two.open", "object.two.count"]),
+    ] {
+        let mut d = dispatch();
+        d.request.arguments = args(id);
+        let mut value = payload();
+        value["object"] = json!(id);
+        let result = normalizer
+            .canonicalize(&d, None, &mapping(), tool(value))
+            .unwrap();
+        let observed = result.observation();
+        let bounds = normalizer
+            .resource_bounds_for_route(&cap, &d.request.arguments, &source)
+            .unwrap();
+        assert_eq!(observed.records.facts().len(), expected.len());
+        assert_eq!(
+            observed
+                .records
+                .facts()
+                .iter()
+                .map(|f| f.subject().clone())
+                .collect::<BTreeSet<_>>(),
+            *bounds.subjects()
+        );
+        assert_eq!(
+            *bounds.subjects(),
+            expected
+                .into_iter()
+                .map(|s| SubjectPath::new(s.split('.')).unwrap())
+                .collect()
+        );
+    }
+    assert!(
+        normalizer
+            .resource_bounds_for_route(&cap, &args("unknown"), &source)
+            .is_err()
+    );
+    assert!(
+        normalizer
+            .resource_bounds_for_route(
+                &cap,
+                &args("one"),
+                &SourceId::new("foreign.source").unwrap()
+            )
+            .is_err()
+    );
+    let mut unknown = dispatch();
+    unknown.request.arguments = args("unknown");
+    assert!(matches!(
+        normalizer.canonicalize(&unknown, None, &mapping(), tool(payload())),
+        Err(Error::Schema)
+    ));
+}
+
+#[test]
+fn normalization_route_construction_rejects_ambiguous_or_foreign_selectors() {
+    let cap = dispatch().request.capability;
+    let source = profile().source;
+    let route = |id: &str| NormalizationRoute {
+        capability: cap.clone(),
+        source: source.clone(),
+        arguments: BTreeMap::from([(text("query"), TypedValue::string(id).unwrap())]),
+        profile: profile(),
+    };
+    assert!(matches!(
+        CanonicalResultNormalizer::new_qualified_routes(
+            vec![route("same"), route("same")],
+            Box::new(Collector(acquisition()))
+        ),
+        Err(Error::Configuration)
+    ));
+    let mut foreign = route("two");
+    foreign.capability = CapabilityId::new("foreign.capability").unwrap();
+    assert!(matches!(
+        CanonicalResultNormalizer::new_qualified_routes(
+            vec![route("one"), foreign],
+            Box::new(Collector(acquisition()))
+        ),
+        Err(Error::Configuration)
+    ));
+    let mut foreign = route("two");
+    foreign.profile.source = SourceId::new("foreign.source").unwrap();
+    assert!(matches!(
+        CanonicalResultNormalizer::new_qualified_routes(
+            vec![route("one"), foreign],
+            Box::new(Collector(acquisition()))
+        ),
+        Err(Error::Configuration)
+    ));
 }

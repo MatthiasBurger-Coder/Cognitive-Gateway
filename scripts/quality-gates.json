@@ -40,6 +40,10 @@
     "command": "bash scripts/qualify-shared-sessions.sh \"$EVIDENCE_DIR/shared-sessions\""
   },
   {
+    "name": "EPIC-08.03.01 installed observed-goal sessions, PostgreSQL recovery and production coverage",
+    "command": "bash scripts/qualify-observed-goal-sessions.sh \"$EVIDENCE_DIR/observed-goal-sessions\""
+  },
+  {
     "name": "Install registry CLI",
     "command": "cargo install --path crates/gateway-daemon --bin cg-registry --locked --force --root \"$RUNNER_TEMP/cg-registry\""
   },
@@ -241,18 +245,18 @@
   },
   {
     "name": "EPIC-07.03 MCP client runtime, stdio conformance and coverage",
-    "command": "CARGO_BUILD_JOBS=1 CARGO_LLVM_COV_TARGET_DIR=target/mcp-client-coverage cargo llvm-cov -p gateway-daemon --lib --test mcp_client --locked --json --output-path \"$EVIDENCE_DIR/mcp-client-coverage.json\"\npython3 scripts/check-mcp-client-coverage.py --self-test\npython3 scripts/check-mcp-client-coverage.py \"$EVIDENCE_DIR/mcp-client-coverage.json\""
+    "command": "CARGO_BUILD_JOBS=1 CARGO_LLVM_COV_TARGET_DIR=target/mcp-client-coverage cargo llvm-cov -p gateway-daemon --lib --test mcp_client --test observed_goal_sessions --locked --json --output-path \"$EVIDENCE_DIR/mcp-client-coverage.json\"\npython3 scripts/check-mcp-client-coverage.py --self-test\npython3 scripts/check-mcp-client-coverage.py \"$EVIDENCE_DIR/mcp-client-coverage.json\""
   },
   {
     "name": "EPIC-07.04 deterministic connector mapping and coverage",
-    "command": "CARGO_BUILD_JOBS=1 CARGO_LLVM_COV_TARGET_DIR=target/mcp-client-coverage cargo llvm-cov -p gateway-daemon --lib --test mcp_client --locked --json --output-path \"$EVIDENCE_DIR/connector-mapping-coverage.json\"\npython3 scripts/check-connector-mapping-coverage.py --self-test\npython3 scripts/check-connector-mapping-coverage.py \"$EVIDENCE_DIR/connector-mapping-coverage.json\""
+    "command": "CARGO_BUILD_JOBS=1 CARGO_LLVM_COV_TARGET_DIR=target/mcp-client-coverage cargo llvm-cov -p gateway-daemon --lib --test mcp_client --test observed_goal_sessions --locked --json --output-path \"$EVIDENCE_DIR/connector-mapping-coverage.json\"\npython3 scripts/check-connector-mapping-coverage.py --self-test\npython3 scripts/check-connector-mapping-coverage.py \"$EVIDENCE_DIR/connector-mapping-coverage.json\""
   },
   {
     "name": "EPIC-07.05 canonical connector evidence normalization and coverage",
-    "command": "CARGO_BUILD_JOBS=1 CARGO_LLVM_COV_TARGET_DIR=target/connector-result-linux-coverage cargo llvm-cov -p gateway-daemon -p gateway-application --lib --test mcp_client --locked --json --output-path \"$EVIDENCE_DIR/connector-result-coverage.json\"\npython3 scripts/check-connector-result-coverage.py --self-test\npython3 scripts/check-connector-result-coverage.py \"$EVIDENCE_DIR/connector-result-coverage.json\""
+    "command": "CARGO_BUILD_JOBS=1 CARGO_LLVM_COV_TARGET_DIR=target/connector-result-linux-coverage cargo llvm-cov -p gateway-daemon -p gateway-application --lib --test mcp_client --test observed_goal_sessions --locked --json --output-path \"$EVIDENCE_DIR/connector-result-coverage.json\"\npython3 scripts/check-connector-result-coverage.py --self-test\npython3 scripts/check-connector-result-coverage.py \"$EVIDENCE_DIR/connector-result-coverage.json\""
   },
   {
     "name": "EPIC-07.06 credential isolation and secret disclosure regression",
-    "command": "CARGO_BUILD_JOBS=1 CARGO_LLVM_COV_TARGET_DIR=target/mcp-client-coverage cargo llvm-cov -p gateway-daemon --lib --test mcp_client --locked --json --output-path \"$EVIDENCE_DIR/epic-07-06-coverage.json\"\npython3 scripts/check-mcp-client-coverage.py --self-test\npython3 scripts/check-mcp-client-coverage.py \"$EVIDENCE_DIR/epic-07-06-coverage.json\""
+    "command": "CARGO_BUILD_JOBS=1 CARGO_LLVM_COV_TARGET_DIR=target/mcp-client-coverage cargo llvm-cov -p gateway-daemon --lib --test mcp_client --test observed_goal_sessions --locked --json --output-path \"$EVIDENCE_DIR/epic-07-06-coverage.json\"\npython3 scripts/check-mcp-client-coverage.py --self-test\npython3 scripts/check-mcp-client-coverage.py \"$EVIDENCE_DIR/epic-07-06-coverage.json\""
   }
 ]

@@ -1,4 +1,9 @@
 //! Launcher-owned current admission and v2 mapping. All lifecycle lives in application.
+#[cfg(test)]
+#[path = "local_sessions/boundary_tests.rs"]
+mod boundary_tests;
+mod definition_json;
+mod observed_goal;
 use crate::{
     codex_workspace::{LocalCodexHost, LocalWorkspaceResolver},
     cognitive_store::CognitiveStore,
@@ -20,6 +25,7 @@ use serde_json::{Value, json};
 use std::{
     io::Read,
     path::PathBuf,
+    sync::{Arc, Mutex},
     time::{SystemTime, UNIX_EPOCH},
 };
 
@@ -28,7 +34,14 @@ use std::{
 pub(crate) struct SessionAdmission {
     pub store_file: PathBuf,
     pub intent: Intent,
-    pub basis: ArtifactGoalBasis,
+    #[serde(default)]
+    pub basis: Option<ArtifactGoalBasis>,
+    #[serde(default)]
+    pub connector_goal: Option<ConnectorGoalAdmission>,
+    #[serde(default)]
+    pub resource_limits: Option<SessionResourceLimits>,
+    #[serde(default)]
+    observed_goal_runtime: Option<observed_goal::definitions::ReadonlyRuntimeAdmission>,
     pub execution: RequestedExecution,
     pub max_actions: u32,
     pub max_retries: u32,
@@ -36,6 +49,65 @@ pub(crate) struct SessionAdmission {
     pub consent_required: bool,
     pub enabled: bool,
     pub issuers: Vec<PrincipalId>,
+}
+
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(crate) struct ConnectorGoalAdmission {
+    plan: RecordRef,
+    steps: Vec<String>,
+    observations: Vec<ConnectorObservationAdmission>,
+}
+
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct ConnectorObservationAdmission {
+    condition: String,
+    source: String,
+    capability: String,
+    operation_class: String,
+}
+
+fn registered_connector_goal(
+    config: &SessionAdmission,
+    scope: &gateway_domain::ContextScopeId,
+) -> Result<SupportedConnectorGoal, SessionError> {
+    let goal = config
+        .connector_goal
+        .as_ref()
+        .ok_or(SessionError::UnsupportedCapability)?;
+    let steps = goal
+        .steps
+        .iter()
+        .map(|step| PlanStepId::new(step).map_err(|_| SessionError::InvalidInput))
+        .collect::<Result<Vec<_>, _>>()?;
+    let observations = goal
+        .observations
+        .iter()
+        .map(|mapping| {
+            let class = match mapping.operation_class.as_str() {
+                "read" => gateway_application::connectors::ConnectorOperationClass::Read,
+                "search" => gateway_application::connectors::ConnectorOperationClass::Search,
+                "inspect" => gateway_application::connectors::ConnectorOperationClass::Inspect,
+                _ => return Err(SessionError::UnsupportedCapability),
+            };
+            ConditionObservationMapping::new(
+                gateway_domain::ConditionId::new(&mapping.condition)
+                    .map_err(|_| SessionError::InvalidInput)?,
+                gateway_domain::SourceId::new(&mapping.source)
+                    .map_err(|_| SessionError::InvalidInput)?,
+                CapabilityId::new(&mapping.capability).map_err(|_| SessionError::InvalidInput)?,
+                class,
+            )
+        })
+        .collect::<Result<Vec<_>, _>>()?;
+    SupportedConnectorGoal::from_host_registration(
+        config.intent.clone(),
+        scope.clone(),
+        goal.plan.clone(),
+        steps,
+        observations,
+    )
 }
 fn read(path: &str, limit: u64) -> Result<String, SessionError> {
     let file = std::fs::File::open(path).map_err(|_| SessionError::Unavailable)?;
@@ -47,27 +119,6 @@ fn read(path: &str, limit: u64) -> Result<String, SessionError> {
         return Err(SessionError::LimitExceeded);
     }
     Ok(text)
-}
-fn store(host: &LocalCodexHost) -> Result<PostgresSessionStore, SessionError> {
-    let config = host
-        .sessions
-        .as_ref()
-        .ok_or(SessionError::UnsupportedCapability)?;
-    if !config.store_file.is_absolute() {
-        return Err(SessionError::InvalidInput);
-    }
-    let text = read(
-        config
-            .store_file
-            .to_str()
-            .ok_or(SessionError::InvalidInput)?,
-        4096,
-    )?;
-    // Local database credentials are read only by this trusted storage adapter.
-    Ok(PostgresSessionStore::new(CognitiveStore::connect(
-        text.trim(),
-        host.binding.canonical_scope.clone(),
-    )?))
 }
 fn error(e: FacadeError) -> SessionError {
     match e {
@@ -105,11 +156,16 @@ impl LocalApplication {
         }
     }
     fn host(&self) -> LocalSessionHost {
-        LocalSessionHost {
+        let access = Arc::new(LocalSessionAccess {
             binding: self.binding.clone(),
             admission: self.admission.clone(),
             cwd: self.cwd.clone(),
             repository: self.repository.clone(),
+            selected_store: Mutex::new(None),
+        });
+        LocalSessionHost {
+            goal_runtime: observed_goal::ObservedGoalRuntime::new(Arc::clone(&access)),
+            access,
         }
     }
     fn execute_v2(&self, operation: &str, request: &Value) -> Result<Value, &'static str> {
@@ -123,8 +179,12 @@ impl LocalApplication {
         let host = self.host();
         let admitted = host.current().map_err(SessionError::code)?;
         let owner = host.owner().map_err(SessionError::code)?;
-        let coordinator =
-            SessionCoordinator::new(store(&admitted).map_err(SessionError::code)?, host);
+        let coordinator = SessionCoordinator::new(
+            host.access
+                .selected_repository(&admitted)
+                .map_err(SessionError::code)?,
+            host,
+        );
         let snapshot = match decoded {
             boundary::Decoded::Command(command) => {
                 if let Some(at) = command.mutation() {
@@ -171,7 +231,7 @@ impl LocalApplication {
         let admitted = host.current()?;
         let owner = host.owner()?;
         host.issuer(&owner, issuer)?;
-        let repository = store(&admitted)?;
+        let repository = host.access.selected_repository(&admitted)?;
         if decision == "recover" {
             let c = SessionCoordinator::new(repository, host);
             return Ok(json!({"session":c.recover(&owner,session)?}));
@@ -231,7 +291,10 @@ impl CodexApplicationPort for LocalApplication {
             digest.into(),
         )
         .map_err(|_| FacadeError::ReferenceUnavailable)?;
-        let repository = store(&admitted).map_err(|_| FacadeError::ReferenceUnavailable)?;
+        let repository = host
+            .access
+            .selected_repository(&admitted)
+            .map_err(|_| FacadeError::ReferenceUnavailable)?;
         if repository
             .record_kind(&owner, &reference)
             .map_err(|_| FacadeError::ReferenceUnavailable)?
@@ -268,15 +331,90 @@ impl CodexApplicationPort for LocalApplication {
     }
 }
 struct LocalSessionHost {
+    access: Arc<LocalSessionAccess>,
+    goal_runtime: observed_goal::ObservedGoalRuntime,
+}
+impl LocalSessionHost {
+    fn current(&self) -> Result<LocalCodexHost, SessionError> {
+        self.access.current()
+    }
+    fn owner(&self) -> Result<OwnerBinding, SessionError> {
+        self.access.owner()
+    }
+}
+/// One shared definition of current launcher identity for the session host and
+/// its connector adapters. Each access still resolves fresh admission; this is
+/// not a cache of permissions, session records or observations.
+struct LocalSessionAccess {
     binding: ScopeBinding,
     admission: String,
     cwd: String,
     repository: String,
+    selected_store: Mutex<Option<SelectedSessionStore>>,
 }
-impl LocalSessionHost {
+struct SelectedSessionStore {
+    path: PathBuf,
+    connection: String,
+    scope: gateway_domain::ContextScopeId,
+    repository: PostgresSessionStore,
+}
+impl LocalSessionAccess {
+    /// Pin the selected database for this one command and share its connection,
+    /// never its rows or authority decisions. A selector change fails closed.
+    fn selected_repository(
+        &self,
+        host: &LocalCodexHost,
+    ) -> Result<PostgresSessionStore, SessionError> {
+        let config = host
+            .sessions
+            .as_ref()
+            .ok_or(SessionError::UnsupportedCapability)?;
+        if !config.store_file.is_absolute() {
+            return Err(SessionError::InvalidInput);
+        }
+        if host.binding.canonical_scope != self.binding.canonical_scope {
+            return Err(SessionError::ScopeDenied);
+        }
+        let connection = read(
+            config
+                .store_file
+                .to_str()
+                .ok_or(SessionError::InvalidInput)?,
+            4096,
+        )?;
+        let connection = connection.trim();
+        if connection.is_empty() {
+            return Err(SessionError::StorageUnavailable);
+        }
+        let mut slot = self
+            .selected_store
+            .lock()
+            .map_err(|_| SessionError::StorageUnavailable)?;
+        if let Some(selected) = slot.as_ref() {
+            if selected.path != config.store_file
+                || selected.connection != connection
+                || selected.scope != host.binding.canonical_scope
+            {
+                return Err(SessionError::StaleRevision);
+            }
+            return Ok(selected.repository.clone());
+        }
+        let repository = PostgresSessionStore::new(CognitiveStore::connect(
+            connection,
+            host.binding.canonical_scope.clone(),
+        )?);
+        *slot = Some(SelectedSessionStore {
+            path: config.store_file.clone(),
+            connection: connection.to_owned(),
+            scope: host.binding.canonical_scope.clone(),
+            repository: repository.clone(),
+        });
+        Ok(repository)
+    }
     fn current(&self) -> Result<LocalCodexHost, SessionError> {
-        let resolver =
-            LocalWorkspaceResolver::from_json(&read(&self.admission, 1_048_575)?).map_err(error)?;
+        let definition = read(&self.admission, 1_048_575)?;
+        definition_json::parse(&definition)?;
+        let resolver = LocalWorkspaceResolver::from_json(&definition).map_err(error)?;
         let binding = resolver
             .resolve(&WorkspaceReference {
                 working_directory: self.cwd.clone(),
@@ -318,7 +456,10 @@ impl InteractionAuthorityPort for LocalSessionHost {
             return Err(SessionError::ScopeDenied);
         }
         let host = self.current()?;
-        let status = store(&host)?.consent(owner, reference)?;
+        let status = self
+            .access
+            .selected_repository(&host)?
+            .consent(owner, reference)?;
         if let ConsentStatus::Granted(grant) = &status {
             self.issuer(owner, grant.issuer())?;
         }
@@ -329,6 +470,59 @@ impl InteractionAuthorityPort for LocalSessionHost {
     }
 }
 impl StructuredSessionHost for LocalSessionHost {
+    fn goal_observation_runtime(&self) -> Option<&dyn ReadonlyGoalObservationRuntimePort> {
+        Some(&self.goal_runtime)
+    }
+    fn register_goal(
+        &self,
+        owner: &OwnerBinding,
+        intent: Intent,
+        execution: RequestedExecution,
+    ) -> Result<(SupportedSessionGoal, SessionBudget), SessionError> {
+        self.disclose(owner, &SessionId::new("start")?)?;
+        let host = self.current()?;
+        let config = host
+            .sessions
+            .as_ref()
+            .ok_or(SessionError::UnsupportedCapability)?;
+        match (
+            &config.basis,
+            &config.connector_goal,
+            &config.observed_goal_runtime,
+        ) {
+            (Some(_), None, None) => self
+                .register(owner, intent, execution)
+                .map(|(goal, budget)| (goal.into(), budget)),
+            (None, Some(_), Some(runtime)) => {
+                if config.intent != intent || config.execution != execution {
+                    return Err(SessionError::UnsupportedCapability);
+                }
+                if config.ttl_ms == 0 || config.ttl_ms > 86_400_000 {
+                    return Err(SessionError::LimitExceeded);
+                }
+                config
+                    .resource_limits
+                    .as_ref()
+                    .ok_or(SessionError::UnsupportedCapability)?
+                    .validate()?;
+                let goal = registered_connector_goal(config, &host.binding.canonical_scope)?;
+                runtime.capture(&host, &goal, execution)?;
+                let budget = SessionBudget {
+                    actions: 0,
+                    retries: 0,
+                    max_actions: config.max_actions,
+                    max_retries: config.max_retries,
+                    deadline_ms: self
+                        .now_ms()?
+                        .checked_add(config.ttl_ms)
+                        .ok_or(SessionError::LimitExceeded)?,
+                };
+                budget.validate()?;
+                Ok((SupportedSessionGoal::connector(goal), budget))
+            }
+            _ => Err(SessionError::InvalidInput),
+        }
+    }
     fn now_ms(&self) -> Result<u64, SessionError> {
         u64::try_from(
             SystemTime::now()
@@ -381,7 +575,13 @@ impl StructuredSessionHost for LocalSessionHost {
         if config.ttl_ms == 0 || config.ttl_ms > 86_400_000 {
             return Err(SessionError::LimitExceeded);
         }
-        let goal = SupportedArtifactGoal::validate(intent, config.basis.clone())?;
+        let goal = SupportedArtifactGoal::validate(
+            intent,
+            config
+                .basis
+                .clone()
+                .ok_or(SessionError::UnsupportedCapability)?,
+        )?;
         let budget = SessionBudget {
             actions: 0,
             retries: 0,
@@ -402,7 +602,11 @@ impl StructuredSessionHost for LocalSessionHost {
             .sessions
             .as_ref()
             .ok_or(SessionError::UnsupportedCapability)?;
-        if config.basis != *checkpoint.goal.basis()
+        let basis = config
+            .basis
+            .as_ref()
+            .ok_or(SessionError::UnsupportedCapability)?;
+        if basis != checkpoint.goal.artifact_basis()?
             || config.intent != *checkpoint.goal.intent()
             || config.execution != checkpoint.execution
         {
@@ -430,9 +634,9 @@ impl StructuredSessionHost for LocalSessionHost {
                 .map(|r| &r["document"])
                 .ok_or(SessionError::Unavailable)
         };
-        if canonical.plan["id"] != config.basis.plan.id().as_str()
-            || canonical.plan["revision"] != config.basis.plan.revision().as_str()
-            || canonical.plan["digest"] != config.basis.plan.digest()
+        if canonical.plan["id"] != basis.plan.id().as_str()
+            || canonical.plan["revision"] != basis.plan.revision().as_str()
+            || canonical.plan["digest"] != basis.plan.digest()
         {
             return Err(SessionError::StaleRevision);
         }
@@ -441,7 +645,7 @@ impl StructuredSessionHost for LocalSessionHost {
             &canonical.documents(&host.resources).map_err(error)?,
         )
         .map_err(error)?;
-        if snapshot.scope != config.basis.scope
+        if snapshot.scope != basis.scope
             || snapshot.scope != host.binding.canonical_scope
             || snapshot.operating_mode != checkpoint.execution.mode
             || snapshot.execution_profile != checkpoint.execution.profile
@@ -451,16 +655,16 @@ impl StructuredSessionHost for LocalSessionHost {
         let resolved = DeclarativeResolutionApplication
             .resolve_plan(&snapshot, &rules)
             .map_err(|_| SessionError::InvalidInput)?;
-        let mut projection = record(&config.basis.projection, "cg.context-projection")?.clone();
+        let mut projection = record(&basis.projection, "cg.context-projection")?.clone();
         let mut fragments = Vec::new();
-        for source in &config.basis.sources {
+        for source in &basis.sources {
             let fragment = record(source, "cg.context-fragment")?.clone();
             if fragment["id"] != source.id().as_str() {
                 return Err(SessionError::InvalidInput);
             }
             fragments.push(fragment);
         }
-        if !config.basis.sources.is_empty() {
+        if !basis.sources.is_empty() {
             projection["fragments"] = json!(fragments);
             projection["selected"] = json!(
                 checkpoint
@@ -472,7 +676,7 @@ impl StructuredSessionHost for LocalSessionHost {
         }
         let input =
             host_mapping::compile(resolved, canonical.policy.clone(), projection).map_err(error)?;
-        if input.projection.mapping.step != config.basis.step {
+        if input.projection.mapping.step != basis.step {
             return Err(SessionError::StaleRevision);
         }
         let id = CapabilityId::new("context.artifact.persist")

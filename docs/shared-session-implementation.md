@@ -1,5 +1,9 @@
 # Shared structured-session implementation — #294
 
+The additive connector path for an already satisfied original goal is described
+in [connector observed-goal sessions](connector-observed-goal-sessions.md). Its
+qualification is separate from the historical artifact baseline below.
+
 Delivery state reviewed 2026-10-11. Retained reports below keep their original
 candidate/source bindings; current full EPIC-04 acceptance requires a fresh
 [full qualification](epic-04-acceptance.md), separate from #279.

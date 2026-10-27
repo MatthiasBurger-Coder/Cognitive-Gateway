@@ -1,16 +1,21 @@
 //! Provider-independent MCP 2025-11-25 client. Effect dispatch is private to the
 //! admitted application host; public wire discovery never confers authority.
+pub(crate) mod credential_file;
 mod host;
 mod json;
 pub mod mapping;
 pub mod normalization;
 mod protocol;
+pub(crate) mod scalar_quotes;
 mod schema;
+pub mod session_budget;
 pub mod transport;
 pub use host::{
     ConnectorAdmission, ConnectorMapping, HostConfig, McpConnectorHost, ProtocolResult,
     WireOperation,
 };
+
+pub use mapping::MappedToolSchema;
 
 use gateway_application::connectors::{ConnectorEffect, ConnectorFailure, ConnectorFailureCode};
 use gateway_domain::NonEmptyText;
@@ -28,6 +33,7 @@ pub const MCP_VERSION: &str = "2025-11-25";
 /// Stable content-free errors. Never retain provider messages, payloads or IO errors.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Error {
+    SessionDenied(ConnectorFailureCode),
     Configuration,
     Unavailable,
     Timeout,
@@ -49,6 +55,7 @@ impl Error {
     fn failure(self, correlation: &NonEmptyText, effect: ConnectorEffect) -> ConnectorFailure {
         use ConnectorFailureCode as C;
         let code = match self {
+            Self::SessionDenied(code) => code,
             Self::Unavailable => C::Unavailable,
             Self::Authentication => C::AuthenticationFailed,
             Self::CredentialUnavailable => C::CredentialUnavailable,
@@ -111,6 +118,18 @@ pub struct CallContext {
     pub correlation: NonEmptyText,
     pub deadline: Instant,
     cancelled: Arc<AtomicBool>,
+    guard: Option<Arc<dyn CallGuard>>,
+    final_guard: Option<Arc<dyn CallGuard>>,
+}
+/// Trusted session admission, invoked at every bounded I/O context check.
+/// Implementations must be bounded and must not re-enter this connector host.
+pub(crate) trait CallGuard: Send + Sync {
+    fn check(&self) -> Result<(), Error>;
+}
+impl<F: Fn() -> Result<(), Error> + Send + Sync> CallGuard for F {
+    fn check(&self) -> Result<(), Error> {
+        self()
+    }
 }
 impl CallContext {
     pub fn new(correlation: NonEmptyText, deadline: Instant) -> Self {
@@ -118,6 +137,8 @@ impl CallContext {
             correlation,
             deadline,
             cancelled: Arc::new(AtomicBool::new(false)),
+            guard: None,
+            final_guard: None,
         }
     }
     pub fn cancel(&self) {
@@ -129,8 +150,52 @@ impl CallContext {
         } else if Instant::now() >= self.deadline {
             Err(Error::Timeout)
         } else {
-            Ok(())
+            if let Some(guard) = &self.guard {
+                guard.check()?;
+            }
+            if let Some(guard) = &self.final_guard {
+                guard.check()?;
+            }
+            // A trusted lookup can take time or trigger cancellation. Never
+            // release I/O using the timestamp from before that callback.
+            if self.cancelled.load(Ordering::Acquire) {
+                Err(Error::Cancelled)
+            } else if Instant::now() >= self.deadline {
+                Err(Error::Timeout)
+            } else {
+                Ok(())
+            }
         }
+    }
+    pub(crate) fn with_guard(&self, guard: Arc<dyn CallGuard>) -> Self {
+        let guard: Arc<dyn CallGuard> = match &self.guard {
+            Some(previous) => {
+                let previous = previous.clone();
+                Arc::new(move || {
+                    previous.check()?;
+                    guard.check()
+                })
+            }
+            None => guard,
+        };
+        let mut context = self.clone();
+        context.guard = Some(guard);
+        context
+    }
+    pub(crate) fn with_final_guard(&self, guard: Arc<dyn CallGuard>) -> Self {
+        let guard: Arc<dyn CallGuard> = match &self.final_guard {
+            Some(previous) => {
+                let previous = previous.clone();
+                Arc::new(move || {
+                    previous.check()?;
+                    guard.check()
+                })
+            }
+            None => guard,
+        };
+        let mut context = self.clone();
+        context.final_guard = Some(guard);
+        context
     }
     fn slice(&self) -> Duration {
         self.deadline
@@ -192,3 +257,6 @@ pub struct ProtocolInventory {
     pub templates: Vec<Value>,
     pub prompts: Vec<Value>,
 }
+
+#[cfg(test)]
+mod context_tests;

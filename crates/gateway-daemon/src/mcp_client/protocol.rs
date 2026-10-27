@@ -14,6 +14,9 @@ pub(super) struct Session {
     capabilities: Value,
     observer: Arc<dyn Observer>,
     pub sent: bool,
+    /// Monotonic attempted-I/O counter. Marking before transport send conservatively
+    /// includes partial writes and transport-side rejection; it is never reset.
+    pub send_attempts: u64,
     server_version: String,
 }
 impl Session {
@@ -27,6 +30,7 @@ impl Session {
             capabilities: Value::Null,
             observer,
             sent: false,
+            send_attempts: 0,
             server_version,
         }
     }
@@ -77,8 +81,10 @@ impl Session {
         factory: &dyn TransportFactory,
         context: &CallContext,
     ) -> Result<(), Error> {
+        context.check()?;
         self.transport = Some(factory.open(context, &self.limits)?);
         self.transition(SessionState::Initializing, context);
+        context.check()?;
         let result = self.rpc(
             "initialize",
             json!({"protocolVersion":MCP_VERSION,"capabilities":{},
@@ -120,10 +126,9 @@ impl Session {
         if bytes.len() > self.limits.frame_bytes {
             return Err(Error::Limit);
         }
-        self.transport
-            .as_mut()
-            .ok_or(Error::InvalidState)?
-            .send(&bytes, context)
+        let transport = self.transport.as_mut().ok_or(Error::InvalidState)?;
+        self.send_attempts = self.send_attempts.checked_add(1).ok_or(Error::Limit)?;
+        transport.send(&bytes, context)
     }
     pub fn rpc(
         &mut self,
@@ -144,6 +149,7 @@ impl Session {
         context.check()?;
         let transport = self.transport.as_mut().ok_or(Error::InvalidState)?;
         // Mark before write: partial writes can leave the effect outcome unknown.
+        self.send_attempts = self.send_attempts.checked_add(1).ok_or(Error::Limit)?;
         self.sent = true;
         transport.send(&bytes, context)?;
         self.event(EventKind::Sent, Some(id), context);
@@ -161,12 +167,23 @@ impl Session {
         result
     }
     fn response(&mut self, id: u64, context: &CallContext) -> Result<Value, Error> {
+        self.response_with_wait_deadline(id, context, None)
+    }
+    fn response_with_wait_deadline(
+        &mut self,
+        id: u64,
+        context: &CallContext,
+        wait_deadline: Option<Instant>,
+    ) -> Result<Value, Error> {
         for _ in 0..self.limits.events_per_request {
-            let frame = self
-                .transport
-                .as_mut()
-                .ok_or(Error::InvalidState)?
-                .receive(context)?;
+            let transport = self.transport.as_mut().ok_or(Error::InvalidState)?;
+            let frame = match wait_deadline {
+                Some(deadline) => transport.receive_with_wait_deadline(context, deadline)?,
+                None => transport.receive(context)?,
+            };
+            // A short inventory-drain poll only bounds waiting for a frame.
+            // Once received, process it under the live operation context so a
+            // just-expired poll cannot consume and discard an invalidation.
             context.check()?;
             if frame.len() > self.limits.frame_bytes {
                 return Err(Error::Limit);
@@ -237,7 +254,7 @@ impl Session {
         poll.deadline = context
             .deadline
             .min(Instant::now() + Duration::from_millis(1));
-        match self.response(0, &poll) {
+        match self.response_with_wait_deadline(0, context, Some(poll.deadline)) {
             Err(Error::Timeout) => context.check(),
             Err(error) => Err(error),
             Ok(_) => Err(Error::Protocol),
@@ -343,3 +360,11 @@ fn identity_key(key: &str) -> &str {
 #[cfg(test)]
 #[path = "protocol_tests.rs"]
 mod tests;
+
+#[cfg(test)]
+#[path = "protocol_guard_tests.rs"]
+mod guard_tests;
+
+#[cfg(all(test, unix))]
+#[path = "protocol_polling_tests.rs"]
+mod polling_tests;

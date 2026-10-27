@@ -1,8 +1,11 @@
 //! #276 PostgreSQL journal: scoped row locks, immutable records and global owner ledger.
 use crate::cognitive_store::{CognitiveStore, StoreError};
 use gateway_application::sessions::*;
-use gateway_domain::{ContextScopeId, Intent};
+use gateway_domain::{CapabilityId, ConditionId, ContextScopeId, Intent, PlanStepId, SourceId};
 use serde::{Deserialize, Serialize};
+#[path = "session_store_observation_audit.rs"]
+mod observation_audit;
+use observation_audit::ObservationPolicyAudit;
 
 impl From<StoreError> for SessionError {
     fn from(error: StoreError) -> Self {
@@ -33,10 +36,17 @@ enum GrantState {
 struct Checkpoint {
     owner: OwnerBinding,
     intent: Intent,
-    basis: ArtifactGoalBasis,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    basis: Option<ArtifactGoalBasis>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    connector_goal: Option<ConnectorGoalWire>,
     execution: RequestedExecution,
     snapshot: SessionSnapshot,
     budget: SessionBudget,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    resource_ledger: Option<SessionResourceLedger>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pre_execution_goal: Option<PreExecutionGoalRef>,
     pending: Option<PendingWire>,
     accepted_consent: Option<Grant>,
     authority_events: Vec<EventWire>,
@@ -44,6 +54,54 @@ struct Checkpoint {
     artifact: Option<RecordRef>,
     lease_until_ms: Option<u64>,
     initial_assessment: Option<InitialAssessment>,
+}
+#[derive(Clone, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct ConnectorGoalWire {
+    scope: ContextScopeId,
+    plan: RecordRef,
+    steps: Vec<String>,
+    observations: Vec<ConditionObservationWire>,
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct ConditionObservationWire {
+    condition: ConditionId,
+    source: SourceId,
+    capability: CapabilityId,
+    operation_class: ReadOperationWire,
+}
+
+#[derive(Clone, Copy, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+enum ReadOperationWire {
+    Read,
+    Search,
+    Inspect,
+}
+
+impl From<ReadOperationWire> for gateway_application::connectors::ConnectorOperationClass {
+    fn from(value: ReadOperationWire) -> Self {
+        match value {
+            ReadOperationWire::Read => Self::Read,
+            ReadOperationWire::Search => Self::Search,
+            ReadOperationWire::Inspect => Self::Inspect,
+        }
+    }
+}
+impl From<gateway_application::connectors::ConnectorOperationClass> for ReadOperationWire {
+    fn from(value: gateway_application::connectors::ConnectorOperationClass) -> Self {
+        match value {
+            gateway_application::connectors::ConnectorOperationClass::Read => Self::Read,
+            gateway_application::connectors::ConnectorOperationClass::Search => Self::Search,
+            gateway_application::connectors::ConnectorOperationClass::Inspect => Self::Inspect,
+            gateway_application::connectors::ConnectorOperationClass::Mutate
+            | gateway_application::connectors::ConnectorOperationClass::Admin => {
+                unreachable!("validated connector goals only contain read operations")
+            }
+        }
+    }
 }
 #[derive(Clone, Serialize, Deserialize)]
 #[serde(
@@ -70,13 +128,47 @@ enum EventWire {
 }
 impl Checkpoint {
     fn from_typed(c: &SessionCheckpoint) -> Self {
+        let (basis, connector_goal) = match c.goal.as_artifact() {
+            Some(goal) => (Some(goal.basis().clone()), None),
+            None => {
+                let goal = c
+                    .goal
+                    .as_connector()
+                    .expect("session goal has one supported variant");
+                (
+                    None,
+                    Some(ConnectorGoalWire {
+                        scope: goal.scope().clone(),
+                        plan: goal.plan().clone(),
+                        steps: goal
+                            .steps()
+                            .iter()
+                            .map(|step| step.as_str().to_owned())
+                            .collect(),
+                        observations: goal
+                            .observations()
+                            .iter()
+                            .map(|mapping| ConditionObservationWire {
+                                condition: mapping.condition().clone(),
+                                source: mapping.source().clone(),
+                                capability: mapping.capability().clone(),
+                                operation_class: mapping.operation_class().into(),
+                            })
+                            .collect(),
+                    }),
+                )
+            }
+        };
         Self {
             owner: c.owner.clone(),
             intent: c.goal.intent().clone(),
-            basis: c.goal.basis().clone(),
+            basis,
+            connector_goal,
             execution: c.execution,
             snapshot: c.snapshot.clone(),
             budget: c.budget.clone(),
+            resource_ledger: c.resource_ledger.clone(),
+            pre_execution_goal: c.pre_execution_goal.clone(),
             pending: c.pending.as_ref().map(|p| match p {
                 PendingInteraction::Source(q) => PendingWire::Source(q.clone()),
                 PendingInteraction::Consent(a) => PendingWire::Consent(a.clone()),
@@ -108,12 +200,46 @@ impl Checkpoint {
         }
     }
     fn typed(&self) -> Result<SessionCheckpoint, SessionError> {
+        let goal = match (&self.basis, &self.connector_goal) {
+            (Some(basis), None) => SupportedSessionGoal::artifact(SupportedArtifactGoal::validate(
+                self.intent.clone(),
+                basis.clone(),
+            )?),
+            (None, Some(goal)) => {
+                SupportedSessionGoal::connector(SupportedConnectorGoal::from_host_registration(
+                    self.intent.clone(),
+                    goal.scope.clone(),
+                    goal.plan.clone(),
+                    goal.steps
+                        .iter()
+                        .map(|step| {
+                            PlanStepId::new(step.clone())
+                                .map_err(|_| SessionError::StorageUnavailable)
+                        })
+                        .collect::<Result<Vec<_>, _>>()?,
+                    goal.observations
+                        .iter()
+                        .map(|mapping| {
+                            ConditionObservationMapping::new(
+                                mapping.condition.clone(),
+                                mapping.source.clone(),
+                                mapping.capability.clone(),
+                                mapping.operation_class.into(),
+                            )
+                        })
+                        .collect::<Result<Vec<_>, _>>()?,
+                )?)
+            }
+            _ => return Err(SessionError::StorageUnavailable),
+        };
         let result = SessionCheckpoint {
             owner: self.owner.clone(),
-            goal: SupportedArtifactGoal::validate(self.intent.clone(), self.basis.clone())?,
+            goal,
             execution: self.execution,
             snapshot: self.snapshot.clone(),
             budget: self.budget.clone(),
+            resource_ledger: self.resource_ledger.clone(),
+            pre_execution_goal: self.pre_execution_goal.clone(),
             pending: self.pending.as_ref().map(|p| match p {
                 PendingWire::Source(q) => PendingInteraction::Source(q.clone()),
                 PendingWire::Consent(a) => PendingInteraction::Consent(a.clone()),
@@ -145,11 +271,12 @@ impl Checkpoint {
             initial_assessment: self.initial_assessment.clone(),
         };
         result.validate()?;
-        if result
-            .selected_source
-            .as_ref()
-            .is_some_and(|r| !result.goal.basis().sources.contains(r))
-        {
+        if result.selected_source.as_ref().is_some_and(|r| {
+            result
+                .goal
+                .as_artifact()
+                .is_none_or(|goal| !goal.basis().sources.contains(r))
+        }) {
             return Err(SessionError::StorageUnavailable);
         }
         Ok(result)
@@ -191,6 +318,8 @@ struct Journal {
     commands: Vec<Ledger>,
     records: Vec<Record>,
     grants: Vec<Grant>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    observation_policy_audits: Vec<ObservationPolicyAudit>,
 }
 impl Journal {
     fn initial() -> Self {
@@ -200,6 +329,7 @@ impl Journal {
             commands: vec![],
             records: vec![],
             grants: vec![],
+            observation_policy_audits: vec![],
         }
     }
     fn validate(&self, scope: &ContextScopeId) -> Result<(), SessionError> {
@@ -212,11 +342,11 @@ impl Journal {
             return Err(SessionError::StorageUnavailable);
         }
         for (i, s) in self.sessions.iter().enumerate() {
-            s.typed()?;
+            let typed = s.typed()?;
             if s.checkpoint.initial_assessment.is_none() {
                 return Err(SessionError::StorageUnavailable);
             }
-            if s.checkpoint.basis.scope != *scope {
+            if typed.checkpoint.goal.scope() != scope {
                 return Err(SessionError::StorageUnavailable);
             }
             if s.checkpoint
@@ -234,6 +364,15 @@ impl Journal {
             if self.sessions[..i]
                 .iter()
                 .any(|p| p.checkpoint.snapshot.session == s.checkpoint.snapshot.session)
+            {
+                return Err(SessionError::StorageUnavailable);
+            }
+            if let Some(marker) = &s.checkpoint.pre_execution_goal
+                && !self.records.iter().any(|record| {
+                    record.owner == s.checkpoint.owner
+                        && record.reference == marker.record
+                        && record.kind == RecordKind::PreExecutionGoal
+                })
             {
                 return Err(SessionError::StorageUnavailable);
             }
@@ -278,6 +417,7 @@ impl Journal {
                 return Err(SessionError::StorageUnavailable);
             }
         }
+        observation_audit::validate(self, scope)?;
         for (i, grant) in self.grants.iter().enumerate() {
             let bytes =
                 serde_json::to_vec(&("cg.consent-record/2.0", &grant.binding, &grant.issuer))
@@ -309,6 +449,7 @@ impl Journal {
             .ok_or(SessionError::ScopeDenied)
     }
 }
+#[derive(Clone)]
 pub struct PostgresSessionStore {
     store: CognitiveStore,
 }
@@ -491,7 +632,7 @@ impl SessionJournalPort for PostgresSessionStore {
         if initial.initial_assessment.is_none() {
             return Err(SessionError::InvalidState);
         }
-        if initial.goal.basis().scope != *self.store.scope() {
+        if initial.goal.scope() != self.store.scope() {
             return Err(SessionError::ScopeDenied);
         }
         if initial.snapshot.revision.value() != 1
@@ -568,10 +709,15 @@ impl SessionJournalPort for PostgresSessionStore {
                     return Err(SessionError::InvalidInput);
                 }
                 let target = match record.kind {
-                    RecordKind::Artifact => &transition.next.artifact,
-                    RecordKind::Evidence => &transition.next.snapshot.final_evidence,
+                    RecordKind::Artifact => transition.next.artifact.as_ref(),
+                    RecordKind::Evidence => transition.next.snapshot.final_evidence.as_ref(),
+                    RecordKind::PreExecutionGoal => transition
+                        .next
+                        .pre_execution_goal
+                        .as_ref()
+                        .map(|marker| &marker.record),
                 };
-                if target.as_ref() != Some(&record.reference) {
+                if target != Some(&record.reference) {
                     return Err(SessionError::InvalidState);
                 }
                 if j.records.iter().any(|r| {

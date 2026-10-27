@@ -23,6 +23,19 @@ pub trait StructuredSessionHost: InteractionAuthorityPort {
         intent: Intent,
         execution: RequestedExecution,
     ) -> Result<(SupportedArtifactGoal, SessionBudget), SessionError>;
+    /// Additive trusted registration; legacy artifact hosts need no new implementation.
+    fn register_goal(
+        &self,
+        owner: &OwnerBinding,
+        intent: Intent,
+        execution: RequestedExecution,
+    ) -> Result<(SupportedSessionGoal, SessionBudget), SessionError> {
+        self.register(owner, intent, execution)
+            .map(|(goal, budget)| (goal.into(), budget))
+    }
+    fn goal_observation_runtime(&self) -> Option<&dyn ReadonlyGoalObservationRuntimePort> {
+        None
+    }
     fn prepare(&self, checkpoint: &SessionCheckpoint) -> Result<PreparedTask, SessionError>;
     fn disclose(&self, owner: &OwnerBinding, session: &SessionId) -> Result<(), SessionError>;
     /// Authenticated operator boundary, separate from client SessionCommand DTOs.
@@ -114,7 +127,7 @@ impl<J: SessionRepositoryPort, H: StructuredSessionHost> SessionCoordinator<J, H
         expires: u64,
     ) -> Result<ActionBinding, SessionError> {
         let arguments = encoded(&(
-            checkpoint.goal.basis(),
+            checkpoint.goal.artifact_basis()?,
             checkpoint.execution,
             &checkpoint.selected_source,
             crate::resolution_encoding::basis_json(&prepared.input.resolved.report.basis),
@@ -126,7 +139,7 @@ impl<J: SessionRepositoryPort, H: StructuredSessionHost> SessionCoordinator<J, H
             pending,
             issued_revision: issued,
             dispatch,
-            step: RecordId::new(checkpoint.goal.basis().step.as_str())?,
+            step: RecordId::new(checkpoint.goal.artifact_basis()?.step.as_str())?,
             action: content_reference(
                 "compile-context",
                 b"CG-10.ContextApplication.compile_step/1.0",
@@ -134,7 +147,7 @@ impl<J: SessionRepositoryPort, H: StructuredSessionHost> SessionCoordinator<J, H
             arguments: content_reference("compile-arguments", &arguments)?,
             artifact_basis: content_reference(
                 "artifact-basis",
-                &encoded(checkpoint.goal.basis())?,
+                &encoded(checkpoint.goal.artifact_basis()?)?,
             )?,
             authority: prepared.authority.clone(),
             expires_at_ms: expires,
@@ -162,8 +175,8 @@ impl<J: SessionRepositoryPort, H: StructuredSessionHost> SessionCoordinator<J, H
         next.snapshot.pending = Some(reference.clone());
         next.pending = Some(PendingInteraction::Source(SourceQuestion {
             pending: reference,
-            basis: next.goal.basis().projection.clone(),
-            alternatives: next.goal.basis().sources.clone(),
+            basis: next.goal.artifact_basis()?.projection.clone(),
+            alternatives: next.goal.artifact_basis()?.sources.clone(),
         }));
         Ok(())
     }
@@ -293,12 +306,183 @@ impl<J: SessionRepositoryPort, H: StructuredSessionHost> SessionCoordinator<J, H
                 selected: &input.selected,
             })
             .map_err(|_| SessionError::AuthorityDenied)?;
-        if compiled.basis().scope != checkpoint.goal.basis().scope
-            || input.projection.mapping.step != checkpoint.goal.basis().step
+        if compiled.basis().scope != checkpoint.goal.artifact_basis()?.scope
+            || input.projection.mapping.step != checkpoint.goal.artifact_basis()?.step
         {
             return Err(SessionError::ScopeDenied);
         }
         Ok((compiled, prepared))
+    }
+    fn verify_observed_goal(
+        &self,
+        current: FencedSession,
+        command: Option<CommandId>,
+    ) -> Result<SessionSnapshot, SessionError> {
+        if current.checkpoint.snapshot.state != SessionState::Runnable
+            || current.checkpoint.pre_execution_goal.is_none()
+        {
+            return Err(SessionError::InvalidState);
+        }
+        let now = self.host.now_ms()?;
+        if now >= current.checkpoint.budget.deadline_ms {
+            return self.fail_with_command(&current, SessionState::Failed, command);
+        }
+        let data = match load_pre_execution_goal(&self.repository, &current.checkpoint, now) {
+            Ok(data) => data,
+            Err(_) => return self.fail_with_command(&current, SessionState::Failed, command),
+        };
+        let reference = current.checkpoint.pre_execution_goal.as_ref().unwrap();
+        let Some(receipt) = self
+            .host
+            .goal_observation_runtime()
+            .ok_or(SessionError::UnsupportedCapability)?
+            .verify_retained_goal(&current.checkpoint, &data)?
+        else {
+            return self.fail_with_command(&current, SessionState::Failed, command);
+        };
+        if !super::pre_execution_goal::receipt_matches(&receipt, reference, data.readset())? {
+            return self.fail_with_command(&current, SessionState::Failed, command);
+        }
+        let latest = self.load(
+            &current.checkpoint.owner,
+            &current.checkpoint.snapshot.session,
+        )?;
+        if latest != current {
+            return Err(SessionError::StaleRevision);
+        }
+        let final_now = self.host.now_ms()?;
+        if final_now >= current.checkpoint.budget.deadline_ms
+            || data.validate_fresh(final_now).is_err()
+        {
+            return self.fail_with_command(&current, SessionState::Failed, command);
+        }
+        let bytes=serde_json::to_vec(&serde_json::json!({"contract":"cg.connector-pre-execution-goal-verification","contract_version":"1.0","purpose":"PRE_EXECUTION_GOAL","owner":current.checkpoint.owner,"scope":current.checkpoint.goal.scope(),"session":current.checkpoint.snapshot.session,"run":current.checkpoint.snapshot.run,"read_manifest":reference,"goal_digest":receipt.goal_digest(),"readset_digest":receipt.readset_digest(),"execution":receipt.execution(),"source_digest":receipt.source_digest(),"validation":receipt.validation(),"facts":receipt.facts().iter().map(|id|id.as_str()).collect::<Vec<_>>(),"evidence":receipt.evidence().iter().map(|id|id.as_str()).collect::<Vec<_>>()})).map_err(|_|SessionError::InvalidInput)?;
+        let evidence = RecordWrite {
+            reference: content_reference(
+                &format!("pre-goal-proof-{}", &receipt.source_digest().as_str()[..24]),
+                &bytes,
+            )?,
+            kind: RecordKind::Evidence,
+            bytes,
+        };
+        let mut next = current.checkpoint.clone();
+        next.snapshot.state = SessionState::Completed;
+        next.snapshot.dispatch_knowledge = DispatchKnowledge::Verified;
+        next.snapshot.final_evidence = Some(evidence.reference.clone());
+        Ok(self
+            .append(&current, command, next, vec![evidence])?
+            .checkpoint
+            .snapshot)
+    }
+    fn continue_observed_goal(
+        &self,
+        current: FencedSession,
+        command: CommandId,
+    ) -> Result<SessionSnapshot, SessionError> {
+        if current.checkpoint.pre_execution_goal.is_some() {
+            return self.verify_observed_goal(current, Some(command));
+        }
+        let runtime = self
+            .host
+            .goal_observation_runtime()
+            .ok_or(SessionError::UnsupportedCapability)?;
+        let limits = runtime.resource_limits(&current.checkpoint)?;
+        let amounts = runtime.preparation_budget(&current.checkpoint)?;
+        amounts.validate_readonly()?;
+        if amounts.connector_calls == 0 {
+            return Err(SessionError::InvalidInput);
+        }
+        let lease_started = std::time::Instant::now();
+        let claim_started_ms = self.host.now_ms()?;
+        let now = claim_started_ms;
+        let mut next = current.checkpoint.clone();
+        next.budget.reserve(now, false)?;
+        let revision = next.snapshot.revision.next()?;
+        let step = next
+            .goal
+            .as_connector()
+            .ok_or(SessionError::InvalidState)?
+            .steps()[0]
+            .clone();
+        let dispatch = DispatchId::new(format!(
+            "observe-{}-{}",
+            next.snapshot.run.as_str(),
+            revision.value()
+        ))?;
+        let binding = ResourceReservationBinding {
+            owner: next.owner.clone(),
+            scope: next.goal.scope().clone(),
+            session: next.snapshot.session.clone(),
+            run: next.snapshot.run.clone(),
+            revision,
+            step,
+            dispatch: dispatch.clone(),
+        };
+        let ledger = next
+            .resource_ledger
+            .as_mut()
+            .ok_or(SessionError::InvalidState)?;
+        if limits != *ledger.limits() {
+            return Err(SessionError::AuthorityDenied);
+        }
+        let reservation = ledger.reserve(binding, amounts)?;
+        let unit = ledger.limits().cost_unit.clone();
+        next.snapshot.state = SessionState::Dispatching;
+        next.snapshot.dispatch = Some(dispatch);
+        next.snapshot.dispatch_knowledge = DispatchKnowledge::Reserved;
+        next.lease_until_ms = Some(
+            now.checked_add(30_000)
+                .ok_or(SessionError::LimitExceeded)?
+                .min(next.budget.deadline_ms),
+        );
+        let claim = self.append(&current, Some(command), next, vec![])?;
+        let now = self.host.now_ms()?;
+        let until = claim
+            .checkpoint
+            .lease_until_ms
+            .ok_or(SessionError::InvalidState)?;
+        if now >= until {
+            return self.fail(&claim, SessionState::Failed);
+        }
+        // Keep the original monotonic claim lifetime even if the wall clock
+        // moves backward while persistence is in progress.
+        let deadline = lease_started
+            .checked_add(std::time::Duration::from_millis(until - claim_started_ms))
+            .ok_or(SessionError::LimitExceeded)?
+            .min(
+                std::time::Instant::now()
+                    .checked_add(std::time::Duration::from_millis(until - now))
+                    .ok_or(SessionError::LimitExceeded)?,
+            );
+        let mut resources = SessionPhaseResources::mint(
+            &reservation,
+            SessionResourcePhase::Preparation,
+            unit,
+            claim.checkpoint.snapshot.revision,
+            claim.fence,
+            deadline,
+        )?;
+        let Some(candidate) = runtime.observe_goal(&claim.checkpoint, &mut resources)? else {
+            self.fail(&claim, SessionState::Failed)?;
+            return Err(SessionError::UnsupportedCapability);
+        };
+        if self.load(&claim.checkpoint.owner, &claim.checkpoint.snapshot.session)? != claim {
+            return Err(SessionError::StaleRevision);
+        }
+        let now = self.host.now_ms()?;
+        if now >= until || std::time::Instant::now() >= deadline {
+            return self.fail(&claim, SessionState::Failed);
+        }
+        let (marker, record) = candidate.into_record(&claim.checkpoint, now)?;
+        let mut next = claim.checkpoint.clone();
+        next.snapshot.state = SessionState::Runnable;
+        // The actual read completed with known NoMutation. Only native goal
+        // verification remains; there is no unresolved external effect.
+        next.snapshot.dispatch_knowledge = DispatchKnowledge::Prepared;
+        next.lease_until_ms = None;
+        next.pre_execution_goal = Some(marker);
+        let persisted = self.append(&claim, None, next, vec![record])?;
+        self.verify_observed_goal(persisted, None)
     }
     fn continue_task(
         &self,
@@ -306,6 +490,9 @@ impl<J: SessionRepositoryPort, H: StructuredSessionHost> SessionCoordinator<J, H
         command: CommandId,
         _now: u64,
     ) -> Result<SessionSnapshot, SessionError> {
+        if current.checkpoint.goal.as_connector().is_some() {
+            return self.continue_observed_goal(current, command);
+        }
         let prepared = self.host.prepare(&current.checkpoint)?;
         let now = self.host.now_ms()?;
         if self.needs_consent(&prepared)?
@@ -429,6 +616,14 @@ impl<J: SessionRepositoryPort, H: StructuredSessionHost> SessionCoordinator<J, H
         current: &FencedSession,
         state: SessionState,
     ) -> Result<SessionSnapshot, SessionError> {
+        self.fail_with_command(current, state, None)
+    }
+    fn fail_with_command(
+        &self,
+        current: &FencedSession,
+        state: SessionState,
+        command: Option<CommandId>,
+    ) -> Result<SessionSnapshot, SessionError> {
         let mut next = current.checkpoint.clone();
         next.snapshot.state = state;
         next.pending = None;
@@ -438,7 +633,7 @@ impl<J: SessionRepositoryPort, H: StructuredSessionHost> SessionCoordinator<J, H
         }
         next.lease_until_ms = None;
         Ok(self
-            .append(current, None, next, vec![])?
+            .append(current, command, next, vec![])?
             .checkpoint
             .snapshot)
     }
@@ -451,6 +646,23 @@ impl<J: SessionRepositoryPort, H: StructuredSessionHost> SessionCoordinator<J, H
         session: &SessionId,
     ) -> Result<SessionSnapshot, SessionError> {
         let current = self.load(owner, session)?;
+        if current.checkpoint.goal.as_connector().is_some() {
+            if current.checkpoint.snapshot.state == SessionState::Runnable
+                && current.checkpoint.pre_execution_goal.is_some()
+            {
+                return self.verify_observed_goal(current, None);
+            }
+            if current.checkpoint.snapshot.state == SessionState::Dispatching
+                && self.host.now_ms()?
+                    >= current
+                        .checkpoint
+                        .lease_until_ms
+                        .ok_or(SessionError::InvalidState)?
+            {
+                return self.fail(&current, SessionState::Failed);
+            }
+            return Ok(current.checkpoint.snapshot);
+        }
         let now = self.host.now_ms()?;
         if current
             .checkpoint
@@ -549,7 +761,7 @@ impl<J: SessionRepositoryPort, H: StructuredSessionHost> SessionApplicationPort
             if self.duplicate(owner, &command)? {
                 return Err(SessionError::Duplicate);
             }
-            let (goal, budget) = self.host.register(owner, intent, execution)?;
+            let (goal, budget) = self.host.register_goal(owner, intent, execution)?;
             budget.validate()?;
             if now >= budget.deadline_ms {
                 return Err(SessionError::LimitExceeded);
@@ -583,15 +795,31 @@ impl<J: SessionRepositoryPort, H: StructuredSessionHost> SessionApplicationPort
                 artifact: None,
                 lease_until_ms: None,
                 initial_assessment: None,
+                resource_ledger: None,
+                pre_execution_goal: None,
             };
-            let prepared = self.host.prepare(&initial)?;
-            initial.initial_assessment = Some(assess_initial_goal(
-                &initial,
-                &prepared.input,
-                &prepared.authority,
-            )?);
-            if !initial.goal.basis().sources.is_empty() {
-                self.question(&mut initial, Revision::new(1)?, now)?;
+            if let Some(goal) = initial.goal.as_connector() {
+                let runtime = self
+                    .host
+                    .goal_observation_runtime()
+                    .ok_or(SessionError::UnsupportedCapability)?;
+                let limits = runtime.resource_limits(&initial)?;
+                initial.resource_ledger = Some(SessionResourceLedger::new(limits)?);
+                initial.initial_assessment = Some(InitialAssessment {
+                    goal: content_reference("supported-goal", &encoded(initial.goal.intent())?)?,
+                    authority: goal.plan().clone(),
+                    outcome: "UNKNOWN".into(),
+                });
+            } else {
+                let prepared = self.host.prepare(&initial)?;
+                initial.initial_assessment = Some(assess_initial_goal(
+                    &initial,
+                    &prepared.input,
+                    &prepared.authority,
+                )?);
+                if !initial.goal.artifact_basis()?.sources.is_empty() {
+                    self.question(&mut initial, Revision::new(1)?, now)?;
+                }
             }
             return Ok(self
                 .repository
