@@ -326,10 +326,10 @@ fn validate_link(
                 C::Authority | C::TaskInput | C::OutputVerification | C::Examples => false,
                 C::Evidence => f.kind() == FragmentKind::Evidence,
                 C::Memory => f.kind() == FragmentKind::Memory,
-                C::RuntimeState | C::SystemState => {
+                C::RuntimeState | C::SystemState | C::StructuredData => {
                     matches!(f.kind(), FragmentKind::Knowledge | FragmentKind::Evidence)
                 }
-                C::DomainKnowledge | C::StructuredData => f.kind() == FragmentKind::Knowledge,
+                C::DomainKnowledge => f.kind() == FragmentKind::Knowledge,
             };
             kind_ok
                 && f.id() == id

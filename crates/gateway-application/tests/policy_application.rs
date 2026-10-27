@@ -168,6 +168,16 @@ fn forged_resolution_and_ambiguous_bindings_cannot_authorize() {
         .evaluate(&ambiguous, &authority, &context)
         .unwrap();
     assert_eq!(report.decision(), PolicyDecision::Deny);
+    for step in ambiguous.snapshot.request().plan().steps() {
+        let native = PolicyApplication
+            .step_input(&ambiguous, &context, step.id())
+            .unwrap();
+        assert!(!native.resolved);
+        assert!(
+            native.capabilities.is_empty(),
+            "no alternative can masquerade as a canonical selection"
+        );
+    }
     assert!(report.steps().values().all(|s| {
         s.findings
             .iter()
@@ -336,6 +346,14 @@ fn process_constraints_and_paused_state_remain_policy_blockers() {
         .evaluate(&resolved, &authority, &context)
         .unwrap();
     assert_eq!(report.decision(), PolicyDecision::RequireEvidence);
+    let native = PolicyApplication
+        .step_input(&resolved, &context, input.plan.steps()[0].id())
+        .unwrap();
+    assert!(native.constraints.contains("[\"primary-agent\",\"alpha\"]"));
+    assert_eq!(
+        PolicyEngine::evaluate(&authority, &native.as_input()),
+        report.steps()[input.plan.steps()[0].id()]
+    );
     assert!(report.steps().values().any(|s| {
         s.findings
             .iter()
@@ -376,6 +394,14 @@ fn process_constraints_and_paused_state_remain_policy_blockers() {
         .evaluate(&resolved, &authority, &context)
         .unwrap();
     assert_eq!(report.decision(), PolicyDecision::Deny);
+    let native = PolicyApplication
+        .step_input(&resolved, &context, input.plan.steps()[0].id())
+        .unwrap();
+    assert_eq!(native.process, ProcessReadiness::Blocked);
+    assert_eq!(
+        PolicyEngine::evaluate(&authority, &native.as_input()),
+        report.steps()[input.plan.steps()[0].id()]
+    );
     assert!(report.steps().values().any(|s| {
         s.findings
             .iter()
@@ -436,6 +462,12 @@ fn noop_has_no_capability_authorization_side_effect() {
         .evaluate(&resolved, &PolicyAuthority::default(), &context)
         .unwrap();
     assert_eq!(report.decision(), PolicyDecision::Allow);
+    let native = PolicyApplication
+        .step_input(&resolved, &context, input.plan.steps()[0].id())
+        .unwrap();
+    assert!(native.resolved);
+    assert_eq!(native.process, ProcessReadiness::NotApplicable);
+    assert!(native.capabilities.is_empty());
     assert!(
         report
             .steps()
@@ -484,6 +516,19 @@ fn capabilities_added_by_skill_closure_cannot_escape_policy() {
         .evaluate(&resolved, &authority, &context)
         .unwrap();
     assert_eq!(report.decision(), PolicyDecision::Deny);
+    let native = PolicyApplication
+        .step_input(&resolved, &context, input.plan.steps()[0].id())
+        .unwrap();
+    assert!(
+        native
+            .capabilities
+            .contains_key(&CapabilityId::new("nested").unwrap()),
+        "connector sources must see capabilities introduced by the selected skill closure"
+    );
+    assert_eq!(
+        PolicyEngine::evaluate(&authority, &native.as_input()),
+        report.steps()[input.plan.steps()[0].id()]
+    );
     assert!(report.steps().values().all(|s| {
         s.capability_classes
             .contains_key(&CapabilityId::new("nested").unwrap())
@@ -529,6 +574,14 @@ fn desired_state_restrictions_only_narrow_authorization() {
         .evaluate(&resolved, &authority, &context)
         .unwrap();
     assert_eq!(report.decision(), PolicyDecision::RequireEvidence);
+    let native = PolicyApplication
+        .step_input(&resolved, &context, input.plan.steps()[0].id())
+        .unwrap();
+    assert!(native.constraints.contains("desired:stay-safe"));
+    assert_eq!(
+        PolicyEngine::evaluate(&authority, &native.as_input()),
+        report.steps()[input.plan.steps()[0].id()]
+    );
     assert!(
         report
             .steps()
@@ -555,4 +608,210 @@ fn desired_state_restrictions_only_narrow_authorization() {
             .decision(),
         PolicyDecision::Deny
     );
+}
+
+#[test]
+fn direct_step_inputs_reject_foreign_steps_and_every_untrusted_context_basis() {
+    let (mut resolved, _, mut context) = fixture();
+    let step = resolved.snapshot.request().plan().steps()[0].id().clone();
+    assert!(matches!(
+        PolicyApplication.step_input(&resolved, &context, &PlanStepId::new("foreign").unwrap()),
+        Err(PolicyApplicationError::UnknownStep)
+    ));
+    for field in [
+        "scope",
+        "catalog",
+        "process",
+        "mode",
+        "profile",
+        "foreign-facts",
+    ] {
+        let (_, _, fresh) = fixture();
+        context = fresh;
+        match field {
+            "scope" => context.basis.scope = ContextScopeId::new("foreign").unwrap(),
+            "catalog" => {
+                context.basis.registry_fingerprint =
+                    ContentFingerprint::of_bytes(b"replacement catalog")
+            }
+            "process" => {
+                context.basis.process_state_fingerprint =
+                    ContentFingerprint::of_bytes(b"replacement process")
+            }
+            "mode" => context.operating_mode = OperatingMode::Development,
+            "profile" => context.execution_profile = ExecutionProfile::FastPath,
+            _ => {
+                context
+                    .steps
+                    .insert(PlanStepId::new("foreign").unwrap(), StepFacts::default());
+            }
+        }
+        assert!(
+            matches!(
+                PolicyApplication.step_input(&resolved, &context, &step),
+                Err(PolicyApplicationError::StaleContext | PolicyApplicationError::UnknownStep)
+            ),
+            "{field}"
+        );
+    }
+    let (_, _, context) = fixture();
+    resolved.report.visits += 1;
+    assert!(matches!(
+        PolicyApplication.step_input(&resolved, &context, &step),
+        Err(PolicyApplicationError::Resolution(_))
+    ));
+}
+
+#[test]
+fn requirement_metadata_and_prerequisite_structure_survive_independent_trusted_facts() {
+    let (_, authority, mut context) = fixture();
+    let mut input = composition::fixture();
+    let original = &input.plan.capability_requirements()[0];
+    let requirement = CapabilityRequirement::new_with_metadata(
+        original.id().clone(),
+        original.capability().clone(),
+        original.cardinality(),
+        original.originating_delta_item().clone(),
+        vec![CapabilityPrecondition::new("before.committed").unwrap()],
+        vec![CapabilityConstraint::new("exact.target").unwrap()],
+        "step contract",
+    )
+    .unwrap();
+    let steps = input
+        .plan
+        .steps()
+        .iter()
+        .map(|step| {
+            step.clone()
+                .with_prerequisite(PlanCondition::desired_condition(
+                    input.desired.conditions()[0].id().clone(),
+                ))
+                .unwrap()
+        })
+        .collect();
+    input.plan = Plan::new(
+        input.plan.id().clone(),
+        input.plan.desired_state().clone(),
+        input.plan.delta().clone(),
+        vec![requirement],
+        steps,
+    )
+    .unwrap();
+    let mut rules = composition::rules();
+    rules
+        .provider_priorities
+        .insert(composition::skill("good"), 10);
+    let resolved = DeclarativeResolutionApplication
+        .resolve_plan(&input, &rules)
+        .unwrap();
+    context.basis = resolved.report.basis.clone();
+    let step = input.plan.steps()[0].id();
+    context.steps.get_mut(step).unwrap().prerequisites_satisfied = false;
+    let native = PolicyApplication
+        .step_input(&resolved, &context, step)
+        .unwrap();
+    assert!(native.has_prerequisites);
+    let denied = PolicyEngine::evaluate(&authority, &native.as_input());
+    for (reason, subject) in [
+        (PolicyReason::PrerequisiteMissing, step.as_str()),
+        (PolicyReason::EvidenceMissing, "before.committed"),
+        (PolicyReason::ConstraintUnsatisfied, "exact.target"),
+    ] {
+        assert!(
+            denied
+                .findings
+                .iter()
+                .any(|finding| finding.reason == reason && finding.subject == subject)
+        );
+    }
+    let facts = context.steps.get_mut(step).unwrap();
+    facts.prerequisites_satisfied = true;
+    facts.evidence.insert("before.committed".into());
+    facts.satisfied_constraints.insert("exact.target".into());
+    let current = PolicyApplication
+        .step_input(&resolved, &context, step)
+        .unwrap();
+    assert!(
+        current.has_prerequisites,
+        "evidence does not erase the structural requirement"
+    );
+    let report = PolicyEngine::evaluate(&authority, &current.as_input());
+    assert!(!report.findings.iter().any(|finding| {
+        matches!(
+            finding.reason,
+            PolicyReason::PrerequisiteMissing
+                | PolicyReason::EvidenceMissing
+                | PolicyReason::ConstraintUnsatisfied
+        ) && [step.as_str(), "before.committed", "exact.target"].contains(&finding.subject.as_str())
+    }));
+    assert_eq!(
+        &report,
+        &PolicyApplication
+            .evaluate(&resolved, &authority, &context)
+            .unwrap()
+            .steps()[step]
+    );
+}
+
+#[test]
+fn one_whole_plan_input_capture_preserves_native_decisions_and_per_step_facts() {
+    let (resolved, authority, mut context) = fixture();
+    let first = resolved.snapshot.request().plan().steps()[0].id().clone();
+    context
+        .steps
+        .get_mut(&first)
+        .unwrap()
+        .authorizations
+        .clear();
+    let inputs = PolicyApplication.step_inputs(&resolved, &context).unwrap();
+    let report = PolicyApplication
+        .evaluate(&resolved, &authority, &context)
+        .unwrap();
+    assert_eq!(
+        inputs.len(),
+        resolved.snapshot.request().plan().steps().len()
+    );
+    for (step, input) in &inputs {
+        let expected = PolicyEngine::evaluate(&authority, &input.as_input());
+        assert_eq!(report.steps().get(step), Some(&expected));
+        assert_eq!(input.step, *step);
+    }
+    assert_ne!(report.steps()[&first].decision, PolicyDecision::Allow);
+    // A fresh capture uses changed facts; the previous data stays immutable.
+    context.steps.get_mut(&first).unwrap().authorizations = authority
+        .capabilities
+        .keys()
+        .map(|id| (id.clone(), Approval::Granted))
+        .collect();
+    let fresh = PolicyApplication.step_inputs(&resolved, &context).unwrap();
+    assert!(inputs[&first].facts.authorizations.is_empty());
+    assert!(!fresh[&first].facts.authorizations.is_empty());
+    assert_eq!(
+        PolicyEngine::evaluate(&authority, &fresh[&first].as_input()).decision,
+        PolicyDecision::Allow
+    );
+}
+
+#[test]
+fn whole_plan_inputs_validate_all_resolution_and_context_before_returning_any_step() {
+    let (mut resolved, _, mut context) = fixture();
+    context
+        .steps
+        .insert(PlanStepId::new("foreign").unwrap(), StepFacts::default());
+    assert!(matches!(
+        PolicyApplication.step_inputs(&resolved, &context),
+        Err(PolicyApplicationError::UnknownStep)
+    ));
+    let (_, _, mut context) = fixture();
+    context.basis.registry_fingerprint = ContentFingerprint::of_bytes(b"changed canonical catalog");
+    assert!(matches!(
+        PolicyApplication.step_inputs(&resolved, &context),
+        Err(PolicyApplicationError::StaleContext)
+    ));
+    let (_, _, context) = fixture();
+    resolved.report.visits += 1;
+    assert!(matches!(
+        PolicyApplication.step_inputs(&resolved, &context),
+        Err(PolicyApplicationError::Resolution(_))
+    ));
 }

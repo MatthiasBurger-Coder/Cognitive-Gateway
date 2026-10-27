@@ -636,6 +636,59 @@ fn live_adapter_profile() {
 }
 
 #[test]
+fn result_only_http_rejects_duplicate_outer_model_identity() {
+    for kind in [
+        AdapterKind::ChatCompletionsV1,
+        AdapterKind::ChatCompletionsLegacyV1,
+    ] {
+        let f = fixture(kind, |_, _| {});
+        let raw = success(kind).to_string().replace(
+            "\"model\":\"model\"",
+            "\"model\":\"foreign\",\"model\":\"model\"",
+        );
+        let (endpoint, server) = server(kind, 200, raw, Duration::ZERO, false);
+        let adapter = HttpModelAdapter::new(kind, endpoint, None).unwrap();
+        assert!(call(&adapter, &f, &context(), 65536).output.is_err());
+        assert_eq!(
+            adapter.observation().unwrap().diagnostic,
+            Some(AdapterDiagnostic::InvalidResponse)
+        );
+        server.join().unwrap();
+    }
+}
+
+#[test]
+fn escaped_credentials_are_rejected_in_response_text_and_nested_result_json() {
+    for kind in [
+        AdapterKind::ChatCompletionsV1,
+        AdapterKind::ChatCompletionsLegacyV1,
+    ] {
+        for nested in [false, true] {
+            let f = fixture(kind, |_, _| {});
+            let mut response = success(kind);
+            response["choices"][0]["message"]["content"] = if nested {
+                json!(r#"{"message":"\u0072untime-secret"}"#)
+            } else {
+                json!(r#"{"message":"runtime-secret"}"#)
+            };
+            let raw = response
+                .to_string()
+                .replace("runtime-secret", r"\u0072untime-secret");
+            assert!(!raw.contains("runtime-secret"));
+            let (endpoint, server) = server(kind, 200, raw, Duration::ZERO, true);
+            let adapter =
+                HttpModelAdapter::new(kind, endpoint, Some("runtime-secret".into())).unwrap();
+            assert!(call(&adapter, &f, &context(), 65536).output.is_err());
+            assert_eq!(
+                adapter.observation().unwrap().diagnostic,
+                Some(AdapterDiagnostic::InvalidResponse)
+            );
+            server.join().unwrap();
+        }
+    }
+}
+
+#[test]
 fn unsupported_modes_remote_locality_reflection_http_denials_and_large_wire_fail_closed() {
     let kind = AdapterKind::ChatCompletionsV1;
     let f = fixture(kind, |d, _| {

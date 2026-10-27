@@ -6,7 +6,7 @@ use gateway_application::{
     resolution_candidates::CandidateRules,
     resolution_composition::CompositionRules,
     resolution_process::{ProcessSelectionRules, TemplatePreference},
-    resolution_skills::SkillCondition,
+    resolution_skills::{SkillCondition, SkillRules},
 };
 use gateway_domain::*;
 use gateway_policy::{Approval, StepFacts, WorkClass};
@@ -120,9 +120,52 @@ pub(super) struct ResolutionRules {
     semantics: BTreeMap<String, ConditionInput>,
     #[serde(default)]
     priorities: Vec<Priority>,
+    /// Explicit native dependency providers; they never grant the capability.
+    #[serde(default, deserialize_with = "step_map")]
+    skill_capability_providers: BTreeMap<PlanStepId, BTreeMap<CapabilityId, Provider>>,
 }
 impl ResolutionRules {
     pub fn build(self) -> Result<CompositionRules, CliError> {
+        const MAX_PROVIDER_STEPS: usize = 64;
+        const MAX_DEPENDENCY_PROVIDERS: usize = 64;
+        if self.skill_capability_providers.len() > MAX_PROVIDER_STEPS
+            || self
+                .skill_capability_providers
+                .values()
+                .any(BTreeMap::is_empty)
+            || self
+                .skill_capability_providers
+                .values()
+                .try_fold(0usize, |total, providers| {
+                    total.checked_add(providers.len())
+                })
+                .is_none_or(|total| total > MAX_DEPENDENCY_PROVIDERS)
+        {
+            return Err(CliError::new(
+                3,
+                "INVALID_INPUT",
+                "skill dependency provider bounds exceeded",
+            ));
+        }
+        let skills = self
+            .skill_capability_providers
+            .into_iter()
+            .map(|(step, providers)| {
+                (
+                    step,
+                    SkillRules {
+                        version: SchemaVersion::V1,
+                        roots: BTreeMap::new(),
+                        conditions: BTreeMap::new(),
+                        capability_providers: providers
+                            .into_iter()
+                            .map(|(id, provider)| (id, provider.build()))
+                            .collect(),
+                        max_visits: 10000,
+                    },
+                )
+            })
+            .collect();
         let mut priorities = BTreeMap::new();
         for item in self.priorities {
             if priorities
@@ -160,7 +203,7 @@ impl ResolutionRules {
                 participants: self.participants,
                 process_roles: BTreeMap::new(),
             },
-            skills: BTreeMap::new(),
+            skills,
             applicability: ApplicabilityRules {
                 version: SchemaVersion::V1,
                 restrictions: BTreeMap::new(),
@@ -448,4 +491,98 @@ fn step_map<'de, D: serde::Deserializer<'de>, T: Deserialize<'de>>(
                 .map_err(serde::de::Error::custom)
         })
         .collect()
+}
+
+#[cfg(test)]
+mod dependency_provider_tests {
+    use super::*;
+
+    fn actual_decode(text: &str) -> Result<CompositionRules, CliError> {
+        let value = super::super::read_json(text, false)?;
+        let rules: Rules = super::super::decode(value)?;
+        super::super::version(rules.schema_version)?;
+        rules.resolution.build()
+    }
+    #[test]
+    fn explicit_dependency_providers_are_typed_bounded_and_legacy_optional() {
+        assert!(
+            actual_decode(r#"{"schema_version":1}"#)
+                .unwrap()
+                .skills
+                .is_empty()
+        );
+        let document = |providers: Value| {
+            json!({"schema_version":1,"resolution":{"skill_capability_providers":providers}})
+                .to_string()
+        };
+        let parsed = actual_decode(&document(
+            json!({"step":{"repository.read":{"skill":"inspect"}}}),
+        ))
+        .unwrap();
+        assert_eq!(
+            parsed.skills[&PlanStepId::new("step").unwrap()].capability_providers
+                [&CapabilityId::new("repository.read").unwrap()],
+            CapabilityProvider::Skill {
+                skill_id: SkillId::new("inspect").unwrap()
+            }
+        );
+        let maximum: serde_json::Map<String, Value> = (0..64)
+            .map(|i| {
+                (
+                    format!("step-{i}"),
+                    json!({"repository.read":{"agent":"inspector"}}),
+                )
+            })
+            .collect();
+        assert_eq!(
+            actual_decode(&document(json!(maximum)))
+                .unwrap()
+                .skills
+                .len(),
+            64
+        );
+        let mut excessive = maximum;
+        excessive.insert(
+            "step-extra".into(),
+            json!({"repository.read":{"agent":"inspector"}}),
+        );
+        assert!(actual_decode(&document(json!(excessive))).is_err());
+        let maximum: serde_json::Map<String, Value> = (0..64)
+            .map(|i| (format!("capability-{i}"), json!({"skill":"inspect"})))
+            .collect();
+        assert_eq!(
+            actual_decode(&document(json!({"step":maximum})))
+                .unwrap()
+                .skills[&PlanStepId::new("step").unwrap()]
+                .capability_providers
+                .len(),
+            64
+        );
+        let mut excessive = maximum;
+        excessive.insert("capability-extra".into(), json!({"skill":"inspect"}));
+        assert!(actual_decode(&document(json!({"step":excessive}))).is_err());
+        for providers in [
+            json!({"step":{}}),
+            json!({"step":{"repository.read":{"http":"inspect"}}}),
+            json!({"step":{"repository.read":{"skill":"bad/id"}}}),
+            json!([{"step":"step"}]),
+        ] {
+            assert!(actual_decode(&document(providers)).is_err());
+        }
+    }
+    #[test]
+    fn actual_json_ingress_rejects_duplicate_keys_unknown_fields_and_schema() {
+        for text in [
+            r#"{"schema_version":2,"resolution":{"skill_capability_providers":{}}}"#,
+            r#"{"schema_version":1,"resolution":{"skill_capability_providers":{},"extra":true}}"#,
+            r#"{"schema_version":1,"resolution":{"skill_capability_providers":{"step":{"repository.read":{"skill":"inspect"}},"step":{"repository.read":{"agent":"inspector"}}}}}"#,
+            r#"{"schema_version":1,"resolution":{"skill_capability_providers":{"step":{"repository.read":{"skill":"inspect"},"repository.read":{"agent":"inspector"}}}}}"#,
+            r#"{"schema_version":1,"resolution":{"skill_capability_providers":{"step":{"repository.read":{"skill":"inspect","skill":"update"}}}}}"#,
+        ] {
+            assert!(
+                actual_decode(text).is_err(),
+                "accepted invalid provider input"
+            );
+        }
+    }
 }

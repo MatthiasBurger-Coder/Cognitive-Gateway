@@ -1325,6 +1325,10 @@ fn invalid_scope_and_correlations_leave_pending_attempt_unrepeated() {
             .starts_with("execution-snapshot-")
     );
     assert_eq!(receipt.source_digest().as_str(), "a".repeat(64));
+    assert!(
+        receipt.readset_digest().is_none(),
+        "legacy ingest cannot impersonate a complete retained readset proof"
+    );
     assert_eq!(
         receipt.outcome(),
         gateway_application::experience_patterns::OutcomeClass::Success
@@ -1703,4 +1707,545 @@ fn mutation_requires_separate_consent_on_every_attempt() {
         Ok(LoopDecision::Success)
     );
     assert_eq!(runtime.calls, 1);
+}
+
+use gateway_application::retained_observations::{
+    RetainedObservationError, RetainedObservationMember, RetainedObservationReadset,
+};
+fn retained_member(
+    binding: char,
+    domain: char,
+    batch: ScopedObservationBatch,
+) -> RetainedObservationMember {
+    RetainedObservationMember {
+        binding: ContentDigest::new(binding.to_string().repeat(64)).unwrap(),
+        version_domain: ContentDigest::new(domain.to_string().repeat(64)).unwrap(),
+        batch,
+    }
+}
+fn retained_batch(
+    source: &str,
+    object: &str,
+    revision: Option<&str>,
+    claimed_digest: char,
+    path: SubjectPath,
+    value: bool,
+) -> ScopedObservationBatch {
+    let prefix = format!("{source}-{object}");
+    let provenance = Provenance::new(
+        ProvenanceId::new(format!("{prefix}-p")).unwrap(),
+        SourceKind::Tool,
+        SourceId::new(source).unwrap(),
+        format!("fixture://{object}"),
+    )
+    .unwrap();
+    let observation = Observation::new(
+        ObservationId::new(format!("{prefix}-o")).unwrap(),
+        path.clone(),
+        TypedValue::Boolean(value),
+        provenance.id().clone(),
+    )
+    .unwrap();
+    let fact = Fact::new(
+        FactId::new(format!("{prefix}-f")).unwrap(),
+        path.clone(),
+        TypedValue::Boolean(value),
+        AssertionPolarity::Affirmed,
+        vec![observation.id().clone()],
+    )
+    .unwrap();
+    let evidence = Evidence::new(
+        EvidenceId::new(format!("{prefix}-e")).unwrap(),
+        EvidenceKind::Report,
+        "retained actual result",
+        EvidenceContent::inline("observed state").unwrap(),
+        provenance.id().clone(),
+        vec![EvidenceLink::new(
+            fact.id().clone(),
+            EvidenceRelation::Supports,
+        )],
+    )
+    .unwrap();
+    ScopedObservationBatch::new(
+        scope(),
+        SourceSnapshot::new(
+            SourceId::new(source).unwrap(),
+            SourceKind::Tool,
+            revision.map(|r| SourceTimestamp::new(r).unwrap()),
+            Some(ContentDigest::new(claimed_digest.to_string().repeat(64)).unwrap()),
+        )
+        .unwrap(),
+        ObservationEvidenceSet::new(
+            vec![provenance],
+            vec![observation],
+            vec![fact],
+            vec![evidence],
+        )
+        .unwrap(),
+    )
+    .unwrap()
+    .with_quality_metadata(
+        path,
+        vec![QualityMetadata::new(
+            TrustClass::ObservedEvidence,
+            SensitivityClass::Public,
+            Confidence::Unknown,
+            FreshnessStatus::Fresh,
+            Uncertainty::None,
+        )],
+    )
+}
+fn retained_verify(
+    intent: Intent,
+    set: &RetainedObservationReadset,
+) -> Option<VerifiedOutcomeReceipt> {
+    ClosedLoop::verify_retained(
+        ReferenceId::new("retained-execution").unwrap(),
+        scope(),
+        intent,
+        set,
+        loop_rules(0, 0),
+    )
+    .unwrap()
+}
+#[test]
+fn retained_initially_satisfied_goal_produces_a_receipt_without_an_action() {
+    let intent = Intent::new(IntentId::new("intent").unwrap(), input().desired)
+        .with_original_input(OriginalInput::inline("actual original goal").unwrap());
+    let batch = batch(Some(true), true, true);
+    let started = ClosedLoop::start(
+        ReferenceId::new("retained-execution").unwrap(),
+        scope(),
+        intent.clone(),
+        batch.clone(),
+        loop_rules(0, 0),
+    )
+    .unwrap();
+    assert_eq!(started.decision(), LoopDecision::Success);
+    assert_eq!(started.iterations(), 0);
+    assert!(started.verified_outcome().is_none());
+    let member = retained_member('a', 'a', batch);
+    let set =
+        RetainedObservationReadset::new(scope(), vec![member.clone(), member.clone()]).unwrap();
+    let single = RetainedObservationReadset::new(scope(), vec![member]).unwrap();
+    assert_eq!(set.digest(), single.digest());
+    let receipt = retained_verify(intent.clone(), &set).unwrap();
+    assert_eq!(receipt.goal_digest(), &ClosedLoop::goal_digest(&intent));
+    assert_eq!(receipt.readset_digest(), Some(set.digest()));
+    assert_eq!(receipt.source_digest(), set.digest());
+    assert_eq!(
+        receipt.outcome(),
+        gateway_application::experience_patterns::OutcomeClass::Success
+    );
+    assert!(!receipt.facts().is_empty());
+    assert!(!receipt.evidence().is_empty());
+    assert!(matches!(
+        ClosedLoop::verify_retained(
+            ReferenceId::new("wrong-scope").unwrap(),
+            ContextScopeId::new("other").unwrap(),
+            intent,
+            &set,
+            loop_rules(0, 0)
+        ),
+        Err(LoopError::ScopeMismatch)
+    ));
+}
+#[test]
+fn retained_multisource_goal_and_reused_condition_batches_bind_the_complete_readset() {
+    let desired = input().desired;
+    let second = DesiredCondition::new(
+        ConditionId::new("second").unwrap(),
+        SubjectPath::new(["tests", "passed"]).unwrap(),
+        ComparisonOperator::Equals,
+        Some(TypedValue::Boolean(true)),
+    )
+    .unwrap();
+    let full = DesiredState::new(
+        desired.id().clone(),
+        vec![desired.conditions()[0].clone(), second.clone()],
+        ConditionExpression::all(vec![
+            desired.expression().clone(),
+            ConditionExpression::condition(second.id().clone()),
+        ])
+        .unwrap(),
+        vec![],
+        vec![],
+    )
+    .unwrap();
+    let intent = Intent::new(IntentId::new("intent").unwrap(), full);
+    let first = retained_member(
+        'a',
+        'a',
+        retained_batch("source-a", "object-a", Some("v1"), 'a', subject(), true),
+    );
+    let second_member = retained_member(
+        'b',
+        'b',
+        retained_batch(
+            "source-b",
+            "object-b",
+            Some("v8"),
+            'b',
+            second.subject().clone(),
+            true,
+        ),
+    );
+    let set = RetainedObservationReadset::new(scope(), vec![first.clone(), second_member.clone()])
+        .unwrap();
+    let reversed =
+        RetainedObservationReadset::new(scope(), vec![second_member, first.clone()]).unwrap();
+    assert_eq!(set, reversed);
+    assert_eq!(set.batch().records().facts().len(), 2);
+    let receipt = retained_verify(intent.clone(), &set).unwrap();
+    assert_ne!(
+        receipt.source_digest(),
+        first.batch.snapshot().digest().unwrap()
+    );
+    assert_eq!(receipt.readset_digest(), Some(set.digest()));
+    let missing = RetainedObservationReadset::new(scope(), vec![first.clone()]).unwrap();
+    assert!(retained_verify(intent, &missing).is_none());
+    let other_condition = retained_member('c', 'a', first.batch.clone());
+    let reused = RetainedObservationReadset::new(scope(), vec![first, other_condition]).unwrap();
+    assert_eq!(reused.batch().records().facts().len(), 1);
+    assert_ne!(
+        reused.digest(),
+        missing.digest(),
+        "condition/member bindings remain in the digest even when records are identical"
+    );
+}
+#[test]
+fn retained_digest_commits_actual_records_and_quality_not_claimed_source_digest() {
+    let yes = retained_batch("source", "object", Some("v1"), 'a', subject(), true);
+    let no = retained_batch("source", "object", Some("v1"), 'a', subject(), false);
+    assert_eq!(yes.snapshot(), no.snapshot());
+    let original =
+        RetainedObservationReadset::new(scope(), vec![retained_member('a', 'a', yes.clone())])
+            .unwrap();
+    let altered =
+        RetainedObservationReadset::new(scope(), vec![retained_member('a', 'a', no.clone())])
+            .unwrap();
+    assert_ne!(original.digest(), altered.digest());
+    let intent = Intent::new(IntentId::new("intent").unwrap(), input().desired);
+    assert!(retained_verify(intent.clone(), &original).is_some());
+    assert!(retained_verify(intent.clone(), &altered).is_none());
+    let conflict = RetainedObservationReadset::new(
+        scope(),
+        vec![
+            retained_member('a', 'a', yes.clone()),
+            retained_member(
+                'b',
+                'b',
+                retained_batch("other-source", "object", Some("v1"), 'b', subject(), false),
+            ),
+        ],
+    )
+    .unwrap();
+    assert!(
+        retained_verify(intent, &conflict).is_none(),
+        "fresh conflicting sources do not establish goal success"
+    );
+    assert_eq!(
+        RetainedObservationReadset::new(
+            scope(),
+            vec![
+                retained_member('a', 'a', yes.clone()),
+                retained_member('b', 'a', no)
+            ]
+        )
+        .unwrap_err(),
+        RetainedObservationError::DuplicateIdentity
+    );
+    let quality = yes.with_quality_metadata(
+        subject(),
+        vec![QualityMetadata::new(
+            TrustClass::ObservedEvidence,
+            SensitivityClass::Public,
+            Confidence::Unknown,
+            FreshnessStatus::Fresh,
+            Uncertainty::Probabilistic,
+        )],
+    );
+    let changed =
+        RetainedObservationReadset::new(scope(), vec![retained_member('a', 'a', quality)]).unwrap();
+    assert_ne!(original.digest(), changed.digest());
+}
+#[test]
+fn retained_scope_version_identity_and_quality_drift_fail_closed() {
+    let first = retained_batch("source", "one", Some("v1"), 'a', subject(), true);
+    assert_eq!(
+        RetainedObservationReadset::new(scope(), vec![]).unwrap_err(),
+        RetainedObservationError::Empty
+    );
+    assert_eq!(
+        RetainedObservationReadset::new(
+            scope(),
+            vec![
+                retained_member('a', 'a', first.clone());
+                gateway_application::retained_observations::MAX_RETAINED_OBSERVATION_MEMBERS + 1
+            ]
+        )
+        .unwrap_err(),
+        RetainedObservationError::Limit
+    );
+    let without_version = retained_batch("source", "one", None, 'a', subject(), true);
+    let changed_without_version = retained_batch("source", "two", None, 'b', subject(), true);
+    assert_eq!(
+        RetainedObservationReadset::new(
+            scope(),
+            vec![
+                retained_member('a', 'a', without_version),
+                retained_member('b', 'a', changed_without_version)
+            ]
+        )
+        .unwrap_err(),
+        RetainedObservationError::InconsistentVersion
+    );
+    for invalid in [
+        QualityMetadata::new(
+            TrustClass::DerivedAssessment,
+            SensitivityClass::Public,
+            Confidence::Unknown,
+            FreshnessStatus::Fresh,
+            Uncertainty::None,
+        ),
+        QualityMetadata::new(
+            TrustClass::ObservedEvidence,
+            SensitivityClass::Secret,
+            Confidence::Unknown,
+            FreshnessStatus::Fresh,
+            Uncertainty::None,
+        ),
+        QualityMetadata::new(
+            TrustClass::ObservedEvidence,
+            SensitivityClass::Public,
+            Confidence::Unknown,
+            FreshnessStatus::Fresh,
+            Uncertainty::Unknown,
+        ),
+        QualityMetadata::new(
+            TrustClass::ObservedEvidence,
+            SensitivityClass::Public,
+            Confidence::Unknown,
+            FreshnessStatus::Fresh,
+            Uncertainty::None,
+        )
+        .with_conflict(ConflictStatus::Unresolved),
+    ] {
+        let bad = first
+            .clone()
+            .with_quality_metadata(subject(), vec![invalid]);
+        assert_eq!(
+            RetainedObservationReadset::new(scope(), vec![retained_member('a', 'a', bad)])
+                .unwrap_err(),
+            RetainedObservationError::InvalidQuality
+        );
+    }
+
+    assert_eq!(
+        RetainedObservationReadset::new(
+            ContextScopeId::new("foreign").unwrap(),
+            vec![retained_member('a', 'a', first.clone())]
+        )
+        .unwrap_err(),
+        RetainedObservationError::ScopeMismatch
+    );
+    for revision in [Some("v2"), None] {
+        let other = retained_batch("source", "two", revision, 'a', subject(), true);
+        assert_eq!(
+            RetainedObservationReadset::new(
+                scope(),
+                vec![
+                    retained_member('a', 'a', first.clone()),
+                    retained_member('b', 'a', other.clone())
+                ]
+            )
+            .unwrap_err(),
+            RetainedObservationError::InconsistentVersion
+        );
+        assert!(
+            RetainedObservationReadset::new(
+                scope(),
+                vec![
+                    retained_member('a', 'a', first.clone()),
+                    retained_member('b', 'b', other)
+                ]
+            )
+            .is_ok(),
+            "different true objects may have independent versions"
+        );
+    }
+    let other_raw = retained_batch(
+        "source",
+        "two",
+        Some("v1"),
+        'b',
+        SubjectPath::new(["other"]).unwrap(),
+        true,
+    );
+    assert!(
+        RetainedObservationReadset::new(
+            scope(),
+            vec![
+                retained_member('a', 'a', first.clone()),
+                retained_member('b', 'a', other_raw)
+            ]
+        )
+        .is_ok(),
+        "same explicit version need not have identical response metadata/digest"
+    );
+    for freshness in [FreshnessStatus::Stale, FreshnessStatus::Unknown] {
+        let bad = first.clone().with_quality_metadata(
+            subject(),
+            vec![QualityMetadata::new(
+                TrustClass::ObservedEvidence,
+                SensitivityClass::Public,
+                Confidence::Unknown,
+                freshness,
+                Uncertainty::None,
+            )],
+        );
+        assert_eq!(
+            RetainedObservationReadset::new(scope(), vec![retained_member('a', 'a', bad)])
+                .unwrap_err(),
+            RetainedObservationError::InvalidQuality
+        );
+    }
+    assert_eq!(
+        RetainedObservationReadset::new(
+            scope(),
+            vec![
+                retained_member('a', 'a', first.clone()),
+                retained_member('a', 'b', first)
+            ]
+        )
+        .unwrap_err(),
+        RetainedObservationError::DuplicateBinding
+    );
+}
+#[test]
+fn retained_verification_preserves_full_criteria_invariants_and_original_goal_identity() {
+    let desired = input().desired;
+    let second = DesiredCondition::new(
+        ConditionId::new("second").unwrap(),
+        SubjectPath::new(["tests", "passed"]).unwrap(),
+        ComparisonOperator::Equals,
+        Some(TypedValue::Boolean(true)),
+    )
+    .unwrap();
+    let set = RetainedObservationReadset::new(
+        scope(),
+        vec![
+            retained_member('a', 'a', batch(Some(true), true, true)),
+            retained_member(
+                'b',
+                'b',
+                retained_batch(
+                    "second",
+                    "object",
+                    Some("v1"),
+                    'b',
+                    second.subject().clone(),
+                    false,
+                ),
+            ),
+        ],
+    )
+    .unwrap();
+    let smaller = Intent::new(IntentId::new("intent").unwrap(), desired.clone());
+    let receipt = retained_verify(smaller.clone(), &set).unwrap();
+    for invariant in [false, true] {
+        let expression = ConditionExpression::condition(second.id().clone());
+        let full = DesiredState::new(
+            desired.id().clone(),
+            vec![desired.conditions()[0].clone(), second.clone()],
+            desired.expression().clone(),
+            if invariant {
+                vec![DeclarativeConstraint::new(
+                    ConstraintId::new("invariant").unwrap(),
+                    expression.clone(),
+                )]
+            } else {
+                vec![]
+            },
+            if invariant {
+                vec![]
+            } else {
+                vec![
+                    AcceptanceCriterion::new(
+                        AcceptanceCriterionId::new("criterion").unwrap(),
+                        "must hold",
+                        expression,
+                    )
+                    .unwrap(),
+                ]
+            },
+        )
+        .unwrap();
+        let intent = Intent::new(IntentId::new("intent").unwrap(), full);
+        assert_ne!(receipt.goal_digest(), &ClosedLoop::goal_digest(&intent));
+        assert!(retained_verify(intent, &set).is_none());
+    }
+    let changed_input = smaller
+        .with_original_input(OriginalInput::inline("different original goal input").unwrap());
+    let other = retained_verify(changed_input, &set).unwrap();
+    assert_ne!(receipt.goal_digest(), other.goal_digest());
+    assert_ne!(receipt.validation(), other.validation());
+}
+
+#[test]
+fn retained_members_cannot_borrow_fresh_quality_from_another_sources_subject() {
+    let with_quality = retained_batch("source", "object", Some("v1"), 'a', subject(), true);
+    let missing = ScopedObservationBatch::new(
+        scope(),
+        with_quality.snapshot().clone(),
+        with_quality.records().clone(),
+    )
+    .unwrap();
+    let intent = Intent::new(IntentId::new("intent").unwrap(), input().desired);
+    let legacy = ClosedLoop::start(
+        ReferenceId::new("legacy-missing-quality").unwrap(),
+        scope(),
+        intent,
+        missing.clone(),
+        loop_rules(0, 0),
+    )
+    .unwrap();
+    assert_ne!(
+        legacy.decision(),
+        LoopDecision::Success,
+        "native fresh comparison does not infer quality when absent"
+    );
+    for omitted in [
+        missing.clone(),
+        missing.with_quality_metadata(subject(), vec![]),
+    ] {
+        assert_eq!(
+            RetainedObservationReadset::new(
+                scope(),
+                vec![retained_member('a', 'a', omitted.clone())]
+            )
+            .unwrap_err(),
+            RetainedObservationError::InvalidQuality
+        );
+        let fresh_other_source = retained_batch(
+            "fresh-other-source",
+            "object",
+            Some("v1"),
+            'b',
+            subject(),
+            true,
+        );
+        assert_eq!(
+            RetainedObservationReadset::new(
+                scope(),
+                vec![
+                    retained_member('a', 'a', omitted),
+                    retained_member('b', 'b', fresh_other_source)
+                ]
+            )
+            .unwrap_err(),
+            RetainedObservationError::InvalidQuality,
+            "fresh metadata for the shared subject must not qualify a different member's unqualified facts"
+        );
+    }
 }

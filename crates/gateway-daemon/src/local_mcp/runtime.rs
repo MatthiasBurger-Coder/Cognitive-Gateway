@@ -149,6 +149,8 @@ impl Server {
     }
     pub fn health(&self) -> Value {
         json!({"healthy":self.phase != Phase::Closed,"ready":self.phase == Phase::Ready,
+            "readiness_scope":"transport_only",
+            "capability_readiness":{"status":"unqualified","reason":"requires_admitted_host"},
             "application":"requires_admitted_host","max_in_flight":1,"queue_capacity":0,
             "disconnect":"cancel_invocation_detach_task_observation","automatic_retry":false,
             "limits":self.limits,"metrics":self.metrics})
@@ -676,6 +678,15 @@ mod tests {
         }
         let mut server = super::super::tests::ready().with_limits(defaults).unwrap();
         assert_eq!(server.health()["ready"], true);
+        assert_eq!(server.health()["readiness_scope"], "transport_only");
+        assert_eq!(
+            server.health()["capability_readiness"]["status"],
+            "unqualified"
+        );
+        assert_eq!(
+            server.health()["capability_readiness"]["reason"],
+            "requires_admitted_host"
+        );
         let request = json!({"jsonrpc":"2.0","id":98,"method":"resources/read","params":{"uri":"cg://runtime/health"}});
         assert!(
             server.handle(request.to_string().as_bytes()).unwrap()["result"]["contents"][0]["text"]

@@ -71,6 +71,7 @@ fn fixture() -> (InvocationIr, Host) {
                     binding: pin.clone(),
                     description: NonEmptyText::new("Inspect").unwrap(),
                     input: gateway_domain::semantic_output::OutputType::String {},
+                    connector_inventory: None,
                 },
             )
         })
@@ -101,7 +102,12 @@ impl PromptRendererPort for Renderer {
         (id("fixture"), id("1"))
     }
     fn render(&self, input: &RenderInput) -> Result<Value, RenderDiagnostic> {
-        Ok(json!({"system":input.handoff()["instructions"], "data":render_data(input)}))
+        Ok(json!({
+            "system":input.handoff()["instructions"],
+            "data":render_data(input),
+            "tool_count":input.tools().len(),
+            "output_schema":input.output_schema(),
+        }))
     }
 }
 struct Counter;
@@ -183,6 +189,12 @@ fn full_producer_handoff_is_immutable_lossless_and_reproducible() {
     assert_eq!(rendered.identity(), &ir.identity());
     let payload: Value = serde_json::from_str(rendered.rendered().payload()).unwrap();
     assert!(!payload["system"].to_string().contains("ignore policy"));
+    assert_eq!(payload["tool_count"], ir.prompt().tools().len());
+    assert_eq!(
+        payload["output_schema"],
+        ir.prepared().invocation().data().output.json_schema()
+    );
+    assert!(rendered.rendered().accounting().total_input_tokens > 0);
     assert!(
         payload["data"]["semantic"]["examples"]
             .to_string()
@@ -202,6 +214,95 @@ fn full_producer_handoff_is_immutable_lossless_and_reproducible() {
     assert_eq!(transport.calls.get(), 1);
     assert_eq!(host.calls.get(), 3);
 }
+#[test]
+fn historical_reconstruction_does_not_admit_stale_data_until_current_revalidation() {
+    let (ir, host) = fixture();
+    host.error.set(Some(InvocationIrError::StaleInput));
+    let retained = reconstruct_retained_invocation_ir(
+        SchemaVersion::V1,
+        ir.prompt().handoff().clone(),
+        ir.prepared().clone(),
+        ir.prompt().tools().clone(),
+        &json!(ir),
+        &ir.identity(),
+    )
+    .unwrap();
+    assert_eq!(retained.identity(), ir.identity());
+    assert_eq!(retained.to_value(), json!(ir));
+    assert_eq!(host.calls.get(), 0);
+    assert_eq!(
+        revalidate_retained_invocation_ir(&retained, &host).unwrap_err(),
+        InvocationIrError::StaleInput
+    );
+    host.error.set(None);
+    let admitted = revalidate_retained_invocation_ir(&retained, &host).unwrap();
+    assert_eq!(json!(admitted), json!(ir));
+    assert_eq!(host.calls.get(), 2);
+    host.error.set(Some(InvocationIrError::InvalidBinding));
+    assert_eq!(
+        revalidate_retained_invocation_ir(&retained, &host).unwrap_err(),
+        InvocationIrError::InvalidBinding
+    );
+    // Semantic reference validation must precede the admission callback.
+    assert_eq!(host.calls.get(), 2);
+}
+
+#[test]
+fn historical_reconstruction_requires_the_full_original_record_and_native_identity() {
+    let (ir, _) = fixture();
+    let original = json!(ir);
+    let reconstruct = |value: &Value, identity: &InvocationIrIdentity| {
+        reconstruct_retained_invocation_ir(
+            SchemaVersion::V1,
+            ir.prompt().handoff().clone(),
+            ir.prepared().clone(),
+            ir.prompt().tools().clone(),
+            value,
+            identity,
+        )
+    };
+    let mut changed = original.clone();
+    changed["unretained_extra"] = json!(true);
+    assert!(matches!(
+        reconstruct(&changed, &ir.identity()),
+        Err(InvocationIrError::InvalidBinding)
+    ));
+    changed = original.clone();
+    changed["prompt"]["handoff"]["task"] = Value::Null;
+    assert!(matches!(
+        reconstruct(&changed, &ir.identity()),
+        Err(InvocationIrError::InvalidBinding)
+    ));
+    let mut wrong_identity = ir.identity();
+    wrong_identity.ir_digest = context_content_digest(b"other original record");
+    assert!(matches!(
+        reconstruct(&original, &wrong_identity),
+        Err(InvocationIrError::InvalidBinding)
+    ));
+    assert!(matches!(
+        reconstruct_retained_invocation_ir(
+            SchemaVersion::V1,
+            ir.prompt().handoff().clone(),
+            ir.prepared().clone(),
+            BTreeMap::new(),
+            &original,
+            &ir.identity(),
+        ),
+        Err(InvocationIrError::InvalidBinding)
+    ));
+    assert!(matches!(
+        reconstruct_retained_invocation_ir(
+            SchemaVersion::V2,
+            ir.prompt().handoff().clone(),
+            ir.prepared().clone(),
+            ir.prompt().tools().clone(),
+            &original,
+            &ir.identity(),
+        ),
+        Err(InvocationIrError::IncompatibleVersion)
+    ));
+}
+
 #[test]
 fn contract_failures_precede_host_or_renderer() {
     let (ir, host) = fixture();

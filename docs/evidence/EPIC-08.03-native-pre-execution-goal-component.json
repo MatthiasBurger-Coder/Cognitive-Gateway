@@ -1,0 +1,49 @@
+{
+  "issue": 274,
+  "parent": 271,
+  "status": "COMPONENT_PASS",
+  "evidence_level": "CONTROLLED_MCP_AND_POSTGRES_COORDINATOR_COMPONENT",
+  "revision": "742c318b47b1e06ced615618fe7ac0c1d05f71ce",
+  "dirty_worktree": true,
+  "command": "CARGO_INCREMENTAL=0 CARGO_BUILD_JOBS=2 python3 scripts/cognitive-test-host.py cargo test -p gateway-daemon --lib actual_mcp_goal_read_completes_via_postgres_without_model_or_mutation --locked -- --nocapture",
+  "result": {
+    "passed": 1,
+    "failed": 0,
+    "ignored": 0,
+    "duration_seconds": 23.49,
+    "actual_goal_capture_ms": 21306
+  },
+  "proven": [
+    "Real controlled stdio MCP discovery and read satisfy both original goal conditions, reusing one identical read route.",
+    "Native full-goal receipt is persisted as owner-scoped pre-execution evidence through the actual PostgreSQL coordinator journal.",
+    "No model invocation, action consent, mutation, connector result or fabricated after-action snapshot; completed recovery is stable."
+  ],
+  "limitations": [
+    "The test uses NativeConsentPreparingProbe; installed LocalConnectorRuntime.prepare_step and execute_step remain UnsupportedCapability.",
+    "This run does not qualify the installed client, mutation/resume/restart path, complete #274 or parent #271.",
+    "The existing WIP test build emits 21 warnings; no full Clippy or coverage pass is claimed for these sources."
+  ],
+  "archive": {
+    "path": "docs/evidence/EPIC-08.03-native-pre-execution-goal-component-validation.json.gz",
+    "sha256": "d6c50e9973bc8288e617ef20b549773f0a2b9d62c139bb9dbd8c0d6f6904ec1b"
+  },
+  "next_delivery_review": {
+    "reviewers": [
+      "connector_gate_review",
+      "connector_phase_resources"
+    ],
+    "decision": "READY_AFTER_399_COMPLETION",
+    "path": "VerifiedOutput -> live canonical connector binder -> existing CG09 admission -> actual MCP host",
+    "requirements": [
+      "Native #399 step_input must supply policy data; no manually asserted resolution/constraint facts.",
+      "Bind capability, typed arguments, invocation, host task/step/execution, scope, inventory revision and full schema.",
+      "Mismatched invocation, capability, arguments, scope, changed schema/inventory, denied or stale consent produce zero tools/call.",
+      "Ordered proposals retain completed outcomes and report failure ordinal; result alone does not prove goal completion."
+    ],
+    "excluded_from_package": [
+      "Historical IR and readsets",
+      "Session runtime and PostgreSQL composition",
+      "Full #230/#274 closure"
+    ]
+  }
+}

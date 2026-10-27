@@ -1,5 +1,9 @@
 //! Real subprocess conformance tests. Authority/mapping are explicit test adapters;
 //! these tests do not qualify the future production policy service or providers.
+#[path = "support/connector_resilience_cases.rs"]
+mod connector_resilience_cases;
+#[path = "support/session_connector_budget_cases.rs"]
+mod session_budget_cases;
 use gateway_application::{connector_manifest::*, connectors::*};
 use gateway_daemon::mcp_client::{transport::*, *};
 use gateway_domain::*;
@@ -991,6 +995,8 @@ fn real_stdio_resource_crosses_canonical_normalization_ingestion_and_context_bou
                 max_age: FreshnessPolicy::new(60),
                 authenticated_source: text("test.admitted.stdio.peer"),
                 sensitivity: SensitivityClass::Internal,
+                confidence: Confidence::Unknown,
+                uncertainty: Uncertainty::Unknown,
                 conflict: ConflictStatus::Unresolved,
                 partial: false,
                 basis: ConnectorObservationBasis::SourceRead,

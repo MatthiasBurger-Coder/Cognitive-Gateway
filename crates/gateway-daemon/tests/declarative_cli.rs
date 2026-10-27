@@ -10,6 +10,11 @@ use std::{
 };
 
 static NEXT: AtomicUsize = AtomicUsize::new(0);
+fn cg_binary() -> PathBuf {
+    std::env::var_os("CG_QUALIFICATION_BIN_DIR")
+        .map(|directory| PathBuf::from(directory).join("cg"))
+        .unwrap_or_else(|| Path::new(env!("CARGO_BIN_EXE_cg")).to_path_buf())
+}
 struct Fixture {
     root: PathBuf,
     context: Value,
@@ -85,7 +90,7 @@ impl Fixture {
         }
     }
     fn command(&self, args: &[&str]) -> Output {
-        Command::new(env!("CARGO_BIN_EXE_cg"))
+        Command::new(cg_binary())
             .args(args)
             .current_dir(&self.root)
             .output()
@@ -304,7 +309,7 @@ fn file_inline_and_stdin_inputs_agree() {
         expected,
         f.run(&["assess", &format!("--context={file}"), "--json"], 0)
     );
-    let mut child = Command::new(env!("CARGO_BIN_EXE_cg"))
+    let mut child = Command::new(cg_binary())
         .args(["assess", "--context", "-", "--json"])
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())

@@ -1,0 +1,50 @@
+{
+  "epic": "EPIC-07.07",
+  "issue": 230,
+  "prerequisite_issue": 369,
+  "status": "COMPONENT_QUALIFIED_PARTIAL",
+  "baseline": "e21a1e40d556c9dcf95ebb519b8b18b107b6f8c5",
+  "scope": "Provider-independent CG-09 connector admission adapter, current policy/consent revalidation port, deterministic denial projection and component qualification.",
+  "three_amigos": {
+    "requirement": "Implements the reusable policy admission slice from #369 and the component-level policy mapping in #230. Full installed coordinator acceptance remains open.",
+    "architecture": "Cg09ConnectorAdmission calls the existing PolicyEngine. ConnectorPolicySource is the trusted host boundary for authenticated current authority/facts, consent, scope/source/argument/inventory binding and budget reservation. No provider SDK or parallel policy engine is introduced.",
+    "automation": "Rust gateway-application adapter behind the existing ConnectorAdmissionPort; MCP host revalidates immediately before effects. No concrete installed ConnectorPolicySource composition exists yet.",
+    "testing": "Component matrix covers inspect allow, mutation consent denial, extra consent, admin escalation, evidence denial, stale consent/policy, unknown/mismatched capability, and trusted-source fail-closed errors. Existing synthetic stdio MCP host regression suite passes.",
+    "review_provenance": "Requirement, architecture, automation and tester perspectives performed by one agent; no independent review is claimed."
+  },
+  "verification": {
+    "commands": [
+      "cargo test -p gateway-application --test connector_policy",
+      "cargo test -p gateway-daemon --test mcp_client",
+      "CARGO_LLVM_COV_TARGET_DIR=target/connector-policy-linux-coverage cargo llvm-cov -p gateway-application --test connector_policy --locked --json --output-path target/connector-policy-coverage.json",
+      "cargo fmt --check",
+      "cargo clippy -p gateway-application --all-targets -- -D warnings",
+      "bash scripts/check-architecture.sh",
+      "git diff --check"
+    ],
+    "result": "PASS_COMPONENT",
+    "notes": [
+      "Connector policy component tests: 6 passed.",
+      "Existing MCP client integration regression: 12 passed; revalidation remains before tool/resource effects.",
+      "connector_policy.rs line coverage: 117/121 (96.69%) in Linux-specific target.",
+      "Formatting, application Clippy, architecture dependency guard and diff whitespace check passed.",
+      "An initial llvm-cov attempt against the shared target failed because it contained an invalid Windows PDB object; the documented fresh Linux target passed.",
+      "No production ConnectorPolicySource, installed coordinator, durable consent/budget store, live provider or system-level effect qualification is claimed; #230 and #274 remain incomplete."
+    ]
+  },
+  "source_bindings": {
+    "crates/gateway-application/src/connector_policy.rs": "61a8956a067b64f95782297e2651dd9b91bc6cd52fa67bf92d062c9120fa0c32",
+    "crates/gateway-application/src/lib.rs": "477835056d49343184a88ee50a95cbfa699eb9a5ecfbafb1e8b28a1c4d2b9512",
+    "crates/gateway-application/tests/connector_policy.rs": "e6ff6440ecd9ba32fed9e2c92c6819bb1a9c65a75ce9f37ee59e1ebde2519a07",
+    "docs/connector-policy-v1.md": "42a6465a5fef67d051c6e120c9c9e9a65de94fade0f2289ea018fc4c40c4976f",
+    "docs/current-architecture-state.md": "899f415cb67e2e260885eb991fb59691ebca30d3e266bf2c6423f5b3258ab046",
+    "docs/mcp-connector-runtime.md": "d855821f5f7e01b796f843625906081a0923ac06a4bcb38dda6dc0f77aa59656",
+    "docs/README.md": "9242ceb8eb7a2408a94b971337d86f848e215cc90128d7a979a5321ce6874e61"
+  },
+  "evidence_boundary": "Historical component qualification before the #274 connector-phase follow-up; source hashes and counts below do not qualify the current candidate. Current follow-up and clean coverage runs are tracked in EPIC-08.03-connector-proposals.json.",
+  "production_admission_gaps": [
+    "Actual canonical resolution, prerequisite presence, constraints and preconditions must replace synthetic evaluator inputs before installing a production source",
+    "Existing audit hook needs immutable evaluated snapshot and stage, with durable audit separate from active session claim revision/fence",
+    "Configured current production policy/consent/resource/target composition and full installed/live acceptance remain open"
+  ]
+}

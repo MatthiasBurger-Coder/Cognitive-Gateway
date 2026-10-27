@@ -102,6 +102,7 @@ fn tools(
                     input: gateway_domain::semantic_output::OutputType::Object {
                         fields: BTreeMap::new(),
                     },
+                    connector_inventory: None,
                 },
             )
         })

@@ -4,10 +4,14 @@ use gateway_domain::ContextScopeId;
 use postgres::{Client, NoTls};
 use serde::{Serialize, de::DeserializeOwned};
 use sha2::{Digest, Sha256};
-use std::{sync::Mutex, time::Duration};
+use std::{
+    sync::{Arc, Mutex},
+    time::Duration,
+};
 
+#[derive(Clone)]
 pub struct CognitiveStore {
-    client: Mutex<Client>,
+    client: Arc<Mutex<Client>>,
     scope: ContextScopeId,
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -41,12 +45,53 @@ impl CognitiveStore {
             )
             .map_err(|_| StoreError::Storage)?;
         Ok(Self {
-            client: Mutex::new(client),
+            client: Arc::new(Mutex::new(client)),
             scope,
         })
     }
     pub fn scope(&self) -> &ContextScopeId {
         &self.scope
+    }
+    pub(crate) fn is_closed(&self) -> Result<bool, StoreError> {
+        self.client
+            .lock()
+            .map(|client| client.is_closed())
+            .map_err(|_| StoreError::Storage)
+    }
+    #[cfg(test)]
+    pub(crate) fn backend_pid(&self) -> Result<i32, StoreError> {
+        self.client
+            .lock()
+            .map_err(|_| StoreError::Storage)?
+            .query_one("SELECT pg_backend_pid()", &[])
+            .map(|row| row.get(0))
+            .map_err(|_| StoreError::Storage)
+    }
+    /// Fresh committed statement snapshot, without inserting or locking a row.
+    /// This is data only: mutation still requires transact's lock and CAS.
+    pub fn snapshot<T: DeserializeOwned>(&self, kind: &str) -> Result<Option<T>, StoreError> {
+        let mut client = self.client.lock().map_err(|_| StoreError::Storage)?;
+        let row = client
+            .query_opt(
+                "SELECT payload,digest,revision FROM cg_cognitive_journals WHERE scope=$1 AND kind=$2",
+                &[&self.scope.as_str(), &kind],
+            )
+            .map_err(|_| StoreError::Storage)?;
+        let Some(row) = row else {
+            return Ok(None);
+        };
+        let payload: String = row.get(0);
+        let expected: String = row.get(1);
+        let revision: i64 = row.get(2);
+        if payload.len() > 33_554_432 {
+            return Err(StoreError::Limit);
+        }
+        if revision < 0 || expected != format!("{:x}", Sha256::digest(payload.as_bytes())) {
+            return Err(StoreError::InvalidJournal);
+        }
+        serde_json::from_str(&payload)
+            .map(Some)
+            .map_err(|_| StoreError::InvalidJournal)
     }
     /// Row lock serializes coordinators. Projection and routing change commit
     /// together. No cache is exposed before commit; a failed operation rolls back.

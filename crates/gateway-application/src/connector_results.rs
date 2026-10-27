@@ -164,6 +164,103 @@ impl ConnectorResult {
         }
         Ok(())
     }
+
+    /// Validate an observation returned by a connector application port when
+    /// its internal authorized dispatch is intentionally not exposed to the
+    /// caller. The host has already performed CG-09 authorization and
+    /// revalidation; this checks the returned data remains bound to the exact
+    /// request and typed trust/effect contract.
+    pub fn validate_for_request(
+        request: &ConnectorRequest,
+        observation: &ConnectorObservation,
+    ) -> Result<(), ResultError> {
+        let metadata = &observation.metadata;
+        let read = matches!(
+            request.class,
+            ConnectorOperationClass::Read
+                | ConnectorOperationClass::Search
+                | ConnectorOperationClass::Inspect
+        );
+        if observation.target != request.target
+            || observation.inventory_revision != request.inventory_revision
+            || observation.correlation != request.correlation
+            || metadata.task != request.task
+            || metadata.step != request.step
+            || metadata.execution != request.execution
+            || metadata.source_kind == SourceKind::Model
+            || metadata.quality.trust() != TrustClass::ObservedEvidence
+            || (metadata.partial && metadata.quality.uncertainty() == Uncertainty::None)
+        {
+            return Err(ResultError::Binding);
+        }
+        match observation.basis {
+            ConnectorObservationBasis::ProviderAcknowledgement
+                if metadata.verifies.is_none()
+                    && metadata.effect != ConnectorEffect::NotDispatched => {}
+            ConnectorObservationBasis::SourceRead
+                if read
+                    && metadata.verifies.is_none()
+                    && metadata.effect == ConnectorEffect::NoMutation => {}
+            ConnectorObservationBasis::IndependentPostEffectRead
+                if metadata.verifies.as_ref().is_some_and(|original| {
+                    original.target == request.target
+                        && original.task == request.task
+                        && original.step == request.step
+                        && original.execution != request.execution
+                        && original.correlation != request.correlation
+                        && matches!(
+                            original.class,
+                            ConnectorOperationClass::Mutate | ConnectorOperationClass::Admin
+                        )
+                }) && read
+                    && metadata.effect == ConnectorEffect::NoMutation => {}
+            _ => return Err(ResultError::Basis),
+        }
+        observation
+            .records
+            .validate()
+            .map_err(|_| ResultError::Lineage)?;
+        if observation.records.observations().is_empty()
+            || observation.records.evidence().is_empty()
+            || observation.records.observations().len() > 256
+            || observation.records.provenances().len() > 256
+            || observation.records.facts().len() > 256
+            || observation.records.evidence().len() > 256
+        {
+            return Err(ResultError::Lineage);
+        }
+        let acquired = observation.acquired_at.seconds().to_string();
+        let direct: BTreeSet<_> = observation
+            .records
+            .observations()
+            .iter()
+            .map(|value| value.provenance())
+            .chain(
+                observation
+                    .records
+                    .evidence()
+                    .iter()
+                    .map(|value| value.provenance()),
+            )
+            .collect();
+        for provenance in observation
+            .records
+            .provenances()
+            .iter()
+            .filter(|provenance| direct.contains(provenance.id()))
+        {
+            if provenance.source_id() != &observation.source
+                || provenance.source_kind() != metadata.source_kind
+                || provenance.source_reference() != metadata.object_reference.as_str()
+                || provenance.source_timestamp() != observation.source_revision.as_ref()
+                || provenance.acquired_at().map(SourceTimestamp::as_str) != Some(acquired.as_str())
+                || provenance.producer() != Some(metadata.authenticated_source.as_str())
+            {
+                return Err(ResultError::Lineage);
+            }
+        }
+        Ok(())
+    }
     pub fn diagnostics(&self) -> Vec<ResultDiagnostic> {
         let o = &self.0;
         let mut result = vec![];
@@ -251,4 +348,54 @@ impl ConnectorResult {
             })
             .collect()
     }
+}
+
+/// Validate the distinct read-back record that follows a mutating proposal.
+/// The connector admission boundary must already have authorized the read call;
+/// this check proves its typed evidence is linked to the exact original request
+/// and cannot be replaced by the mutation's provider acknowledgement.
+pub fn validate_independent_post_effect_read(
+    original: &ConnectorRequest,
+    read_request: &ConnectorRequest,
+    observation: &ConnectorObservation,
+) -> Result<(), ResultError> {
+    ConnectorResult::validate_for_request(read_request, observation)?;
+    let metadata = &observation.metadata;
+    if !matches!(
+        original.class,
+        ConnectorOperationClass::Mutate | ConnectorOperationClass::Admin
+    ) || observation.basis != ConnectorObservationBasis::IndependentPostEffectRead
+        || metadata.verifies.as_ref() != Some(original)
+        || !matches!(
+            read_request.class,
+            ConnectorOperationClass::Read
+                | ConnectorOperationClass::Search
+                | ConnectorOperationClass::Inspect
+        )
+        || observation.target != original.target
+        || metadata.task != original.task
+        || metadata.step != original.step
+        || metadata.execution == original.execution
+        || observation.correlation == original.correlation
+        || metadata.effect != ConnectorEffect::NoMutation
+        || metadata.source_kind == SourceKind::Model
+        || metadata.quality.trust() != TrustClass::ObservedEvidence
+        || (metadata.partial && metadata.quality.uncertainty() == Uncertainty::None)
+    {
+        return Err(ResultError::Basis);
+    }
+    observation
+        .records
+        .validate()
+        .map_err(|_| ResultError::Lineage)?;
+    if observation.records.observations().is_empty()
+        || observation.records.evidence().is_empty()
+        || observation.records.observations().len() > 256
+        || observation.records.provenances().len() > 256
+        || observation.records.facts().len() > 256
+        || observation.records.evidence().len() > 256
+    {
+        return Err(ResultError::Lineage);
+    }
+    Ok(())
 }

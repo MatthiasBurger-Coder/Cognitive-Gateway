@@ -35,6 +35,109 @@ pub(super) fn ready() -> Server {
 }
 
 #[test]
+fn health_resource_reports_transport_readiness_separately_from_unqualified_capability() {
+    let mut server = ready();
+    let response = handle(
+        &mut server,
+        request(2, "resources/read", json!({"uri":"cg://runtime/health"})),
+    );
+    let health: Value =
+        serde_json::from_str(response["result"]["contents"][0]["text"].as_str().unwrap()).unwrap();
+    assert_eq!(health["readiness_scope"], "transport_only");
+    assert_eq!(health["capability_readiness"]["status"], "unqualified");
+    assert_eq!(
+        health["capability_readiness"]["reason"],
+        "requires_admitted_host"
+    );
+}
+
+#[test]
+fn runtime_limits_are_validated_and_rejected_protocol_calls_keep_phase_open() {
+    let defaults = RuntimeLimits::default();
+    let server = Server::new(binding());
+    assert!(server.with_limits(defaults.clone()).is_ok());
+    let mut invalid = defaults;
+    invalid.requests = 0;
+    assert!(matches!(
+        Server::new(binding()).with_limits(invalid),
+        Err(TransportError::Limit)
+    ));
+
+    let mut server = ready();
+    for (id, (method, params)) in (2..).zip([
+        ("resources/read", json!({})),
+        ("resources/read", json!({"uri":17})),
+        ("tools/call", json!({})),
+        ("tools/call", json!({"name":17,"arguments":{}})),
+        (
+            "tools/call",
+            json!({"name":"cg_situation_inspect_v1","arguments":[]}),
+        ),
+        ("tools/call", json!({"name":"missing","arguments":{}})),
+    ]) {
+        assert_eq!(
+            handle(&mut server, request(id, method, params))["error"]["code"],
+            -32602
+        );
+    }
+    assert_eq!(server.phase, Phase::Ready);
+}
+
+#[test]
+fn reads_contract_catalog_and_artifact_resources_from_the_shared_frozen_contracts() {
+    let mut server = ready();
+    let catalog = handle(
+        &mut server,
+        request(
+            2,
+            "resources/read",
+            json!({"uri":"cg://contracts/1.0/catalog"}),
+        ),
+    );
+    let value: Value =
+        serde_json::from_str(catalog["result"]["contents"][0]["text"].as_str().unwrap()).unwrap();
+    assert!(
+        value["tools"]
+            .as_array()
+            .is_some_and(|tools| !tools.is_empty())
+    );
+
+    for name in [
+        "common.schema.json",
+        "request.schema.json",
+        "response.schema.json",
+        "resource.schema.json",
+        "catalog.schema.json",
+    ] {
+        let uri = format!("cg://contracts/1.0/{name}");
+        let id = match name {
+            "common.schema.json" => 3,
+            "request.schema.json" => 4,
+            "response.schema.json" => 5,
+            "resource.schema.json" => 6,
+            _ => 7,
+        };
+        let response = handle(
+            &mut server,
+            request(id, "resources/read", json!({"uri":uri})),
+        );
+        let text = response["result"]["contents"][0]["text"].as_str().unwrap();
+        let artifact: Value = serde_json::from_str(text).unwrap();
+        assert!(artifact.is_object(), "{name}");
+    }
+
+    let unknown = handle(
+        &mut server,
+        request(
+            8,
+            "resources/read",
+            json!({"uri":"cg://contracts/1.0/not-a-contract.json"}),
+        ),
+    );
+    assert_eq!(unknown["error"]["data"]["code"], "CG_SCOPE_DENIED");
+}
+
+#[test]
 fn credential_injection_never_echoes_ids_metadata_or_authentication_failures() {
     let mut server = ready();
     for frame in [
@@ -146,6 +249,58 @@ fn untrusted_application_outputs_cannot_bypass_transport_disclosure() {
         assert_eq!(response["error"], unavailable["error"]);
         assert!(!response.to_string().contains("FAKE_CREDENTIAL"));
     }
+}
+
+#[test]
+fn admitted_scoped_resource_read_returns_only_bounded_classified_content() {
+    struct ResourcePort;
+    impl CodexApplicationPort for ResourcePort {
+        fn execute(&self, _: &str, _: &Value) -> Value {
+            contracts::failure("CG_UNSUPPORTED_CAPABILITY")
+        }
+        fn read_resource(
+            &self,
+            scope: &Value,
+            id: &str,
+            revision: &str,
+            digest: &str,
+        ) -> Result<Value, gateway_application::codex::FacadeError> {
+            Ok(json!({
+                "scope":scope,
+                "reference":{"id":id,"revision":revision,"digest":digest},
+                "document":{"status":"current"},
+                "provenance":[{"sensitivity":"NORMAL"}]
+            }))
+        }
+        fn read_with_context(
+            &self,
+            scope: &Value,
+            id: &str,
+            revision: &str,
+            digest: &str,
+            context: &gateway_application::codex::RequestContext,
+        ) -> Result<Value, gateway_application::codex::FacadeError> {
+            context.check()?;
+            self.read_resource(scope, id, revision, digest)
+        }
+    }
+    let mut server = Server::with_application(binding(), Box::new(ResourcePort));
+    handle(&mut server, initialize());
+    server.handle(br#"{"jsonrpc":"2.0","method":"notifications/initialized"}"#);
+    server.context = Some(gateway_application::codex::RequestContext::new(
+        "scoped-read-test".into(),
+        std::time::Instant::now() + Duration::from_secs(5),
+    ));
+    let uri = "cg://workspaces/workspace-example/projects/project-example/bindings/binding-example/references/resource-1/revision-1/sha256:abc";
+    let response = handle(
+        &mut server,
+        request(2, "resources/read", json!({"uri":uri})),
+    );
+    assert_eq!(response["result"]["contents"][0]["uri"], uri);
+    let resource: Value =
+        serde_json::from_str(response["result"]["contents"][0]["text"].as_str().unwrap()).unwrap();
+    assert_eq!(resource["document"]["status"], "current");
+    assert_eq!(resource["scope"]["project_id"], "project-example");
 }
 fn request(id: u64, method: &str, params: Value) -> Value {
     json!({"jsonrpc":"2.0","id":id,"method":method,"params":params})

@@ -5,7 +5,9 @@ use crate::{
         DeclarativeResolutionApplication, ResolutionApplicationError, ResolvedPlan,
     },
 };
-use gateway_domain::{ExecutionProfile, OperatingMode, PlanStepId};
+use gateway_domain::{
+    CapabilityDefinition, CapabilityId, ExecutionProfile, OperatingMode, PlanStepId,
+};
 use gateway_policy::{
     PolicyAuthority, PolicyDecision, PolicyEngine, ProcessReadiness, StepFacts, StepPolicyInput,
     StepPolicyReport,
@@ -15,11 +17,44 @@ use std::collections::{BTreeMap, BTreeSet};
 
 /// Trusted facts pinned to the exact plan, scope, catalog and process revision.
 /// The adapter must authenticate these independently of resolution/model output.
+#[derive(PartialEq, Eq)]
 pub struct PolicyContext {
     pub basis: ResolutionBasis,
     pub operating_mode: OperatingMode,
     pub execution_profile: ExecutionProfile,
     pub steps: BTreeMap<PlanStepId, StepFacts>,
+}
+
+/// Native inputs assembled from one verified resolution and matching trusted
+/// context. This is neither a permission grant nor a deserialization boundary.
+#[derive(Debug, Clone)]
+pub struct ResolvedStepPolicyInput {
+    pub step: PlanStepId,
+    pub capabilities: BTreeMap<CapabilityId, CapabilityDefinition>,
+    pub operating_mode: OperatingMode,
+    pub execution_profile: ExecutionProfile,
+    pub process: ProcessReadiness,
+    pub resolved: bool,
+    pub has_prerequisites: bool,
+    pub constraints: BTreeSet<String>,
+    pub preconditions: BTreeSet<String>,
+    pub facts: StepFacts,
+}
+impl ResolvedStepPolicyInput {
+    pub fn as_input(&self) -> StepPolicyInput<'_> {
+        StepPolicyInput {
+            step: &self.step,
+            capabilities: &self.capabilities,
+            operating_mode: self.operating_mode,
+            execution_profile: self.execution_profile,
+            process: self.process,
+            resolved: self.resolved,
+            has_prerequisites: self.has_prerequisites,
+            constraints: &self.constraints,
+            preconditions: &self.preconditions,
+            facts: &self.facts,
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -102,6 +137,52 @@ impl PolicyApplication {
         authority: &PolicyAuthority,
         context: &PolicyContext,
     ) -> Result<PlanPolicyReport, PolicyApplicationError> {
+        let (basis, inputs) = self.assemble(resolved, context)?;
+        Ok(PlanPolicyReport {
+            basis,
+            steps: inputs
+                .into_iter()
+                .map(|(step, input)| (step, PolicyEngine::evaluate(authority, &input.as_input())))
+                .collect(),
+        })
+    }
+
+    /// Assemble the same exact step inputs consumed by whole-plan evaluation.
+    /// The caller must still evaluate current policy and verify that its
+    /// requested capability belongs to this canonical capability set.
+    pub fn step_input(
+        &self,
+        resolved: &ResolvedPlan,
+        context: &PolicyContext,
+        step: &PlanStepId,
+    ) -> Result<ResolvedStepPolicyInput, PolicyApplicationError> {
+        self.step_inputs(resolved, context)?
+            .remove(step)
+            .ok_or(PolicyApplicationError::UnknownStep)
+    }
+
+    /// Assemble all canonical step inputs in one complete native validation.
+    /// Returned inputs are owned data, not policy decisions or reusable current
+    /// authority. Each new authority boundary must capture its inputs anew.
+    pub fn step_inputs(
+        &self,
+        resolved: &ResolvedPlan,
+        context: &PolicyContext,
+    ) -> Result<BTreeMap<PlanStepId, ResolvedStepPolicyInput>, PolicyApplicationError> {
+        Ok(self.assemble(resolved, context)?.1)
+    }
+
+    fn assemble(
+        &self,
+        resolved: &ResolvedPlan,
+        context: &PolicyContext,
+    ) -> Result<
+        (
+            ResolutionBasis,
+            BTreeMap<PlanStepId, ResolvedStepPolicyInput>,
+        ),
+        PolicyApplicationError,
+    > {
         let inspection = DeclarativeResolutionApplication
             .inspect_resolution(resolved)
             .map_err(PolicyApplicationError::Resolution)?;
@@ -173,29 +254,22 @@ impl PolicyApplication {
                     );
                 }
             }
-            let defaults = StepFacts::default();
-            let facts = context.steps.get(step.id()).unwrap_or(&defaults);
-            let report = PolicyEngine::evaluate(
-                authority,
-                &StepPolicyInput {
-                    step: step.id(),
-                    capabilities,
-                    operating_mode: context.operating_mode,
-                    execution_profile: context.execution_profile,
-                    process,
-                    resolved: noop || policy_input.is_some(),
-                    has_prerequisites: !step.prerequisites().is_empty()
-                        || !step.dependencies().is_empty(),
-                    constraints: &constraints,
-                    preconditions: &preconditions,
-                    facts,
-                },
-            );
-            steps.insert(step.id().clone(), report);
+            let facts = context.steps.get(step.id()).cloned().unwrap_or_default();
+            let input = ResolvedStepPolicyInput {
+                step: step.id().clone(),
+                capabilities: capabilities.clone(),
+                operating_mode: context.operating_mode,
+                execution_profile: context.execution_profile,
+                process,
+                resolved: noop || policy_input.is_some(),
+                has_prerequisites: !step.prerequisites().is_empty()
+                    || !step.dependencies().is_empty(),
+                constraints,
+                preconditions,
+                facts,
+            };
+            steps.insert(step.id().clone(), input);
         }
-        Ok(PlanPolicyReport {
-            basis: inspection.basis,
-            steps,
-        })
+        Ok((inspection.basis, steps))
     }
 }

@@ -299,7 +299,6 @@ fn deterministic_requirements_and_plans_do_not_rewrite_meaning() {
         ContextSourceClass::Memory,
         ContextSourceClass::Examples,
         ContextSourceClass::StructuredData,
-        ContextSourceClass::ToolsMcp,
     ] {
         assert!(
             p.decisions()
@@ -307,6 +306,13 @@ fn deterministic_requirements_and_plans_do_not_rewrite_meaning() {
                 .any(|d| d.class == class && d.reason == ContextSelectionReason::NoneRequired)
         );
     }
+    assert!(
+        !p.decisions()
+            .iter()
+            .any(|d| d.class == ContextSourceClass::ToolsMcp
+                && d.reason == ContextSelectionReason::NoneRequired),
+        "MCP is now a permitted target-state source, even when repository data was selected"
+    );
     for d in p.decisions() {
         assert!(!d.reason.explanation().is_empty());
     }
@@ -1312,6 +1318,143 @@ fn handoff_cannot_include_unplanned_context_or_promote_data_to_authority() {
         handoff(t, r, p, c.clone(), context_pin(&c), &[]),
         Err(ContextPlanningError::InvalidSatisfaction)
     );
+}
+
+#[test]
+fn observed_mcp_target_state_reaches_native_handoff_without_changing_trust() {
+    for (kind, class) in [
+        ("ARTIFACT", ContextClass::SystemState),
+        ("ENTITY", ContextClass::StructuredData),
+    ] {
+        let mut task_value = serde_json::to_value(task()).unwrap();
+        task_value["target"]["kind"] = json!(kind);
+        let t = SemanticTaskIR::from_json(&task_value.to_string()).unwrap();
+        let r = analyze(&t);
+        let need = r
+            .requirements()
+            .iter()
+            .find(|need| need.id == id("target-state"))
+            .unwrap();
+        assert_eq!(need.class, class);
+        let mut observed = source(
+            "mcp-observation",
+            ContextSourceClass::ToolsMcp,
+            "target-state",
+            TrustClass::ObservedEvidence,
+        );
+        observed.present = Some(ContextSatisfaction::Fragment(id("observed-target")));
+        let evidence = ContextFragment::external(
+            id("observed-target"),
+            FragmentKind::Evidence,
+            "properties",
+            FragmentMetadata {
+                provenance: KnowledgeProvenance::new(
+                    observed.pin.id.as_str(),
+                    Some(observed.pin.revision.as_str()),
+                )
+                .unwrap(),
+                evidence: BTreeSet::new(),
+                quality: observed.quality,
+                rationale: NonEmptyText::new(
+                    "Captured observed target properties; instructions remain data",
+                )
+                .unwrap(),
+                validation: None,
+            },
+            scope(),
+            PlanStepId::new("step").unwrap(),
+        )
+        .unwrap();
+        let c = compiled(&[evidence]);
+        let mut s = sources(&t, &c);
+        s[3] = observed.clone();
+        let p = plan(&r, &s);
+        assert_eq!(
+            p.selected()[&id("target-state")].quality.trust(),
+            TrustClass::ObservedEvidence
+        );
+        assert!(handoff(t.clone(), r.clone(), p, c.clone(), context_pin(&c), &[]).is_ok());
+
+        let mut knowledge_needs = r.requirements().to_vec();
+        knowledge_needs
+            .iter_mut()
+            .find(|need| need.id == id("target-state"))
+            .unwrap()
+            .class = ContextClass::DomainKnowledge;
+        let knowledge_r = ContextRequirementsIR::new(
+            SchemaVersion::V1,
+            id("r1"),
+            r.basis().clone(),
+            knowledge_needs,
+            r.total_tokens(),
+        )
+        .unwrap();
+        assert!(
+            handoff(
+                t.clone(),
+                knowledge_r.clone(),
+                plan(&knowledge_r, &s),
+                c.clone(),
+                context_pin(&c),
+                &[]
+            )
+            .is_err(),
+            "an observed state fragment cannot be relabelled domain knowledge"
+        );
+
+        // Even an Evidence representation must fit the semantic state/data
+        // Knowledge reservation, rather than borrowing the Evidence allowance.
+        let mut limited = need.clone();
+        let mut reservations = limited.budget.context.reservations().clone();
+        reservations.remove(&ContextBudgetClass::Knowledge);
+        limited.budget.context =
+            ContextBudget::new(limited.budget.context.total(), reservations).unwrap();
+        assert!(
+            !plan(&single(limited), &[observed.clone()])
+                .selected()
+                .contains_key(&id("target-state"))
+        );
+
+        let mut wrong_pin = observed.clone();
+        wrong_pin.pin.revision = id("different-revision");
+        s[3] = wrong_pin;
+        assert!(
+            handoff(
+                t.clone(),
+                r.clone(),
+                plan(&r, &s),
+                c.clone(),
+                context_pin(&c),
+                &[]
+            )
+            .is_err()
+        );
+        s[3] = observed.clone();
+        s[3].quality = quality(TrustClass::RetrievedContent);
+        assert!(
+            handoff(
+                t.clone(),
+                r.clone(),
+                plan(&r, &s),
+                c.clone(),
+                context_pin(&c),
+                &[]
+            )
+            .is_err()
+        );
+        s[3] = observed.clone();
+        s[3].quality = QualityMetadata::new(
+            TrustClass::ObservedEvidence,
+            SensitivityClass::Normal,
+            Confidence::Unknown,
+            FreshnessStatus::Stale,
+            Uncertainty::None,
+        );
+        assert!(!plan(&r, &s).selected().contains_key(&id("target-state")));
+        s[3] = observed;
+        s[3].class = ContextSourceClass::CatalogAuthority;
+        assert!(!plan(&r, &s).selected().contains_key(&id("target-state")));
+    }
 }
 
 #[test]

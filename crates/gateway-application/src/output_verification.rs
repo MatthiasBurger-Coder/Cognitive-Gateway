@@ -7,6 +7,7 @@ use serde::{
 };
 use serde_json::Value;
 use std::collections::BTreeMap;
+use std::sync::Arc;
 
 pub use gateway_domain::output_parsing::MAX_OUTPUT_BYTES;
 const MAX_DEPTH: usize = 64;
@@ -69,10 +70,21 @@ fn depth(v: &Value) -> usize {
     }
 }
 /// Cannot be constructed from caller-supplied Value or deserialized acceptance.
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct ParsedOutput {
     data: OutputProposalData,
     digest: ContentDigest,
+    raw: Arc<[u8]>,
+}
+impl std::fmt::Debug for ParsedOutput {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        formatter
+            .debug_struct("ParsedOutput")
+            .field("data", &self.data)
+            .field("digest", &self.digest)
+            .field("raw_len", &self.raw.len())
+            .finish()
+    }
 }
 impl ParsedOutput {
     pub fn data(&self) -> &OutputProposalData {
@@ -83,6 +95,13 @@ impl ParsedOutput {
             invocation: self.data.invocation.clone(),
             output_digest: self.digest.clone(),
         }
+    }
+    /// Exact bounded bytes consumed by this parser and bound by output_digest.
+    /// Retention must preserve these bytes, including whitespace and key order;
+    /// serializing the parsed fields is not a reconstruction of the same input.
+    /// Loading retained bytes still requires parsing and current verification.
+    pub fn raw_bytes(&self) -> &[u8] {
+        &self.raw
     }
 }
 pub fn parse_output(raw: &[u8]) -> Result<ParsedOutput, VerificationError> {
@@ -104,6 +123,7 @@ pub fn parse_output(raw: &[u8]) -> Result<ParsedOutput, VerificationError> {
     Ok(ParsedOutput {
         data,
         digest: context_content_digest(raw),
+        raw: Arc::from(raw),
     })
 }
 

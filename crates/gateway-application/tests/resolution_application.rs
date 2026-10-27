@@ -506,6 +506,57 @@ fn facade_failures_and_nested_policy_inputs_do_not_mutate_or_drop_constraints() 
 use serde_json::json;
 
 #[test]
+fn direct_basis_matches_artifact_and_rejects_forged_resolution_inputs() {
+    let app = DeclarativeResolutionApplication;
+    let resolved = app.resolve_plan(&input(), &rules()).unwrap();
+    let artifact: serde_json::Value = serde_json::from_str(
+        &app.serialize_resolution(&resolved, ArtifactLimits::default())
+            .unwrap(),
+    )
+    .unwrap();
+    assert_eq!(app.inspect_basis(&resolved).unwrap(), artifact["basis"]);
+    assert!(
+        app.serialize_resolution(
+            &resolved,
+            ArtifactLimits {
+                max_bytes: 1,
+                ..ArtifactLimits::default()
+            }
+        )
+        .is_err()
+    );
+    assert_eq!(
+        app.inspect_basis(&resolved).unwrap(),
+        artifact["basis"],
+        "a basis is native data, not a full explanation artifact"
+    );
+
+    let mut modified = resolved.clone();
+    modified.report.visits += 1;
+    assert!(matches!(
+        app.inspect_basis(&modified),
+        Err(ResolutionApplicationError::Artifact(
+            ArtifactError::InvalidArtifact
+        ))
+    ));
+    let mut wrong_basis = resolved.clone();
+    wrong_basis.report.basis.scope = ContextScopeId::new("foreign-basis").unwrap();
+    assert!(matches!(
+        app.inspect_basis(&wrong_basis),
+        Err(ResolutionApplicationError::Artifact(
+            ArtifactError::StaleBasis
+        ))
+    ));
+    let mut other = input();
+    other.scope = ContextScopeId::new("foreign-input").unwrap();
+    other.plan_scope = other.scope.clone();
+    other.situation_scope = other.scope.clone();
+    let mut substituted = resolved;
+    substituted.snapshot = ResolutionSnapshot::capture(&other).unwrap();
+    assert!(app.inspect_basis(&substituted).is_err());
+}
+
+#[test]
 fn paused_and_noop_work_never_becomes_an_execution_context() {
     use gateway_application::{DeclarativeSituationApplication, ProcessSnapshotInput};
     use gateway_process::{LifecycleController, PauseReason};

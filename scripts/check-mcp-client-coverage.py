@@ -4,7 +4,7 @@ import json
 import sys
 
 EXPECTED = tuple("crates/gateway-daemon/src/mcp_client/" + name + ".rs"
-                 for name in ("mod", "host", "protocol", "transport", "json", "schema"))
+                 for name in ("mod", "host", "protocol", "transport", "json", "schema", "credential_file", "scalar_quotes"))
 
 
 def check(report):

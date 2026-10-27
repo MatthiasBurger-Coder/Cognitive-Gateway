@@ -13,14 +13,16 @@ use gateway_policy::PolicyDecision;
 use serde::Serialize;
 use sha2::{Digest, Sha256};
 
-/// Issued only after ingesting correlated runtime observations and evaluating
-/// their evidence against the run's goal. It is historical evidence, not a grant.
+/// Issued only after evaluating correlated runtime or retained observations
+/// against the complete original goal. It is historical evidence, not a grant.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct VerifiedOutcomeReceipt {
     scope: ContextScopeId,
     execution: ReferenceId,
     source_snapshot: ReferenceId,
     source_digest: ContentDigest,
+    goal_digest: ContentDigest,
+    readset_digest: Option<ContentDigest>,
     validation: ReferenceId,
     outcome: OutcomeClass,
     facts: Vec<FactId>,
@@ -39,6 +41,12 @@ impl VerifiedOutcomeReceipt {
     }
     pub fn source_digest(&self) -> &ContentDigest {
         &self.source_digest
+    }
+    pub fn goal_digest(&self) -> &ContentDigest {
+        &self.goal_digest
+    }
+    pub fn readset_digest(&self) -> Option<&ContentDigest> {
+        self.readset_digest.as_ref()
     }
     pub fn validation(&self) -> &ReferenceId {
         &self.validation
@@ -192,6 +200,47 @@ impl ClosedLoop {
         }
         Ok(self.decision)
     }
+    /// Canonical identity of the original complete goal, including acceptance
+    /// criteria, invariants and original-input binding. This is not a grant.
+    pub fn goal_digest(intent: &Intent) -> ContentDigest {
+        context_content_digest(&serde_json::to_vec(intent).expect("native intent serializes"))
+    }
+
+    /// Pure assessment of a complete retained readset. It neither invents a
+    /// prior state nor executes an action. Strong receipts bind actual member
+    /// content and the complete original goal, independently of source claims.
+    pub fn verify_retained(
+        execution: ReferenceId,
+        scope: ContextScopeId,
+        intent: Intent,
+        readset: &crate::retained_observations::RetainedObservationReadset,
+        rules: LoopRules,
+    ) -> Result<Option<VerifiedOutcomeReceipt>, LoopError> {
+        if readset.scope() != &scope {
+            return Err(LoopError::ScopeMismatch);
+        }
+        let run = Self::start(
+            execution.clone(),
+            scope.clone(),
+            intent.clone(),
+            readset.batch().clone(),
+            rules,
+        )?;
+        Ok(if run.decision == LoopDecision::Success {
+            receipt(
+                &scope,
+                execution,
+                &intent,
+                readset.batch(),
+                &run.assessment,
+                OutcomeClass::Success,
+                Some(readset.digest().clone()),
+            )
+        } else {
+            None
+        })
+    }
+
     pub fn start(
         run_id: ReferenceId,
         scope: ContextScopeId,
@@ -199,30 +248,7 @@ impl ClosedLoop {
         initial: ScopedObservationBatch,
         rules: LoopRules,
     ) -> Result<Self, LoopError> {
-        // Acceptance criteria and invariants participate in the same deterministic Delta.
-        let desired = intent.desired_state();
-        let expression = ConditionExpression::all(
-            std::iter::once(desired.expression().clone())
-                .chain(
-                    desired
-                        .acceptance_criteria()
-                        .iter()
-                        .map(|c| c.expression().clone()),
-                )
-                .chain(desired.constraints().iter().map(|c| c.expression().clone()))
-                .collect(),
-        )?;
-        let effective = DesiredState::new(
-            desired.id().clone(),
-            desired.conditions().to_vec(),
-            expression,
-            desired.constraints().to_vec(),
-            desired.acceptance_criteria().to_vec(),
-        )?;
-        let mut execution_intent = Intent::new(intent.id().clone(), effective);
-        if let Some(original) = intent.original_input() {
-            execution_intent = execution_intent.with_original_input(original.clone());
-        }
+        let execution_intent = effective_intent(&intent)?;
         let assessment = assess(&run_id, &scope, &execution_intent, &initial, &rules, 0)?;
         let mut run = Self {
             run_id,
@@ -393,48 +419,15 @@ impl ClosedLoop {
             _ => None,
         };
         if let (Some(verdict), Some(batch)) = (verdict, outcome.observations.as_ref()) {
-            let trace = self.assessment.comparison.trace();
-            if let (true, true, Some(source_digest)) = (
-                !trace.facts().is_empty(),
-                !trace.evidence().is_empty(),
-                batch.snapshot().digest().cloned(),
-            ) {
-                let identity = serde_json::to_vec(&(
-                    &self.scope,
-                    &outcome.execution,
-                    batch.snapshot().source_id(),
-                    batch.ingestion_key().as_str(),
-                    &source_digest,
-                ))
-                .expect("typed source identity serializes");
-                let source_snapshot =
-                    ReferenceId::new(format!("execution-snapshot-{:x}", Sha256::digest(identity)))
-                        .expect("SHA-256 source identity is valid");
-                let facts = trace.facts().to_vec();
-                let evidence = trace.evidence().to_vec();
-                let bytes = serde_json::to_vec(&(
-                    &self.scope,
-                    &outcome.execution,
-                    &source_snapshot,
-                    verdict,
-                    &facts,
-                    &evidence,
-                ))
-                .expect("typed verification identity serializes");
-                let validation =
-                    ReferenceId::new(format!("verification-{:x}", Sha256::digest(bytes)))
-                        .expect("SHA-256 verification identity is valid");
-                self.verified_outcome = Some(VerifiedOutcomeReceipt {
-                    scope: self.scope.clone(),
-                    execution: outcome.execution,
-                    source_snapshot,
-                    source_digest,
-                    validation,
-                    outcome: verdict,
-                    facts,
-                    evidence,
-                });
-            }
+            self.verified_outcome = receipt(
+                &self.scope,
+                outcome.execution,
+                &self.original_intent,
+                batch,
+                &self.assessment,
+                verdict,
+                None,
+            );
         }
         Ok(self.decision)
     }
@@ -610,4 +603,86 @@ fn assumptions_preserved(previous: &LoopAssessment, next: &LoopAssessment) -> bo
                             .find(|e| e.subject() == subject)
                 })
         })
+}
+
+fn effective_intent(intent: &Intent) -> Result<Intent, ValidationError> {
+    let desired = intent.desired_state();
+    let expression = ConditionExpression::all(
+        std::iter::once(desired.expression().clone())
+            .chain(
+                desired
+                    .acceptance_criteria()
+                    .iter()
+                    .map(|c| c.expression().clone()),
+            )
+            .chain(desired.constraints().iter().map(|c| c.expression().clone()))
+            .collect(),
+    )?;
+    let effective = DesiredState::new(
+        desired.id().clone(),
+        desired.conditions().to_vec(),
+        expression,
+        desired.constraints().to_vec(),
+        desired.acceptance_criteria().to_vec(),
+    )?;
+    let mut execution_intent = Intent::new(intent.id().clone(), effective);
+    if let Some(original) = intent.original_input() {
+        execution_intent = execution_intent.with_original_input(original.clone());
+    }
+    Ok(execution_intent)
+}
+
+fn receipt(
+    scope: &ContextScopeId,
+    execution: ReferenceId,
+    intent: &Intent,
+    batch: &ScopedObservationBatch,
+    assessment: &LoopAssessment,
+    verdict: OutcomeClass,
+    readset_digest: Option<ContentDigest>,
+) -> Option<VerifiedOutcomeReceipt> {
+    let trace = assessment.comparison.trace();
+    let source_digest = batch.snapshot().digest()?.clone();
+    if trace.facts().is_empty() || trace.evidence().is_empty() {
+        return None;
+    }
+    let identity = serde_json::to_vec(&(
+        scope,
+        &execution,
+        batch.snapshot().source_id(),
+        batch.ingestion_key().as_str(),
+        &source_digest,
+    ))
+    .expect("typed source identity serializes");
+    let source_snapshot =
+        ReferenceId::new(format!("execution-snapshot-{:x}", Sha256::digest(identity)))
+            .expect("SHA-256 source identity is valid");
+    let facts = trace.facts().to_vec();
+    let evidence = trace.evidence().to_vec();
+    let goal_digest = ClosedLoop::goal_digest(intent);
+    let bytes = serde_json::to_vec(&(
+        scope,
+        &execution,
+        &source_snapshot,
+        &goal_digest,
+        &readset_digest,
+        verdict,
+        &facts,
+        &evidence,
+    ))
+    .expect("typed verification identity serializes");
+    let validation = ReferenceId::new(format!("verification-{:x}", Sha256::digest(bytes)))
+        .expect("SHA-256 verification identity is valid");
+    Some(VerifiedOutcomeReceipt {
+        scope: scope.clone(),
+        execution,
+        source_snapshot,
+        source_digest,
+        goal_digest,
+        readset_digest,
+        validation,
+        outcome: verdict,
+        facts,
+        evidence,
+    })
 }

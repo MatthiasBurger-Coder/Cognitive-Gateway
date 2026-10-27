@@ -1,6 +1,11 @@
 //! Bounded newline JSON-RPC transport. No inherited environment or stderr export.
 use super::{CallContext, Error, Limits};
-use std::{collections::BTreeMap, path::PathBuf, process::Stdio, time::Duration};
+use std::{
+    collections::BTreeMap,
+    path::PathBuf,
+    process::Stdio,
+    time::{Duration, Instant},
+};
 use tokio::{
     io::{AsyncReadExt, AsyncWriteExt},
     process::{Child, ChildStdin, ChildStdout, Command},
@@ -11,6 +16,16 @@ use tokio::{
 pub trait Transport: Send {
     fn send(&mut self, frame: &[u8], context: &CallContext) -> Result<(), Error>;
     fn receive(&mut self, context: &CallContext) -> Result<Vec<u8>, Error>;
+    /// Drain complete buffered frames under the active context even after the
+    /// waiting deadline. Only waiting for more bytes is shortened. Unknown
+    /// transports deny polling until they implement this explicit contract.
+    fn receive_with_wait_deadline(
+        &mut self,
+        _context: &CallContext,
+        _wait_deadline: Instant,
+    ) -> Result<Vec<u8>, Error> {
+        Err(Error::Unsupported)
+    }
     fn close(&mut self);
 }
 pub trait TransportFactory: Send + Sync {
@@ -229,7 +244,7 @@ impl StdioConfig {
         Ok(self)
     }
 }
-fn valid_credential_key(key: &str) -> bool {
+pub(super) fn valid_credential_key(key: &str) -> bool {
     !key.is_empty()
         && key.len() <= 128
         && key
@@ -331,6 +346,13 @@ impl Transport for StdioTransport {
         Ok(())
     }
     fn receive(&mut self, context: &CallContext) -> Result<Vec<u8>, Error> {
+        self.receive_with_wait_deadline(context, context.deadline)
+    }
+    fn receive_with_wait_deadline(
+        &mut self,
+        context: &CallContext,
+        wait_deadline: Instant,
+    ) -> Result<Vec<u8>, Error> {
         loop {
             context.check()?;
             if let Some(end) = self.pending.iter().position(|b| *b == b'\n') {
@@ -344,9 +366,14 @@ impl Transport for StdioTransport {
             if self.pending.len() > self.max_frame {
                 return Err(Error::Limit);
             }
+            let remaining = wait_deadline.saturating_duration_since(Instant::now());
+            if remaining.is_zero() {
+                return Err(Error::Timeout);
+            }
             let mut chunk = [0; 4096];
             match self.executor.block_on(async {
-                tokio::time::timeout(context.slice(), self.output.read(&mut chunk)).await
+                tokio::time::timeout(context.slice().min(remaining), self.output.read(&mut chunk))
+                    .await
             }) {
                 Ok(Ok(0)) | Ok(Err(_)) => return Err(Error::Unavailable),
                 Ok(Ok(n)) => self.pending.extend_from_slice(&chunk[..n]),
@@ -628,5 +655,85 @@ mod credential_tests {
                 .unwrap(),
             Error::Authentication
         );
+    }
+}
+
+#[cfg(all(test, unix))]
+mod polling_tests {
+    use super::*;
+    use gateway_domain::NonEmptyText;
+
+    fn buffered_transport(pending: &[u8]) -> StdioTransport {
+        let executor = Builder::new_current_thread().enable_all().build().unwrap();
+        let mut child = {
+            let _entered = executor.enter();
+            Command::new("/bin/cat")
+                .stdin(Stdio::piped())
+                .stdout(Stdio::piped())
+                .kill_on_drop(true)
+                .spawn()
+                .unwrap()
+        };
+        StdioTransport {
+            input: child.stdin.take(),
+            output: child.stdout.take().unwrap(),
+            child,
+            executor,
+            pending: pending.to_vec(),
+            max_frame: 1024,
+            shutdown: Duration::from_millis(20),
+        }
+    }
+    fn active_context() -> CallContext {
+        CallContext::new(
+            NonEmptyText::new("buffered-poll").unwrap(),
+            Instant::now() + Duration::from_secs(1),
+        )
+    }
+
+    #[test]
+    fn expired_wait_drains_complete_frames_but_preserves_active_guards_and_partial_bytes() {
+        let frame = br#"{"jsonrpc":"2.0","method":"notifications/tools/list_changed"}"#;
+        let mut bytes = frame.to_vec();
+        bytes.push(b'\n');
+        let mut transport = buffered_transport(&bytes);
+        let wait_end = Instant::now();
+        assert_eq!(
+            transport.receive_with_wait_deadline(&active_context(), wait_end),
+            Ok(frame.to_vec())
+        );
+        assert!(transport.pending.is_empty());
+
+        transport.pending = bytes.clone();
+        let cancelled = active_context();
+        cancelled.cancel();
+        assert_eq!(
+            transport.receive_with_wait_deadline(&cancelled, wait_end),
+            Err(Error::Cancelled)
+        );
+        assert_eq!(transport.pending, bytes);
+        let expired = CallContext::new(NonEmptyText::new("expired").unwrap(), Instant::now());
+        assert_eq!(
+            transport.receive_with_wait_deadline(&expired, wait_end),
+            Err(Error::Timeout)
+        );
+        assert_eq!(transport.pending, bytes);
+        let denied = active_context().with_guard(std::sync::Arc::new(|| {
+            Err(Error::SessionDenied(
+                gateway_application::connectors::ConnectorFailureCode::PermissionDenied,
+            ))
+        }));
+        assert!(matches!(
+            transport.receive_with_wait_deadline(&denied, wait_end),
+            Err(Error::SessionDenied(_))
+        ));
+        assert_eq!(transport.pending, bytes);
+
+        transport.pending = b"partial".to_vec();
+        assert_eq!(
+            transport.receive_with_wait_deadline(&active_context(), wait_end),
+            Err(Error::Timeout)
+        );
+        assert_eq!(transport.pending, b"partial");
     }
 }

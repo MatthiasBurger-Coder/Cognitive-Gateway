@@ -110,12 +110,17 @@ pub fn analyze_context_requirements(
         let (class, sources) = if d.target.kind == TargetKind::Entity {
             (
                 C::StructuredData,
-                vec![S::StructuredData, S::SituationState],
+                vec![S::StructuredData, S::SituationState, S::ToolsMcp],
             )
         } else {
             (
                 C::SystemState,
-                vec![S::Repository, S::SituationState, S::RuntimeState],
+                vec![
+                    S::Repository,
+                    S::SituationState,
+                    S::RuntimeState,
+                    S::ToolsMcp,
+                ],
             )
         };
         add(

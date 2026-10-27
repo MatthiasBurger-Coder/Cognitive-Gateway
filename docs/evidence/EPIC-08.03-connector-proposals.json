@@ -1,0 +1,692 @@
+{
+  "epic": "EPIC-08.03",
+  "issue": 274,
+  "status": "COMPONENT_REQUALIFICATION_IN_PROGRESS",
+  "baseline": "e21a1e40d556c9dcf95ebb519b8b18b107b6f8c5",
+  "scope": "Component qualification for verified EPIC-06 proposal dispatch through CG-09 and the mapped MCP boundary, including exact connector/scope/inventory/schema pins, immutable owner/project/session/run/revision/step/dispatch-bound before/after snapshots, typed outcomes and separate persisted final goal readbacks. Shipped session composition remains unqualified.",
+  "three_amigos": {
+    "requirement": "Only VerifiedOutput for the exact InvocationIr can dispatch. Every connector tool definition carries the exact target, inventory revision and executable argument-schema digest; drift or failed CG-09 authorization produces zero transport calls. Results remain observations, not goal completion.",
+    "architecture": "The application dispatcher owns proposal correlation, exact argument comparison, invocation revalidation, inventory/schema drift checks, order and typed partial outcomes. The binder owns current step/execution/session binding; EPIC-07 admission owns current policy/consent/scope/credential/budget and immediate effect revalidation. Final goal reads are separate immutable owner-scoped records, reloaded before ClosedLoop verification. The shipped daemon still does not compose these ports. Typed immutable cumulative reservations now persist in the same fenced journal before preparation; approved resume claims the existing allowance before reconstruction. Disjoint phase allocations and concrete nested adapter enforcement remain open. V2 phase plans and one retained SessionToolRun now implement disjoint model allowances, joined task/claim admission, current bound qualification and post-verification context checks; production authority/connector composition remains open.",
+    "automation": "Provider-independent Rust application service and MCP current-inventory schema accessor. ToolDefinition converts only the supported closed scalar/object schema profile and binds its semantic digest and full inventory revision. No installed SessionCoordinator wiring or durable end-to-end multi-step execution is provided.",
+    "testing": "Output-verification tests cover sequential proposals, exact request binding, zero transport calls for policy denial, stale consent, changed inventory/schema, replay/staleness, partial outcomes and uncertainty. Synthetic two-step SessionCoordinator runtime tests retain four owner/project/scope/session/run/revision/step/dispatch-bound snapshots, separate goal readback, preserve earlier results after uncertainty and recover without redispatch. Snapshot persistence is count/byte bounded. MCP mapping tests verify complete current-inventory schema lookup and drift handling. Production session/CG-09 composition remains absent. Resource contracts, interrupted preparation/resume, early/fresh expiry, no refill, cancellation and separate PostgreSQL writer/reader recovery are qualified by final14; a separate independent code review resolved the discovered consent-recovery/concurrent-resume gaps. The current model-session suite passes 33 tests including 12 reserved-run scenarios; PostgreSQL tests retain v2 phase amounts across writer/reader processes. Final15 Application and final16 Daemon plus the prescribed resilience report pass the selected >=95% gates.",
+    "review_provenance": "Requirement, architecture and tester perspectives were independently delegated; the current follow-up 3-Amigos review accepts the pin semantics but keeps shipped-path R1/R5 open. Independent final phase/model review passed after resolving post-callback claim/qualification windows and separate invocation/resource-source admission."
+  },
+  "verification": {
+    "result": "HISTORICAL_FULL_RUN_CURRENT_REQUALIFICATION_REQUIRED",
+    "notes": [
+      "Current follow-up: portable HTTP/decoded-credential component suites pass 38 and 11 tests (one existing live test ignored); fresh LocalSessionAccess admission suite passes 15 actual PostgreSQL-backed tests. These do not establish current full coverage or lint success. The first real Source/TargetFactory stdio-discovery path exceeds the unchanged 30-second claim lease and is being profiled; native model factory, preparation/execution installation and complete acceptance remain open.",
+      "Final15 Application and final16 Daemon all-target runs pass; all selected >=95% session modules, including reserved model session_tools.rs, pass. Separate HTTP model and prescribed Domain+Application invocation resilience coverage gates pass. Older changed-line counts are historical.",
+      "V2 reservation identities persist disjoint phase allocations; v1 total-only records remain readable but cannot mint phase capabilities. Fenced phase claims precede I/O, carry immutable claim revision/fence/deadline and cannot refund or recreate whole-step allowances.",
+      "SessionToolRun retains one InvocationRun through retry/fallback, conservative output/cost quotes, unknown-output byte reserve and terminal uncertainty. Current authority joins the exact claim to registered invocation producer pins and qualifies known conservative token bounds; arbitrary/withdrawn estimates and same-scope foreign producers yield zero provider calls.",
+      "Host callbacks cannot bypass final provider admission. Allocation, producer and qualified-bound checks follow host callbacks before transport; after verification callbacks the adapter checks allocation/producer then the original run deadline/cancellation as the last operation before returning VerifiedOutput.",
+      "Focused tests pass: 22 contracts, 14 resources, 49 session runtime, 13 invocation resilience, 33 model-session and seven PostgreSQL resource tests. Model tests include 12 new reserved-run scenarios. Separate PostgreSQL writer/reader processes prove v2 plan persistence without refill, not database-server restart or live provider effects.",
+      "Workspace Clippy with warnings denied, architecture/format/whitespace and JSON checks pass. Architecture suite: 83 tests, one native Windows-only skip on Linux. JSON contracts: 26 tests. Fixture imports no longer require this checkout absolute path.",
+      "Production ConnectorPolicySource, configured operator target, concrete connector/retrieval/worker allocations and installed runtime remain absent/unqualified. Full CG-14 retry/replan/no-progress integration, global overload, operations and parent/live qualification remain open. No GitHub issue closure or parent acceptance is claimed."
+    ],
+    "application_all_target_report": "target/epic08-session-qualification-20261026-final15/application-coverage.json",
+    "daemon_all_target_report": "target/epic08-session-qualification-20261026-final16/daemon-coverage.json",
+    "application_session_coverage": {
+      "crates/gateway-application/src/codex/ports.rs": "89/89 (100.00%)",
+      "crates/gateway-application/src/sessions/admission.rs": "87/87 (100.00%)",
+      "crates/gateway-application/src/sessions/authority.rs": "346/347 (99.71%)",
+      "crates/gateway-application/src/sessions/boundary.rs": "113/117 (96.58%)",
+      "crates/gateway-application/src/sessions/connector_execution.rs": "735/743 (98.92%)",
+      "crates/gateway-application/src/sessions/connector_goals.rs": "123/126 (97.62%)",
+      "crates/gateway-application/src/sessions/contracts.rs": "159/159 (100.00%)",
+      "crates/gateway-application/src/sessions/coordinator.rs": "1555/1633 (95.22%)",
+      "crates/gateway-application/src/sessions/journal.rs": "445/454 (98.02%)",
+      "crates/gateway-application/src/sessions/readback_storage.rs": "1191/1247 (95.51%)",
+      "crates/gateway-application/src/sessions/verification.rs": "187/193 (96.89%)",
+      "crates/gateway-application/src/sessions/resources.rs": "610/619 (98.55%)"
+    },
+    "daemon_session_coverage": {
+      "crates/gateway-daemon/src/bin/cg-local.rs": "117/122 (95.90%)",
+      "crates/gateway-daemon/src/codex_workspace.rs": "451/456 (98.90%)",
+      "crates/gateway-daemon/src/cognitive_store.rs": "68/70 (97.14%)",
+      "crates/gateway-daemon/src/local_mcp/mod.rs": "361/377 (95.76%)",
+      "crates/gateway-daemon/src/local_sessions.rs": "1165/1211 (96.20%)",
+      "crates/gateway-daemon/src/session_store.rs": "862/906 (95.14%)",
+      "crates/gateway-daemon/src/invocation_host/session_tools.rs": "410/418 (98.09%)"
+    },
+    "provider_model_binding": {
+      "status": "PASS_COMPONENT",
+      "focused_tests_passed": 3,
+      "runtime_mapping_template_version": "2",
+      "canonical_model_pin_preserved": true,
+      "mapping_drift_transport_calls": 0,
+      "review": "Independent requirements/test code review passed; architecture/automation implemented and tested the slice. No shipped runtime or live-provider acceptance claimed."
+    },
+    "historical_commands": [
+      "CARGO_INCREMENTAL=0 python3 scripts/cognitive-test-host.py cargo test --workspace --locked -j1",
+      "CARGO_BUILD_JOBS=1 CARGO_INCREMENTAL=0 CARGO_LLVM_COV_TARGET_DIR=target/connector-session-coverage python3 scripts/cognitive-test-host.py cargo llvm-cov -p gateway-application --all-targets --locked -j1 --json --output-path target/connector-session-coverage-final.json",
+      "CARGO_BUILD_JOBS=1 CARGO_INCREMENTAL=0 CARGO_LLVM_COV_TARGET_DIR=target/connector-daemon-coverage python3 scripts/cognitive-test-host.py cargo llvm-cov -p gateway-daemon --all-targets --locked -j1 --json --output-path target/connector-daemon-coverage-final.json",
+      "cargo fmt --check",
+      "git diff --check",
+      "CARGO_BUILD_JOBS=1 CARGO_INCREMENTAL=0 python3 scripts/cognitive-test-host.py cargo test -p gateway-daemon --lib local_mcp::runtime::tests::limits_health_output_and_failure_classes_are_explicit --locked -j1",
+      "CARGO_BUILD_JOBS=1 CARGO_INCREMENTAL=0 CARGO_LLVM_COV_TARGET_DIR=target/connector-daemon-coverage-final12 python3 scripts/cognitive-test-host.py cargo llvm-cov -p gateway-daemon --all-targets --locked -j1 --json --output-path target/epic08-session-qualification-20261025-final12/daemon-coverage.json",
+      "python3 scripts/check-session-runtime-coverage.py target/epic08-session-qualification-20261025-final9/application-coverage.json target/epic08-session-qualification-20261025-final12/daemon-coverage.json",
+      "cargo test -p gateway-daemon --test session_tool_invocation session_http_runtime --locked -j1",
+      "python3 scripts/check-model-adapters-coverage.py target/epic08-session-qualification-20261025-final12/daemon-coverage.json",
+      "bash scripts/check-architecture.sh",
+      "CARGO_BUILD_JOBS=1 CARGO_INCREMENTAL=0 CARGO_LLVM_COV_TARGET_DIR=target/connector-session-coverage python3 scripts/cognitive-test-host.py cargo llvm-cov -p gateway-application --all-targets --locked -j1 --json --output-path target/epic08-session-qualification-20261025-final14/application-coverage.json",
+      "CARGO_BUILD_JOBS=1 CARGO_INCREMENTAL=0 CARGO_LLVM_COV_TARGET_DIR=target/connector-daemon-coverage-final11 python3 scripts/cognitive-test-host.py cargo llvm-cov -p gateway-daemon --all-targets --locked -j1 --json --output-path target/epic08-session-qualification-20261025-final14/daemon-coverage.json",
+      "cargo test -p gateway-application --test session_runtime --test session_resources --test session_contracts --locked -j1",
+      "CARGO_BUILD_JOBS=1 CARGO_INCREMENTAL=0 python3 scripts/cognitive-test-host.py cargo test -p gateway-daemon --lib resource_ --locked -j1",
+      "python3 scripts/check-session-runtime-coverage.py target/epic08-session-qualification-20261025-final14/application-coverage.json target/epic08-session-qualification-20261025-final14/daemon-coverage.json",
+      "python3 scripts/check-model-adapters-coverage.py target/epic08-session-qualification-20261025-final14/daemon-coverage.json",
+      "python3 scripts/check-session-runtime-coverage.py --self-test",
+      "bash scripts/check-architecture.sh",
+      "python3 -m unittest discover -s tests/architecture -p 'test_*.py'",
+      "python3 -m unittest discover -s tests/contracts -p 'test_*.py'",
+      "cargo fmt --check",
+      "git diff --check",
+      "CARGO_BUILD_JOBS=1 CARGO_INCREMENTAL=0 cargo test -p gateway-daemon --lib runtime_limits_are_validated_and_rejected_protocol_calls_keep_phase_open --locked -j1",
+      "CARGO_BUILD_JOBS=1 CARGO_INCREMENTAL=0 cargo clippy --workspace --all-targets --locked -j1 -- -D warnings"
+    ],
+    "commands": [
+      "CARGO_BUILD_JOBS=1 CARGO_INCREMENTAL=0 CARGO_LLVM_COV_TARGET_DIR=target/connector-session-coverage python3 scripts/cognitive-test-host.py cargo llvm-cov -p gateway-application --all-targets --locked -j1 --json --output-path target/epic08-session-qualification-20261026-final15/application-coverage.json",
+      "CARGO_BUILD_JOBS=1 CARGO_INCREMENTAL=0 CARGO_LLVM_COV_TARGET_DIR=target/connector-daemon-coverage-final11 python3 scripts/cognitive-test-host.py cargo llvm-cov -p gateway-daemon --all-targets --locked -j1 --json --output-path target/epic08-session-qualification-20261026-final16/daemon-coverage.json",
+      "CARGO_BUILD_JOBS=1 CARGO_INCREMENTAL=0 CARGO_LLVM_COV_TARGET_DIR=target/invocation-resilience-coverage cargo llvm-cov -p gateway-domain -p gateway-application --test invocation_resilience --locked -j1 --json --output-path target/epic08-invocation-qualification-20261026/invocation-resilience-coverage.json",
+      "cargo test -p gateway-application --test session_runtime --test session_resources --test session_contracts --locked -j1",
+      "cargo test -p gateway-application --test invocation_resilience --locked -j1",
+      "cargo test -p gateway-daemon --test session_tool_invocation --locked -j1",
+      "CARGO_BUILD_JOBS=1 CARGO_INCREMENTAL=0 python3 scripts/cognitive-test-host.py cargo test -p gateway-daemon --lib resource_ --locked -j1",
+      "python3 scripts/check-session-runtime-coverage.py target/epic08-session-qualification-20261026-final15/application-coverage.json target/epic08-session-qualification-20261026-final16/daemon-coverage.json",
+      "python3 scripts/check-model-adapters-coverage.py target/epic08-session-qualification-20261026-final16/daemon-coverage.json",
+      "python3 scripts/check-invocation-resilience-coverage.py target/epic08-invocation-qualification-20261026/invocation-resilience-coverage.json",
+      "python3 scripts/check-session-runtime-coverage.py --self-test",
+      "bash scripts/check-architecture.sh",
+      "python3 -m unittest discover -s tests/architecture -p 'test_*.py'",
+      "python3 -m unittest discover -s tests/contracts -p 'test_*.py'",
+      "CARGO_BUILD_JOBS=1 CARGO_INCREMENTAL=0 cargo clippy --workspace --all-targets --locked -j1 -- -D warnings",
+      "cargo fmt --check",
+      "git diff --check"
+    ],
+    "resource_reservations": {
+      "status": "PASS_COMPONENT_AND_POSTGRES_PROCESS_STORAGE",
+      "immutable_admission": true,
+      "conservative_unknown_usage": "retain full whole-step upper bound; no refund",
+      "prepare_before_io": "fenced reservation and Continue command append precede runtime preparation",
+      "approved_resume": "fenced claim on same reservation before reconstruction, no refill",
+      "recovery": "stop interrupted preparation after lease; no model/connector replay",
+      "remaining": [
+        "Concrete connector/retrieval/worker child allocation enforcement",
+        "Current production CG-09/producer authority sources and installed runtime composition",
+        "CG-14 cumulative retry/replan/no-progress, global overload, operations and full parent/live qualification"
+      ]
+    },
+    "qualification_logs": {
+      "docs/evidence/EPIC-08.03-application-validation.log.gz": "9315d6c3972bf09610773f6b1d87b006c20d6ce7ac5f77ef7304ec8b32248c52",
+      "docs/evidence/EPIC-08.03-daemon-validation.log.gz": "2ec9f19964e172363d55d43e9d0b445700d571b6b69f7f8fea3f93d1eb50b7b3",
+      "docs/evidence/EPIC-08.03-quality-validation.log.gz": "7680245c07cc79567080948cec9aa9878f97aed846b24d24deaec71882251d7b"
+    },
+    "quality_gates": {
+      "architecture_guard": "PASS",
+      "architecture_regressions": "PASS: 83 tests, 1 Windows-only skip on Linux",
+      "json_contract_regressions": "PASS: 26 tests",
+      "clippy_workspace_all_targets_deny_warnings": "PASS",
+      "format_and_whitespace": "PASS"
+    },
+    "phase_allocations": {
+      "status": "PASS_COMPONENT_AND_POSTGRES_PROCESS_STORAGE",
+      "version": "v2 disjoint plans; v1 read-only compatibility",
+      "model_suite_tests": 33,
+      "new_reserved_run_tests": 12,
+      "legacy_capability_mint": "DENIED",
+      "goal_verification_acquisition": "UNSUPPORTED; pure repeatable retained-record verification only",
+      "qualified_estimate": "explicit full-profile/pinned-method/payload proof; default deny",
+      "remaining": [
+        "Concrete connector/retrieval/worker allocation adapters",
+        "Current production authority sources and installed runtime composition",
+        "Complete #271/#272–#279 system/live acceptance"
+      ]
+    },
+    "historical_test_only_followup": {
+      "file": "crates/gateway-daemon/src/local_mcp/tests.rs",
+      "change": "Equivalent iterator-based request IDs replace the manual loop counter flagged by Clippy. Production files unchanged after final14 coverage. This test source is excluded from the production coverage report.",
+      "focused_regression": "PASS: 1 test, 111 filtered",
+      "clippy": "PASS workspace all-targets with warnings denied"
+    },
+    "github_state_rechecked": {
+      "274": "open",
+      "271": "open",
+      "227": "closed",
+      "228": "closed",
+      "229": "closed",
+      "230": "open",
+      "231": "open",
+      "note": "Read-only issue fetches; no issue state changed. Closed dependency status does not prove installed integration."
+    },
+    "historical_full_run_result": "PASS_APPLICATION_DAEMON_ALL_TARGETS_EXPANDED_SESSION_MODEL_RESILIENCE_GATES_SHIPPED_RUNTIME_OPEN",
+    "retained_consent_preflight": {
+      "status": "PASS_APPLICATION_COMPONENT",
+      "focused_race_matrix_tests": 1,
+      "session_runtime_regressions": 53,
+      "archive": "docs/evidence/EPIC-08.03-retained-consent-preflight-validation.json.gz",
+      "boundary": "Both coordinator sites use a default legacy-delegating pure preflight. Exact live grant and expiry are rechecked after callback before approved-resume allocation. Callback withdrawal/expiry covers approval and continuation; no runtime resume or effects. Native retained-producer and durable resume remain incomplete."
+    },
+    "historical_ir_data_boundary": {
+      "status": "PASS_APPLICATION_COMPONENT",
+      "tests": 8,
+      "archive": "docs/evidence/EPIC-08.03-retained-ir-data-validation.json.gz",
+      "boundary": "Native structural reconstruction plus full original record and native identity equality produces opaque data only. Current admission and semantic-reference checks remain mandatory before promotion. No fake historical current port."
+    },
+    "current_native_definitions": {
+      "status": "PASS_POSTGRES_COMPONENT",
+      "actual_postgres_tests": 1,
+      "source_regressions": 7,
+      "archive": "docs/evidence/EPIC-08.03-current-native-definitions-validation.json.gz",
+      "boundary": "Fresh owner/config/current checkpoint bracketing shared native pure assembly, no allocation/obsolete preparation lease/action compilation. Independent Budget review clear. Actual Runnable/empty ledger, changed consent configuration, foreign owner/revision/step/cancel denial. Complete native resume not yet qualified."
+    }
+  },
+  "source_bindings": {
+    "crates/gateway-application/src/connector_policy.rs": "61a8956a067b64f95782297e2651dd9b91bc6cd52fa67bf92d062c9120fa0c32",
+    "crates/gateway-application/src/connector_proposals.rs": "933020e112eff4d653c9bc3a2c1a6c723663929a2207b988ea3ab532a3d9f735",
+    "crates/gateway-application/src/connector_results.rs": "b2a23c6205b7c0986ada2c93b15034d428a3be56f622a8dd81dfc3448b4120ca",
+    "crates/gateway-application/src/connectors.rs": "1b53eb06d18c3d787a4aec8b1a7080e9fd4b053b75e64cccdfde4b0fdc4a44cc",
+    "crates/gateway-application/src/lib.rs": "477835056d49343184a88ee50a95cbfa699eb9a5ecfbafb1e8b28a1c4d2b9512",
+    "crates/gateway-application/src/prompt_ir.rs": "da1a99f8b6e5a17174226c583c3ec4018b9edabed5168b1d73d9b663a853d6cf",
+    "crates/gateway-application/src/prompt_rendering.rs": "5915518f0f2c09916914b049391defb7491bae6af9c253e2c9ddbbf4c13415fa",
+    "crates/gateway-application/src/sessions/admission.rs": "2a893becbf2829ee77a9acb17b4ea17b03688df78b29d574cca8a4d8a095be68",
+    "crates/gateway-application/src/sessions/authority.rs": "91eae72ebb29faf4948345bb246e93a48e7f197c0c53008ee94de80b51f4ec55",
+    "crates/gateway-application/src/sessions/connector_execution.rs": "dd082fd7817d2dbb84ea5ea060d89c2a0979c8975568cb24c9340de657ae82d8",
+    "crates/gateway-application/src/sessions/connector_goals.rs": "b8800bd5b391992af1d586676b2fefda397393322d309be64f690e9ef7cb458a",
+    "crates/gateway-application/src/sessions/contracts.rs": "de19a8b35dc08ca6142dd1a6c310a86c7d3b25d1946a386559cc18a68f1e16f3",
+    "crates/gateway-application/src/sessions/coordinator.rs": "bef30bae124be92fe28d6f277894dbde498139f9c8e02620fb66d8f3f10a13cf",
+    "crates/gateway-application/src/sessions/journal.rs": "fe020af14bfab65fe2d12db574ea713ef951c60641148ffd25fe32de1430e350",
+    "crates/gateway-application/src/sessions/readback_storage.rs": "f966e1d31e63477fcd3670cb6ccde577d6c7857648b9f582a7175bc9cbcc17b8",
+    "crates/gateway-application/src/sessions/verification.rs": "13029c6196e7af36597e8ed13a568e56a1ce49a877f67d8bd56941361968d383",
+    "crates/gateway-application/tests/connector_consent.rs": "d9dbb98242aa2f6b6adde2f05a6dd3773332d07cf1964b0d2a7264eaee106ddf",
+    "crates/gateway-application/tests/connector_goal_contracts.rs": "b4fb378c6f995500004ebbbe686a91842bd03ba0361c4ccd2402e863c8874856",
+    "crates/gateway-application/tests/connector_goal_verification.rs": "cbb696a399d28525a4cf793318293f73a349b40367882d45c4048b721baf991d",
+    "crates/gateway-application/tests/connector_policy.rs": "e6ff6440ecd9ba32fed9e2c92c6819bb1a9c65a75ce9f37ee59e1ebde2519a07",
+    "crates/gateway-application/tests/connector_result_contracts.rs": "dc0ca82fa2130936434211e1f93599089f47c4018c03bd17fca377dfa2ccf9f5",
+    "crates/gateway-application/tests/connector_session_turn_validation.rs": "224ba406c96d36e51390f05b4bfd0646fe60a4cbd2442ca82e3407a8162cba5e",
+    "crates/gateway-application/tests/output_verification.rs": "d60fd06c5042df85185bfc4185f38b96f042272ec001802741304510ae864b32",
+    "crates/gateway-application/tests/session_runtime.rs": "1ebec3707e684fde59d8af70c42ea6dfc1ecce75488e9a7ca930770db49b9ded",
+    "crates/gateway-daemon/src/invocation_host/session_tools.rs": "2e0287cc4a2d34eda93caf5298b87f465a0c145b103cbb4e6fe0bb618d0859f0",
+    "crates/gateway-daemon/src/local_sessions.rs": "10584072e9e0b81acebdd558c4048cd242ce1008963caa2f2a4009ab71e644b4",
+    "crates/gateway-daemon/src/mcp_client/host.rs": "be48e5c269e4fb7c34c9488c86b31c84d1ab4592a22dfa9e24988727e7aedd5d",
+    "crates/gateway-daemon/src/mcp_client/host_tests.rs": "15f296c37c8872de49b11bf4c1713846fba129d82bc22380a740ddf39eebf03f",
+    "crates/gateway-daemon/src/mcp_client/mapping.rs": "5c1e33ac3acfdf1cf04def3556a7450379e9e400977d9227741cd71b6314c5c1",
+    "crates/gateway-daemon/src/mcp_client/mapping_tests.rs": "acf90cc665f621f14d1cdc859cd6466db69497e3c5d65dfdd47b9821b522ec02",
+    "crates/gateway-daemon/src/session_store.rs": "00bae51c97454d5b4a59d2d5bdcf00a04669a3b581f22ec1d4ec0aa796e566d0",
+    "crates/gateway-daemon/src/session_store_tests.rs": "0173ccf5c49307aff30601f2798b4512c4d5b1ba0ec1d7ab7f73eff9b1a79155",
+    "crates/gateway-daemon/tests/mcp_client.rs": "c9fef8c69dc7aa4d644c40ec4fd5d12bb153926005a37e7a87893669a87f0003",
+    "crates/gateway-daemon/tests/session_tool_invocation.rs": "9c75f7b3e763fe8a7b26d888c009d36ec261f337697cd2c28f4b9bbedb5545b6",
+    "docs/README.md": "163d74e22cb61847771959f61ef59c1264d6a88e0f72898f45f94b7b7eef8d70",
+    "docs/connector-policy-v1.md": "101bc377a6a001216b403ea49df3bac9b685d4a394ff8c70fab1c4579e04f142",
+    "docs/connector-proposal-dispatch-v1.md": "e99c95bec5cfc78207d22e6c8060b5e1cd5e71ed78d77209e51cc94091415750",
+    "docs/current-architecture-state.md": "899f415cb67e2e260885eb991fb59691ebca30d3e266bf2c6423f5b3258ab046",
+    "docs/evidence/EPIC-08.03-connector-proposals-coverage.json.gz": "bb4b3d9611782caa80919524583e6c2d306af32415a0944c0c9e16e6606a169d",
+    "docs/evidence/EPIC-08.03-daemon-coverage.json.gz": "a2b8bc12de6ece6f3dbf07be50db4a37c8e763174b87fb729e8c5c0185d2373c",
+    "docs/evidence/EPIC-08.03-three-amigos-gate.md": "ef3a0a015aee6cdc0e96ad9ddb77dd277a094344dc0a7e3a4d60a204f00832b3",
+    "docs/mcp-connector-runtime.md": "64fcbdcf15275e7c018113ee238db77371a7f38e9e830e4088c3cfe054b8b959",
+    "docs/evidence/EPIC-08-parent-acceptance.md": "e19d3ece11dc44bd8128d7afd8ddc3550243d2c1b2085611c1f5795514e14eed",
+    "crates/gateway-daemon/src/local_mcp/runtime.rs": "bf77ec9942288de227df3cd81b52fab768ef939b513955d1d651888a472698cf",
+    "docs/codex-runtime.md": "c1cf377f9349b3d9aa60c892461439064a6199dd8242873637239d110f4b699b",
+    "docs/local-mcp-server.md": "e4be5e3d436af78df08494b80fb4d099239a0dd4015ca655cf69c1832928de18",
+    "docs/evidence/EPIC-08-child-acceptance.md": "050353f57e860585fddddbd8a8c7e86a01aa57bd2982ad8bfcd77296a069865f",
+    "crates/gateway-daemon/src/model_adapters.rs": "4a88bf8c69956c24984c9dc85da56e8b184bf2cfb7091482d02c479eca3ca912",
+    "crates/gateway-application/src/sessions/resources.rs": "bd5512067551f6158ec5a0d2e9cb90ac8e3db114000f31181683f756c25120ab",
+    "crates/gateway-application/tests/session_resources.rs": "dbd6b3c53bf2540cd450953638809c263758f6f1da24d8b4614609bb7971399c",
+    "crates/gateway-application/tests/session_contracts.rs": "c29f8f47b7ffe4c0329d07917bbc9d6bea940686869565081a08c418a23d12e9",
+    "crates/gateway-application/src/sessions/mod.rs": "d6de67bd389e9b7746954a74fe64d487c21d8860545c741fa5ac04e8b48b729b",
+    "docs/shared-session-contract.md": "c73ab6330a585d30b632f9534d9016745e81e22e6ec3be2fc4ef33542daa33c5",
+    "docs/shared-session-implementation.md": "69b36ec292498f59e76bf5c909b68058a8758f506c2eea16cee37d3d640e4794",
+    "schemas/codex/v2/common.schema.json": "42e37ee7c880a8d9d65637a8a6193eaffc33360306aa730d7577fcd084039f28",
+    "schemas/codex/v2/response.schema.json": "69a0a80c67a9cd514c4f58042041230c68acdf5d90a56539eeee012a11ebec9f",
+    "docs/evidence/EPIC-08.03-application-validation.log.gz": "9315d6c3972bf09610773f6b1d87b006c20d6ce7ac5f77ef7304ec8b32248c52",
+    "docs/evidence/EPIC-08.03-daemon-validation.log.gz": "2ec9f19964e172363d55d43e9d0b445700d571b6b69f7f8fea3f93d1eb50b7b3",
+    "docs/evidence/EPIC-08.03-quality-validation.log.gz": "7680245c07cc79567080948cec9aa9878f97aed846b24d24deaec71882251d7b",
+    "crates/gateway-daemon/src/local_mcp/tests.rs": "cbef6f89015336156b0961408c754e9651dc0c883ebfac723ba2f4c397ea946f",
+    "crates/gateway-application/src/invocation_resilience.rs": "370659861e12cd73040e32af10dd7f49bd58e9b2c7ec0b49dfa7af4e41e71d01",
+    "crates/gateway-daemon/src/lib.rs": "bbf42a027d60a74d942f3bb45497dc11cb0bc7662b7c46562323873c121add95",
+    "crates/gateway-daemon/tests/support/session_resource_allocation.rs": "7b52403e81cd62861df593cf5ae71fd7b9b45bbf6d9fd9f8b3133e35c0862d87",
+    "docs/evidence/EPIC-08.03-invocation-resilience-coverage.json.gz": "d143b608cc5fff8e72dea5745c9b126d17b3fd6d0cc95dd791f06d6e2696e963"
+  },
+  "coverage": {
+    "threshold_percent": 95,
+    "gate": "PASS",
+    "scope": "Current per-module measured coverage: final15 Application, final16 Daemon, plus prescribed Domain+Application invocation-resilience report. Session gate includes reserved model adapter. Older changed-line measurements explicitly historical.",
+    "evidence": [
+      "docs/evidence/EPIC-08.03-connector-proposals-coverage.json.gz",
+      "docs/evidence/EPIC-08.03-daemon-coverage.json.gz",
+      "docs/evidence/EPIC-08.03-invocation-resilience-coverage.json.gz"
+    ],
+    "commands": [
+      "CARGO_BUILD_JOBS=1 CARGO_LLVM_COV_TARGET_DIR=target/connector-session-coverage python3 scripts/cognitive-test-host.py cargo llvm-cov -p gateway-application --all-targets --locked --json --output-path target/connector-session-coverage-final.json",
+      "CARGO_BUILD_JOBS=1 CARGO_LLVM_COV_TARGET_DIR=target/connector-daemon-coverage python3 scripts/cognitive-test-host.py cargo llvm-cov -p gateway-daemon --all-targets --locked --json --output-path target/connector-daemon-coverage-final.json"
+    ],
+    "evidence_sha256": {
+      "docs/evidence/EPIC-08.03-connector-proposals-coverage.json.gz": "bb4b3d9611782caa80919524583e6c2d306af32415a0944c0c9e16e6606a169d",
+      "docs/evidence/EPIC-08.03-daemon-coverage.json.gz": "a2b8bc12de6ece6f3dbf07be50db4a37c8e763174b87fb729e8c5c0185d2373c",
+      "docs/evidence/EPIC-08.03-invocation-resilience-coverage.json.gz": "d143b608cc5fff8e72dea5745c9b126d17b3fd6d0cc95dd791f06d6e2696e963"
+    },
+    "application_all_target_line_total": "20313/22280 (91.17%; includes unrelated legacy code)",
+    "application_all_target_report": "target/epic08-session-qualification-20261026-final15/application-coverage.json",
+    "daemon_all_target_line_total": "11805/12835 (91.98%; includes unrelated legacy code)",
+    "daemon_all_target_report": "target/epic08-session-qualification-20261026-final16/daemon-coverage.json",
+    "application_component_module_lines": {
+      "connector_manifest.rs": "174/174 (100.00%)",
+      "connector_policy.rs": "117/121 (96.69%)",
+      "connector_proposals.rs": "199/209 (95.22%)",
+      "connector_results.rs": "287/294 (97.62%)",
+      "sessions/admission.rs": "87/87 (100.00%)",
+      "sessions/authority.rs": "346/347 (99.71%)",
+      "sessions/boundary.rs": "113/117 (96.58%)",
+      "sessions/connector_execution.rs": "735/743 (98.92%)",
+      "sessions/connector_goals.rs": "123/126 (97.62%)",
+      "sessions/contracts.rs": "159/159 (100.00%)",
+      "sessions/coordinator.rs": "1555/1633 (95.22%)",
+      "sessions/journal.rs": "445/454 (98.02%)",
+      "sessions/readback_storage.rs": "1191/1247 (95.51%)",
+      "sessions/verification.rs": "187/193 (96.89%)",
+      "sessions/resources.rs": "610/619 (98.55%)",
+      "invocation_resilience.rs": "226/231 (97.84%)"
+    },
+    "daemon_component_module_lines": {
+      "session_tools.rs": "410/418 (98.09%)",
+      "local_sessions.rs": "1165/1211 (96.20%)",
+      "host.rs": "547/563 (97.16%)",
+      "mapping.rs": "513/515 (99.61%)",
+      "model_adapters.rs": "768/781 (98.34%)",
+      "session_store.rs": "862/906 (95.14%)",
+      "local_mcp/runtime.rs": "556/578 (96.19%)"
+    },
+    "historical_application_changed_executable_lines": {
+      "gate": "PASS",
+      "modules": {
+        "connector_results.rs": "94/98 (95.92%)",
+        "prompt_rendering.rs": "72/73 (98.63%)",
+        "sessions/coordinator.rs": "626/658 (95.14%)",
+        "sessions/journal.rs": "200/210 (95.24%)",
+        "sessions/readback_storage.rs": "631/663 (95.17%)",
+        "sessions/connector_execution.rs": "340/347 (97.98%)",
+        "connector_proposals.rs": "152/152 (100%)",
+        "connector_policy.rs": "84/85 (98.82%)",
+        "sessions/connector_goals.rs": "103/106 (97.17%)",
+        "sessions/authority.rs": "177/178 (99.44%)"
+      },
+      "all_target_line_total": "19368/21330 (90.80%; includes unrelated legacy code)",
+      "measurement_status": "HISTORICAL; counts retained from earlier changed-line analysis, not recomputed for the current candidate"
+    },
+    "historical_daemon_changed_executable_lines": {
+      "gate": "PASS",
+      "modules": {
+        "invocation_host/session_tools.rs": "166/173 (95.95%)",
+        "local_sessions.rs": "113/118 (95.76%)",
+        "mcp_client/host.rs": "44/45 (97.78%; one multiline continuation is not a separate statement)",
+        "mcp_client/mapping.rs": "76/77 (98.70%)",
+        "model_adapters.rs": "196/206 (95.15%)",
+        "session_store.rs": "274/288 (95.14%)"
+      },
+      "all_target_line_total": "11484/12519 (91.73%; includes unrelated legacy code)",
+      "measurement_status": "HISTORICAL; counts retained from earlier changed-line analysis, not recomputed for the current candidate"
+    },
+    "invocation_resilience_modules": {
+      "crates/gateway-domain/src/invocation_resilience.rs": "15/15 (100.00%)",
+      "crates/gateway-application/src/invocation_resilience.rs": "226/231 (97.84%)"
+    }
+  },
+  "qualification_base_revision": "742c318b47b1e06ced615618fe7ac0c1d05f71ce",
+  "connector_phase_followup": {
+    "status": "ALL_TARGET_TESTS_PASS_APPLICATION_GATE_PASS_DAEMON_COVERAGE_GAPS",
+    "historical_evidence_boundary": "Existing archived reports, coverage numbers and source bindings below describe final15/final16 before this follow-up. They do not qualify the changed candidate.",
+    "implemented": [
+      "Optional connector_calls with legacy zero serialization preserved",
+      "Ordinal-bound proposal correlation v2 prevents interchange of identical ordered action consent",
+      "Reserved SessionConnectorRun with hard quotes, exact CG09 reservation join, live guards, conservative consumption and sticky metric/unknown outcomes",
+      "Validation-only CG09 polling without per-poll audit writes",
+      "Discovery current target guards and truthful send-attempt effect classification"
+    ],
+    "focused_evidence": {
+      "reserved_connector_tests": 10,
+      "architecture_regressions": "83 tests, 1 Windows-only skip",
+      "contract_regressions": 26,
+      "mcp_library_tests": 52,
+      "mcp_integration_tests": 22,
+      "model_session_tests": 33,
+      "application_policy_tests": 11,
+      "local_connector_host_tests": 13,
+      "production_resource_lookup": "PASS: real authenticated resolver + PostgreSQL checkpoint, config drift and persisted stop"
+    },
+    "qualification_directory": "target/epic08-session-qualification-20261026-final18",
+    "remaining": [
+      "Finish current transport regression qualification and expanded >=95% coverage gates",
+      "Production current authority/configuration and installed LocalConnectorRuntime composition",
+      "Full #271 including #272–#279 and live qualification"
+    ],
+    "review_findings": "Discovery effect/target and consumed/buffered inventory polling gaps corrected; final MCP library 52/52 and integration 22/22 pass. Initial daemon all-target run failed on a new test scope mismatch (corrected and rerun locally). Application all-target tests passed, but report mixed pre/post-comment coverage mappings; clean source-frozen application and daemon runs are in progress.",
+    "production_policy_prerequisites": [
+      "Current canonical step constraints, preconditions, resolution and prerequisite status must replace synthetic inputs in connector_policy::evaluate before production composition",
+      "Extend existing decision hook to receive immutable evaluated snapshot and admission stage; write bounded audit separately from session claim revision/fence",
+      "Factor shared current authenticated access without Host/Runtime ownership cycles; install actual target/mapping/quote/producer/snapshot/readback configuration"
+    ],
+    "source_freeze_manifests": [
+      "target/epic08-session-qualification-20261026-final18/application-source-bindings-start.json",
+      "target/epic08-session-qualification-20261026-final18/daemon-source-bindings-start.json"
+    ],
+    "application_qualification": {
+      "status": "PASS_ALL_TARGETS_AND_EXPANDED_95_PERCENT_GATE",
+      "source_freeze": "273 Rust sources unchanged since qualification start",
+      "policy": "140/140 (100.00%)",
+      "proposals": "205/215 (95.35%)",
+      "resources": "675/684 (98.68%)",
+      "archived_evidence": {
+        "docs/evidence/EPIC-08.03-application-final18-coverage.json.gz": "830cbf29a81d2f032c74a7456be146b9b2fa2dc8a956865ec88e5ddadae02df5",
+        "docs/evidence/EPIC-08.03-application-final18-validation.log.gz": "04e5a2faf1ee6f0ab840bb86398af468c77ac5d651d07a0f80abc952eae431af",
+        "docs/evidence/EPIC-08.03-application-final18-source-bindings.json.gz": "6672fcea7522d0ab7422ac01893e331a77e0af757f979463e7af5b404d91a312"
+      }
+    },
+    "daemon_qualification": {
+      "status": "ALL_TARGET_TESTS_PASS_95_PERCENT_GATE_NOT_PASSED",
+      "source_freeze": "92 daemon Rust sources unchanged during qualification",
+      "archived_evidence": {
+        "docs/evidence/EPIC-08.03-daemon-final18-coverage.json.gz": "f0b6937a5cc2be6617f903662eddfedebe1d8bbd76d103afadc301cf4c0d4456",
+        "docs/evidence/EPIC-08.03-daemon-final18-validation.log.gz": "2cd0b6ffe890503fab8f6635689b52b708f503bb1d68de902075cd97c40bbe3c",
+        "docs/evidence/EPIC-08.03-daemon-final18-source-bindings.json.gz": "160c9ba24b018d30743d8f141a8057b56c10c3d05ee01595a4ae739c7681bc4c"
+      },
+      "coverage_gaps": {
+        "local_sessions.rs": "1673/1774 (94.31%)",
+        "mcp_client/mod.rs": "104/116 (89.66%)",
+        "mcp_client/session_budget.rs": "351/370 (94.86%)"
+      },
+      "passing_transport_modules": {
+        "host.rs": "693/726 (95.45%)",
+        "protocol.rs": "301/314 (95.86%)",
+        "transport.rs": "536/563 (95.20%)",
+        "model_adapters.rs": "768/781 (98.34%)"
+      }
+    },
+    "qualification_scope": "Reports qualify the frozen connector-phase candidate, before the following canonical-step/audit-envelope refinement. New source changes require their own qualification."
+  },
+  "canonical_policy_followup": {
+    "status": "FOCUSED_COMPONENT_AND_SHARED_ACCESS_TESTS_PASS_FULL_COVERAGE_OPEN",
+    "implemented": [
+      "Mandatory real step constraints/preconditions/resolution/prerequisite inputs",
+      "Immutable audit evaluation envelope with truthful effective denial and original pre-effect dispatch",
+      "One audit-free current check after successful pre-effect audit, including standalone transport",
+      "Shared LocalSessionAccess for current authenticated configuration and PostgreSQL authority",
+      "Projection-free canonical policy mapping and shared native PolicyApplication step assembly"
+    ],
+    "tests": {
+      "connector_policy": 16,
+      "proposal_output": 37,
+      "native_step_assembly": 12,
+      "reserved_connector_cases": 12,
+      "call_context": 4,
+      "postgres_local_access": 15,
+      "existing_cli_shared_session_mcp": 9,
+      "canonical_mapping": 3,
+      "existing_cli_policy": 2,
+      "walkthrough": 1
+    },
+    "quality": {
+      "clippy": "PASS workspace alltargets warnings denied for this follow-up",
+      "format": "PASS",
+      "architecture_guard": "PASS",
+      "architecture_tests": "83 passed with 1 native Windows-only skip",
+      "whitespace": "PASS"
+    },
+    "source_bindings": {
+      "crates/gateway-application/src/connector_policy.rs": "bf87ab7eb1bc04c102b60bf917633d438266d0157c803e4c65df81fbefaf9fd9",
+      "crates/gateway-application/tests/connector_policy.rs": "ebe9f0e3a32c9a8fa5186551c816405cfcc135a123f61774a69bee41aa022ec3",
+      "crates/gateway-application/src/policy_application.rs": "966c00fcc4632a306deaf9825603fe2ea8f09b544fff09789da507891bfe733b",
+      "crates/gateway-application/tests/policy_application.rs": "6ecced9b4c4501af66a66ab86aa7fea554bd00247fa022d406df640bb522c793",
+      "crates/gateway-application/tests/output_verification.rs": "8ebc8013ace397a9bd78484f6a6796f163cbc9b68ab2295fe89c926d081e4ef5",
+      "crates/gateway-daemon/src/local_sessions.rs": "610f476335e91e3d1a9dfba93ab7c76c87909035610108171cf5a94ea51b9b20",
+      "crates/gateway-daemon/src/declarative_cli/host_mapping.rs": "6af23e480cdbd48a8157f22622f292b124af6cb3931c047213724e905a4ebafa",
+      "crates/gateway-daemon/src/mcp_client/mod.rs": "1a49df73f281e8ad561ceb1f477c145bc9f3af6ea184e1672853b1f326307cb6",
+      "crates/gateway-daemon/src/mcp_client/context_tests.rs": "e6438cb078d6b97411cf2ccc1be74dbe70352ea0b57c9b9dcca083513be43a5c",
+      "crates/gateway-daemon/tests/support/session_connector_budget_cases.rs": "57a49890daead2bcc32d67e7298dcced8d8fbf94488e623bf7ec430951db0a0c"
+    },
+    "validation_archive": "docs/evidence/EPIC-08.03-canonical-policy-followup-validation.json.gz",
+    "validation_archive_sha256": "0b13e7ec3056d7871fd7b919cbebe5e6978b4ccc622e7a9a51c105992e78879c",
+    "coverage_boundary": "Final18 frozen candidate all-target tests passed; expanded daemon gate had three gaps. Targeted gap regressions added, but current canonical/shared-access source has not passed refreshed full coverage. No current >=95% acceptance claim.",
+    "remaining": [
+      "Durable bounded separate decision journal (in progress)",
+      "Configured immutable-basis production policy/quote/producer/snapshot/readback sources and installed runtime",
+      "Complete #271/#272–#279 and actual controlled live qualification"
+    ]
+  },
+  "retained_verifier_followup": {
+    "status": "FOCUSED_COMPONENT_TESTS_PASS_FULL_ACCEPTANCE_OPEN",
+    "evidence_level": "COMPONENT_WITH_REAL_POSTGRES_STORAGE",
+    "archive": "docs/evidence/EPIC-08.03-retained-verifier-followup-validation.json.gz",
+    "archive_sha256": "1e7bba68355aa2372bc997c47a1ae1e43ed05af168ca48bf63a148427db01a7e",
+    "source_bindings": {
+      "crates/gateway-application/src/closed_loop.rs": "c878027285e70448c8b646fef64f89a710e19f87db156764d3dddfc827691dc2",
+      "crates/gateway-application/src/retained_observations.rs": "0a8a0b87d7abb33656dedd5d15e01acc0ba46155910793ab9302769ffec797fb",
+      "crates/gateway-application/src/sessions/coordinator.rs": "85f7cb89bd9b716a8d59d2ccc122f80778f9e675d80a4460f5cc1763e79d63a1",
+      "crates/gateway-application/src/sessions/readback_storage.rs": "7209936ccb7f56cad70fd2f9e4e4c0d7e9595f4e687be557b494da6f27ec2720",
+      "crates/gateway-daemon/src/local_sessions.rs": "34cb223704cf286b5bac1c628f4119b1e56e61a77d0dd9ca27b4d31535f2c64d",
+      "crates/gateway-daemon/src/local_sessions/goal_verifier.rs": "0a8b541eec0cf4e18a9f7228212820253ebacaba16a34911b0adfb737c7d8f97",
+      "crates/gateway-daemon/src/local_sessions/runtime_admission.rs": "479b811cf0c671a201bec49fdc33fc7b871df685f358610a7c19346baf4ca420",
+      "crates/gateway-daemon/src/session_store/connector_policy_audit.rs": "34c78a631700df97961d03d349a1a34a1075a162082927ac77b9101a0229c8b4",
+      "crates/gateway-daemon/src/session_store/connector_policy_audit/tests.rs": "a138e4798175db464ca315965385c57eb94bdd0b2d0274031773727bb8113f2a",
+      "crates/gateway-daemon/src/mcp_client/credential_file.rs": "5660ce704faad0b1816b2d8539de8bc080dd6842b1e6e97cf5a2d250add59146",
+      "crates/gateway-daemon/src/mcp_client/normalization.rs": "cc3c05c9ec2010025d95eb40340843dcfb112577ab955ab4b5ed5f02560dc7d3",
+      "crates/gateway-daemon/src/mcp_client/normalization_tests.rs": "53918ecf9148aaa53f3536fb956bacbd193cdece3e4673b4eff49a630741ed95"
+    },
+    "focused_tests": {
+      "goal_verifier_and_local_sessions_postgres": 23,
+      "immutable_policy_audit_postgres": 6,
+      "session_runtime": 52,
+      "readback_decoder": 6,
+      "credential_file": 3,
+      "normalization_unit": 11,
+      "mcp_integration": 24,
+      "closed_loop": 21
+    },
+    "quality_boundary": [
+      "No current all-target coverage qualification for these changed sources.",
+      "Strict daemon Clippy currently fails on three groups of unconsumed TargetFactory APIs; see retained log.",
+      "Production policy SourceFactory, proposal producer, connector effect and observation acquisition composition remain open.",
+      "No live provider or installed-client qualification; no issue closure."
+    ],
+    "historical_reports": "All preceding full coverage and workspace Clippy reports retain their original source bindings and do not qualify this changed candidate.",
+    "next_slice": "Bounded typed native reference closure, then concrete policy/producer/target factories; complete parent acceptance unchanged."
+  },
+  "native_reference_discovery_followup": {
+    "status": "PASS_COMPONENT_ONLY",
+    "command": "cargo test -p gateway-domain --test semantic_task_v1 --locked -j1",
+    "tests": 9,
+    "source_bindings": {
+      "crates/gateway-domain/src/semantic_task.rs": "091fdadb3f1d33badcfb1aa22fed08b5d44cfdb8d5d8fa43a87cc71d6e21e396",
+      "crates/gateway-domain/tests/semantic_task_v1.rs": "c79452ab4319ce8ca7e618dc559bbc8673749d0e2599ff81db50a5a2496beaf1"
+    },
+    "boundary": "Read-only native reference discovery; no resolution, authenticity, target association or effect authority. Current full coverage open.",
+    "archive": "docs/evidence/EPIC-08.03-native-reference-discovery-validation.json.gz",
+    "archive_sha256": "5d579902f9348d75b444efbfce48f7a3b933b12e6b41386315f6a0559d5b4677"
+  },
+  "runtime_reference_followup": {
+    "status": "PASS_FOCUSED_COMPONENTS_EXECUTABLE_COMPOSITION_OPEN",
+    "evidence_level": "COMPONENT",
+    "tests": {
+      "bounded_runtime_reference_closure": 11,
+      "current_native_capability_alias": 2,
+      "actual_native_planner_resolution_policy_compilation_fixture": 1
+    },
+    "source_bindings": {
+      "crates/gateway-daemon/src/local_sessions/runtime_admission.rs": "c1bc2c5df928f3e85607fc770e50217e7ad5de18714db5bb2f6d43e6ac00162f",
+      "crates/gateway-daemon/src/local_sessions/capability_alias.rs": "3b7c6a390edf021a9b7f7596f76fc82a6a77c74e9407338dc5446a4f946e367b",
+      "crates/gateway-daemon/src/declarative_cli/host_mapping.rs": "39fdf039372d1f45e542d53dea9415de5aebd60eef3fb67c26824c933b0d8a0c",
+      "crates/gateway-daemon/src/declarative_cli/host_mapping/native_producer_fixture.rs": "bccfc149d7ba805c8fb977a36bd1b1776a2c17719586184db8d5dfda22fdc860",
+      "crates/gateway-domain/src/semantic_task.rs": "091fdadb3f1d33badcfb1aa22fed08b5d44cfdb8d5d8fa43a87cc71d6e21e396"
+    },
+    "limits": [
+      "Opaque context-analysis/projection/source-metadata leaves are not generically traversed or executable producer admission.",
+      "The native fixture actually plans/resolves/authorizes/compiles two inspection steps; no model inference or connector dispatch.",
+      "Production SourceFactory/ProducerFactory/collector composition and complete parent/live acceptance remain open.",
+      "Current expanded full coverage and strict daemon Clippy are not passed by this focused report."
+    ],
+    "archive": "docs/evidence/EPIC-08.03-runtime-reference-followup-validation.json.gz",
+    "archive_sha256": "2fc6b0385910cbf7c95e899d1ed51d6bae7cdb332c6e498f98a2bf067679fc53"
+  },
+  "goal_current_store_followup": {
+    "status": "PASS_FOCUSED_REAL_POSTGRES_REGRESSION",
+    "command": "CARGO_BUILD_JOBS=1 CARGO_INCREMENTAL=0 python3 scripts/cognitive-test-host.py cargo test -p gateway-daemon --lib postgres_goal_verifier_uses_original_goal_and_actual_retained_evidence_without_effect_calls --locked -j1 -- --nocapture",
+    "tests": 1,
+    "source_bindings": {
+      "crates/gateway-daemon/src/local_sessions/goal_verifier.rs": "caba8d27b71ca55ac3b938e861fa8646db15e051a3d738629ab4a7e82d3d77f2"
+    },
+    "change": "Final authority reloads the currently configured repository claim and compares full initial FencedSession; same locator path with changed content cannot rely on the old read handle.",
+    "boundary": "Actual read-only store/current-authority component regression; no connector effect or full session-system acceptance.",
+    "archive": "docs/evidence/EPIC-08.03-goal-current-store-validation.json.gz",
+    "archive_sha256": "1f25ce1d589e19827fb169a7e4eebf126096286e75da1e40e126e04d3663e628"
+  },
+  "connector_factory_view_followup": {
+    "status": "PASS_FOCUSED_COMPONENT_ONLY_PRODUCT_FACTORY_OPEN",
+    "evidence_level": "COMPONENT_REAL_COORDINATOR_ALLOCATION",
+    "tests": {
+      "sealed_factory": 2,
+      "existing_session_budget_cases": 12
+    },
+    "source_bindings": {
+      "crates/gateway-daemon/src/mcp_client/session_budget.rs": "a9de1c4a5fc0c6ca0c6e605e68378b94958194b3b5f9204b6ffd539815f20e39",
+      "crates/gateway-daemon/src/mcp_client/session_budget_factory_tests.rs": "4b4bfe62d3d23f907ebf8613d1b18fd87458dcb18ea34cd2bcd39fc33062a453"
+    },
+    "boundary": [
+      "Private sealed metadata view shares one actual coordinator allocation; no Arc or spending capability can be extracted.",
+      "The factory retains independent base plus child authority, deadline and cancellation. Zero connector/provider I/O in denied factory cases.",
+      "No installed product SourceFactory/TargetFactory composition, current full coverage or whole-system acceptance is established."
+    ],
+    "archive": "docs/evidence/EPIC-08.03-connector-factory-view-validation.json.gz",
+    "archive_sha256": "a8ed1f1c7af5c3054d79ef5ab2d815bae1d70e2abfb8da451ef3eb8fb68bb051"
+  },
+  "native_policy_source_followup": {
+    "status": "PASS_FOCUSED_NATIVE_SOURCE_CONTROL_PLANE_FULL_RUNTIME_OPEN",
+    "command": "python3 scripts/cognitive-test-host.py cargo test -p gateway-daemon --lib local_sessions -- --nocapture",
+    "evidence_level": "COMPONENT_REAL_POSTGRES_AND_NATIVE_CONTEXT_COMPILATION",
+    "tests": 45,
+    "source_bindings": {
+      "crates/gateway-daemon/src/local_sessions/runtime_admission.rs": "394c009db60bbb20ca56f4e9c2ec7db8b578f4360a7e9dccfca3abfab965f601",
+      "crates/gateway-daemon/src/local_sessions/selector_association.rs": "dda8d942a28a1da085bf4ace2f8c647831b723cc3ec6697b4ea3cde38e547fdb",
+      "crates/gateway-daemon/src/local_sessions/runtime_admission/connector_source.rs": "4496ae4960242f9a1d292d2676b623485ac588af2491afa5ba97f71ffeef07c9"
+    },
+    "provenance": "Immutable per-owner snapshots captured immediately after the successful focus; later edits are not retroactively qualified. This is not a frozen whole-workspace dependency graph.",
+    "proved": [
+      "Actual coordinator reservation/phase claim and sealed allocation view attach.",
+      "Real native producer/read and readonly action contexts, exact registered task/step/selector/current policy plus real PostgreSQL decision audit.",
+      "Validation-only liveness leaves audit SQL unchanged; audited revalidation appends.",
+      "Actual cancellation and unchanged-path valid DSN definition drift invalidate authority even with unchanged checkpoint.",
+      "Source preview is pure and does not grant dispatch; actual action-context and execution-phase barriers remain."
+    ],
+    "open": [
+      "Real native mixed Mutate+Inspect workflow and accepted exact consent -> action compile branch.",
+      "Native model-producer/retained-output composition, target factory and actual controlled connector effects.",
+      "Current full Clippy/expanded >=95% coverage, all-parent and installed/live acceptance.",
+      "Subsequent review required stricter canonical plan/rules/process alias, actual native rule fingerprint, execution mode/profile and native desired-state joins. This archived earlier focused candidate is historical and does not qualify those later corrections or the mixed consent branch."
+    ],
+    "archive": "docs/evidence/EPIC-08.03-native-policy-source-validation.json.gz",
+    "archive_sha256": "835b2a603f21b87087bbd8e5808b754ee9f13ab0e7438b2206c2c808185748cb"
+  },
+  "policy_preview_followup": {
+    "status": "PASS_FOCUSED_POLICY_PREVIEW_REGRESSION",
+    "tests": {
+      "connector_policy": 17,
+      "output_verification": 37
+    },
+    "source_bindings": {
+      "crates/gateway-application/src/connector_policy.rs": "db8dbd0990d2891132d5b78a2817d51e8bde71c307ad7e3a3a09e2b5b3ac881f",
+      "crates/gateway-application/tests/connector_policy.rs": "5b75b726cce541b5fe4553e3a4d2fbabe7b4e052e56b42fe3d283e3298efec70",
+      "crates/gateway-daemon/src/local_sessions.rs": "4bca479864b4fe491b75389186e100b02c993a4e44c3081c55e838ee9c91eefa",
+      "crates/gateway-daemon/src/local_sessions/goal_verifier.rs": "60786b2f31dbcb2ceed576688dda7d3e3b08f589681b13652acd40d312f8618d"
+    },
+    "boundary": "Pure existing CG09 evaluation exposed for exact consent preview; no dispatch/audit/grant from the helper. Application test command does not qualify daemon store changes; those participate separately in the Source PG focus.",
+    "archive": "docs/evidence/EPIC-08.03-policy-preview-validation.json.gz",
+    "archive_sha256": "cca878b9aef2e5bb44eac9399b9f69f4dfeaf5fd637c47716acd2d698a761258"
+  },
+  "exact_output_retention_followup": {
+    "status": "PASS_FOCUSED_EXACT_OUTPUT_RETENTION",
+    "command": "CARGO_BUILD_JOBS=1 CARGO_INCREMENTAL=0 cargo test -p gateway-application --test connector_policy --test output_verification --locked -j1",
+    "tests": {
+      "connector_policy": 17,
+      "output_verification": 38
+    },
+    "source_bindings": {
+      "crates/gateway-application/src/output_verification.rs": "374ce5c794ce38daadebb73bfbffd41062795810c91e0baa756ec49371726716",
+      "crates/gateway-application/tests/output_verification.rs": "f9e1ce9eaabfffcff076743e67c80004876bbb63187974f5bbf7f33acdf4e434",
+      "crates/gateway-application/src/connector_policy.rs": "db8dbd0990d2891132d5b78a2817d51e8bde71c307ad7e3a3a09e2b5b3ac881f",
+      "crates/gateway-application/tests/connector_policy.rs": "5b75b726cce541b5fe4553e3a4d2fbabe7b4e052e56b42fe3d283e3298efec70"
+    },
+    "boundary": "Native parser retains exact bounded original bytes in immutable shared memory, without acceptance or wire changes. Actual durable native model-producer/consent resume is a separate required integration, not established by this test.",
+    "archive": "docs/evidence/EPIC-08.03-exact-output-retention-validation.json.gz",
+    "archive_sha256": "02d14b6a8d8dcc155ec51e7eca0ee0d51d465d4cc1a07511e78ae15f660a1a96"
+  },
+  "portable_model_transport_followup": {
+    "status": "PASS_COMPONENT_PORTABLE_TOOLS_AND_DECODED_CREDENTIAL_GUARD",
+    "evidence": "EPIC-08.03-portable-model-transport-validation.json.gz",
+    "tests": {
+      "session_tool_invocation": {
+        "passed": 38,
+        "failed": 0
+      },
+      "model_adapters": {
+        "passed": 11,
+        "failed": 0,
+        "ignored": 1
+      }
+    },
+    "boundary": "Loopback real HTTP transport and canonical proposal parser/verification component fixtures with injected trusted host. No installed/native producer factory, real consent lifecycle, external model provider, live effects, full coverage or current strict lint qualification. Existing result-only live-provider test remains ignored. Factory must bind both response and wire profiles from current producer definition; legacy canonical wire profiles 1/2 are unchanged and dotted IDs remain unsuitable for a real OpenAI endpoint.",
+    "remaining": "Native source-owned producer/current status/reference/context factory and runtime installation, full CG14 and complete EPIC08 qualification remain open."
+  },
+  "fresh_access_factorization_followup": {
+    "status": "PASS_COMPONENT_FRESH_ACCESS_FACTORIZATION",
+    "evidence": "EPIC-08.03-fresh-access-factorization-validation.json.gz",
+    "tests": 15,
+    "boundary": "15 actual focused local admission/resource/consent tests, including PostgreSQL current-claim/configuration checks. This is not the full Source or TargetFactory suite. Actual stdio target discovery still exceeds the unchanged lease, so no operational performance or full runtime acceptance is established."
+  },
+  "postgres_fresh_read_followup": {
+    "status": "PASS_COMPONENT_FRESH_POSTGRES_READS",
+    "evidence": "EPIC-08.03-postgres-fresh-read-validation.json.gz",
+    "tests": {
+      "session_store": 21,
+      "local_admission": 15
+    },
+    "boundary": "Actual independent PostgreSQL writer and reader connections prove no reader row initialization, no wait on a held writer row lock, subsequent committed revision visibility, stale write refusal, cross-owner refusal and corruption refusal. Existing process recovery and consent/resource suites also pass. This is not full Source/TargetFactory, DB-server restart, native producer, live effects, full coverage or operational acceptance. MVCC target profiling still exhausts the unchanged lease, so this optimization alone does not resolve runtime performance."
+  },
+  "observed_mcp_context_followup": {
+    "status": "PASS_COMPONENT_OBSERVED_MCP_CONTEXT_OWNER",
+    "evidence": "EPIC-08.03-observed-mcp-context-validation.json.gz",
+    "tests": {
+      "context_planning": 21,
+      "gateway_context_all_targets": 27,
+      "gateway_context_suite_counts": [
+        0,
+        9,
+        11,
+        3,
+        3,
+        1
+      ]
+    },
+    "boundary": "Native analyzer/source-selection/context-compiler components using explicitly injected test metadata and trusted fixture host. Positive Artifact/Entity observations preserve ObservedEvidence. Wrong revision, mismatched quality/trust, stale data, CatalogAuthority source and missing Knowledge reservation reject; Evidence cannot be relabelled DomainKnowledge. No actual SourceContext acquisition/native producer/system or installed-client proof is established."
+  },
+  "resource_only_boundary_followup": {
+    "status": "PASS_COMPONENT_RESOURCE_ONLY_CURRENT_BOUNDARY",
+    "evidence": "EPIC-08.03-resource-only-boundary-validation.json.gz",
+    "tests": 15,
+    "boundary": "Actual scoped/resource/consent PostgreSQL component tests. This report retains the stable LocalSessionAccess source only. Phase also ran a separate true sidecar-drift boundary test, but its changing Source files are not source-bound by this archive. SourceTarget stdio still exceeds the original 30-second lease; no cache, lease extension, operation grant, current full coverage or complete acceptance is claimed."
+  },
+  "native_basis_access_followup": {
+    "status": "PASS_COMPONENT_NATIVE_BASIS_ACCESS",
+    "evidence": "EPIC-08.03-native-basis-access-validation.json.gz",
+    "tests": {
+      "resolution_application": 7,
+      "native_host_mapping": 6
+    },
+    "boundary": "Native resolution and CLI host-policy components, including real mixed-plan constructor fixture and native denial tests. Direct basis equals the real serialized artifact basis; report, basis and snapshot tampering reject. Full serialization retains its own output limit. Current SourceTarget peer performance is being measured separately; no native model factory, complete runtime, full coverage or live acceptance is established."
+  },
+  "probe_completion_hardening": {
+    "status": "PASS_COMPONENT_COMPLETE_CALLBACK_PROOFS",
+    "evidence": "EPIC-08.03-complete-callback-proof-validation.json.gz",
+    "tests": {
+      "local_admission": 15,
+      "retained_goal_verifier": 1
+    },
+    "boundary": "The local access probe now marks completion only after the entire actual configuration/claim/fencing/cancellation assertion path. Early allocation/storage errors cannot satisfy that completion proof. The goal verifier already requires actual captured readbacks and now also marks its callback only after acquisition. Source/TargetFactory probes had analogous weaknesses and are being independently repaired/requalified. No whole Source suite, stdio pipeline or native model integration is claimed.",
+    "historical_evidence_limit": "Prior Source/TargetFactory coordinator-probe pass counts cannot prove assertions following a swallowed early callback error. Current stricter Source requalification is required; the early stdio PASS without a complete-read checkpoint is explicitly not pipeline evidence."
+  }
+}

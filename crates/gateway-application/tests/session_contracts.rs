@@ -1,6 +1,9 @@
 //! #272 prerequisite gate: real shared admission, never a ProjectionHost.
 use gateway_application::sessions::*;
-use gateway_domain::{ContextScopeId, ExecutionProfile, Intent, OperatingMode, PlanStepId};
+use gateway_domain::{
+    ContentDigest, ContextScopeId, ExecutionProfile, Intent, OperatingMode, PlanStepId,
+    ReferenceId, SchemaVersion, TaskId, prompt_ir::InvocationIrIdentity,
+};
 use serde_json::{Value, json};
 
 fn owner() -> OwnerBinding {
@@ -74,6 +77,47 @@ fn basis() -> ArtifactGoalBasis {
         projection: reference("projection"),
         sources: vec![reference("source")],
     }
+}
+fn connector_goal() -> SupportedSessionGoal {
+    let intent = intent();
+    let condition = intent.desired_state().conditions()[0].id().clone();
+    let observation = ConditionObservationMapping::new(
+        condition,
+        gateway_domain::SourceId::new("connector-source").unwrap(),
+        gateway_domain::CapabilityId::new("connector.read").unwrap(),
+        gateway_application::connectors::ConnectorOperationClass::Read,
+    )
+    .unwrap();
+    SupportedSessionGoal::connector(
+        SupportedConnectorGoal::from_host_registration(
+            intent,
+            basis().scope,
+            reference("connector-plan"),
+            vec![PlanStepId::new("connector-step").unwrap()],
+            vec![observation],
+        )
+        .unwrap(),
+    )
+}
+fn connector_goal_two_steps() -> SupportedSessionGoal {
+    let SupportedSessionGoal::Connector(goal) = connector_goal() else {
+        unreachable!()
+    };
+    let intent = goal.intent().clone();
+    let mappings = goal.observations().to_vec();
+    SupportedSessionGoal::connector(
+        SupportedConnectorGoal::from_host_registration(
+            intent,
+            goal.scope().clone(),
+            reference("connector-plan-two-steps"),
+            vec![
+                PlanStepId::new("connector-step-1").unwrap(),
+                PlanStepId::new("connector-step-2").unwrap(),
+            ],
+            mappings,
+        )
+        .unwrap(),
+    )
 }
 fn snapshot(state: SessionState) -> SessionSnapshot {
     SessionSnapshot {
@@ -237,6 +281,7 @@ fn every_mutation_has_one_command_and_the_expected_lifecycle_gate() {
     ];
     let states = [
         SessionState::Runnable,
+        SessionState::Preparing,
         SessionState::Dispatching,
         SessionState::PendingClarification,
         SessionState::PendingConsent,
@@ -271,6 +316,7 @@ fn every_mutation_has_one_command_and_the_expected_lifecycle_gate() {
                 _ => matches!(
                     state,
                     SessionState::Runnable
+                        | SessionState::Preparing
                         | SessionState::Dispatching
                         | SessionState::PendingClarification
                         | SessionState::PendingConsent
@@ -698,7 +744,9 @@ fn diagnostic_mapping_is_sanitized_stable_and_unique() {
 fn checkpoint() -> SessionCheckpoint {
     SessionCheckpoint {
         owner: owner(),
-        goal: SupportedArtifactGoal::validate(intent(), basis()).unwrap(),
+        goal: SupportedSessionGoal::artifact(
+            SupportedArtifactGoal::validate(intent(), basis()).unwrap(),
+        ),
         execution: RequestedExecution {
             mode: OperatingMode::Development,
             profile: ExecutionProfile::FullPath,
@@ -711,13 +759,434 @@ fn checkpoint() -> SessionCheckpoint {
             max_retries: 1,
             deadline_ms: 100,
         },
+        resource_ledger: None,
         pending: None,
         accepted_consent: None,
+        accepted_connector_consent: None,
         authority_events: vec![],
         selected_source: None,
         artifact: None,
         lease_until_ms: None,
         initial_assessment: None,
+        connector_step_snapshots: vec![],
+        connector_results: vec![],
+        connector_observations: vec![],
+        pre_execution_goal: None,
+    }
+}
+
+fn connector_binding(revision_value: u64) -> ConnectorStepBinding {
+    ConnectorStepBinding {
+        owner: owner(),
+        scope: basis().scope,
+        session: snapshot(SessionState::Runnable).session,
+        run: snapshot(SessionState::Runnable).run,
+        revision: revision(revision_value),
+        task: TaskId::new("connector-task").unwrap(),
+        step: PlanStepId::new("connector-step").unwrap(),
+        dispatch: DispatchId::new("connector-dispatch").unwrap(),
+        invocation: InvocationIrIdentity {
+            schema_version: SchemaVersion::V1,
+            invocation_id: ReferenceId::new("invocation").unwrap(),
+            invocation_digest: ContentDigest::new("a".repeat(64)).unwrap(),
+            handoff_digest: ContentDigest::new("b".repeat(64)).unwrap(),
+            tools_digest: ContentDigest::new("c".repeat(64)).unwrap(),
+            ir_digest: ContentDigest::new("d".repeat(64)).unwrap(),
+        },
+    }
+}
+
+#[test]
+fn connector_step_records_are_scoped_bounded_unique_and_append_only() {
+    let mut cp = checkpoint();
+    cp.goal = connector_goal();
+    cp.snapshot.revision = revision(4);
+    let before = ConnectorStepSnapshotRef {
+        binding: connector_binding(4),
+        phase: ConnectorSnapshotPhase::Before,
+        record: reference("before"),
+    };
+    cp.connector_step_snapshots.push(before.clone());
+    cp.validate().unwrap();
+
+    let mut after = before.clone();
+    after.binding.revision = revision(5);
+    after.phase = ConnectorSnapshotPhase::After;
+    after.record = reference("after");
+    cp.snapshot.revision = revision(5);
+    cp.connector_step_snapshots.push(after.clone());
+    cp.connector_results.push(ConnectorResultRef {
+        binding: after.binding.clone(),
+        record: reference("proposal-batch"),
+        after_snapshot_state: ConnectorAfterSnapshotState::Captured,
+    });
+    cp.connector_observations.push(ConnectorObservationRef {
+        binding: after.binding.clone(),
+        proposal_ordinal: Some(0),
+        goal_condition: None,
+        role: ConnectorObservationRole::PostEffectReadback,
+        record: reference("observation"),
+    });
+    cp.validate().unwrap();
+
+    // Historical records remain valid when the checkpoint advances to a
+    // different dispatch; their own immutable bindings are authoritative.
+    cp.snapshot.dispatch = Some(DispatchId::new("later-dispatch").unwrap());
+    cp.snapshot.dispatch_knowledge = DispatchKnowledge::Observed;
+    cp.validate().unwrap();
+
+    let mut invalid = cp.clone();
+    invalid.connector_step_snapshots[0].binding.owner.project =
+        ProjectId::new("other-project").unwrap();
+    assert_eq!(invalid.validate(), Err(SessionError::InvalidInteraction));
+
+    let mut invalid = cp.clone();
+    invalid.connector_step_snapshots[0].record = invalid.connector_step_snapshots[1].record.clone();
+    assert_eq!(invalid.validate(), Err(SessionError::InvalidInteraction));
+
+    let mut invalid = cp.clone();
+    invalid.connector_step_snapshots[1].binding.revision = revision(4);
+    assert_eq!(invalid.validate(), Err(SessionError::InvalidInteraction));
+
+    let mut invalid = cp.clone();
+    invalid.connector_step_snapshots[0].phase = ConnectorSnapshotPhase::After;
+    assert_eq!(invalid.validate(), Err(SessionError::InvalidInteraction));
+
+    let mut invalid = cp.clone();
+    invalid
+        .connector_observations
+        .push(ConnectorObservationRef {
+            binding: invalid.connector_observations[0].binding.clone(),
+            proposal_ordinal: Some(0),
+            goal_condition: None,
+            role: ConnectorObservationRole::PostEffectReadback,
+            record: reference("duplicate-observation"),
+        });
+    assert_eq!(invalid.validate(), Err(SessionError::InvalidInteraction));
+
+    let mut invalid = checkpoint();
+    invalid.connector_observations = vec![
+        ConnectorObservationRef {
+            binding: connector_binding(3),
+            proposal_ordinal: Some(0),
+            goal_condition: None,
+            role: ConnectorObservationRole::PostEffectReadback,
+            record: reference("observation-0"),
+        };
+        4097
+    ];
+    assert_eq!(invalid.validate(), Err(SessionError::LimitExceeded));
+
+    let mut old = checkpoint();
+    old.goal = connector_goal();
+    old.snapshot.revision = revision(4);
+    old.connector_step_snapshots.push(before);
+    let current = FencedSession {
+        checkpoint: old,
+        fence: FenceToken::new(1).unwrap(),
+    };
+    let mut next = current.checkpoint.clone();
+    next.snapshot.revision = revision(5);
+    next.connector_step_snapshots.clear();
+    let transition = JournalAppend {
+        session: current.checkpoint.snapshot.session.clone(),
+        expected_revision: current.checkpoint.snapshot.revision,
+        fence: current.fence,
+        command: None,
+        next,
+        records: vec![],
+    };
+    assert_eq!(
+        transition.validate_against(&current),
+        Err(SessionError::InvalidState)
+    );
+}
+
+#[test]
+fn connector_goal_keeps_scoped_before_after_snapshots_for_each_planned_step() {
+    let mut cp = checkpoint();
+    cp.goal = connector_goal_two_steps();
+    cp.snapshot.revision = revision(8);
+    for (step, dispatch_name, before_rev, after_rev) in [
+        ("connector-step-1", "dispatch-1", 4, 5),
+        ("connector-step-2", "dispatch-2", 6, 7),
+    ] {
+        let mut before_binding = connector_binding(before_rev);
+        before_binding.step = PlanStepId::new(step).unwrap();
+        before_binding.dispatch = DispatchId::new(dispatch_name).unwrap();
+        let before_bytes =
+            format!(r#"{{"phase":"before","step":"{step}","scope":"project"}}"#).into_bytes();
+        let before_ref = content_reference(&format!("before-{step}"), &before_bytes).unwrap();
+        cp.connector_step_snapshots.push(ConnectorStepSnapshotRef {
+            binding: before_binding.clone(),
+            phase: ConnectorSnapshotPhase::Before,
+            record: before_ref.clone(),
+        });
+
+        let mut after_binding = before_binding;
+        after_binding.revision = revision(after_rev);
+        let after_bytes =
+            format!(r#"{{"phase":"after","step":"{step}","scope":"project"}}"#).into_bytes();
+        let after_ref = content_reference(&format!("after-{step}"), &after_bytes).unwrap();
+        cp.connector_step_snapshots.push(ConnectorStepSnapshotRef {
+            binding: after_binding,
+            phase: ConnectorSnapshotPhase::After,
+            record: after_ref,
+        });
+    }
+    cp.validate().unwrap();
+    assert_eq!(cp.connector_step_snapshots.len(), 4);
+    assert!(cp.connector_step_snapshots.iter().all(|snapshot| {
+        snapshot.binding.scope == *cp.goal.as_connector().unwrap().scope()
+            && snapshot.binding.owner == cp.owner
+    }));
+}
+
+#[test]
+fn persisted_connector_request_identity_validates_every_field() {
+    let valid = ConnectorRequestIdentity {
+        connector: "connector".to_owned(),
+        scope: "project".to_owned(),
+        capability: "connector.read".to_owned(),
+        operation_class: "read".to_owned(),
+        inventory_revision: "a".repeat(64),
+        arguments_digest: "b".repeat(64),
+        task: "task".to_owned(),
+        step: "step".to_owned(),
+        execution: "execution".to_owned(),
+        correlation: "correlation".to_owned(),
+    };
+    valid.validate().unwrap();
+
+    let mut invalid = valid.clone();
+    invalid.connector.clear();
+    assert_eq!(invalid.validate(), Err(SessionError::InvalidInput));
+    let mut invalid = valid.clone();
+    invalid.scope.clear();
+    assert_eq!(invalid.validate(), Err(SessionError::InvalidInput));
+    let mut invalid = valid.clone();
+    invalid.capability.clear();
+    assert_eq!(invalid.validate(), Err(SessionError::InvalidInput));
+    let mut invalid = valid.clone();
+    invalid.operation_class = "unknown".to_owned();
+    assert_eq!(invalid.validate(), Err(SessionError::InvalidInput));
+    let mut invalid = valid.clone();
+    invalid.inventory_revision.clear();
+    assert_eq!(invalid.validate(), Err(SessionError::InvalidInput));
+    let mut invalid = valid.clone();
+    invalid.arguments_digest.clear();
+    assert_eq!(invalid.validate(), Err(SessionError::InvalidInput));
+    let mut invalid = valid.clone();
+    invalid.task.clear();
+    assert_eq!(invalid.validate(), Err(SessionError::InvalidInput));
+    let mut invalid = valid.clone();
+    invalid.step.clear();
+    assert_eq!(invalid.validate(), Err(SessionError::InvalidInput));
+    let mut invalid = valid.clone();
+    invalid.execution.clear();
+    assert_eq!(invalid.validate(), Err(SessionError::InvalidInput));
+    let mut invalid = valid;
+    invalid.correlation.clear();
+    assert_eq!(invalid.validate(), Err(SessionError::InvalidInput));
+}
+
+#[test]
+fn checkpoint_accepts_separate_final_goal_verification_observation() {
+    let mut cp = checkpoint();
+    cp.goal = connector_goal();
+    cp.snapshot.revision = revision(5);
+    cp.snapshot.dispatch = Some(DispatchId::new("connector-dispatch").unwrap());
+    cp.snapshot.dispatch_knowledge = DispatchKnowledge::Observed;
+    let before = connector_binding(4);
+    cp.connector_step_snapshots.push(ConnectorStepSnapshotRef {
+        binding: before.clone(),
+        phase: ConnectorSnapshotPhase::Before,
+        record: reference("goal-before"),
+    });
+    let mut result_binding = before.clone();
+    result_binding.revision = revision(5);
+    cp.connector_step_snapshots.push(ConnectorStepSnapshotRef {
+        binding: result_binding.clone(),
+        phase: ConnectorSnapshotPhase::After,
+        record: reference("goal-after"),
+    });
+    cp.connector_results.push(ConnectorResultRef {
+        binding: result_binding.clone(),
+        record: reference("goal-batch"),
+        after_snapshot_state: ConnectorAfterSnapshotState::Captured,
+    });
+    let condition = cp
+        .goal
+        .as_connector()
+        .unwrap()
+        .intent()
+        .desired_state()
+        .conditions()[0]
+        .id()
+        .clone();
+    cp.connector_observations.push(ConnectorObservationRef {
+        binding: result_binding,
+        proposal_ordinal: None,
+        goal_condition: Some(condition),
+        role: ConnectorObservationRole::GoalVerificationReadback,
+        record: reference("final-goal-readback"),
+    });
+    cp.validate().unwrap();
+}
+
+#[test]
+fn connector_record_writes_must_match_new_refs_and_commit_revision() {
+    let mut current_checkpoint = checkpoint();
+    current_checkpoint.goal = connector_goal();
+    let current = FencedSession {
+        checkpoint: current_checkpoint,
+        fence: FenceToken::new(1).unwrap(),
+    };
+    let mut transition = JournalAppend {
+        session: current.checkpoint.snapshot.session.clone(),
+        expected_revision: current.checkpoint.snapshot.revision,
+        fence: current.fence,
+        command: None,
+        next: current.checkpoint.clone(),
+        records: vec![],
+    };
+    transition.next.snapshot.revision = current.checkpoint.snapshot.revision.next().unwrap();
+    transition.next.snapshot.dispatch =
+        Some(connector_binding(transition.next.snapshot.revision.value()).dispatch);
+    transition.next.snapshot.state = SessionState::Dispatching;
+    transition.next.snapshot.dispatch_knowledge = DispatchKnowledge::Reserved;
+    let bytes = br#"{"snapshot":"before"}"#.to_vec();
+    let record = content_reference("step-before", &bytes).unwrap();
+    transition
+        .next
+        .connector_step_snapshots
+        .push(ConnectorStepSnapshotRef {
+            binding: connector_binding(transition.next.snapshot.revision.value()),
+            phase: ConnectorSnapshotPhase::Before,
+            record: record.clone(),
+        });
+    assert_eq!(
+        transition.validate_against(&current),
+        Err(SessionError::InvalidState)
+    );
+    transition.records.push(RecordWrite {
+        reference: record,
+        kind: RecordKind::ConnectorSnapshot,
+        bytes,
+    });
+    transition.validate_against(&current).unwrap();
+
+    let mut wrong_dispatch = transition;
+    wrong_dispatch
+        .next
+        .connector_step_snapshots
+        .last_mut()
+        .unwrap()
+        .binding
+        .dispatch = DispatchId::new("different-dispatch").unwrap();
+    assert_eq!(
+        wrong_dispatch.validate_against(&current),
+        Err(SessionError::InvalidState)
+    );
+}
+
+#[test]
+fn connector_result_after_snapshot_and_observation_writes_are_linked_exactly_once() {
+    let mut cp = checkpoint();
+    cp.goal = connector_goal();
+    cp.snapshot.revision = revision(4);
+    cp.connector_step_snapshots.push(ConnectorStepSnapshotRef {
+        binding: connector_binding(4),
+        phase: ConnectorSnapshotPhase::Before,
+        record: reference("prior-before"),
+    });
+    let current = FencedSession {
+        checkpoint: cp,
+        fence: FenceToken::new(1).unwrap(),
+    };
+    let mut next = current.checkpoint.clone();
+    next.snapshot.revision = revision(5);
+    let binding = connector_binding(5);
+    next.snapshot.dispatch = Some(binding.dispatch.clone());
+    next.snapshot.dispatch_knowledge = DispatchKnowledge::Observed;
+    let entries = [
+        (RecordKind::ConnectorResult, "connector-result"),
+        (RecordKind::ConnectorSnapshot, "connector-after"),
+        (RecordKind::ConnectorObservation, "connector-observation"),
+    ];
+    let refs: Vec<_> = entries
+        .iter()
+        .map(|(kind, label)| {
+            let bytes = format!("{{\"record\":\"{label}\"}}").into_bytes();
+            (kind, content_reference(label, &bytes).unwrap(), bytes)
+        })
+        .collect();
+    next.connector_results.push(ConnectorResultRef {
+        binding: binding.clone(),
+        after_snapshot_state: ConnectorAfterSnapshotState::Captured,
+        record: refs[0].1.clone(),
+    });
+    next.connector_step_snapshots
+        .push(ConnectorStepSnapshotRef {
+            binding: binding.clone(),
+            phase: ConnectorSnapshotPhase::After,
+            record: refs[1].1.clone(),
+        });
+    next.connector_observations.push(ConnectorObservationRef {
+        binding,
+        role: ConnectorObservationRole::PostEffectReadback,
+        record: refs[2].1.clone(),
+        proposal_ordinal: Some(0),
+        goal_condition: None,
+    });
+    let writes: Vec<_> = refs
+        .iter()
+        .map(|(kind, reference, bytes)| RecordWrite {
+            reference: reference.clone(),
+            kind: **kind,
+            bytes: bytes.clone(),
+        })
+        .collect();
+    let make = |records| JournalAppend {
+        session: current.checkpoint.snapshot.session.clone(),
+        expected_revision: current.checkpoint.snapshot.revision,
+        fence: current.fence,
+        command: None,
+        next: next.clone(),
+        records,
+    };
+    make(writes.clone()).validate_against(&current).unwrap();
+    for bad in [
+        vec![writes[1].clone(), writes[2].clone()],
+        vec![
+            RecordWrite {
+                kind: RecordKind::ConnectorSnapshot,
+                ..writes[0].clone()
+            },
+            writes[1].clone(),
+            writes[2].clone(),
+        ],
+        vec![
+            writes[0].clone(),
+            writes[1].clone(),
+            writes[2].clone(),
+            RecordWrite {
+                reference: reference("unlinked-connector-record"),
+                kind: RecordKind::ConnectorObservation,
+                bytes: b"{}".to_vec(),
+            },
+        ],
+        vec![
+            writes[0].clone(),
+            writes[0].clone(),
+            writes[1].clone(),
+            writes[2].clone(),
+        ],
+    ] {
+        assert_eq!(
+            make(bad).validate_against(&current),
+            Err(SessionError::InvalidState)
+        );
     }
 }
 
@@ -846,7 +1315,10 @@ fn checkpoints_preserve_full_pending_identity_and_trusted_authority_history() {
             let mut bad = historical.clone();
             match &mut bad.authority_events[0] {
                 AuthorityEvent::Denied { revision, .. }
-                | AuthorityEvent::Withdrawn { revision, .. } => *revision = crate::revision(rev),
+                | AuthorityEvent::Withdrawn { revision, .. }
+                | AuthorityEvent::ConnectorWithdrawn { revision, .. } => {
+                    *revision = crate::revision(rev)
+                }
             }
             assert_eq!(bad.validate(), Err(SessionError::InvalidState));
         }
@@ -916,9 +1388,10 @@ fn conditional_append_refuses_fencing_scope_goal_and_budget_drift() {
             "goal" => {
                 let mut wire = intent_wire();
                 wire["id"] = json!("other");
-                bad.next.goal =
+                bad.next.goal = SupportedSessionGoal::artifact(
                     SupportedArtifactGoal::validate(serde_json::from_value(wire).unwrap(), basis())
-                        .unwrap();
+                        .unwrap(),
+                );
             }
             "execution" => bad.next.execution.mode = OperatingMode::Hardening,
             "next_session" => {
@@ -978,6 +1451,338 @@ fn conditional_append_refuses_fencing_scope_goal_and_budget_drift() {
     let next = append(&terminal, None);
     assert_eq!(
         next.validate_against(&terminal),
+        Err(SessionError::InvalidState)
+    );
+}
+
+#[test]
+fn preparing_has_no_connector_mutation_or_pending_interaction() {
+    let mut preparing = snapshot(SessionState::Preparing);
+    assert_eq!(preparing.validate(), Err(SessionError::InvalidState));
+    preparing.dispatch = Some(DispatchId::new("preparation-dispatch").unwrap());
+    preparing.dispatch_knowledge = DispatchKnowledge::Prepared;
+    assert_eq!(preparing.validate(), Ok(()));
+    for knowledge in [
+        DispatchKnowledge::None,
+        DispatchKnowledge::Reserved,
+        DispatchKnowledge::Observed,
+        DispatchKnowledge::Verified,
+        DispatchKnowledge::Unknown,
+        DispatchKnowledge::Stopped,
+    ] {
+        let mut invalid = preparing.clone();
+        invalid.dispatch_knowledge = knowledge;
+        assert_eq!(invalid.validate(), Err(SessionError::InvalidState));
+    }
+    let mut pending_preparation = preparing.clone();
+    pending_preparation.pending = Some(pending());
+    assert_eq!(
+        pending_preparation.validate(),
+        Err(SessionError::InvalidState)
+    );
+    let mut completed_preparation = preparing.clone();
+    completed_preparation.final_evidence = Some(reference("not-yet-verified"));
+    assert_eq!(
+        completed_preparation.validate(),
+        Err(SessionError::InvalidState)
+    );
+    let mut stopped = preparing;
+    stopped.state = SessionState::Cancelled;
+    stopped.dispatch_knowledge = DispatchKnowledge::Stopped;
+    assert_eq!(stopped.validate(), Ok(()));
+}
+
+#[test]
+fn preparing_snapshot_projects_through_both_version_two_schemas() {
+    let mut preparing = snapshot(SessionState::Preparing);
+    preparing.dispatch = Some(DispatchId::new("preparation-dispatch").unwrap());
+    preparing.dispatch_knowledge = DispatchKnowledge::Prepared;
+    let wire = serde_json::to_value(&preparing).unwrap();
+    assert_eq!(wire["state"], "preparing");
+    assert_eq!(
+        serde_json::from_value::<SessionSnapshot>(wire.clone()).unwrap(),
+        preparing
+    );
+    let common = boundary::artifact("common.schema.json").unwrap();
+    let response = boundary::artifact("response.schema.json").unwrap();
+    for schema in [
+        &common["$defs"]["snapshot"],
+        &response["oneOf"][0]["properties"]["result"]["properties"]["session"],
+    ] {
+        assert!(gateway_application::codex::contracts::valid(
+            &wire, schema, &common
+        ));
+        let mut invalid = wire.clone();
+        invalid["state"] = json!("provider-executing");
+        assert!(!gateway_application::codex::contracts::valid(
+            &invalid, schema, &common
+        ));
+    }
+}
+
+fn session_resource_limits() -> SessionResourceLimits {
+    SessionResourceLimits {
+        cost_unit: ReferenceId::new("operator-cost-unit").unwrap(),
+        amounts: SessionResourceAmounts {
+            model_attempts: 10,
+            input_tokens: 1000,
+            cost_microunits: 100,
+            ..SessionResourceAmounts::default()
+        },
+    }
+}
+
+fn resource_checkpoint() -> SessionCheckpoint {
+    let mut result = checkpoint();
+    result.goal = connector_goal();
+    result.resource_ledger = Some(SessionResourceLedger::new(session_resource_limits()).unwrap());
+    result
+}
+
+fn resource_binding(
+    checkpoint: &SessionCheckpoint,
+    reservation_revision: u64,
+    dispatch: &str,
+) -> ResourceReservationBinding {
+    ResourceReservationBinding {
+        owner: checkpoint.owner.clone(),
+        scope: checkpoint.goal.scope().clone(),
+        session: checkpoint.snapshot.session.clone(),
+        run: checkpoint.snapshot.run.clone(),
+        revision: revision(reservation_revision),
+        step: checkpoint.goal.as_connector().unwrap().steps()[0].clone(),
+        dispatch: DispatchId::new(dispatch).unwrap(),
+    }
+}
+
+fn add_resource_reservation(
+    checkpoint: &mut SessionCheckpoint,
+    binding: ResourceReservationBinding,
+) {
+    checkpoint
+        .resource_ledger
+        .as_mut()
+        .unwrap()
+        .reserve(
+            binding,
+            SessionResourceAmounts {
+                model_attempts: 1,
+                input_tokens: 100,
+                cost_microunits: 10,
+                ..SessionResourceAmounts::default()
+            },
+        )
+        .unwrap();
+}
+
+fn preparing_checkpoint() -> SessionCheckpoint {
+    let mut result = resource_checkpoint();
+    let binding = resource_binding(&result, 3, "preparing-reservation");
+    result.snapshot.dispatch = Some(binding.dispatch.clone());
+    result.snapshot.dispatch_knowledge = DispatchKnowledge::Prepared;
+    result.snapshot.state = SessionState::Preparing;
+    result.lease_until_ms = Some(99);
+    add_resource_reservation(&mut result, binding);
+    result
+}
+
+#[test]
+fn resource_checkpoint_requires_exact_owner_run_scope_registered_step_and_revision() {
+    let base = resource_checkpoint();
+    base.validate().unwrap();
+    for field in [
+        "owner",
+        "scope",
+        "session",
+        "run",
+        "step",
+        "future_revision",
+    ] {
+        let mut bad = base.clone();
+        let mut binding = resource_binding(&bad, 3, "foreign-reservation");
+        match field {
+            "owner" => binding.owner.project = ProjectId::new("different-project").unwrap(),
+            "scope" => binding.scope = ContextScopeId::new("different-scope").unwrap(),
+            "session" => binding.session = SessionId::new("different-session").unwrap(),
+            "run" => binding.run = RunId::new("different-run").unwrap(),
+            "step" => binding.step = PlanStepId::new("unregistered-step").unwrap(),
+            _ => binding.revision = revision(4),
+        }
+        add_resource_reservation(&mut bad, binding);
+        assert_eq!(
+            bad.validate(),
+            Err(SessionError::InvalidInteraction),
+            "{field}"
+        );
+    }
+}
+
+#[test]
+fn resource_journal_keeps_admission_consumption_and_reservation_history_immutable() {
+    let mut used = resource_checkpoint();
+    let binding = resource_binding(&used, 2, "retained-reservation");
+    add_resource_reservation(&mut used, binding);
+    used.validate().unwrap();
+    let current = FencedSession {
+        checkpoint: used,
+        fence: FenceToken::new(1).unwrap(),
+    };
+    append(&current, None).validate_against(&current).unwrap();
+    for field in [
+        "remove",
+        "rollback",
+        "increase_limits",
+        "change_cost_unit",
+        "replace_history",
+    ] {
+        let mut bad = append(&current, None);
+        match field {
+            "remove" => bad.next.resource_ledger = None,
+            "rollback" => {
+                bad.next.resource_ledger =
+                    Some(SessionResourceLedger::new(session_resource_limits()).unwrap());
+            }
+            "increase_limits" | "change_cost_unit" => {
+                let mut limits = session_resource_limits();
+                if field == "increase_limits" {
+                    limits.amounts.input_tokens += 1;
+                } else {
+                    limits.cost_unit = ReferenceId::new("another-cost-unit").unwrap();
+                }
+                bad.next.resource_ledger = Some(SessionResourceLedger::new(limits).unwrap());
+                let retained = resource_binding(&bad.next, 2, "retained-reservation");
+                add_resource_reservation(&mut bad.next, retained);
+            }
+            _ => {
+                bad.next.resource_ledger =
+                    Some(SessionResourceLedger::new(session_resource_limits()).unwrap());
+                let replacement = resource_binding(&bad.next, 2, "replacement-reservation");
+                add_resource_reservation(&mut bad.next, replacement);
+            }
+        }
+        assert_eq!(
+            bad.validate_against(&current),
+            Err(SessionError::InvalidState),
+            "{field}"
+        );
+    }
+    let mut no_admission = current.clone();
+    no_admission.checkpoint.resource_ledger = None;
+    let mut enabled_later = append(&no_admission, None);
+    enabled_later.next.resource_ledger =
+        Some(SessionResourceLedger::new(session_resource_limits()).unwrap());
+    assert_eq!(
+        enabled_later.validate_against(&no_admission),
+        Err(SessionError::InvalidState)
+    );
+}
+
+#[test]
+fn resource_journal_adds_one_exact_reservation_only_with_preparing_transition() {
+    let current = FencedSession {
+        checkpoint: resource_checkpoint(),
+        fence: FenceToken::new(1).unwrap(),
+    };
+    let mut next = append(&current, Some(at().command));
+    let binding = resource_binding(&next.next, 4, "new-preparation");
+    next.next.snapshot.state = SessionState::Preparing;
+    next.next.snapshot.dispatch = Some(binding.dispatch.clone());
+    next.next.snapshot.dispatch_knowledge = DispatchKnowledge::Prepared;
+    next.next.lease_until_ms = Some(99);
+    add_resource_reservation(&mut next.next, binding);
+    next.validate_against(&current).unwrap();
+    let mut outside_preparation = append(&current, Some(at().command));
+    outside_preparation.next = next.next.clone();
+    outside_preparation.next.snapshot.state = SessionState::Runnable;
+    assert_eq!(
+        outside_preparation.validate_against(&current),
+        Err(SessionError::InvalidState)
+    );
+    let mut wrong_dispatch = append(&current, Some(at().command));
+    wrong_dispatch.next = next.next.clone();
+    wrong_dispatch.next.snapshot.dispatch = Some(DispatchId::new("another-dispatch").unwrap());
+    assert!(wrong_dispatch.validate_against(&current).is_err());
+    let mut multiple = next;
+    multiple.next.resource_ledger =
+        Some(SessionResourceLedger::new(session_resource_limits()).unwrap());
+    let earlier = resource_binding(&multiple.next, 3, "additional-preparation");
+    add_resource_reservation(&mut multiple.next, earlier);
+    let latest = resource_binding(&multiple.next, 4, "new-preparation");
+    add_resource_reservation(&mut multiple.next, latest);
+    assert_eq!(
+        multiple.validate_against(&current),
+        Err(SessionError::InvalidState)
+    );
+}
+
+#[test]
+fn preparing_checkpoint_needs_a_current_reservation_and_bounded_lease_without_before_snapshot() {
+    let valid = preparing_checkpoint();
+    valid.validate().unwrap();
+    for field in [
+        "artifact_goal",
+        "missing_ledger",
+        "empty_ledger",
+        "missing_lease",
+        "zero_lease",
+        "lease_exceeds_deadline",
+        "wrong_dispatch",
+        "old_reservation",
+        "old_active_reservation",
+        "before_snapshot",
+    ] {
+        let mut bad = valid.clone();
+        match field {
+            "artifact_goal" => bad.goal = checkpoint().goal,
+            "missing_ledger" => bad.resource_ledger = None,
+            "empty_ledger" => {
+                bad.resource_ledger =
+                    Some(SessionResourceLedger::new(session_resource_limits()).unwrap())
+            }
+            "missing_lease" => bad.lease_until_ms = None,
+            "zero_lease" => bad.lease_until_ms = Some(0),
+            "lease_exceeds_deadline" => bad.lease_until_ms = Some(101),
+            "wrong_dispatch" => {
+                bad.snapshot.dispatch = Some(DispatchId::new("unreserved").unwrap())
+            }
+            "old_reservation" | "old_active_reservation" => {
+                bad.resource_ledger =
+                    Some(SessionResourceLedger::new(session_resource_limits()).unwrap());
+                let old = resource_binding(&bad, 2, "preparing-reservation");
+                add_resource_reservation(&mut bad, old);
+                if field == "old_active_reservation" {
+                    let latest = resource_binding(&bad, 3, "newer-reservation");
+                    add_resource_reservation(&mut bad, latest);
+                }
+            }
+            _ => {
+                let mut binding = connector_binding(3);
+                binding.dispatch = bad.snapshot.dispatch.clone().unwrap();
+                bad.connector_step_snapshots.push(ConnectorStepSnapshotRef {
+                    binding,
+                    phase: ConnectorSnapshotPhase::Before,
+                    record: reference("premature-before-snapshot"),
+                });
+            }
+        }
+        assert!(bad.validate().is_err(), "{field}");
+    }
+}
+
+#[test]
+fn producer_input_record_cannot_be_appended_without_exact_consent_linkage() {
+    let current = FencedSession {
+        checkpoint: checkpoint(),
+        fence: FenceToken::new(1).unwrap(),
+    };
+    let mut transition = append(&current, None);
+    transition.records.push(RecordWrite {
+        reference: reference("unlinked-producer-data"),
+        kind: RecordKind::ConnectorProducerInput,
+        bytes: b"unlinked-producer-data".to_vec(),
+    });
+    assert_eq!(
+        transition.validate_against(&current),
         Err(SessionError::InvalidState)
     );
 }

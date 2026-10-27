@@ -35,6 +35,19 @@ append commits state, budget reservations, command acceptance, fencing and
 released records together. Failed validation or storage operations roll back;
 an ambiguous commit returns `CG_OUTCOME_UNKNOWN` and requires inspection.
 
+Current session loads use a fresh PostgreSQL statement snapshot of the scoped
+payload, digest and revision. They validate the checksum, complete journal,
+owner and typed checkpoint without inserting a row or acquiring a writer row
+lock. Conditional mutations still use transactions and fencing; a read result
+cannot authorize a later write. An absent journal returns the same scope denial
+as an absent owner-bound session. This change reduces repeated liveness-read
+cost without caching claims between callbacks. The
+[fresh-read component report](evidence/EPIC-08.03-postgres-fresh-read-validation.json.gz)
+retains 21 repository and 15 local-admission passing tests, including separate
+connections, a held writer lock, committed revision visibility, stale-CAS denial
+and corruption rejection. It does not requalify the historical full runtime or
+resolve the remaining connector-target latency by itself.
+
 ## Acceptance evidence
 
 | Requirement | Production behavior | Meaningful verification |
@@ -69,6 +82,48 @@ process/projection resources. Supply:
 - `execution: {"mode":"DEVELOPMENT","profile":"FULL_PATH"}` matching the
   current canonical plan/policy, bounded `max_actions`/`max_retries`, absolute-run
   TTL configuration `ttl_ms` (1..86400000), and `consent_required`.
+
+An optional trusted `resource_limits` object admits cumulative resource units
+for new sessions. It contains a `cost_unit` reference and an `amounts` object
+with explicit unsigned integer fields: `model_attempts`, `input_tokens`,
+`output_tokens`, `output_bytes`, `cost_microunits`, `retrieval_rounds`,
+`retrieval_results`, `retrieval_tokens`, `repair_attempts`, `worker_attempts`,
+and `worker_compute_units`. Optional `connector_calls` defaults to zero and is
+omitted when zero to preserve legacy reservation identities. One unit covers
+one logical discovery, invocation or resource read, including bounded discovery
+negotiation and pagination. At least one limit must be positive; zero refuses
+that resource. Other missing fields and unknown fields are rejected. Admission is
+authenticated against the owner and exact registered goal before Start; later
+configuration changes cannot raise an existing session's limits.
+
+The PostgreSQL checkpoint persists immutable resource limits, total conservative
+charges and exact step reservations. Before connector preparation the
+coordinator commits `preparing`, its reservation and command outcome together.
+Approved consent resume obtains a fenced claim on that same reservation before
+reading/reconstructing the proposal. Failed persistence releases no model or
+resume call. Cancel or expired-lease recovery retains consumed resources and
+never repeats preparation. Separate writer/reader-process tests qualify this
+storage behavior; they do not qualify a PostgreSQL server restart or external
+provider effects. The local host shares an `Arc<LocalSessionAccess>` with future
+runtime adapters. This object owns current authenticated configuration and
+resource-claim lookup against the same PostgreSQL journal; it owns neither a
+runtime nor a coordinator. It
+checks exact owner, scope, session/run, revision/fence, reservation/phase and
+both wall-clock and original monotone deadlines. Joined invocation/connector
+admission still requires producer and target configuration.
+
+`host_mapping::policy` maps canonical policy against the exact current
+resolution without requiring a context projection. `PolicyApplication::step_input`
+and ordinary plan evaluation use the same native assembly, including resolved
+capability closure, process readiness, constraints, preconditions and structural
+prerequisites. A connector source must use those inputs and check that its
+requested capability belongs to the actual resolved step.
+
+`SessionConnectorRun` enforces connector-only child allocations with hard
+operation quotes and current CG-09/claim checks; its controlled-peer tests do
+not install it in the shipped runtime. `LocalConnectorRuntime` remains
+unsupported until current producer/policy/connector/readback composition and
+remaining retrieval/worker enforcement are implemented.
 
 The registered Intent has exactly one Boolean `EQUALS true` condition named
 `context-verified`, subject `cg.context.<projection-id>.verified`, a corresponding
@@ -146,3 +201,50 @@ cognitive journal kinds. Rollback disables the mapping's session capability and
 restores unsupported discovery; it does not delete PostgreSQL data. Terminal
 sessions and owner-wide command ledgers are retained together. No owner transfer,
 external-effect retry, semantic fallback or provider invocation is implemented.
+
+## Connector retained-goal verification follow-up
+
+The shipped local connector runtime implements pure final verification through
+`local_sessions/goal_verifier.rs`. It authenticates the current configuration
+and exact PostgreSQL checkpoint, reloads the actual owner-scoped immutable
+goal-readback records, and builds the same complete readset as the application
+coordinator. Supplied readbacks cannot replace stored records. Native
+`ClosedLoop::verify_retained` evaluates the original registered intent, including
+criteria and invariants, without a model or connector call. Each receipt binds
+the full goal and internally hashed records, quality, source/version domains
+and condition bindings. Legacy receipts without this readset binding cannot
+qualify a new connector completion. New connector final evidence uses contract
+version `2.0`; historical terminal evidence remains readable unchanged.
+
+The read adapter uses the same store instance and checks the original checkpoint
+and fence before each record lookup. Deadline checks surround the store reads
+and native verification; current configuration and native resolution pins are
+checked again before returning. That final check also loads the claim through
+the currently configured repository: unchanged locator paths cannot hide a
+changed store configuration behind the original open handle. Cancellation or a
+concurrent checkpoint change invalidates the verification. These reads do not mint another resource allowance
+or update the checkpoint. A PostgreSQL component scenario exercises normalized
+source data through storage, decoding and the actual product verifier, including
+weakened-goal rejection, deadline expiry and concurrent cancellation.
+
+This delivered verifier consumes retained observations. Connector preparation,
+execution and acquisition of new snapshots/readbacks still require their real
+policy, producer and transport composition. The complete connector lifecycle,
+installed-client/live qualification and current expanded coverage gates remain
+open; the verifier component tests do not establish EPIC-08 acceptance.
+
+### Private capability reference aliases
+
+The private runtime's `cg.connector-capability` documents register full scoped
+reference aliases for native `CapabilityDefinition` values. Their revisions
+belong to the operator registration. The native capability index has no separate
+capability revision, so the runtime does not derive one from an ID, registry
+fingerprint or connector inventory version.
+
+Producer-join references must match the loaded registration in ID, scope,
+contract, contract version, revision and digest. The loaded JSON must parse as a
+native declaration and canonically equal the actual currently resolved action
+declaration. The descriptor ID and native CapabilityId must agree. Unsupported
+contracts, drifted definitions, mismatched pins and incorrect content digests
+are rejected. This check authenticates the referenced data; native policy,
+Process/Context, consent and current inventory checks still govern dispatch.

@@ -4,7 +4,7 @@ use gateway_application::{
     connector_manifest::{CompatibilityDecision, ConnectorCompatibilityProfile, ConnectorManifest},
     connectors::*,
 };
-use gateway_domain::{SourceId, TypedValue};
+use gateway_domain::{CapabilityId, SourceId, TypedValue};
 use serde_json::{Value, json};
 use std::{
     collections::BTreeMap,
@@ -16,6 +16,14 @@ use std::{
 /// #227 owns canonical mapping, #228 owns evidence normalization. Both must fail
 /// closed for unrecognized schemas and preserve the supplied request bindings.
 pub trait ConnectorMapping: Send + Sync {
+    fn recovery_support(
+        &self,
+        _request: &ConnectorRequest,
+        _source: Option<&SourceId>,
+        _wire: &ProtocolInventory,
+    ) -> Result<gateway_application::connector_resilience::RecoverySupport, Error> {
+        Ok(Default::default())
+    }
     fn inventory(
         &self,
         target: &ConnectorTarget,
@@ -34,6 +42,18 @@ pub trait ConnectorMapping: Send + Sync {
         source: Option<&SourceId>,
         result: ProtocolResult,
     ) -> Result<ConnectorObservation, Error>;
+    /// Providers that cannot prove a complete mapped schema remain unavailable
+    /// to tool-capable invocation adapters by default.
+    fn tool_schema(
+        &self,
+        _target: &ConnectorTarget,
+        _manifest: &ConnectorManifest,
+        _wire: &ProtocolInventory,
+        _capability: &CapabilityId,
+        _inventory_revision: &gateway_domain::ContentDigest,
+    ) -> Result<super::mapping::MappedToolSchema, Error> {
+        Err(Error::Unsupported)
+    }
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum WireOperation {
@@ -58,6 +78,19 @@ pub enum ProtocolResult {
         contents: Vec<Value>,
     },
 }
+
+type DispatchPreflight<'a> = dyn Fn(&ConnectorDispatch) -> Result<(), ConnectorFailure> + 'a;
+
+enum PreparedOperation {
+    Tool {
+        name: String,
+        arguments: serde_json::Map<String, Value>,
+        output_schema: Option<Value>,
+    },
+    Resource {
+        uri: String,
+    },
+}
 struct Active<'a>(&'a Mutex<Option<CallContext>>);
 impl Drop for Active<'_> {
     fn drop(&mut self) {
@@ -69,6 +102,8 @@ struct State {
     canonical: Option<ConnectorInventory>,
 }
 struct Runtime {
+    resilience: super::resilience::Resilience,
+    observer: Arc<dyn Observer>,
     state: Mutex<State>,
     target: ConnectorTarget,
     manifest: ConnectorManifest,
@@ -105,6 +140,24 @@ impl McpConnectorHost {
         mapping: Box<dyn ConnectorMapping>,
         observer: Arc<dyn Observer>,
     ) -> Result<Self, Error> {
+        Self::new_with_resilience(
+            config,
+            factory,
+            admission,
+            mapping,
+            observer,
+            ResilienceConfig::default(),
+        )
+    }
+    pub fn new_with_resilience(
+        config: HostConfig,
+        factory: Box<dyn TransportFactory>,
+        admission: Arc<dyn ConnectorAdmission>,
+        mapping: Box<dyn ConnectorMapping>,
+        observer: Arc<dyn Observer>,
+        resilience: ResilienceConfig,
+    ) -> Result<Self, Error> {
+        resilience.validate()?;
         let HostConfig {
             target,
             manifest,
@@ -122,6 +175,8 @@ impl McpConnectorHost {
         }
         Ok(Self {
             runtime: Runtime {
+                resilience: super::resilience::Resilience::new(resilience, observer.clone()),
+                observer: observer.clone(),
                 state: Mutex::new(State {
                     session: Session::new(limits.clone(), observer, {
                         let version = manifest.definition().server_version;
@@ -140,6 +195,93 @@ impl McpConnectorHost {
             },
         })
     }
+    /// Local content-free health; never probes or consumes provider budget.
+    pub fn health_snapshot(&self) -> gateway_application::connector_resilience::HealthSnapshot {
+        let mut snapshot = self.runtime.resilience.snapshot();
+        if self.runtime.disabled.load(Ordering::Acquire) {
+            snapshot.health =
+                gateway_application::connector_resilience::ConnectorHealth::Unavailable;
+        }
+        snapshot
+    }
+    pub(crate) fn operation_timeout(&self) -> Duration {
+        self.runtime.limits.call_timeout
+    }
+    pub(crate) fn record_retry(
+        &self,
+        context: &CallContext,
+        decision: gateway_application::connector_resilience::RetryDecision,
+    ) {
+        self.runtime.observer.record(Event {
+            kind: EventKind::Retry(decision),
+            request_id: None,
+            correlation: context.correlation.clone(),
+        });
+    }
+    /// Current, inventory-bound provider metadata for session/goal consumers.
+    /// This lookup grants no dispatch or reconciliation authority.
+    pub fn recovery_support(
+        &self,
+        request: &ConnectorRequest,
+        source: Option<&SourceId>,
+    ) -> Result<gateway_application::connector_resilience::RecoverySupport, ConnectorFailure> {
+        let context = self.runtime.context(request.correlation.clone());
+        self.runtime
+            .check_target(&request.target, &request.correlation)?;
+        let state = self.runtime.lock(&context)?;
+        let inventory = state.canonical.as_ref().ok_or_else(|| {
+            Error::InventoryChanged.failure(&request.correlation, ConnectorEffect::NotDispatched)
+        })?;
+        if inventory.revision != request.inventory_revision
+            || !inventory
+                .capabilities
+                .iter()
+                .any(|c| c.capability == request.capability && c.class == request.class)
+            || source.is_some_and(|source| !inventory.resources.contains(source))
+        {
+            return Err(Error::InventoryChanged
+                .failure(&request.correlation, ConnectorEffect::NotDispatched));
+        }
+        let support = self
+            .runtime
+            .mapping
+            .recovery_support(
+                request,
+                source,
+                state.session.inventory.as_ref().ok_or_else(|| {
+                    Error::InventoryChanged
+                        .failure(&request.correlation, ConnectorEffect::NotDispatched)
+                })?,
+            )
+            .map_err(|e| e.failure(&request.correlation, ConnectorEffect::NotDispatched))?;
+        use gateway_application::connector_resilience::{ProviderIdempotency, RetrySafety};
+        let unsafe_metadata = (support.retry == RetrySafety::ReadOnly
+            && matches!(
+                request.class,
+                ConnectorOperationClass::Mutate | ConnectorOperationClass::Admin
+            ))
+            || matches!(&support.idempotency, ProviderIdempotency::Keyed { argument }
+                if !request.arguments.get(argument).is_some_and(|value| matches!(value,
+                    TypedValue::String(key) if !key.as_str().is_empty())));
+        if unsafe_metadata {
+            return Err(Error::Schema.failure(&request.correlation, ConnectorEffect::NotDispatched));
+        }
+        if let gateway_application::connector_resilience::ReadBackSupport::Capability(capability) =
+            &support.read_back
+            && !state.canonical.as_ref().is_some_and(|i| {
+                i.capabilities.iter().any(|c| {
+                    c.capability == *capability
+                        && !matches!(
+                            c.class,
+                            ConnectorOperationClass::Mutate | ConnectorOperationClass::Admin
+                        )
+                })
+            })
+        {
+            return Err(Error::Schema.failure(&request.correlation, ConnectorEffect::NotDispatched));
+        }
+        Ok(support)
+    }
     /// Host-provided cancellation handle; its deadline is narrowed by dispatch and
     /// configured bounds. Callers cannot extend an admitted budget.
     pub fn invoke_with_context(
@@ -147,6 +289,26 @@ impl McpConnectorHost {
         request: &ConnectorRequest,
         source: Option<&SourceId>,
         context: &CallContext,
+    ) -> Result<ConnectorObservation, ConnectorFailure> {
+        self.invoke_guarded(request, source, context, None)
+    }
+
+    pub(crate) fn invoke_with_context_and_preflight(
+        &self,
+        request: &ConnectorRequest,
+        source: Option<&SourceId>,
+        context: &CallContext,
+        preflight: &DispatchPreflight<'_>,
+    ) -> Result<ConnectorObservation, ConnectorFailure> {
+        self.invoke_guarded(request, source, context, Some(preflight))
+    }
+
+    fn invoke_guarded(
+        &self,
+        request: &ConnectorRequest,
+        source: Option<&SourceId>,
+        context: &CallContext,
+        preflight: Option<&DispatchPreflight<'_>>,
     ) -> Result<ConnectorObservation, ConnectorFailure> {
         context
             .check()
@@ -164,7 +326,20 @@ impl McpConnectorHost {
                 Error::Configuration.failure(&request.correlation, ConnectorEffect::NotDispatched)
             );
         }
-        self.runtime.dispatch(&dispatch, source, context)
+        if let Some(preflight) = preflight {
+            preflight(&dispatch)?;
+        }
+        self.runtime
+            .dispatch_guarded(&dispatch, source, context, preflight)
+    }
+    pub(crate) fn discover_with_context_and_preflight(
+        &self,
+        target: &ConnectorTarget,
+        context: &CallContext,
+        preflight: &dyn Fn() -> Result<(), ConnectorFailure>,
+    ) -> Result<ConnectorInventory, ConnectorFailure> {
+        self.runtime
+            .discover_guarded(target, context, Some(preflight), true)
     }
     pub fn session_state(&self) -> Result<SessionState, Error> {
         self.runtime
@@ -172,6 +347,21 @@ impl McpConnectorHost {
             .try_lock()
             .map(|s| s.session.state)
             .map_err(|_| Error::InvalidState)
+    }
+    pub(crate) fn configured_target(&self) -> &ConnectorTarget {
+        &self.runtime.target
+    }
+
+    /// Retrieve a tool's complete schemas from the exact current canonical
+    /// inventory. This exposes no transport handle and conveys no permission.
+    pub fn tool_schema(
+        &self,
+        target: &ConnectorTarget,
+        capability: &CapabilityId,
+        inventory_revision: &gateway_domain::ContentDigest,
+    ) -> Result<super::mapping::MappedToolSchema, Error> {
+        self.runtime
+            .tool_schema(target, capability, inventory_revision)
     }
 }
 impl Runtime {
@@ -181,6 +371,47 @@ impl Runtime {
             context.cancel();
         }
         Active(&self.active)
+    }
+
+    fn tool_schema(
+        &self,
+        target: &ConnectorTarget,
+        capability: &CapabilityId,
+        expected_revision: &gateway_domain::ContentDigest,
+    ) -> Result<super::mapping::MappedToolSchema, Error> {
+        let context = self.context(target.connector.clone());
+        if target != &self.target {
+            return Err(Error::Configuration);
+        }
+        context.check()?;
+        let state = self
+            .lock(&context)
+            .map_err(|failure| tool_schema_lock_error(failure.code))?;
+        state.session.ready()?;
+        let inventory = state.canonical.as_ref().ok_or(Error::InventoryChanged)?;
+        if inventory.target != *target || &inventory.revision != expected_revision {
+            return Err(Error::InventoryChanged);
+        }
+        let wire = state
+            .session
+            .inventory
+            .as_ref()
+            .ok_or(Error::InventoryChanged)?;
+        let schema = self.mapping.tool_schema(
+            target,
+            &self.manifest,
+            wire,
+            capability,
+            expected_revision,
+        )?;
+        context.check()?;
+        if schema.target != *target
+            || schema.capability != *capability
+            || &schema.inventory_revision != expected_revision
+        {
+            return Err(Error::InventoryChanged);
+        }
+        Ok(schema)
     }
     fn context(&self, correlation: NonEmptyText) -> CallContext {
         CallContext::new(correlation, Instant::now() + self.limits.call_timeout)
@@ -215,8 +446,42 @@ impl Runtime {
         source: Option<&SourceId>,
         supplied: &CallContext,
     ) -> Result<ConnectorObservation, ConnectorFailure> {
+        self.dispatch_guarded(dispatch, source, supplied, None)
+    }
+
+    fn dispatch_guarded(
+        &self,
+        dispatch: &ConnectorDispatch,
+        source: Option<&SourceId>,
+        supplied: &CallContext,
+        preflight: Option<&DispatchPreflight<'_>>,
+    ) -> Result<ConnectorObservation, ConnectorFailure> {
+        self.resilience.run(supplied, || {
+            self.dispatch_once(dispatch, source, supplied, preflight)
+        })
+    }
+    fn dispatch_once(
+        &self,
+        dispatch: &ConnectorDispatch,
+        source: Option<&SourceId>,
+        supplied: &CallContext,
+        preflight: Option<&DispatchPreflight<'_>>,
+    ) -> Result<ConnectorObservation, ConnectorFailure> {
         let request = &dispatch.request;
         let mut context = supplied.clone();
+        if preflight.is_some() {
+            let admission = self.admission.clone();
+            let dispatch = dispatch.clone();
+            let source = source.cloned();
+            // Preserve the outer resource/quote guard, then validate current
+            // CG-09 facts last. No source callback may silently revoke policy
+            // between that validation and the next bounded I/O operation.
+            context = context.with_guard(Arc::new(move || {
+                admission
+                    .validate_current_dispatch(&dispatch, source.as_ref())
+                    .map_err(|failure| Error::SessionDenied(failure.code))
+            }));
+        }
         let remaining = u64::try_from(dispatch.deadline.seconds())
             .ok()
             .and_then(|s| UNIX_EPOCH.checked_add(Duration::from_secs(s)))
@@ -230,6 +495,9 @@ impl Runtime {
             .deadline
             .min(Instant::now() + remaining.unwrap_or_default().min(self.limits.call_timeout));
         self.check_target(&request.target, &request.correlation)?;
+        if let Some(preflight) = preflight {
+            preflight(dispatch)?;
+        }
         let mut state = self.lock(&context)?;
         state.session.sent = false;
         if self.disabled.load(Ordering::Acquire) {
@@ -250,7 +518,13 @@ impl Runtime {
         let result = self.prepare(&state, dispatch, source);
         let operation =
             result.map_err(|e| e.failure(&request.correlation, ConnectorEffect::NotDispatched))?;
+        let operation = self
+            .prepare_execution(&state.session, operation)
+            .map_err(|e| e.failure(&request.correlation, ConnectorEffect::NotDispatched))?;
         self.admission.revalidate(dispatch, source)?;
+        if let Some(preflight) = preflight {
+            preflight(dispatch)?;
+        }
         context
             .check()
             .map_err(|e| e.failure(&request.correlation, ConnectorEffect::NotDispatched))?;
@@ -296,8 +570,12 @@ impl Runtime {
                 Ok(observation)
             }
             Err(error) => {
-                state.canonical = None;
-                state.session.failed(error, &context);
+                if let Error::RateLimited(delay) = error {
+                    self.resilience.rate_limited(delay);
+                } else {
+                    state.canonical = None;
+                    state.session.failed(error, &context);
+                }
                 Err(error.failure(&request.correlation, effect))
             }
         }
@@ -336,12 +614,11 @@ impl Runtime {
         }
         Ok(operation)
     }
-    fn execute(
+    fn prepare_execution(
         &self,
-        session: &mut Session,
+        session: &Session,
         operation: WireOperation,
-        context: &CallContext,
-    ) -> Result<ProtocolResult, Error> {
+    ) -> Result<PreparedOperation, Error> {
         let inventory = session.inventory.as_ref().ok_or(Error::InventoryChanged)?;
         match operation {
             WireOperation::Tool { name, arguments } => {
@@ -362,6 +639,36 @@ impl Runtime {
                     .map(|(key, value)| Ok((key.as_str().to_owned(), typed(value)?)))
                     .collect::<Result<_, Error>>()?;
                 super::schema::accepts(&input_schema, &Value::Object(arguments.clone()))?;
+                Ok(PreparedOperation::Tool {
+                    name,
+                    arguments,
+                    output_schema,
+                })
+            }
+            WireOperation::Resource { uri } => {
+                if !inventory
+                    .resources
+                    .iter()
+                    .any(|r| r["uri"].as_str() == Some(&uri))
+                {
+                    return Err(Error::Schema);
+                }
+                Ok(PreparedOperation::Resource { uri })
+            }
+        }
+    }
+    fn execute(
+        &self,
+        session: &mut Session,
+        operation: PreparedOperation,
+        context: &CallContext,
+    ) -> Result<ProtocolResult, Error> {
+        match operation {
+            PreparedOperation::Tool {
+                name,
+                arguments,
+                output_schema,
+            } => {
                 let result = session.rpc(
                     "tools/call",
                     json!({"name":name,"arguments":arguments}),
@@ -388,15 +695,7 @@ impl Runtime {
                     is_error,
                 })
             }
-            WireOperation::Resource { uri } => {
-                // Template expansion is deferred to explicit mapping qualification.
-                if !inventory
-                    .resources
-                    .iter()
-                    .any(|r| r["uri"].as_str() == Some(&uri))
-                {
-                    return Err(Error::Schema);
-                }
+            PreparedOperation::Resource { uri } => {
                 let result = session.rpc("resources/read", json!({"uri":uri}), context)?;
                 let contents = result["contents"].as_array().ok_or(Error::Schema)?.clone();
                 if contents.iter().any(|c| {
@@ -412,6 +711,14 @@ impl Runtime {
                 Ok(ProtocolResult::Resource { contents })
             }
         }
+    }
+}
+
+fn tool_schema_lock_error(code: ConnectorFailureCode) -> Error {
+    match code {
+        ConnectorFailureCode::Backpressure => Error::InvalidState,
+        ConnectorFailureCode::Timeout => Error::Timeout,
+        _ => Error::Unavailable,
     }
 }
 
@@ -506,49 +813,49 @@ impl ConnectorRuntimePort for Runtime {
         )
     }
     fn discover(&self, target: &ConnectorTarget) -> Result<ConnectorInventory, ConnectorFailure> {
-        let context = self.context(target.connector.clone());
-        self.check_target(target, &context.correlation)?;
-        let mut state = self.lock(&context)?;
-        let _active = self.activate(&context);
-        state.canonical = None;
-        let result = state
-            .session
-            .discover(&context)
-            .and_then(|wire| self.mapping.inventory(target, &self.manifest, &wire))
-            .and_then(|inventory| {
-                context.check()?;
-                Ok(inventory)
-            });
-        match result {
-            Ok(inventory)
-                if inventory.target == *target
-                    && inventory.capabilities.len() <= self.limits.items
-                    && inventory.resources.len() <= self.limits.items
-                    && inventory
-                        .capabilities
-                        .windows(2)
-                        .all(|p| p[0].capability < p[1].capability)
-                    && inventory.resources.windows(2).all(|p| p[0] < p[1]) =>
-            {
-                state.canonical = Some(inventory.clone());
-                Ok(inventory)
-            }
-            Ok(_) => {
-                Err(Error::Schema.failure(&context.correlation, ConnectorEffect::NotDispatched))
-            }
-            Err(error) => {
-                state.session.failed(error, &context);
-                Err(error.failure(&context.correlation, ConnectorEffect::NotDispatched))
-            }
-        }
+        self.discover_guarded(target, &self.context(target.connector.clone()), None, false)
     }
     fn lifecycle(
         &self,
         target: &ConnectorTarget,
         command: ConnectorLifecycleCommand,
     ) -> Result<ConnectorLifecycleState, ConnectorFailure> {
+        if matches!(
+            command,
+            ConnectorLifecycleCommand::Connect | ConnectorLifecycleCommand::Health
+        ) {
+            let context = self.context(target.connector.clone());
+            self.resilience
+                .run(&context, || self.lifecycle_once(target, command))
+        } else {
+            self.lifecycle_once(target, command)
+        }
+    }
+}
+impl Runtime {
+    fn lifecycle_once(
+        &self,
+        target: &ConnectorTarget,
+        command: ConnectorLifecycleCommand,
+    ) -> Result<ConnectorLifecycleState, ConnectorFailure> {
         let context = self.context(target.connector.clone());
-        self.check_target(target, &context.correlation)?;
+        let draining = matches!(
+            command,
+            ConnectorLifecycleCommand::Disable | ConnectorLifecycleCommand::Shutdown
+        );
+        if draining {
+            // Revocation must not prevent cleanup of this exact configured
+            // target. Cleanup grants no new protocol/application operation.
+            if *target != self.target {
+                return Err(ConnectorFailure {
+                    code: ConnectorFailureCode::ScopeMismatch,
+                    effect: ConnectorEffect::NotDispatched,
+                    correlation: context.correlation.clone(),
+                });
+            }
+        } else {
+            self.check_target(target, &context.correlation)?;
+        }
         if matches!(
             command,
             ConnectorLifecycleCommand::Disable | ConnectorLifecycleCommand::Shutdown
@@ -563,10 +870,6 @@ impl ConnectorRuntimePort for Runtime {
                 active.cancel();
             }
         }
-        let draining = matches!(
-            command,
-            ConnectorLifecycleCommand::Disable | ConnectorLifecycleCommand::Shutdown
-        );
         let until = Instant::now() + self.limits.shutdown * 4;
         let mut state = loop {
             match self.lock(&context) {
@@ -619,6 +922,9 @@ impl ConnectorRuntimePort for Runtime {
             }
         };
         result.map_err(|error| {
+            if let Error::RateLimited(delay) = error {
+                self.resilience.rate_limited(delay);
+            }
             state.canonical = None;
             self.factory.connection_closed();
             if error != Error::InvalidState && state.session.state != SessionState::Degraded {
@@ -626,6 +932,136 @@ impl ConnectorRuntimePort for Runtime {
             }
             error.failure(&context.correlation, ConnectorEffect::NotDispatched)
         })
+    }
+}
+
+impl Runtime {
+    fn discover_guarded(
+        &self,
+        target: &ConnectorTarget,
+        supplied: &CallContext,
+        preflight: Option<&dyn Fn() -> Result<(), ConnectorFailure>>,
+        bootstrap: bool,
+    ) -> Result<ConnectorInventory, ConnectorFailure> {
+        self.resilience.run(supplied, || {
+            self.discover_once(target, supplied, preflight, bootstrap)
+        })
+    }
+    fn discover_once(
+        &self,
+        target: &ConnectorTarget,
+        supplied: &CallContext,
+        preflight: Option<&dyn Fn() -> Result<(), ConnectorFailure>>,
+        bootstrap: bool,
+    ) -> Result<ConnectorInventory, ConnectorFailure> {
+        let mut context = supplied.clone();
+        if preflight.is_some() {
+            let admission = self.admission.clone();
+            let target = target.clone();
+            // Current target admission runs after quote callbacks and before
+            // the final exact resource join on every bounded I/O check.
+            context = context.with_guard(Arc::new(move || {
+                admission
+                    .admit_target(&target)
+                    .map_err(|failure| Error::SessionDenied(failure.code))
+            }));
+        }
+        context.deadline = context
+            .deadline
+            .min(Instant::now() + self.limits.call_timeout);
+        context
+            .check()
+            .map_err(|e| e.failure(&context.correlation, ConnectorEffect::NotDispatched))?;
+        self.check_target(target, &context.correlation)?;
+        if let Some(preflight) = preflight {
+            preflight()?;
+        }
+        let mut state = self.lock(&context)?;
+        if self.disabled.load(Ordering::Acquire) {
+            return Err(
+                Error::InvalidState.failure(&context.correlation, ConnectorEffect::NotDispatched)
+            );
+        }
+        let _active = self.activate(&context);
+        let initial_send_attempts = state.session.send_attempts;
+        let effect = |session: &Session| {
+            if session.send_attempts != initial_send_attempts {
+                ConnectorEffect::NoMutation
+            } else {
+                ConnectorEffect::NotDispatched
+            }
+        };
+        state.canonical = None;
+        if bootstrap {
+            state
+                .session
+                .connect(self.factory.as_ref(), &context)
+                .map_err(|e| {
+                    if let Error::RateLimited(delay) = e {
+                        self.resilience.rate_limited(delay);
+                    }
+                    e.failure(&context.correlation, effect(&state.session))
+                })?;
+        }
+        if let Some(preflight) = preflight {
+            preflight().map_err(|mut failure| {
+                failure.effect = effect(&state.session);
+                failure
+            })?;
+        }
+        context
+            .check()
+            .map_err(|e| e.failure(&context.correlation, effect(&state.session)))?;
+        let result = state
+            .session
+            .discover(&context)
+            .and_then(|wire| self.mapping.inventory(target, &self.manifest, &wire))
+            .and_then(|inventory| {
+                context.check()?;
+                Ok(inventory)
+            });
+        match result {
+            Ok(inventory)
+                if inventory.target == *target
+                    && inventory.capabilities.len() <= self.limits.items
+                    && inventory.resources.len() <= self.limits.items
+                    && inventory
+                        .capabilities
+                        .windows(2)
+                        .all(|p| p[0].capability < p[1].capability)
+                    && inventory.resources.windows(2).all(|p| p[0] < p[1]) =>
+            {
+                if let Some(preflight) = preflight {
+                    preflight().map_err(|mut failure| {
+                        failure.effect = effect(&state.session);
+                        failure
+                    })?;
+                }
+                context
+                    .check()
+                    .map_err(|e| e.failure(&context.correlation, effect(&state.session)))?;
+                state.canonical = Some(inventory.clone());
+                Ok(inventory)
+            }
+            Ok(_) => Err(Error::Schema.failure(&context.correlation, effect(&state.session))),
+            Err(error) => {
+                if let Error::RateLimited(delay) = error {
+                    self.resilience.rate_limited(delay);
+                }
+                state.session.failed(error, &context);
+                Err(error.failure(&context.correlation, effect(&state.session)))
+            }
+        }
+    }
+}
+
+impl gateway_application::connector_resilience::ConnectorRecoveryPort for McpConnectorHost {
+    fn recovery_support(
+        &self,
+        request: &ConnectorRequest,
+        source: Option<&SourceId>,
+    ) -> Result<gateway_application::connector_resilience::RecoverySupport, ConnectorFailure> {
+        McpConnectorHost::recovery_support(self, request, source)
     }
 }
 

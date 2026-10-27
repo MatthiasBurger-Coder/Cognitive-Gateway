@@ -1,23 +1,30 @@
 //! Optional HTTP transports for admitted, bounded model invocations. No SDK,
 //! credentials, provider errors or raw response bodies enter canonical records.
+use crate::invocation_host::session_tools::{
+    MAX_SESSION_TOOL_CALLS, ProviderFinish, ProviderTokenUsage, ProviderToolCall,
+    ProviderToolCompletion, ProviderToolFailure, SessionToolProviderPort,
+    validate_invocation_tool_pins,
+};
 use gateway_application::{
     invocation_resilience::{
         BoundedInvocationPort, BoundedInvocationRequest, InvocationAttemptResponse,
     },
     model_invocation::PreparedModelInvocation,
-    prompt_rendering::{PromptRendererPort, RenderInput},
+    prompt_rendering::{PromptRendererPort, RenderInput, ToolDefinition, render_data},
 };
+use gateway_context::PlannedContextHandoff;
 use gateway_domain::{
-    ReferenceId, ResolvedReference, SchemaVersion,
+    CapabilityId, ReferenceId, ResolvedReference, SchemaVersion, context_content_digest,
     invocation_resilience::{InvocationAttemptFailure, ProviderUsage},
     model_invocation::{
         EffectiveGenerationRecord, GenerationControl, GenerationValue, StructuredOutputMode,
     },
     prompt_rendering::{RenderDiagnostic, TokenizerProfile},
 };
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 use std::{
+    collections::BTreeMap,
     io::{Read, Write},
     process::{Command, Stdio},
     sync::Mutex,
@@ -174,6 +181,429 @@ impl PromptRendererPort for AdapterRenderer {
         .map_err(|_| RenderDiagnostic::RenderingFailed)
     }
 }
+
+/// Tool-capable rendering is a distinct format/profile from the result-only
+/// AdapterRenderer. It binds the exact admitted schema and connector inventory
+/// into the request before token accounting.
+pub struct SessionToolHttpRenderer {
+    kind: AdapterKind,
+    prepared: PreparedModelInvocation,
+    handoff: PlannedContextHandoff,
+    tools: BTreeMap<CapabilityId, ToolDefinition>,
+    runtime_model: Option<RuntimeModelBinding>,
+    wire_mode: SessionToolWireMode,
+}
+
+/// Provider function names are transport aliases, never capability identities.
+/// PortableV1 also preserves optional arguments by disabling provider strict
+/// decoding where the admitted native schema cannot express its strict subset.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum SessionToolWireMode {
+    CanonicalV1,
+    PortableV1,
+}
+
+impl SessionToolWireMode {
+    fn template_version(self, runtime_model: bool) -> &'static str {
+        match (self, runtime_model) {
+            (Self::CanonicalV1, false) => "1",
+            (Self::CanonicalV1, true) => "2",
+            (Self::PortableV1, false) => "3",
+            (Self::PortableV1, true) => "4",
+        }
+    }
+
+    fn names(
+        self,
+        tools: &BTreeMap<CapabilityId, ToolDefinition>,
+    ) -> Result<BTreeMap<String, CapabilityId>, AdapterDiagnostic> {
+        let mut names = BTreeMap::new();
+        for (id, tool) in tools {
+            let name = match self {
+                Self::CanonicalV1 => id.as_str().to_owned(),
+                Self::PortableV1 => {
+                    let bytes =
+                        serde_json::to_vec(tool).map_err(|_| AdapterDiagnostic::InvalidBinding)?;
+                    let digest = context_content_digest(&bytes);
+                    format!("cg_tool_{}", &digest.as_str()[..56])
+                }
+            };
+            if names.insert(name, id.clone()).is_some() {
+                return Err(AdapterDiagnostic::InvalidBinding);
+            }
+        }
+        Ok(names)
+    }
+}
+
+impl SessionToolHttpRenderer {
+    pub fn new(
+        kind: AdapterKind,
+        prepared: PreparedModelInvocation,
+        handoff: PlannedContextHandoff,
+        tools: BTreeMap<CapabilityId, ToolDefinition>,
+    ) -> Result<Self, AdapterDiagnostic> {
+        let data = prepared.invocation().data();
+        if data.generation.data().structured_output_mode != StructuredOutputMode::ToolProposal
+            || tools.is_empty()
+            || tools.len() != data.permitted_capabilities.len()
+            || tools.iter().any(|(id, tool)| {
+                let Some(pin) = &tool.connector_inventory else {
+                    return true;
+                };
+                id != &tool.binding.id
+                    || data.permitted_capabilities.get(id) != Some(&tool.binding)
+                    || tool.binding.scope != data.task.scope
+                    || pin.scope != data.task.scope
+                    || serde_json::to_vec(&tool.input.json_schema())
+                        .ok()
+                        .map(|bytes| context_content_digest(&bytes))
+                        != Some(pin.argument_schema_digest.clone())
+            })
+        {
+            return Err(AdapterDiagnostic::CapabilityMismatch);
+        }
+        Ok(Self {
+            kind,
+            prepared,
+            handoff,
+            tools,
+            runtime_model: None,
+            wire_mode: SessionToolWireMode::CanonicalV1,
+        })
+    }
+
+    /// Must match the adapter and the producer's pinned tokenizer profile.
+    pub fn with_wire_mode(mut self, mode: SessionToolWireMode) -> Self {
+        self.wire_mode = mode;
+        self
+    }
+
+    pub fn for_runtime(
+        kind: AdapterKind,
+        prepared: PreparedModelInvocation,
+        handoff: PlannedContextHandoff,
+        tools: BTreeMap<CapabilityId, ToolDefinition>,
+        binding: RuntimeModelBinding,
+    ) -> Result<Self, AdapterDiagnostic> {
+        binding.validate()?;
+        if prepared.capability().data().model != binding.canonical {
+            return Err(AdapterDiagnostic::InvalidBinding);
+        }
+        let mut renderer = Self::new(kind, prepared, handoff, tools)?;
+        renderer.runtime_model = Some(binding);
+        Ok(renderer)
+    }
+}
+
+impl PromptRendererPort for SessionToolHttpRenderer {
+    fn identity(&self) -> (ReferenceId, ReferenceId) {
+        (
+            ReferenceId::new(format!("{}-session-tools", self.kind.renderer())).expect("id"),
+            ReferenceId::new(
+                self.wire_mode
+                    .template_version(self.runtime_model.is_some()),
+            )
+            .expect("version"),
+        )
+    }
+
+    fn render(&self, input: &RenderInput) -> Result<Value, RenderDiagnostic> {
+        if input.handoff() != &self.handoff.to_value() || input.tools() != &self.tools {
+            return Err(RenderDiagnostic::InvalidBinding);
+        }
+        if self.kind == AdapterKind::LocalServiceV1 {
+            return Err(RenderDiagnostic::UnsupportedRenderer);
+        }
+        let messages = json!([
+            {"role":"system","content":"Connector calls are proposals. Use only the exact provided functions. Gateway validates proposals before dispatch."},
+            {"role":"user","content":render_data(input).to_string()}
+        ]);
+        let body = tool_wire(
+            self.kind,
+            &self.prepared,
+            &messages,
+            &self.tools,
+            self.runtime_model.as_ref(),
+            self.wire_mode,
+        )
+        .map_err(|_| RenderDiagnostic::RenderingFailed)?;
+        Ok(body)
+    }
+}
+
+/// Explicit response interpretation for model tool proposals.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum SessionToolResponseMode {
+    JsonOrText,
+    /// Empty provider text remains empty text, alongside actual tool proposals.
+    /// This mode supplies no success claim and supports only String outputs.
+    ToolProposalTextV1,
+}
+impl SessionToolResponseMode {
+    fn accepts_shape(self, shape: &gateway_domain::semantic_output::OutputType) -> bool {
+        self == Self::JsonOrText
+            || matches!(
+                shape,
+                gateway_domain::semantic_output::OutputType::String {}
+            )
+    }
+
+    fn result(
+        self,
+        content: Option<&Value>,
+        has_calls: bool,
+    ) -> Result<Value, ProviderToolFailure> {
+        match self {
+            Self::JsonOrText => Ok(match content.and_then(Value::as_str) {
+                Some(s) if !s.is_empty() => {
+                    match crate::local_mcp::decode::decode(s.as_bytes()) {
+                        Ok(value) => value,
+                        // The strict decoder's duplicate/depth violations are
+                        // data errors, never permission to reinterpret JSON as text.
+                        Err(error) if error.is_data() => return Err(ProviderToolFailure::Hard),
+                        Err(_) => Value::String(s.into()),
+                    }
+                }
+                _ => Value::Null,
+            }),
+            Self::ToolProposalTextV1 if has_calls => match content {
+                None | Some(Value::Null) => Ok(Value::String(String::new())),
+                Some(Value::String(text)) => Ok(Value::String(text.clone())),
+                _ => Err(ProviderToolFailure::Hard),
+            },
+            Self::ToolProposalTextV1 => Err(ProviderToolFailure::Hard),
+        }
+    }
+}
+
+/// Separate HTTP provider for connector-session proposals. It shares the
+/// hardened curl transport, but its response mapping and renderer are isolated
+/// from the result-only HttpModelAdapter.
+pub struct SessionToolHttpAdapter {
+    kind: AdapterKind,
+    endpoint: String,
+    credential: Option<String>,
+    loopback: bool,
+    runtime_model: Option<RuntimeModelBinding>,
+    response_mode: SessionToolResponseMode,
+    wire_mode: SessionToolWireMode,
+}
+
+impl SessionToolHttpAdapter {
+    pub fn new(
+        kind: AdapterKind,
+        endpoint: String,
+        credential: Option<String>,
+        binding: Option<RuntimeModelBinding>,
+    ) -> Result<Self, AdapterDiagnostic> {
+        let base = HttpModelAdapter::new(kind, endpoint, credential)?;
+        if let Some(binding) = &binding {
+            binding.validate()?;
+        }
+        Ok(Self {
+            kind,
+            endpoint: base.endpoint,
+            credential: base.credential,
+            loopback: base.loopback,
+            runtime_model: binding,
+            response_mode: SessionToolResponseMode::JsonOrText,
+            wire_mode: SessionToolWireMode::CanonicalV1,
+        })
+    }
+
+    /// Explicit operator-selected response interpretation. The owning producer
+    /// definition must bind this mode; it never changes the result-only adapter.
+    pub fn with_response_mode(mut self, mode: SessionToolResponseMode) -> Self {
+        self.response_mode = mode;
+        self
+    }
+
+    /// Must match the renderer's exact versioned wire profile.
+    pub fn with_wire_mode(mut self, mode: SessionToolWireMode) -> Self {
+        self.wire_mode = mode;
+        self
+    }
+}
+
+impl SessionToolProviderPort for SessionToolHttpAdapter {
+    fn complete(
+        &self,
+        r: BoundedInvocationRequest<'_>,
+    ) -> Result<ProviderToolCompletion, ProviderToolFailure> {
+        use AdapterDiagnostic as D;
+        let fail = |d| {
+            if matches!(d, D::Unavailable | D::Cancelled | D::DeadlineExceeded) {
+                ProviderToolFailure::Transient
+            } else {
+                ProviderToolFailure::Hard
+            }
+        };
+        check_context(&r).map_err(fail)?;
+        let p = r.ir.prepared();
+        if r.max_output_bytes == 0
+            || r.max_output_bytes > gateway_domain::output_parsing::MAX_OUTPUT_BYTES
+            || p.effective_generation().structured_output_mode != StructuredOutputMode::ToolProposal
+            || !self
+                .response_mode
+                .accepts_shape(&p.invocation().data().output.shape)
+            || self
+                .runtime_model
+                .as_ref()
+                .is_some_and(|b| b.canonical != p.capability().data().model)
+            || (p.provider().data().locality
+                == gateway_domain::cognitive_routing::PrivacyBoundary::OnDevice
+                && !self.loopback)
+            || r.binding.invocation != r.ir.identity()
+            || r.rendered.identity() != &r.ir.identity()
+        {
+            return Err(ProviderToolFailure::Hard);
+        }
+        validate_invocation_tool_pins(r.ir).map_err(|_| ProviderToolFailure::Hard)?;
+        let a = r.rendered.rendered().accounting();
+        if a.count.profile.renderer.as_str() != format!("{}-session-tools", self.kind.renderer())
+            || a.count.profile.template_version.as_str()
+                != self
+                    .wire_mode
+                    .template_version(self.runtime_model.is_some())
+            || a.count.profile.model != p.capability().data().model
+            || a.count.profile.generation_profile
+                != p.invocation().data().generation.content_digest()
+            || a.count.payload_digest != r.binding.payload_digest
+            || a.count.profile != r.binding.profile
+        {
+            return Err(ProviderToolFailure::Hard);
+        }
+        let body: Value = serde_json::from_str(r.rendered.rendered().payload())
+            .map_err(|_| ProviderToolFailure::Hard)?;
+        let expected = tool_wire(
+            self.kind,
+            p,
+            &body["messages"],
+            r.ir.prompt().tools(),
+            self.runtime_model.as_ref(),
+            self.wire_mode,
+        )
+        .map_err(|_| ProviderToolFailure::Hard)?;
+        if body != expected {
+            return Err(ProviderToolFailure::Hard);
+        }
+        let transport = HttpModelAdapter {
+            kind: self.kind,
+            endpoint: self.endpoint.clone(),
+            credential: self.credential.clone(),
+            observation: Mutex::new(None),
+            loopback: self.loopback,
+            runtime_model: self.runtime_model.clone(),
+            task_directive: false,
+            registered_role: false,
+        };
+        let raw = http(&transport, &r, &body).map_err(fail)?;
+        if self
+            .credential
+            .as_ref()
+            .is_some_and(|s| raw.windows(s.len()).any(|w| w == s.as_bytes()))
+        {
+            return Err(ProviderToolFailure::Hard);
+        }
+        let response =
+            crate::local_mcp::decode::decode(&raw).map_err(|_| ProviderToolFailure::Hard)?;
+        if contains_credential(&response, self.credential.as_deref()) {
+            return Err(ProviderToolFailure::Hard);
+        }
+        if self.kind == AdapterKind::LocalServiceV1 {
+            return Err(ProviderToolFailure::Hard);
+        }
+        let expected_id = self
+            .runtime_model
+            .as_ref()
+            .map_or(p.capability().data().model.id.as_str(), |b| {
+                b.runtime_id.as_str()
+            });
+        if response["model"].as_str() != Some(expected_id)
+            || response["choices"].as_array().is_none_or(|v| v.len() != 1)
+        {
+            return Err(ProviderToolFailure::Hard);
+        }
+        let choice = &response["choices"][0];
+        let message = &choice["message"];
+        if !message["refusal"].is_null() {
+            return Err(ProviderToolFailure::Hard);
+        }
+        let finish = match choice["finish_reason"].as_str() {
+            Some("tool_calls") => ProviderFinish::Complete,
+            Some("stop") if message["tool_calls"].is_null() => ProviderFinish::Complete,
+            _ => ProviderFinish::Incomplete,
+        };
+        if finish != ProviderFinish::Complete {
+            return Err(ProviderToolFailure::Hard);
+        }
+        let mut calls = Vec::new();
+        let wire_names = self.wire_mode.names(r.ir.prompt().tools()).map_err(fail)?;
+        if let Some(native_calls) = message["tool_calls"].as_array() {
+            if native_calls.len() > MAX_SESSION_TOOL_CALLS {
+                return Err(ProviderToolFailure::Hard);
+            }
+            for call in native_calls {
+                if call["type"] != "function" {
+                    return Err(ProviderToolFailure::Hard);
+                }
+                let name = call["function"]["name"]
+                    .as_str()
+                    .ok_or(ProviderToolFailure::Hard)?;
+                let arguments = call["function"]["arguments"]
+                    .as_str()
+                    .ok_or(ProviderToolFailure::Hard)?;
+                let args = crate::local_mcp::decode::decode(arguments.as_bytes())
+                    .map_err(|_| ProviderToolFailure::Hard)?;
+                if contains_credential(&args, self.credential.as_deref()) {
+                    return Err(ProviderToolFailure::Hard);
+                }
+                let canonical_name = if self.wire_mode == SessionToolWireMode::PortableV1 {
+                    wire_names
+                        .get(name)
+                        .ok_or(ProviderToolFailure::Hard)?
+                        .as_str()
+                } else {
+                    name
+                };
+                calls.push(ProviderToolCall {
+                    name: canonical_name.into(),
+                    arguments: args,
+                });
+            }
+        }
+        let result = self
+            .response_mode
+            .result(message.get("content"), !calls.is_empty())?;
+        if contains_credential(&result, self.credential.as_deref()) {
+            return Err(ProviderToolFailure::Hard);
+        }
+        let usage = if response["usage"].is_null() {
+            None
+        } else {
+            Some(ProviderTokenUsage {
+                input_tokens: response["usage"]["prompt_tokens"]
+                    .as_u64()
+                    .ok_or(ProviderToolFailure::Hard)?,
+                output_tokens: response["usage"]["completion_tokens"]
+                    .as_u64()
+                    .ok_or(ProviderToolFailure::Hard)?,
+            })
+        };
+        Ok(ProviderToolCompletion {
+            // The provider wire name was checked above; the generic invocation
+            // boundary consumes only the admitted canonical model identity.
+            model_id: p.capability().data().model.id.as_str().into(),
+            finish,
+            result,
+            calls,
+            usage,
+        })
+    }
+}
 fn controls(kind: AdapterKind, p: &PreparedModelInvocation) -> Result<Value, AdapterDiagnostic> {
     let g = p.effective_generation();
     if !matches!(
@@ -239,6 +669,90 @@ fn wire(
             body
         }
     })
+}
+fn tool_wire(
+    kind: AdapterKind,
+    p: &PreparedModelInvocation,
+    messages: &Value,
+    tools: &BTreeMap<CapabilityId, ToolDefinition>,
+    runtime_model: Option<&RuntimeModelBinding>,
+    wire_mode: SessionToolWireMode,
+) -> Result<Value, AdapterDiagnostic> {
+    if kind == AdapterKind::LocalServiceV1 {
+        return Err(AdapterDiagnostic::CapabilityMismatch);
+    }
+    let mut options = json!({});
+    for (key, value) in &p.effective_generation().controls {
+        let name = match key {
+            GenerationControl::Temperature => "temperature",
+            GenerationControl::TopP => "top_p",
+            GenerationControl::Seed => "seed",
+            GenerationControl::StopConditions => "stop",
+            _ => return Err(AdapterDiagnostic::CapabilityMismatch),
+        };
+        options[name] = match &value.value {
+            GenerationValue::Scalar(v) => json!(v),
+            GenerationValue::Integer(v) => json!(v),
+            GenerationValue::Stops(v) => json!(v),
+        };
+    }
+    let mut body = options;
+    let model = &p.capability().data().model;
+    body["model"] = json!(runtime_model.map_or(model.id.as_str(), |m| m.runtime_id.as_str()));
+    body["messages"] = messages.clone();
+    body[if kind == AdapterKind::ChatCompletionsLegacyV1 {
+        "max_tokens"
+    } else {
+        "max_completion_tokens"
+    }] = json!(p.effective_generation().max_output_tokens);
+    body["stream"] = json!(false);
+    let names = wire_mode.names(tools)?;
+    body["tools"] = Value::Array(
+        names
+            .iter()
+            .map(|(name, id)| {
+                let tool = &tools[id];
+                let strict =
+                    wire_mode == SessionToolWireMode::CanonicalV1 || strict_tool_shape(&tool.input);
+                json!({
+                    "type":"function",
+                    "function":{"name":name,"description":tool.description.as_str(),
+                        "parameters":tool.input.json_schema(),"strict":strict}
+                })
+            })
+            .collect(),
+    );
+    body["tool_choice"] = json!("auto");
+    Ok(body)
+}
+
+fn strict_tool_shape(shape: &gateway_domain::semantic_output::OutputType) -> bool {
+    use gateway_domain::semantic_output::OutputType;
+    match shape {
+        OutputType::Object { fields } => fields
+            .values()
+            .all(|field| field.required && strict_tool_shape(&field.value_type)),
+        OutputType::Array { items } => strict_tool_shape(items),
+        _ => true,
+    }
+}
+
+// Inspect exactly the JSON values the adapter consumes after each actual
+// decoding boundary; escaped JSON strings can bypass a raw byte comparison.
+fn contains_credential(value: &Value, credential: Option<&str>) -> bool {
+    let Some(secret) = credential else {
+        return false;
+    };
+    match value {
+        Value::String(text) => text.contains(secret),
+        Value::Array(items) => items
+            .iter()
+            .any(|item| contains_credential(item, credential)),
+        Value::Object(fields) => fields
+            .iter()
+            .any(|(key, value)| key.contains(secret) || contains_credential(value, credential)),
+        _ => false,
+    }
 }
 #[derive(Debug, Clone, Serialize)]
 pub struct AdapterReceipt {
@@ -418,7 +932,10 @@ impl HttpModelAdapter {
         {
             return Err(D::InvalidResponse);
         }
-        let response: Value = serde_json::from_slice(&raw).map_err(|_| D::InvalidResponse)?;
+        let response = crate::local_mcp::decode::decode(&raw).map_err(|_| D::InvalidResponse)?;
+        if contains_credential(&response, self.credential.as_deref()) {
+            return Err(D::InvalidResponse);
+        }
         let (actual, content, usage) = match self.kind {
             AdapterKind::LocalServiceV1 => {
                 let model = &p.capability().data().model;
@@ -460,6 +977,11 @@ impl HttpModelAdapter {
             return Err(D::IdentityMismatch);
         }
         let content = content.ok_or(D::InvalidResponse)?;
+        if serde_json::from_str::<Value>(content)
+            .is_ok_and(|value| contains_credential(&value, self.credential.as_deref()))
+        {
+            return Err(D::InvalidResponse);
+        }
         // This adapter supports result-only generation. Bind transport output to
         // the admitted invocation without asking the model to invent correlation
         // metadata. Preserve raw JSON bytes so the strict parser still rejects

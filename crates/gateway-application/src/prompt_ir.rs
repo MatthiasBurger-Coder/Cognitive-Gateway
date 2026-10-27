@@ -108,6 +108,17 @@ pub fn admit_invocation_ir(
     tools: BTreeMap<CapabilityId, ToolDefinition>,
     host: &dyn InvocationAdmissionPort,
 ) -> Result<InvocationIr, InvocationIrError> {
+    let ir = assemble_invocation_ir(schema_version, handoff, prepared, tools)?;
+    validate_current(&ir, host)?;
+    Ok(ir)
+}
+
+fn assemble_invocation_ir(
+    schema_version: SchemaVersion,
+    handoff: PlannedContextHandoff,
+    prepared: PreparedModelInvocation,
+    tools: BTreeMap<CapabilityId, ToolDefinition>,
+) -> Result<InvocationIr, InvocationIrError> {
     use InvocationIrError as E;
     if schema_version != INVOCATION_IR_VERSION {
         return Err(E::IncompatibleVersion);
@@ -123,6 +134,15 @@ pub fn admit_invocation_ir(
         || tools
             .iter()
             .any(|(id, t)| d.permitted_capabilities.get(id) != Some(&t.binding))
+        || tools.values().any(|tool| {
+            tool.connector_inventory.as_ref().is_some_and(|pin| {
+                pin.scope != d.task.scope
+                    || serde_json::to_vec(&tool.input.json_schema())
+                        .ok()
+                        .map(|bytes| gateway_domain::context_content_digest(&bytes))
+                        != Some(pin.argument_schema_digest.clone())
+            })
+        })
     {
         return Err(E::InvalidBinding);
     }
@@ -139,8 +159,64 @@ pub fn admit_invocation_ir(
         },
         prepared,
     };
-    validate_current(&ir, host)?;
     Ok(ir)
+}
+
+/// Structurally reconstructed historical data. This is neither an admitted IR
+/// nor proof that its source data, policy or model availability are current.
+/// The storage owner must separately authenticate the original record and pins.
+pub struct RetainedInvocationIr {
+    ir: InvocationIr,
+}
+impl RetainedInvocationIr {
+    pub fn identity(&self) -> InvocationIrIdentity {
+        self.ir.identity()
+    }
+    pub fn to_value(&self) -> serde_json::Value {
+        serde_json::to_value(&self.ir).expect("native IR JSON")
+    }
+    /// Crate-internal data projection for canonical historical request binding.
+    /// No admitted invocation or current authority escapes this wrapper.
+    pub(crate) fn proposal_data(
+        &self,
+        capability: &CapabilityId,
+    ) -> Option<(&ResolvedReference<TaskId>, &ToolDefinition)> {
+        Some((
+            &self.ir.prepared.invocation().data().task,
+            self.ir.prompt.tools.get(capability)?,
+        ))
+    }
+}
+
+/// Rebuild only through the same native structural checks as live admission.
+/// Expected bytes/identity must come from authenticated retained records; their
+/// equality is not by itself source authenticity or current authorization.
+pub fn reconstruct_retained_invocation_ir(
+    schema_version: SchemaVersion,
+    handoff: PlannedContextHandoff,
+    prepared: PreparedModelInvocation,
+    tools: BTreeMap<CapabilityId, ToolDefinition>,
+    expected: &serde_json::Value,
+    expected_identity: &InvocationIrIdentity,
+) -> Result<RetainedInvocationIr, InvocationIrError> {
+    let ir = assemble_invocation_ir(schema_version, handoff, prepared, tools)?;
+    if serde_json::to_value(&ir).map_err(|_| InvocationIrError::InvalidBinding)? != *expected
+        || ir.identity() != *expected_identity
+    {
+        return Err(InvocationIrError::InvalidBinding);
+    }
+    Ok(RetainedInvocationIr { ir })
+}
+
+/// This is the sole promotion from retained data to an admitted IR. The host
+/// must prove actual current applicability, including budgeted fresh source
+/// observations when the historical Before data has aged or the phase changed.
+pub fn revalidate_retained_invocation_ir(
+    retained: &RetainedInvocationIr,
+    host: &dyn InvocationAdmissionPort,
+) -> Result<InvocationIr, InvocationIrError> {
+    validate_current(&retained.ir, host)?;
+    Ok(retained.ir.clone())
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]

@@ -1,3 +1,4 @@
+use super::ConnectorConsentRecordRef;
 use gateway_domain::{ContextScopeId, ExecutionProfile, Intent, OperatingMode, PlanStepId};
 use serde::{Deserialize, Deserializer, Serialize};
 
@@ -241,6 +242,11 @@ pub enum SessionCommand {
         pending: PendingId,
         consent: ConsentRecordRef,
     },
+    ApproveConnector {
+        at: Mutation,
+        pending: PendingId,
+        consent: ConnectorConsentRecordRef,
+    },
     Continue {
         at: Mutation,
     },
@@ -254,6 +260,7 @@ impl SessionCommand {
             Self::Start { command, .. } => command,
             Self::Clarify { at, .. }
             | Self::Approve { at, .. }
+            | Self::ApproveConnector { at, .. }
             | Self::Continue { at }
             | Self::Cancel { at } => &at.command,
         }
@@ -263,6 +270,7 @@ impl SessionCommand {
             Self::Start { .. } => None,
             Self::Clarify { at, .. }
             | Self::Approve { at, .. }
+            | Self::ApproveConnector { at, .. }
             | Self::Continue { at }
             | Self::Cancel { at } => Some(at),
         }
@@ -279,6 +287,9 @@ pub enum InspectTarget {
 #[serde(rename_all = "snake_case")]
 pub enum SessionState {
     Runnable,
+    /// Resource-consuming model/read preparation has a durable reservation;
+    /// no connector mutation has been released yet.
+    Preparing,
     Dispatching,
     PendingClarification,
     PendingConsent,
@@ -298,9 +309,12 @@ impl SessionState {
 #[serde(rename_all = "snake_case")]
 pub enum DispatchKnowledge {
     None,
-    /// Identity reserved for exact consent; invocation has not been released.
+    /// Action identity reserved for resource preparation or exact consent;
+    /// the connector action has not been released.
     Prepared,
     Reserved,
+    /// Connector returned a typed observation; the goal is not verified.
+    Observed,
     Verified,
     Unknown,
     Stopped,

@@ -250,5 +250,9 @@
   {
     "name": "EPIC-07.06 credential isolation and secret disclosure regression",
     "command": "CARGO_BUILD_JOBS=1 CARGO_LLVM_COV_TARGET_DIR=target/mcp-client-coverage cargo llvm-cov -p gateway-daemon --lib --test mcp_client --locked --json --output-path \"$EVIDENCE_DIR/epic-07-06-coverage.json\"\npython3 scripts/check-mcp-client-coverage.py --self-test\npython3 scripts/check-mcp-client-coverage.py \"$EVIDENCE_DIR/epic-07-06-coverage.json\""
+  },
+  {
+    "name": "EPIC-07.08 connector retries, health, circuit and aggregate budget coverage",
+    "command": "CARGO_BUILD_JOBS=1 CARGO_LLVM_COV_TARGET_DIR=target/mcp-client-coverage cargo llvm-cov -p gateway-application -p gateway-daemon --lib --test connector_resilience --test mcp_client --locked --json --output-path \"$EVIDENCE_DIR/connector-resilience-coverage.json\" -- --test-threads=1\npython3 scripts/check-connector-resilience-coverage.py --self-test\npython3 scripts/check-connector-resilience-coverage.py \"$EVIDENCE_DIR/connector-resilience-coverage.json\""
   }
 ]

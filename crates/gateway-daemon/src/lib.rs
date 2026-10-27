@@ -1,5 +1,15 @@
 #![forbid(unsafe_code)]
 
+#[cfg(test)]
+#[allow(dead_code)]
+#[path = "../tests/support/session_resource_allocation.rs"]
+mod session_resource_test_support;
+
+#[cfg(test)]
+#[allow(dead_code)]
+#[path = "../../../tests/fixtures/prompt-rendering-v1/support.rs"]
+mod session_model_test_support;
+
 mod codex_canonical;
 
 pub mod declarative_cli;

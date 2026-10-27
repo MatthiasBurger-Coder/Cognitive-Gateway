@@ -44,6 +44,8 @@ fn acquisition() -> Acquisition {
         max_age: FreshnessPolicy::new(20),
         authenticated_source: text("authenticated.collector"),
         sensitivity: SensitivityClass::Confidential,
+        confidence: Confidence::Unknown,
+        uncertainty: Uncertainty::Unknown,
         conflict: ConflictStatus::None,
         partial: false,
         basis: ConnectorObservationBasis::SourceRead,
@@ -621,4 +623,52 @@ fn optional_provider_revision_and_digest_remain_absent_when_not_supplied() {
     assert!(r.observation().source_revision.is_none());
     assert!(r.observation().metadata.source_digest.is_none());
     assert!(r.batch().unwrap().snapshot().change_token().is_none());
+}
+
+#[test]
+fn quality_requires_explicit_collector_assessment_and_partial_cannot_claim_certainty() {
+    let unassessed = normalizer(acquisition())
+        .canonicalize(&dispatch(), None, &mapping(), tool(payload()))
+        .unwrap();
+    assert_eq!(
+        unassessed.observation().metadata.quality.confidence(),
+        Confidence::Unknown
+    );
+    assert_eq!(
+        unassessed.observation().metadata.quality.uncertainty(),
+        Uncertainty::Unknown
+    );
+    for partial in [false, true] {
+        let mut qualified = acquisition();
+        qualified.confidence = Confidence::NotApplicable;
+        qualified.uncertainty = Uncertainty::None;
+        qualified.partial = partial;
+        let result = normalizer(qualified)
+            .canonicalize(&dispatch(), None, &mapping(), tool(payload()))
+            .unwrap();
+        let quality = result.observation().metadata.quality;
+        assert_eq!(quality.confidence(), Confidence::NotApplicable);
+        assert_eq!(
+            quality.uncertainty(),
+            if partial {
+                Uncertainty::Incomplete
+            } else {
+                Uncertainty::None
+            }
+        );
+        let batch = result.batch().unwrap();
+        assert!(
+            batch
+                .quality_metadata()
+                .values()
+                .all(|items| items == &[quality])
+        );
+        assert!(
+            result
+                .fragments()
+                .unwrap()
+                .iter()
+                .all(|fragment| fragment.metadata().quality == quality)
+        );
+    }
 }

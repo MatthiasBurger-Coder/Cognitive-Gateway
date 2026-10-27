@@ -82,6 +82,7 @@
                 "state": {
                   "enum": [
                     "runnable",
+                    "preparing",
                     "dispatching",
                     "pending_clarification",
                     "pending_consent",
@@ -500,6 +501,294 @@
                         "arguments",
                         "artifact_basis",
                         "authority"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "payload"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "kind": {
+                      "const": "connector_consent"
+                    },
+                    "payload": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "owner": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "properties": {
+                            "principal": {
+                              "type": "string",
+                              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+                            },
+                            "workspace": {
+                              "type": "string",
+                              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+                            },
+                            "project": {
+                              "type": "string",
+                              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+                            },
+                            "binding": {
+                              "type": "string",
+                              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+                            },
+                            "client_owner": {
+                              "type": "string",
+                              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+                            }
+                          },
+                          "required": [
+                            "principal",
+                            "workspace",
+                            "project",
+                            "binding",
+                            "client_owner"
+                          ]
+                        },
+                        "scope": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+                        },
+                        "session": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+                        },
+                        "run": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+                        },
+                        "issued_revision": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 9007199254740991
+                        },
+                        "pending": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+                        },
+                        "step": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+                        },
+                        "dispatch": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+                        },
+                        "request": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "properties": {
+                            "connector": {
+                              "type": "string",
+                              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+                            },
+                            "scope": {
+                              "type": "string",
+                              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+                            },
+                            "capability": {
+                              "type": "string",
+                              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+                            },
+                            "operation_class": {
+                              "enum": [
+                                "read",
+                                "search",
+                                "inspect",
+                                "mutate",
+                                "admin"
+                              ]
+                            },
+                            "inventory_revision": {
+                              "type": "string",
+                              "pattern": "^[0-9a-fA-F]{64}$"
+                            },
+                            "arguments_digest": {
+                              "type": "string",
+                              "pattern": "^[0-9a-fA-F]{64}$"
+                            },
+                            "task": {
+                              "type": "string",
+                              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+                            },
+                            "step": {
+                              "type": "string",
+                              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+                            },
+                            "execution": {
+                              "type": "string",
+                              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+                            },
+                            "correlation": {
+                              "type": "string",
+                              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+                            }
+                          },
+                          "required": [
+                            "connector",
+                            "scope",
+                            "capability",
+                            "operation_class",
+                            "inventory_revision",
+                            "arguments_digest",
+                            "task",
+                            "step",
+                            "execution",
+                            "correlation"
+                          ]
+                        },
+                        "resume": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "properties": {
+                            "invocation": {
+                              "type": "object",
+                              "additionalProperties": false,
+                              "properties": {
+                                "schema_version": {
+                                  "const": "1.0"
+                                },
+                                "invocation_id": {
+                                  "type": "string",
+                                  "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+                                },
+                                "invocation_digest": {
+                                  "type": "string",
+                                  "pattern": "^[0-9a-fA-F]{64}$"
+                                },
+                                "handoff_digest": {
+                                  "type": "string",
+                                  "pattern": "^[0-9a-fA-F]{64}$"
+                                },
+                                "tools_digest": {
+                                  "type": "string",
+                                  "pattern": "^[0-9a-fA-F]{64}$"
+                                },
+                                "ir_digest": {
+                                  "type": "string",
+                                  "pattern": "^[0-9a-fA-F]{64}$"
+                                }
+                              },
+                              "required": [
+                                "schema_version",
+                                "invocation_id",
+                                "invocation_digest",
+                                "handoff_digest",
+                                "tools_digest",
+                                "ir_digest"
+                              ]
+                            },
+                            "proposal_ordinal": {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 31
+                            },
+                            "output_record": {
+                              "type": "object",
+                              "additionalProperties": false,
+                              "properties": {
+                                "id": {
+                                  "type": "string",
+                                  "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+                                },
+                                "revision": {
+                                  "type": "string",
+                                  "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+                                },
+                                "digest": {
+                                  "type": "string",
+                                  "pattern": "^sha256:[0-9a-f]{64}$"
+                                }
+                              },
+                              "required": [
+                                "id",
+                                "revision",
+                                "digest"
+                              ]
+                            },
+                            "output_digest": {
+                              "type": "string",
+                              "pattern": "^[0-9a-fA-F]{64}$"
+                            },
+                            "producer_pins": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                  "id": {
+                                    "type": "string",
+                                    "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+                                  },
+                                  "revision": {
+                                    "type": "string",
+                                    "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+                                  },
+                                  "digest": {
+                                    "type": "string",
+                                    "pattern": "^sha256:[0-9a-f]{64}$"
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "revision",
+                                  "digest"
+                                ]
+                              },
+                              "minItems": 1,
+                              "maxItems": 128,
+                              "uniqueItems": true
+                            }
+                          },
+                          "required": [
+                            "invocation",
+                            "proposal_ordinal",
+                            "output_record",
+                            "output_digest",
+                            "producer_pins"
+                          ]
+                        },
+                        "policy": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+                        },
+                        "policy_revision": {
+                          "type": "string",
+                          "pattern": "^[0-9a-fA-F]{64}$"
+                        },
+                        "expires_at_ms": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 9007199254740991
+                        },
+                        "issuer": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+                        }
+                      },
+                      "required": [
+                        "owner",
+                        "scope",
+                        "session",
+                        "run",
+                        "issued_revision",
+                        "pending",
+                        "step",
+                        "dispatch",
+                        "request",
+                        "resume",
+                        "policy",
+                        "policy_revision",
+                        "expires_at_ms",
+                        "issuer"
                       ]
                     }
                   },

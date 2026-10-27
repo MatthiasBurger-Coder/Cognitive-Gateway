@@ -43,9 +43,11 @@ No runtime error triggers a retry.
 After MCP initialization, `resources/list` advertises `cg://runtime/health`.
 `resources/read` exposes adapter health/readiness, configured limits, concurrency,
 queue and disconnect behavior, and counters for completed response attempts,
-failed attempts, rejections, cancellations and deadlines. Readiness means the
-adapter handshake completed; it does not assert that a protected operation's
-host, policy, consent or evidence is available. Health cannot reveal other
+failed attempts, rejections, cancellations and deadlines. `readiness_scope` is
+`transport_only`; `capability_readiness.status` remains `unqualified` with reason
+`requires_admitted_host` until a capability host supplies its own qualification.
+The `ready` flag means the adapter handshake completed; it does not assert that a
+protected operation's host, policy, consent or evidence is available. Health cannot reveal other
 projects, request bodies, resource contents, filesystem paths or credentials.
 
 ## Deadlines, cancellation and disconnect

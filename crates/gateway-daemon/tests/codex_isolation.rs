@@ -72,6 +72,130 @@ fn code(response: &Value) -> &str {
     response["diagnostics"][0]["code"].as_str().unwrap()
 }
 
+fn pin_resource(scope: &Value, id: &str, contract: &str, document: Value) -> (Value, Value) {
+    let reference = json!({
+        "id":id,
+        "contract":contract,
+        "contract_version":"1.0",
+        "revision":"1",
+        "digest":format!("sha256:{:x}", Sha256::digest(document.to_string().as_bytes()))
+    });
+    let resource = json!({
+        "schema_version":"1.0",
+        "scope":scope,
+        "reference":reference,
+        "document":document,
+        "provenance":[{"reference":reference,"source_id":id,"source_revision":"1",
+            "freshness":"current","sensitivity":"NORMAL","lineage":[]}]
+    });
+    (reference, resource)
+}
+
+fn canonical_admission(fixture: &mut Fixture) -> (Value, Value) {
+    use std::process::Command;
+    let fixtures =
+        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../tests/fixtures/declarative-cli");
+    let catalog = fixture.root.join("a/catalog");
+    std::fs::create_dir_all(&catalog).unwrap();
+    for entry in std::fs::read_dir(fixtures.join("catalog")).unwrap() {
+        let entry = entry.unwrap();
+        if entry.file_type().unwrap().is_dir() {
+            std::fs::create_dir_all(catalog.join(entry.file_name())).unwrap();
+            for child in std::fs::read_dir(entry.path()).unwrap() {
+                let child = child.unwrap();
+                std::fs::copy(
+                    child.path(),
+                    catalog.join(entry.file_name()).join(child.file_name()),
+                )
+                .unwrap();
+            }
+        } else {
+            std::fs::copy(entry.path(), catalog.join(entry.file_name())).unwrap();
+        }
+    }
+    let context_path = fixture.root.join("canonical-context.json");
+    let context: Value =
+        serde_json::from_slice(&std::fs::read(fixtures.join("context.json")).unwrap()).unwrap();
+    std::fs::write(&context_path, context.to_string()).unwrap();
+    let output = Command::new(env!("CARGO_BIN_EXE_cg"))
+        .args([
+            "assess",
+            "--context",
+            context_path.to_str().unwrap(),
+            "--json",
+        ])
+        .env(
+            "LLVM_PROFILE_FILE",
+            fixture.root.join("cg-assess-%p.profraw"),
+        )
+        .output()
+        .unwrap();
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    let assessed: Value = serde_json::from_slice(&output.stdout).unwrap();
+    let assessed_path = fixture.root.join("canonical-assessed.json");
+    std::fs::write(&assessed_path, assessed.to_string()).unwrap();
+    let output = Command::new(env!("CARGO_BIN_EXE_cg"))
+        .args([
+            "plan",
+            "--intent",
+            fixtures.join("intent.json").to_str().unwrap(),
+            "--context",
+            assessed_path.to_str().unwrap(),
+            "--catalog",
+            catalog.to_str().unwrap(),
+            "--rules",
+            fixtures.join("rules.json").to_str().unwrap(),
+            "--json",
+        ])
+        .env("LLVM_PROFILE_FILE", fixture.root.join("cg-plan-%p.profraw"))
+        .output()
+        .unwrap();
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    let plan: Value = serde_json::from_slice(&output.stdout).unwrap();
+    let scope = &fixture.config["mappings"][0]["scope"];
+    let rules: Value =
+        serde_json::from_slice(&std::fs::read(fixtures.join("rules.json")).unwrap()).unwrap();
+    let process: Value =
+        serde_json::from_slice(&std::fs::read(fixtures.join("process.json")).unwrap()).unwrap();
+    let projection: Value =
+        serde_json::from_slice(&std::fs::read(fixtures.join("projection.json")).unwrap()).unwrap();
+    let (plan_ref, plan_resource) = pin_resource(scope, "canonical-plan", "cg.plan", plan);
+    let (rules_ref, rules_resource) =
+        pin_resource(scope, "canonical-rules", "cg.composition-rules", rules);
+    let (process_ref, process_resource) =
+        pin_resource(scope, "canonical-process", "cg.process-snapshot", process);
+    let (projection_ref, projection_resource) = pin_resource(
+        scope,
+        "canonical-projection",
+        "cg.context-projection",
+        projection,
+    );
+    let mapping = &mut fixture.config["mappings"][0];
+    mapping["canonical_scope"] = json!("external-project");
+    mapping["resources"].as_array_mut().unwrap().extend([
+        plan_resource,
+        rules_resource,
+        process_resource,
+        projection_resource,
+    ]);
+    mapping["canonical"] = json!({
+        "catalog":catalog,
+        "plan":plan_ref,
+        "rules":rules_ref,
+        "process":process_ref,
+        "policy":serde_json::from_slice::<Value>(&std::fs::read(fixtures.join("policy.json")).unwrap()).unwrap()
+    });
+    (projection_ref, plan_ref)
+}
+
 #[test]
 fn resolver_rejects_unmapped_ambiguous_relative_and_wrong_repository_claims() {
     let mut f = Fixture::new();
@@ -100,6 +224,80 @@ fn resolver_rejects_unmapped_ambiguous_relative_and_wrong_repository_claims() {
     ));
     f.config["mappings"][1] = f.config["mappings"][0].clone();
     assert!(f.resolver().resolve(&f.claim()).is_err());
+}
+
+#[test]
+fn canonical_workspace_host_executes_resolve_explain_compile_and_resource_read_in_process() {
+    let mut fixture = Fixture::new();
+    let (projection, _) = canonical_admission(&mut fixture);
+    let resolver = fixture.resolver();
+    let binding = resolver.resolve(&fixture.claim()).unwrap();
+    let host = resolver.host(&binding).unwrap();
+    let app = CodexFacade::with_binding(binding, host).unwrap();
+    let references = &fixture.config["mappings"][0]["resources"];
+    let reference = |id: &str| {
+        references
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|resource| resource["reference"]["id"] == id)
+            .unwrap()["reference"]
+            .clone()
+    };
+    let mut request = fixture.request.clone();
+    request["operation"] = json!("capabilities.resolve");
+    request["input"] = json!({
+        "plan":reference("canonical-plan"),
+        "rules":reference("canonical-rules"),
+        "process":reference("canonical-process")
+    });
+    let resolved = app.execute("capabilities.resolve", &request);
+    assert_eq!(resolved["status"], "ok", "{resolved}");
+    let resolution = resolved["provenance"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|entry| entry["reference"]["id"] == "local-resolution")
+        .unwrap()["reference"]
+        .clone();
+
+    request["operation"] = json!("state.explain");
+    request["input"] = json!({"resolution":resolution});
+    let explained = app.execute("state.explain", &request);
+    assert_eq!(explained["status"], "ok", "{explained}");
+
+    request["operation"] = json!("context.compile");
+    request["input"] = json!({"resolution":resolution,"projection":projection,"step_id":"step-condition.0","candidates":[]});
+    let compiled = app.execute("context.compile", &request);
+    assert_eq!(compiled["status"], "ok", "{compiled}");
+
+    let resource = app
+        .read_resource(
+            &fixture.request["scope"],
+            "local-resolution",
+            resolution["revision"].as_str().unwrap(),
+            resolution["digest"].as_str().unwrap(),
+        )
+        .unwrap();
+    assert_eq!(resource["reference"], resolution);
+    assert_eq!(
+        resource["document"],
+        resolved["result"]["canonical_result"]["document"]
+    );
+
+    let mut stale = request.clone();
+    stale["operation"] = json!("capabilities.resolve");
+    stale["input"]["plan"]["revision"] = json!("2");
+    assert_eq!(
+        code(&app.execute("capabilities.resolve", &stale)),
+        "CG_INVALID_REQUEST"
+    );
+    let mut foreign = request.clone();
+    foreign["scope"]["project_id"] = json!("foreign");
+    assert_eq!(
+        code(&app.execute("context.compile", &foreign)),
+        "CG_SCOPE_DENIED"
+    );
 }
 #[cfg(unix)]
 #[test]
@@ -337,6 +535,74 @@ fn admission_rejects_bad_versions_duplicate_keys_digests_and_provenance() {
         )
         .is_err()
     );
+}
+
+#[test]
+fn admission_rejects_oversize_empty_and_invalid_repository_manifests() {
+    let f = Fixture::new();
+    assert!(matches!(
+        LocalWorkspaceResolver::from_json(&" ".repeat(1_048_576)),
+        Err(FacadeError::LimitExceeded)
+    ));
+    assert!(matches!(
+        LocalWorkspaceResolver::from_json(r#"{"schema_version":1,"mappings":[]}"#),
+        Err(FacadeError::InvalidInput)
+    ));
+    for repository in [f.root.join("missing"), PathBuf::from("relative/path")] {
+        let mut config = f.config.clone();
+        config["mappings"][0]["repository"] = json!(repository);
+        assert!(matches!(
+            LocalWorkspaceResolver::from_json(&config.to_string()),
+            Err(FacadeError::ScopeDenied)
+        ));
+    }
+    let mut config = f.config.clone();
+    let duplicate = config["mappings"][0]["resources"][0].clone();
+    config["mappings"][0]["resources"]
+        .as_array_mut()
+        .unwrap()
+        .push(duplicate);
+    assert!(matches!(
+        LocalWorkspaceResolver::from_json(&config.to_string()),
+        Err(FacadeError::InvalidInput)
+    ));
+}
+
+#[test]
+fn canonical_admission_rejects_collision_wrong_contract_and_outside_catalog() {
+    let mut f = Fixture::new();
+    let (_, _) = canonical_admission(&mut f);
+
+    let mut collision = f.config.clone();
+    let (reference, resource) = pin_resource(
+        &collision["mappings"][0]["scope"],
+        "local-resolution",
+        "cg.resolution",
+        json!({"kind":"collision"}),
+    );
+    let _ = reference;
+    collision["mappings"][0]["resources"]
+        .as_array_mut()
+        .unwrap()
+        .push(resource);
+    assert!(matches!(
+        LocalWorkspaceResolver::from_json(&collision.to_string()),
+        Err(FacadeError::InvalidInput)
+    ));
+
+    let mut wrong_contract = f.config.clone();
+    wrong_contract["mappings"][0]["canonical"]["rules"]["contract"] = json!("cg.plan");
+    assert!(matches!(
+        LocalWorkspaceResolver::from_json(&wrong_contract.to_string()),
+        Err(FacadeError::InvalidInput)
+    ));
+
+    let mut outside = f.config.clone();
+    outside["mappings"][0]["canonical"]["catalog"] = json!(f.root.join("b"));
+    assert!(matches!(
+        LocalWorkspaceResolver::from_json(&outside.to_string()),
+        Err(FacadeError::ScopeDenied)
+    ));
 }
 
 #[test]

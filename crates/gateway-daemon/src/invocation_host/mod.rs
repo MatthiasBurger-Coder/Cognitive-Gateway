@@ -2,6 +2,7 @@
 //! session coordinator: CG-14/EPIC-08 retain planning and lifecycle ownership.
 mod assembly;
 mod journal;
+pub mod session_tools;
 
 use crate::model_adapters::{AdapterKind, AdapterRenderer, HttpModelAdapter, RuntimeModelBinding};
 use gateway_application::{

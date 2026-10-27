@@ -206,6 +206,18 @@ impl DeclarativeResolutionApplication {
             policy_inputs,
         })
     }
+    /// Encode the exact current basis after full native resolution validation.
+    /// No explanation artifact is produced; its rendering limits remain at the
+    /// serialization boundary. This data supplies no policy or dispatch grant.
+    pub fn inspect_basis(
+        &self,
+        resolution: &ResolvedPlan,
+    ) -> Result<serde_json::Value, ResolutionApplicationError> {
+        self.validate_resolution(resolution)?;
+        Ok(crate::resolution_encoding::basis_json(
+            &resolution.report.basis,
+        ))
+    }
     pub fn explain_resolution(
         &self,
         resolution: &ResolvedPlan,

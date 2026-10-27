@@ -86,6 +86,9 @@ semantics, generated correlation metadata, structured stderr traces, counters an
 `cg://runtime/health`. Disconnect requests invocation cancellation and detaches
 durable task observation. Reconnect never restarts work. Existing application
 policy, consent, scope, provenance and verification checks remain mandatory.
+The health resource reports `readiness_scope: transport_only` separately from
+`capability_readiness: unqualified`; a completed MCP handshake does not qualify
+any application capability.
 
 ## Evidence
 

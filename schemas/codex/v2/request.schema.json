@@ -476,10 +476,16 @@
               "additionalProperties": false,
               "properties": {
                 "contract": {
-                  "const": "cg.consent-record"
+                  "enum": [
+                    "cg.consent-record",
+                    "cg.connector-consent-record"
+                  ]
                 },
                 "contract_version": {
-                  "const": "2.0"
+                  "enum": [
+                    "2.0",
+                    "1.0"
+                  ]
                 },
                 "reference": {
                   "type": "object",

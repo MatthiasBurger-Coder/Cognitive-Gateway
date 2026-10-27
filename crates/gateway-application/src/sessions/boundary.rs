@@ -86,6 +86,16 @@ pub fn decode(operation: &str, request: &Value) -> Result<Decoded, &'static str>
                     .map_err(|_| "CG_INVALID_INPUT")?,
             ),
         },
+        "session.approve" if input["consent"]["contract"] == "cg.connector-consent-record" => {
+            SessionCommand::ApproveConnector {
+                at,
+                pending: PendingId::new(id("pending_id")?).map_err(map)?,
+                consent: ConnectorConsentRecordRef(
+                    serde_json::from_value(input["consent"]["reference"].clone())
+                        .map_err(|_| "CG_INVALID_INPUT")?,
+                ),
+            }
+        }
         "session.approve" => SessionCommand::Approve {
             at,
             pending: PendingId::new(id("pending_id")?).map_err(map)?,
@@ -115,6 +125,9 @@ pub fn response(
     let interaction = match &checkpoint.pending {
         Some(PendingInteraction::Source(q)) => json!({"kind":"source","payload":q}),
         Some(PendingInteraction::Consent(a)) => json!({"kind":"consent","payload":a}),
+        Some(PendingInteraction::ConnectorConsent(a)) => {
+            json!({"kind":"connector_consent","payload":a})
+        }
         None => Value::Null,
     };
     let result = json!({"schema_version":"2.0","scope":request["scope"],"operation":request["operation"],"correlation":request["correlation"],

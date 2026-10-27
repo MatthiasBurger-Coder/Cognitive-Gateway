@@ -398,11 +398,23 @@ impl SemanticTaskIR {
         ))?)
     }
 
+    /// Enumerate the exact direct references consumed by `validate_references`,
+    /// retaining every contract, scope, revision and digest. Literal inputs add
+    /// no reference. Process references use their native definition binding.
+    ///
+    /// This read-only discovery neither resolves nor authenticates references,
+    /// proves target association, or confers authority. A loader must still use
+    /// the owning contracts and a trusted `SemanticReferenceValidator`; it must
+    /// not replace stale or missing bindings while walking a dependency closure.
+    pub fn reference_bindings(&self) -> Vec<SemanticReferenceBinding> {
+        self.0.bindings()
+    }
+
     pub fn validate_references(
         &self,
         validator: &impl SemanticReferenceValidator,
     ) -> Result<(), ValidationError> {
-        for binding in self.0.bindings() {
+        for binding in self.reference_bindings() {
             validator.validate(&self.0, &binding)?;
         }
         Ok(())

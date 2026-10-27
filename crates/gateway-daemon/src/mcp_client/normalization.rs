@@ -7,7 +7,28 @@ use super::{
 use gateway_application::{connector_results::*, connectors::*};
 use gateway_domain::*;
 use sha2::{Digest, Sha256};
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
+
+const MAX_CANONICAL_INPUT_BYTES: usize = 262_144;
+
+/// Only an admitted scalar normalizer can construct this output proof.
+pub(super) struct ScalarBounds {
+    source: SourceId,
+    subjects: BTreeSet<SubjectPath>,
+}
+impl ScalarBounds {
+    pub(super) fn source(&self) -> &SourceId {
+        &self.source
+    }
+    pub(super) fn subjects(&self) -> &BTreeSet<SubjectPath> {
+        &self.subjects
+    }
+    pub(super) fn value_bytes(&self) -> u64 {
+        // Native TypedValue scalar serde adds {kind,value}, at most 32 bytes
+        // per field, to the same JSON scalar represented in the bounded input.
+        MAX_CANONICAL_INPUT_BYTES as u64 + 32 * self.subjects.len() as u64
+    }
+}
 
 /// Immutable CG-owned projection; names never come from server instructions.
 #[derive(Debug, Clone)]
@@ -28,6 +49,10 @@ pub struct Acquisition {
     pub max_age: FreshnessPolicy,
     pub authenticated_source: NonEmptyText,
     pub sensitivity: SensitivityClass,
+    /// Explicit collector assessment under its authenticated source contract.
+    /// Unassessed sources must retain Unknown; completeness alone is no proof.
+    pub confidence: Confidence,
+    pub uncertainty: Uncertainty,
     pub conflict: ConflictStatus,
     pub partial: bool,
     pub basis: ConnectorObservationBasis,
@@ -40,9 +65,16 @@ pub struct Acquisition {
 pub trait AcquisitionPort: Send + Sync {
     fn collect(&self, dispatch: &ConnectorDispatch) -> Result<Acquisition, Error>;
 }
+/// Trusted collector contract for the qualified direct acquisition path.
+/// Implementations perform bounded read-only host metadata lookups only: no
+/// connector/model/embedding I/O, no secret material in returned metadata.
+/// Implementing this trait is a source-owner assertion, never inferred from stdio.
+pub trait QualifiedAcquisitionPort: AcquisitionPort {}
+
 pub struct CanonicalResultNormalizer {
     profile: NormalizationProfile,
     acquisition: Box<dyn AcquisitionPort>,
+    qualified: bool,
 }
 impl CanonicalResultNormalizer {
     pub fn new(
@@ -68,6 +100,24 @@ impl CanonicalResultNormalizer {
         Ok(Self {
             profile,
             acquisition,
+            qualified: false,
+        })
+    }
+    pub fn new_qualified(
+        profile: NormalizationProfile,
+        acquisition: Box<dyn QualifiedAcquisitionPort>,
+    ) -> Result<Self, Error> {
+        let mut value = Self::new(profile, acquisition)?;
+        value.qualified = true;
+        Ok(value)
+    }
+    pub(super) fn resource_bounds(&self) -> Result<ScalarBounds, Error> {
+        if !self.qualified {
+            return Err(Error::Unsupported);
+        }
+        Ok(ScalarBounds {
+            source: self.profile.source.clone(),
+            subjects: self.profile.fields.values().cloned().collect(),
         })
     }
     pub fn canonicalize(
@@ -116,7 +166,7 @@ impl CanonicalResultNormalizer {
             _ => return Err(Error::Schema),
         };
         let bytes = serde_json::to_vec(&value).map_err(|_| Error::Schema)?;
-        if bytes.len() > 262_144 {
+        if bytes.len() > MAX_CANONICAL_INPUT_BYTES {
             return Err(Error::Limit);
         }
         let string = |key: &str| value.get(key).and_then(|v| v.as_str()).ok_or(Error::Schema);
@@ -149,12 +199,12 @@ impl CanonicalResultNormalizer {
         let quality = QualityMetadata::new(
             TrustClass::ObservedEvidence,
             a.sensitivity,
-            Confidence::Unknown,
+            a.confidence,
             freshness,
             if a.partial {
                 Uncertainty::Incomplete
             } else {
-                Uncertainty::Unknown
+                a.uncertainty
             },
         )
         .with_conflict(a.conflict);

@@ -58,11 +58,21 @@ impl SessionAdmission<'_> {
                     now_ms,
                 )
             }
+            SessionCommand::ApproveConnector { pending, .. }
+                if self.state == SessionState::PendingConsent =>
+            {
+                self.pending.ok_or(SessionError::InvalidInteraction)?.check(
+                    pending,
+                    self.revision,
+                    now_ms,
+                )
+            }
             SessionCommand::Continue { .. } if self.state == SessionState::Runnable => Ok(()),
             SessionCommand::Cancel { .. }
                 if matches!(
                     self.state,
                     SessionState::Runnable
+                        | SessionState::Preparing
                         | SessionState::PendingClarification
                         | SessionState::PendingConsent
                         | SessionState::Dispatching
@@ -105,6 +115,9 @@ impl SessionSnapshot {
             DispatchKnowledge::Reserved | DispatchKnowledge::Unknown
         );
         match self.state {
+            SessionState::Preparing if self.dispatch_knowledge != DispatchKnowledge::Prepared => {
+                Err(SessionError::InvalidState)
+            }
             SessionState::Completed | SessionState::Failed | SessionState::Cancelled
                 if self.dispatch_knowledge == DispatchKnowledge::Prepared =>
             {

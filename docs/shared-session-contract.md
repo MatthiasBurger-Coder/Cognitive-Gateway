@@ -163,6 +163,7 @@ command/session, never automatically replay a possible mutation.
 | State | Admitted transition / rule |
 | --- | --- |
 | runnable | Continue may reserve one eligible dispatch after fresh checks; Cancel may terminate if no invocation is outstanding |
+| preparing | A whole-step resource envelope or exact approved-resume claim is durably fenced before model preparation or reconstruction reads. Connector mutation has not been released. Continue/Approve are blocked; Cancel retains the resource charge and stops. Expired-lease recovery fails without repeating preparation. |
 | dispatching | Only correlated outcome/reconciliation or cancellation request; no second Continue dispatch |
 | pending_clarification | Clarify consumes the exact question once, records validated answer and reassessment, then becomes runnable or genuinely pending again; Continue is blocked |
 | pending_consent | Approve consumes the exact request after trusted-record validation, then becomes runnable; Continue is blocked |
@@ -175,6 +176,46 @@ state if existing services establish that outcome; it must not invent a dispatch
 A prerequisite with no supported actionable question/action remains blocked with
 a diagnostic, not a synthetic pause. CG-14 decisions remain authoritative; wrapper
 states describe orchestration and outstanding effects, not another process engine.
+
+Connector preparation requires immutable trusted resource admission. The
+session checkpoint retains typed cumulative model attempts/input/output tokens,
+output bytes and cost micro-units, retrieval rounds/results/tokens, repair
+attempts, connector calls and worker attempts/compute units. One connector call
+means one top-level discovery, invocation or resource read; discovery includes
+bounded handshake and pagination. Zero connector calls are omitted from the
+serialized amounts, preserving legacy identities. The operator selects one immutable
+cost unit. An absent allowance never means zero consumption or unlimited use.
+Checked whole-step reservations bind owner/project/scope/session/run/revision/
+step/dispatch and conservatively debit the complete admitted upper bound;
+missing or smaller usage telemetry cannot refund it. Reservation history and
+limits cannot be removed, replaced or increased in later journal appends.
+
+The first preparation append consumes the Continue command key and advances
+the fence before resource-consuming work. Consent pauses retain that charge.
+Approved continuation claims the same reservation under a new fence before
+reconstructing the retained proposal; it cannot reserve a replacement or let
+competing Continues repeat the reconstruction. A successful step consumes its
+exact-step approval. Later steps require fresh envelopes and consent decisions.
+Expired connector consent stops without model/artifact preparation. Legacy
+checkpoints without resource admission remain readable, but cannot start new
+connector preparation through the coordinator.
+
+V2 reservation identities bind disjoint phase allocations. Each coordinator
+claim mints a non-cloneable, non-deserializable phase cursor; nested adapters
+consume child slices without refunds. Preparation and approved resume use
+different slices. Execution and fallback snapshot capture receive their own
+allowances after the Before/Dispatching append. Recovery never recreates a
+preparation or execution cursor. Legacy v1 reservations cannot mint cursors.
+The model adapter now enforces its child allowance through one retained
+`InvocationRun`, joined current claim/producer admission and explicit current
+qualification for estimated counts. `SessionConnectorRun` enforces distinct
+connector-only child allocations with hard operation quotes, exact current
+request/source admission and the existing CG-09 transport boundary. Its
+reservation must match the authorized dispatch reservation. Polling is
+validation-only; explicit authorization and pre-effect revalidation are audited.
+Concrete retrieval/worker adapters and shipped runtime composition still
+require qualification; a saved reservation alone cannot establish enforcement.
+
 Completed requires verified evidence and no pending/uncertain dispatch. Cancelled
 requires no unresolved effect; cancellation does not undo an already completed
 effect. Failed does not conceal an uncertain effect. Terminal snapshots retain

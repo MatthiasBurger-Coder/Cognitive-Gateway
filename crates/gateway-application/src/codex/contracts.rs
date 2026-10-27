@@ -116,6 +116,9 @@ pub fn valid(value: &Value, schema: &Value, common: &Value) -> bool {
                         && s.bytes()
                             .all(|c| c.is_ascii_digit() || (b'a'..=b'f').contains(&c))
                 }),
+                "^[0-9a-fA-F]{64}$" => {
+                    text.len() == 64 && text.bytes().all(|c| c.is_ascii_hexdigit())
+                }
                 _ => false,
             };
             if !matches {

@@ -13,7 +13,7 @@ fn target() -> ConnectorTarget {
         scope: ContextScopeId::new("scope-one").unwrap(),
     }
 }
-fn wire() -> ProtocolInventory {
+pub(super) fn wire() -> ProtocolInventory {
     let v: Value = serde_json::from_slice(DISCOVERY).unwrap();
     ProtocolInventory {
         tools: v["tools"].as_array().unwrap().clone(),
@@ -28,7 +28,7 @@ fn doc(v: &Value) -> Result<MappingDocument, MappingError> {
 fn document() -> Value {
     serde_json::from_slice(DOC).unwrap()
 }
-fn mapper() -> DiscoveryMapper {
+pub(super) fn mapper() -> DiscoveryMapper {
     DiscoveryMapper::new(
         target(),
         ConnectorManifest::from_json(MANIFEST).unwrap(),
@@ -52,7 +52,11 @@ fn rebind(mapper: &mut DiscoveryMapper, wire: &ProtocolInventory) {
     mapper.manifest =
         ConnectorManifest::from_definition_json(&serde_json::to_vec(&v).unwrap()).unwrap();
 }
-fn dispatch(m: &DiscoveryMapper, wire: &ProtocolInventory, resource: bool) -> ConnectorDispatch {
+pub(super) fn dispatch(
+    m: &DiscoveryMapper,
+    wire: &ProtocolInventory,
+    resource: bool,
+) -> ConnectorDispatch {
     ConnectorDispatch {
         request: ConnectorRequest {
             target: target(),
@@ -112,6 +116,125 @@ fn golden_snapshot_and_manifest_bundle_digests() {
             .unwrap()
             .digest(),
         m.document.digest()
+    );
+}
+
+#[test]
+fn tool_schema_is_complete_and_bound_to_current_inventory_and_capability() {
+    let m = mapper();
+    let w = wire();
+    let inventory = m.snapshot(&w).unwrap().inventory().clone();
+    let capability = CapabilityId::new("records.read").unwrap();
+    let schema = m.tool_schema(&w, &capability, &inventory.revision).unwrap();
+    assert_eq!(schema.target, target());
+    assert_eq!(schema.capability, capability);
+    assert_eq!(schema.inventory_revision, inventory.revision);
+    assert_eq!(schema.argument_schema["type"], "object");
+    assert_eq!(
+        schema.argument_schema["properties"]["query"]["type"],
+        "string"
+    );
+    assert_eq!(schema.result_schema["type"], "object");
+    assert_eq!(
+        hash(&schema.argument_schema),
+        schema.wire_argument_schema_digest
+    );
+    assert_eq!(
+        executable_schema_digest(&schema.argument_schema),
+        schema.argument_schema_digest
+    );
+    assert_eq!(hash(&schema.result_schema), schema.result_schema_digest);
+    let tool = gateway_application::prompt_rendering::ToolDefinition::from_connector_schema(
+        ResolvedReference {
+            id: capability.clone(),
+            scope: schema.target.scope.clone(),
+            contract: ReferenceId::new("connector-capability").unwrap(),
+            contract_version: SchemaVersion::V1,
+            revision: ReferenceId::new("1").unwrap(),
+            digest: ContentDigest::new("a".repeat(64)).unwrap(),
+        },
+        NonEmptyText::new("Read records").unwrap(),
+        schema.target.clone(),
+        schema.inventory_revision.clone(),
+        schema.argument_schema_digest.clone(),
+        &schema.argument_schema,
+    )
+    .unwrap();
+    assert_eq!(
+        tool.input.json_schema(),
+        executable_schema(&schema.argument_schema)
+    );
+    let pin = tool.connector_inventory.unwrap();
+    assert_eq!(pin.connector, schema.target.connector);
+    assert_eq!(pin.revision, schema.inventory_revision);
+    assert_eq!(pin.argument_schema_digest, schema.argument_schema_digest);
+
+    let stale = ContentDigest::new("f".repeat(64)).unwrap();
+    assert_eq!(
+        m.tool_schema(&w, &capability, &stale).unwrap_err(),
+        MappingError::StaleInventory
+    );
+    assert_eq!(
+        m.tool_schema(
+            &w,
+            &CapabilityId::new("unmapped.capability").unwrap(),
+            &inventory.revision
+        )
+        .unwrap_err(),
+        MappingError::UnknownEntry
+    );
+
+    let mut drifted = w.clone();
+    drifted.tools[0]["inputSchema"]["properties"]["query"]["type"] = json!("boolean");
+    assert!(matches!(
+        m.tool_schema(&drifted, &capability, &inventory.revision),
+        Err(MappingError::SchemaDigest)
+    ));
+}
+
+#[test]
+fn tool_schema_executable_digest_ignores_docs_but_revision_binds_them() {
+    let mut mapper = mapper();
+    let original = wire();
+    let original_inventory = mapper.snapshot(&original).unwrap();
+    let capability = CapabilityId::new("records.read").unwrap();
+    let original_tool = mapper
+        .tool_schema(
+            &original,
+            &capability,
+            &original_inventory.inventory().revision,
+        )
+        .unwrap();
+
+    let mut documented = original.clone();
+    documented.tools[0]["inputSchema"]["description"] = json!("Read records");
+    documented.tools[0]["inputSchema"]["properties"]["query"]["description"] =
+        json!("Search phrase");
+    rebind(&mut mapper, &documented);
+    let documented_inventory = mapper.snapshot(&documented).unwrap();
+    assert_ne!(
+        documented_inventory.inventory().revision,
+        original_inventory.inventory().revision
+    );
+    let documented_tool = mapper
+        .tool_schema(
+            &documented,
+            &capability,
+            &documented_inventory.inventory().revision,
+        )
+        .unwrap();
+    assert_eq!(
+        documented_tool.argument_schema_digest,
+        original_tool.argument_schema_digest
+    );
+    assert_eq!(executable_schema(&json!("scalar")), json!("scalar"));
+    assert_eq!(
+        executable_schema(&json!({"properties":"opaque","description":"docs"})),
+        json!({"properties":"opaque"})
+    );
+    assert_ne!(
+        documented_tool.wire_argument_schema_digest,
+        original_tool.wire_argument_schema_digest
     );
 }
 #[test]
@@ -571,6 +694,65 @@ fn host_adapter_requires_normalizer_and_validates_results_even_without_advertise
     unknown.tools[0]["name"] = json!("unknown");
     assert_eq!(
         adapter.inventory(&target(), &m.manifest, &unknown),
+        Err(Error::Schema)
+    );
+}
+
+#[test]
+fn canonical_host_adapter_projects_tool_schema_and_rejects_wrong_scope_manifest_and_stale_pins() {
+    let m = mapper();
+    let wire = wire();
+    let adapter = CanonicalConnectorMapping::new(m.clone(), Box::new(RejectNormalizer));
+    let snapshot = m.snapshot(&wire).unwrap();
+    let capability = snapshot.inventory.capabilities[0].capability.clone();
+    let revision = snapshot.inventory.revision.clone();
+    let schema = adapter
+        .tool_schema(&target(), &m.manifest, &wire, &capability, &revision)
+        .unwrap();
+    assert_eq!(schema.target, target());
+    assert_eq!(schema.capability, capability);
+    assert_eq!(schema.inventory_revision, revision);
+
+    let mut wrong_target = target();
+    wrong_target.scope = ContextScopeId::new("other-scope").unwrap();
+    assert_eq!(
+        adapter.tool_schema(&wrong_target, &m.manifest, &wire, &capability, &revision),
+        Err(Error::Configuration)
+    );
+    let mut wrong_manifest_value = serde_json::to_value(m.manifest.definition()).unwrap();
+    wrong_manifest_value["configuration_ref"] = json!("other.config");
+    let wrong_manifest = ConnectorManifest::from_definition_json(
+        &serde_json::to_vec(&wrong_manifest_value).unwrap(),
+    )
+    .unwrap();
+    assert_eq!(
+        adapter.tool_schema(&target(), &wrong_manifest, &wire, &capability, &revision),
+        Err(Error::Configuration)
+    );
+    assert_eq!(
+        adapter.tool_schema(
+            &target(),
+            &m.manifest,
+            &wire,
+            &capability,
+            &ContentDigest::new("f".repeat(64)).unwrap(),
+        ),
+        Err(Error::InventoryChanged)
+    );
+    assert_eq!(
+        adapter.tool_schema(
+            &target(),
+            &m.manifest,
+            &wire,
+            &CapabilityId::new("missing.capability").unwrap(),
+            &revision,
+        ),
+        Err(Error::Schema)
+    );
+    let mut drifted = wire.clone();
+    drifted.tools[0]["inputSchema"]["properties"]["query"]["type"] = json!("boolean");
+    assert_eq!(
+        adapter.tool_schema(&target(), &m.manifest, &drifted, &capability, &revision),
         Err(Error::Schema)
     );
 }

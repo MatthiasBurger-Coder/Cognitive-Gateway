@@ -80,6 +80,11 @@ impl InvocationRun {
     pub fn terminal(&self) -> Option<D> {
         self.terminal
     }
+    /// Preserve the exact run deadline, shared cancellation and terminal state
+    /// when outer verification callbacks complete after provider dispatch.
+    pub fn check_current(&self) -> Result<(), D> {
+        self.check()
+    }
     fn check(&self) -> Result<(), D> {
         if let Some(error) = self.terminal {
             return Err(error);

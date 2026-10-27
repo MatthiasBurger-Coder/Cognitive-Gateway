@@ -4,6 +4,7 @@ struct Peer {
     input: VecDeque<Result<Vec<u8>, Error>>,
     output: Arc<Mutex<Vec<Value>>>,
     send_error: Option<Error>,
+    delay_past_receive_deadline: bool,
 }
 impl Transport for Peer {
     fn send(&mut self, frame: &[u8], _: &CallContext) -> Result<(), Error> {
@@ -13,7 +14,27 @@ impl Transport for Peer {
             .push(serde_json::from_slice(frame).unwrap());
         self.send_error.map_or(Ok(()), Err)
     }
-    fn receive(&mut self, _: &CallContext) -> Result<Vec<u8>, Error> {
+    fn receive(&mut self, context: &CallContext) -> Result<Vec<u8>, Error> {
+        let frame = self.input.pop_front().unwrap_or(Err(Error::Timeout));
+        if self.delay_past_receive_deadline && frame.is_ok() {
+            std::thread::sleep(
+                context.deadline.saturating_duration_since(Instant::now())
+                    + Duration::from_millis(1),
+            );
+        }
+        frame
+    }
+    fn receive_with_wait_deadline(
+        &mut self,
+        context: &CallContext,
+        wait_deadline: Instant,
+    ) -> Result<Vec<u8>, Error> {
+        if self.delay_past_receive_deadline {
+            std::thread::sleep(
+                wait_deadline.saturating_duration_since(Instant::now()) + Duration::from_millis(1),
+            );
+        }
+        context.check()?;
         self.input.pop_front().unwrap_or(Err(Error::Timeout))
     }
     fn close(&mut self) {}
@@ -34,6 +55,7 @@ fn session(values: Vec<Value>) -> (Session, Arc<Mutex<Vec<Value>>>) {
             .collect(),
         output: output.clone(),
         send_error: None,
+        delay_past_receive_deadline: false,
     }));
     session.state = SessionState::Ready;
     (session, output)
@@ -159,6 +181,7 @@ impl TransportFactory for Init {
             .unwrap())]),
             output: Arc::new(Mutex::new(vec![])),
             send_error: None,
+            delay_past_receive_deadline: false,
         }))
     }
 }
@@ -203,4 +226,22 @@ fn discovery_rejects_invalid_pages_and_cursor_cycles_atomically() {
     ]);
     s.capabilities = json!({"tools":{}});
     assert_eq!(s.discover(&context()), Err(Error::Limit));
+}
+
+#[test]
+fn received_inventory_invalidation_survives_expired_refresh_poll() {
+    let (mut session, output) = session(vec![]);
+    session.transport = Some(Box::new(Peer {
+        input: VecDeque::from([Ok(serde_json::to_vec(&json!({
+            "jsonrpc":"2.0","method":"notifications/tools/list_changed"
+        }))
+        .unwrap())]),
+        output: output.clone(),
+        send_error: None,
+        delay_past_receive_deadline: true,
+    }));
+    session.inventory = Some(ProtocolInventory::default());
+    assert_eq!(session.refresh(&context()), Err(Error::InventoryChanged));
+    assert!(session.inventory.is_none());
+    assert!(output.lock().unwrap().is_empty());
 }

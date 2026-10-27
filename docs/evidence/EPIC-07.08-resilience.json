@@ -1,0 +1,150 @@
+{
+  "issue": 231,
+  "date": "2026-10-27T06:50:55.063808+00:00",
+  "base_commit": "742c318b47b1e06ced615618fe7ac0c1d05f71ce",
+  "workspace_before_task": "Dirty, with substantial existing EPIC-07.07/08.03 policy and session changes; these were preserved. No commit, push or external issue mutation performed.",
+  "status": "COMPONENT_VERIFIED_WORKSPACE_QUALITY_BLOCKED",
+  "ready_to_close_issue": false,
+  "review_provenance": "Single agent role passes; no independent approval or live provider qualification.",
+  "runtime_evidence_level": "Real independent stdio subprocess peer through connector, CG-09 and coordinator-owned session resource boundaries; injected trusted control-plane sources.",
+  "acceptance": {
+    "R01": "VERIFIED_COMPONENT",
+    "R02": "VERIFIED_COMPONENT",
+    "R03": "VERIFIED_COMPONENT",
+    "R04": "VERIFIED_COMPONENT",
+    "R05": "VERIFIED_COMPONENT",
+    "R06": "VERIFIED_COMPONENT",
+    "R07": "VERIFIED_COMPONENT",
+    "R08": "VERIFIED_COMPONENT",
+    "R09": "VERIFIED_COMPONENT"
+  },
+  "checks": [
+    {
+      "command": "CARGO_BUILD_JOBS=1 cargo build --workspace --locked",
+      "status": "PASS"
+    },
+    {
+      "command": "CARGO_BUILD_JOBS=1 cargo test --workspace --locked -- --test-threads=1",
+      "status": "PASS",
+      "suites": 128,
+      "passed": 1516,
+      "failed": 0,
+      "ignored": 4,
+      "scope_note": "Workspace run precedes final test-only additions, which are covered by the final candidate coverage run below. Production behavior is unchanged by those additions."
+    },
+    {
+      "command": "CARGO_BUILD_JOBS=1 CARGO_LLVM_COV_TARGET_DIR=target/mcp-client-coverage cargo llvm-cov -p gateway-application -p gateway-daemon --lib --test connector_resilience --test mcp_client --locked --json --output-path target/epic-07-08-coverage.json -- --test-threads=1",
+      "status": "PASS",
+      "suites": 4,
+      "passed": 347,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "command": "python3 scripts/check-connector-resilience-coverage.py --self-test; python3 scripts/check-connector-resilience-coverage.py target/epic-07-08-coverage.json",
+      "status": "PASS",
+      "requirement": "At least 95% measured line coverage separately for every expected production file."
+    },
+    {
+      "command": "python3 scripts/check-mcp-client-coverage.py target/epic-07-08-coverage.json; python3 scripts/check-connector-mapping-coverage.py target/epic-07-08-coverage.json",
+      "status": "PASS"
+    },
+    {
+      "command": "python3 -m unittest discover -s tests/architecture -p 'test_*.py'",
+      "status": "PASS",
+      "tests": 83,
+      "skipped": 1
+    },
+    {
+      "command": "bash scripts/check-architecture.sh",
+      "status": "PASS"
+    },
+    {
+      "command": "rustfmt --check --edition 2024 --config skip_children=true <all Rust files changed by this slice>",
+      "status": "PASS"
+    },
+    {
+      "command": "git diff --check; python3 -m py_compile scripts/check-connector-resilience-coverage.py tests/fixtures/mcp-client-v1/server.py",
+      "status": "PASS"
+    },
+    {
+      "command": "cargo fmt --check",
+      "status": "FAIL_EXISTING_WORKSPACE",
+      "reason": "Existing format differences in session_runtime.rs and local_sessions/runtime_admission files outside this slice; scoped formatting passes."
+    },
+    {
+      "command": "cargo clippy --workspace --all-targets -- -D warnings",
+      "status": "FAIL_EXISTING_WORKSPACE",
+      "reason": "items_after_test_module in gateway-application/src/sessions/readback_storage.rs (untouched existing file)."
+    },
+    {
+      "command": "CARGO_BUILD_JOBS=1 cargo clippy -p gateway-daemon --lib",
+      "status": "FAIL_EXISTING_WORKSPACE",
+      "reason": "clone_on_copy in gateway-daemon/src/local_sessions/runtime_admission/connector_source.rs:1024 and 196 existing dead-code warnings; no suppression or gate reduction introduced."
+    }
+  ],
+  "coverage": [
+    {
+      "path": "crates/gateway-application/src/connector_resilience.rs",
+      "count": 54,
+      "covered": 54,
+      "percent": 100.0
+    },
+    {
+      "path": "crates/gateway-daemon/src/mcp_client/mod.rs",
+      "count": 117,
+      "covered": 114,
+      "percent": 97.43589743589743
+    },
+    {
+      "path": "crates/gateway-daemon/src/mcp_client/host.rs",
+      "count": 900,
+      "covered": 861,
+      "percent": 95.66666666666667
+    },
+    {
+      "path": "crates/gateway-daemon/src/mcp_client/protocol.rs",
+      "count": 325,
+      "covered": 313,
+      "percent": 96.3076923076923
+    },
+    {
+      "path": "crates/gateway-daemon/src/mcp_client/mapping.rs",
+      "count": 600,
+      "covered": 595,
+      "percent": 99.16666666666667
+    },
+    {
+      "path": "crates/gateway-daemon/src/mcp_client/session_budget.rs",
+      "count": 631,
+      "covered": 600,
+      "percent": 95.08716323296355
+    },
+    {
+      "path": "crates/gateway-daemon/src/mcp_client/resilience.rs",
+      "count": 156,
+      "covered": 152,
+      "percent": 97.43589743589743
+    }
+  ],
+  "artifacts": {
+    "source_bindings": {
+      "path": "docs/evidence/EPIC-07.08-source-bindings.json.gz",
+      "sha256": "4ec0400aab4e81bb23111e53efde7631fcf938bc52e6f6f9415339b402e1b6d6"
+    },
+    "coverage": {
+      "path": "docs/evidence/EPIC-07.08-resilience-coverage.json.gz",
+      "sha256": "76bfc1a3e31c4482af0d1ab3f1333d83bd5e281d90726c1a0a0d60d66a2f9fa3"
+    },
+    "validation": {
+      "path": "docs/evidence/EPIC-07.08-validation.json.gz",
+      "sha256": "45fdf5974b174247700dc4205925a266a2cf6440c52cffe84b0649f1e2a357a5"
+    }
+  },
+  "limitations": [
+    "Full repository quality is not green: existing formatting and Clippy failures block issue closure/release acceptance.",
+    "Read-back support is an explicit capability contract. The canonical mapper reports Unsupported until a provider contract is qualified; unknown effects remain terminal even with idempotency support.",
+    "Circuit/concurrency state is per host and ephemeral; existing durable coordinator phase ceilings remain authoritative across restart. No external exactly-once or parent epic completion is claimed.",
+    "Live providers and installed-client connector qualification remain EPIC-07.12 (#235); durable effect reconciliation and broader session no-progress limits remain #276/#277 owners."
+  ]
+}

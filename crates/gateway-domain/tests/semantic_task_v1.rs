@@ -329,3 +329,99 @@ fn desired_state_set_operands_and_rust_created_assumptions_are_validated() {
     value["desired_state"]["conditions"][0]["expected"] = Value::Null;
     assert!(SemanticTaskIR::from_json(&value.to_string()).is_ok());
 }
+
+#[test]
+fn reference_discovery_matches_native_validation_without_authenticating_or_mutating_task() {
+    let task = SemanticTaskIR::from_json(FULL).unwrap();
+    let original = task.content_digest().unwrap();
+    let discovered = task.reference_bindings();
+    let validator = CapturedBasis {
+        seen: RefCell::new(vec![]),
+        reject_id: None,
+    };
+    task.validate_references(&validator).unwrap();
+    assert_eq!(discovered, *validator.seen.borrow());
+    assert_eq!(task.content_digest().unwrap(), original);
+    let mut detached = discovered.clone();
+    detached[0].revision = ReferenceId::new("not-current").unwrap();
+    detached[0].digest = ContentDigest::new("f".repeat(64)).unwrap();
+    assert_ne!(
+        detached,
+        task.reference_bindings(),
+        "enumeration returns detached bindings, not mutable task state"
+    );
+    let rejected = &discovered[discovered.len() - 1];
+    let denying = CapturedBasis {
+        seen: RefCell::new(vec![]),
+        reject_id: Some(rejected.id.clone()),
+    };
+    assert!(
+        task.validate_references(&denying).is_err(),
+        "enumerating does not admit an unresolved dependency"
+    );
+    assert_eq!(task.reference_bindings(), discovered);
+}
+
+#[test]
+fn reference_discovery_preserves_full_target_input_process_and_optional_reference_identities() {
+    let task = SemanticTaskIR::from_json(FULL).unwrap();
+    let bindings = task.reference_bindings();
+    let value = serde_json::to_value(task.data()).unwrap();
+    let expected = |reference: &Value| SemanticReferenceBinding {
+        id: reference["id"].as_str().unwrap().into(),
+        scope: ContextScopeId::new(reference["scope"].as_str().unwrap()).unwrap(),
+        contract: ReferenceId::new(reference["contract"].as_str().unwrap()).unwrap(),
+        contract_version: serde_json::from_value(reference["contract_version"].clone()).unwrap(),
+        revision: ReferenceId::new(reference["revision"].as_str().unwrap()).unwrap(),
+        digest: ContentDigest::new(reference["digest"].as_str().unwrap()).unwrap(),
+    };
+    let mut direct = vec![
+        expected(&value["target"]["reference"]),
+        expected(&value["output_contract"]["schema"]),
+    ];
+    for field in [
+        "context_refs",
+        "observations",
+        "history",
+        "capability_requirements",
+        "policy_refs",
+        "evidence_refs",
+    ] {
+        direct.extend(value[field].as_array().unwrap().iter().map(expected));
+    }
+    direct.push(expected(&value["current_state"]));
+    for input in value["inputs"].as_array().unwrap() {
+        if input["value"]["kind"] == "REFERENCE" {
+            direct.push(expected(&input["value"]["value"]));
+        }
+    }
+    direct.extend(
+        value["assumptions"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|assumption| expected(&assumption["basis"])),
+    );
+    let process = task.data().process.as_ref().unwrap();
+    direct.push(SemanticReferenceBinding {
+        id: process.id().as_str().into(),
+        scope: task.data().target.reference.scope.clone(),
+        contract: ReferenceId::new("cg.process-definition").unwrap(),
+        contract_version: SchemaVersion::V1,
+        revision: ReferenceId::new(process.version().to_string()).unwrap(),
+        digest: process.digest().clone(),
+    });
+    assert_eq!(bindings.len(), direct.len());
+    for binding in direct {
+        assert!(
+            bindings.contains(&binding),
+            "missing full native binding {binding:?}"
+        );
+    }
+    let minimal = SemanticTaskIR::from_json(MINIMAL).unwrap();
+    assert_eq!(
+        minimal.reference_bindings().len(),
+        2,
+        "empty optional sets and literals do not create fabricated dependencies"
+    );
+}
