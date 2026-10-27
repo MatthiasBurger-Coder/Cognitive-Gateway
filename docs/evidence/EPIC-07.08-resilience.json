@@ -1,0 +1,180 @@
+{
+  "schema_version": 1,
+  "issue": 231,
+  "status": "PASS",
+  "ready_for_merge": true,
+  "recorded_at": "2026-10-27T15:02:12.390286+00:00",
+  "base_commit": "506ce69b9cf472fc8bec850d4e4b7295137438ad",
+  "branch": "codex/231-connector-resilience",
+  "scope": "Only EPIC-07.08 changes transferred onto committed main; original integration workspace preserved.",
+  "review_provenance": "Single-agent requirement, architecture, automation and tester role passes; no independent approval claimed.",
+  "acceptance": {
+    "R01": "VERIFIED",
+    "R02": "VERIFIED",
+    "R03": "VERIFIED",
+    "R04": "VERIFIED",
+    "R05": "VERIFIED",
+    "R06": "VERIFIED",
+    "R07": "VERIFIED",
+    "R08": "VERIFIED",
+    "R09": "VERIFIED"
+  },
+  "test_host": "Repository scripts/cognitive-test-host.py supplies a dedicated disposable loopback PostgreSQL 16 instance; installed tests actually executed.",
+  "checks": [
+    {
+      "command": "cargo check -p gateway-daemon --tests --locked",
+      "status": "PASS"
+    },
+    {
+      "command": "cargo build --workspace --locked",
+      "status": "PASS"
+    },
+    {
+      "command": "python3 scripts/cognitive-test-host.py -- cargo test --workspace --locked -- --test-threads=1",
+      "status": "PASS",
+      "suites": 124,
+      "passed": 1342,
+      "failed": 0,
+      "ignored": 4,
+      "scope_note": "Final metadata and expiry test-only additions are validated by the additional instrumented runs below; production sources are identical."
+    },
+    {
+      "command": "cargo clippy --workspace --all-targets -- -D warnings",
+      "status": "PASS"
+    },
+    {
+      "command": "cargo fmt --check",
+      "status": "PASS"
+    },
+    {
+      "command": "python3 -m unittest discover -s tests/architecture -p 'test_*.py'",
+      "status": "PASS",
+      "tests": 83,
+      "skipped": 1
+    },
+    {
+      "command": "bash scripts/check-architecture.sh",
+      "status": "PASS"
+    },
+    {
+      "command": "python3 scripts/check-connector-resilience-coverage.py --self-test",
+      "status": "PASS"
+    },
+    {
+      "command": "python3 scripts/check-connector-resilience-coverage.py <coverage-report>",
+      "status": "PASS",
+      "threshold": "95% per production file"
+    },
+    {
+      "command": "python3 scripts/check-mcp-client-coverage.py <coverage-report>",
+      "status": "PASS"
+    },
+    {
+      "command": "python3 scripts/check-connector-mapping-coverage.py <coverage-report>",
+      "status": "PASS"
+    },
+    {
+      "command": "git diff --check; python3 -m py_compile scripts/check-connector-resilience-coverage.py tests/fixtures/mcp-client-v1/server.py",
+      "status": "PASS"
+    }
+  ],
+  "coverage_collection": [
+    {
+      "command": "python3 scripts/cognitive-test-host.py -- cargo llvm-cov -p gateway-application -p gateway-daemon --lib --test connector_resilience --test mcp_client --test observed_goal_sessions --locked --json --output-path <report> -- --test-threads=1",
+      "suites": 5,
+      "passed": 255,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "command": "cargo llvm-cov -p gateway-application -p gateway-daemon --test mcp_client --no-clean --locked --json --output-path <report> -- --test-threads=1",
+      "scope": "Additional metadata contract cases on identical production sources",
+      "suites": 1,
+      "passed": 23,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "command": "cargo llvm-cov -p gateway-application -p gateway-daemon --lib --no-clean --locked --json --output-path <report> -- mcp_client::session_budget::boundary_tests::expired_native_policy_deadline --test-threads=1",
+      "scope": "Expired native policy deadline; identical production sources",
+      "suites": 2,
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "command": "cargo llvm-cov -p gateway-application -p gateway-daemon --test mcp_client --no-clean --locked --json --output-path <report> -- --test-threads=1",
+      "scope": "Complete final MCP suite including before-discovery metadata refusal",
+      "suites": 1,
+      "passed": 24,
+      "failed": 0,
+      "ignored": 0
+    }
+  ],
+  "reproduce_coverage": "CARGO_BUILD_JOBS=1 python3 scripts/cognitive-test-host.py -- cargo llvm-cov -p gateway-application -p gateway-daemon --lib --test connector_resilience --test mcp_client --test observed_goal_sessions --locked --json --output-path target/connector-resilience-coverage.json -- --test-threads=1",
+  "coverage": [
+    {
+      "path": "crates/gateway-application/src/connector_resilience.rs",
+      "count": 54,
+      "covered": 54,
+      "percent": 100.0
+    },
+    {
+      "path": "crates/gateway-daemon/src/mcp_client/mod.rs",
+      "count": 117,
+      "covered": 114,
+      "percent": 97.43589743589743
+    },
+    {
+      "path": "crates/gateway-daemon/src/mcp_client/host.rs",
+      "count": 879,
+      "covered": 839,
+      "percent": 95.44937428896473
+    },
+    {
+      "path": "crates/gateway-daemon/src/mcp_client/protocol.rs",
+      "count": 325,
+      "covered": 313,
+      "percent": 96.3076923076923
+    },
+    {
+      "path": "crates/gateway-daemon/src/mcp_client/mapping.rs",
+      "count": 567,
+      "covered": 556,
+      "percent": 98.05996472663139
+    },
+    {
+      "path": "crates/gateway-daemon/src/mcp_client/session_budget.rs",
+      "count": 616,
+      "covered": 591,
+      "percent": 95.94155844155844
+    },
+    {
+      "path": "crates/gateway-daemon/src/mcp_client/resilience.rs",
+      "count": 156,
+      "covered": 152,
+      "percent": 97.43589743589743
+    }
+  ],
+  "artifacts": {
+    "source_bindings": {
+      "path": "docs/evidence/EPIC-07.08-source-bindings.json.gz",
+      "sha256": "c97066fac1e97b99d79d5e0a6b03f356ec7114d51abdae56345512f79be98df5"
+    },
+    "coverage": {
+      "path": "docs/evidence/EPIC-07.08-resilience-coverage.json.gz",
+      "sha256": "2722297427d5a6414d74845d9e0aa80b3010af977c0942f46c0ebe6bcf9ad967"
+    },
+    "validation": {
+      "path": "docs/evidence/EPIC-07.08-validation.json.gz",
+      "sha256": "60ac3e3f358aa6dfd0f26630f7f4a50029d327c0041eb6f4e593700438f219d4"
+    }
+  },
+  "limitations": [
+    "Canonical read-back support remains explicitly Unsupported until a provider contract is qualified; unknown effects never replay solely because idempotency is declared.",
+    "The legacy SessionConnectorRun facade remains read-only. Standalone admitted mutations perform one attempt and retain Unknown on ambiguous transport outcomes.",
+    "Breaker and concurrency state are per host and ephemeral; existing durable coordinator reservations remain authoritative. No external exactly-once guarantee or parent epic completion is claimed.",
+    "Live external-provider qualification remains #235; durable reconciliation and wider session admission/no-progress semantics remain #276/#277 responsibilities."
+  ],
+  "closure": "This is candidate evidence. Issue closure and branch deletion follow a confirmed PR merge."
+}

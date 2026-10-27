@@ -237,9 +237,11 @@ impl Policy {
             } else {
                 reservation
             }),
-            deadline: UnixTimestamp::new(
-                (self.state.checkpoint.lease_until_ms.unwrap() / 1000) as i64,
-            ),
+            deadline: UnixTimestamp::new(if *self.state.mode.lock().unwrap() == "expired-policy" {
+                0
+            } else {
+                (self.state.checkpoint.lease_until_ms.unwrap() / 1000) as i64
+            }),
         })
     }
 }
@@ -471,6 +473,7 @@ impl Fixture {
         let script = root.join("peer.py");
         std::fs::write(&script,r#"import json,sys,pathlib
 root=pathlib.Path(sys.argv[1])
+calls=0
 for line in sys.stdin:
  r=json.loads(line)
  with (root/'wire.jsonl').open('a') as f:f.write(json.dumps(r)+'\n')
@@ -478,7 +481,14 @@ for line in sys.stdin:
  m=r['method']
  if m=='initialize':v={'protocolVersion':'2025-11-25','serverInfo':{'name':'bounded','version':'1.0.0'},'capabilities':{'tools':{'listChanged':True}}}
  elif m=='tools/list':v={'tools':[{'name':'records.read','inputSchema':{'type':'object','properties':{'query':{'type':'string'}},'required':['query'],'additionalProperties':False}}]}
- elif m=='tools/call':v={'content':[],'structuredContent':{'object':r['params']['arguments']['query'],'value':True},'isError':False}
+ elif m=='tools/call':
+  calls+=1
+  mode=(root/'fault').read_text() if (root/'fault').exists() else 'normal'
+  if mode=='eof':sys.exit(0)
+  if mode in ('rate-once','rate-limit','rate-long') and (mode!='rate-once' or calls==1):
+   print(json.dumps({'jsonrpc':'2.0','id':r['id'],'error':{'code':-32029,'message':'fixture','data':{'retryAfterMs':1000 if mode=='rate-long' else 10}}}),flush=True)
+   continue
+  v={'content':[],'structuredContent':{'object':r['params']['arguments']['query'],'value':True},'isError':False}
  else:v={}
  print(json.dumps({'jsonrpc':'2.0','id':r['id'],'result':v}),flush=True)
 "#).unwrap();
@@ -995,6 +1005,113 @@ fn readonly_slice_rejects_mutation_step_or_target_substitution_before_quote_and_
         );
         assert_eq!(run.usage()?, held);
         assert_eq!(f.state.quote_calls.load(Ordering::SeqCst), quoted);
+        assert_eq!(f.calls(), 0);
+        Ok(())
+    });
+}
+
+#[test]
+fn retries_and_reconnects_charge_the_same_native_session_slice() {
+    for (mode, ceiling, expected_calls, expected_usage) in [
+        ("rate-once", 3, 2, 3),
+        ("rate-limit", 10, 3, 4),
+        ("rate-limit", 2, 1, 2),
+        ("eof", 6, 3, 6),
+    ] {
+        exercise_with_ceiling(amounts(ceiling), |cp, resources, native| {
+            let f = Fixture::new(cp, native);
+            std::fs::write(f.root.join("fault"), mode).unwrap();
+            let run = f.run(resources.allocate(amounts(ceiling))?)?;
+            let inventory = run.discover(&target(cp.goal.scope().clone())).unwrap();
+            let r = f.request(&inventory, cp);
+            f.state.allow(&r, None);
+            let result = run.invoke(&r);
+            if mode == "rate-once" {
+                assert!(result.is_ok(), "{result:?}");
+            } else {
+                assert_eq!(
+                    result.unwrap_err().code,
+                    match (mode, ceiling) {
+                        ("eof", _) => ConnectorFailureCode::Unavailable,
+                        (_, 2) => ConnectorFailureCode::BudgetExhausted,
+                        _ => ConnectorFailureCode::RateLimited,
+                    }
+                );
+            }
+            assert_eq!(f.calls(), expected_calls);
+            assert_eq!(run.usage()?.connector_calls, expected_usage);
+            assert_eq!(run.usage()?.cost_microunits, expected_usage);
+            assert!(run.retry_attempts()? > 0);
+            let retained = run.usage()?;
+            run.cancel();
+            assert_eq!(
+                run.invoke(&r).unwrap_err().code,
+                ConnectorFailureCode::Cancelled
+            );
+            assert_eq!(run.usage()?, retained);
+            Ok(())
+        });
+    }
+}
+
+#[test]
+fn cancellation_and_authority_revocation_interrupt_native_backoff_without_another_send() {
+    for cancel in [true, false] {
+        exercise(|cp, resources, native| {
+            let f = Fixture::new(cp, native);
+            std::fs::write(f.root.join("fault"), "rate-long").unwrap();
+            let run = f.run(resources.allocate(amounts(5))?)?;
+            let inventory = run.discover(&target(cp.goal.scope().clone())).unwrap();
+            let r = f.request(&inventory, cp);
+            f.state.allow(&r, None);
+            std::thread::scope(|scope| {
+                let worker = scope.spawn(|| run.invoke(&r));
+                let until = Instant::now() + Duration::from_secs(5);
+                while f.host.health_snapshot().retry_after.is_zero() {
+                    assert!(Instant::now() < until);
+                    std::thread::sleep(Duration::from_millis(2));
+                }
+                if cancel {
+                    run.cancel();
+                } else {
+                    f.state.request_live.store(false, Ordering::SeqCst);
+                }
+                assert_eq!(
+                    worker.join().unwrap().unwrap_err().code,
+                    if cancel {
+                        ConnectorFailureCode::Cancelled
+                    } else {
+                        ConnectorFailureCode::ScopeMismatch
+                    }
+                );
+            });
+            assert_eq!(f.calls(), 1);
+            assert_eq!(run.usage()?.connector_calls, 2);
+            assert_eq!(run.retry_attempts()?, 0);
+            Ok(())
+        });
+    }
+}
+
+#[test]
+fn expired_native_policy_deadline_never_spends_a_retry_or_sends_a_tool() {
+    exercise(|cp, resources, native| {
+        let f = Fixture::new(cp, native);
+        *f.state.mode.lock().unwrap() = "expired-policy";
+        let run = f.run(resources.allocate(amounts(4))?)?;
+        let inventory = run.discover(&target(cp.goal.scope().clone())).unwrap();
+        let r = f.request(&inventory, cp);
+        f.state.allow(&r, None);
+        let error = run.invoke(&r).unwrap_err();
+        assert_eq!(
+            (error.code, error.effect),
+            (
+                ConnectorFailureCode::Timeout,
+                ConnectorEffect::NotDispatched
+            )
+        );
+        assert_eq!(run.usage()?.connector_calls, 2);
+        assert_eq!(run.retry_attempts()?, 0);
         assert_eq!(f.calls(), 0);
         Ok(())
     });

@@ -60,6 +60,7 @@ pub trait SessionConnectorQuotePort: Send + Sync {
 #[derive(Default)]
 struct Usage {
     amounts: SessionResourceAmounts,
+    retry_attempts: u64,
     terminal: Option<ConnectorFailure>,
 }
 
@@ -425,13 +426,116 @@ impl SessionConnectorRun {
         })
     }
 
+    /// Retries use the original cancellation/deadline and the same non-cloneable
+    /// aggregate spending cursor. Every attempt and reconnect/discovery is charged.
+    pub fn invoke_with_retry(
+        &self,
+        request: &ConnectorRequest,
+        source: Option<&SourceId>,
+        policy: &gateway_application::connector_resilience::RetryPolicy,
+    ) -> Result<ConnectorObservation, ConnectorFailure> {
+        use gateway_application::connector_resilience::RetryDecision;
+        let correlation = &request.correlation;
+        let mut usage = self.lock(correlation)?;
+        if let Some(terminal) = &usage.terminal {
+            return Err(terminal.clone());
+        }
+        let mut context = self.context(correlation);
+        context.deadline = context
+            .deadline
+            .min(std::time::Instant::now() + self.host.operation_timeout());
+        context
+            .check()
+            .map_err(|e| e.failure(correlation, ConnectorEffect::NotDispatched))?;
+        let support = self
+            .host
+            .recovery_support(request, source)
+            .unwrap_or_default();
+        let mut attempts = 0_u32;
+        let admitted_deadline = std::cell::Cell::new(context.deadline);
+        loop {
+            attempts += 1;
+            let result =
+                self.request_once(&mut usage, request, source, &context, &admitted_deadline);
+            context.deadline = context.deadline.min(admitted_deadline.get());
+            let error = match result {
+                Ok(observation) => return Ok(observation),
+                Err(error) => error,
+            };
+            let decision = policy.decide(
+                &error,
+                &support,
+                attempts,
+                context
+                    .deadline
+                    .saturating_duration_since(std::time::Instant::now()),
+                Some(self.host.health_snapshot().retry_after),
+            );
+            self.host.record_retry(&context, decision.clone());
+            let RetryDecision::RetryAfter(delay) = decision else {
+                return Err(error);
+            };
+            let until = std::time::Instant::now() + delay;
+            while std::time::Instant::now() < until {
+                context
+                    .check()
+                    .map_err(|e| e.failure(correlation, error.effect))?;
+                self.authority
+                    .validate_allocation(&self.allocation)
+                    .and_then(|_| {
+                        self.authority.validate_connector_allocation(
+                            &self.allocation,
+                            request,
+                            source,
+                        )
+                    })
+                    .map_err(|e| session_failure(e, correlation, error.effect))?;
+                std::thread::sleep(
+                    until
+                        .saturating_duration_since(std::time::Instant::now())
+                        .min(std::time::Duration::from_millis(5)),
+                );
+            }
+            context
+                .check()
+                .map_err(|e| e.failure(correlation, error.effect))?;
+            usage.retry_attempts = usage.retry_attempts.checked_add(1).ok_or_else(|| {
+                failure(
+                    ConnectorFailureCode::BudgetExhausted,
+                    correlation,
+                    ConnectorEffect::NotDispatched,
+                )
+            })?;
+            if matches!(
+                error.code,
+                ConnectorFailureCode::Unavailable | ConnectorFailureCode::Timeout
+            ) {
+                self.discover_once(&mut usage, &request.target, &context)?;
+            }
+        }
+    }
+    pub fn retry_attempts(&self) -> Result<u64, SessionError> {
+        self.usage
+            .try_lock()
+            .map(|usage| usage.retry_attempts)
+            .map_err(|_| SessionError::Unavailable)
+    }
     fn request(
         &self,
         request: &ConnectorRequest,
         source: Option<&SourceId>,
     ) -> Result<ConnectorObservation, ConnectorFailure> {
+        self.invoke_with_retry(request, source, &Default::default())
+    }
+    fn request_once(
+        &self,
+        usage: &mut Usage,
+        request: &ConnectorRequest,
+        source: Option<&SourceId>,
+        base_context: &CallContext,
+        admitted_deadline: &std::cell::Cell<std::time::Instant>,
+    ) -> Result<ConnectorObservation, ConnectorFailure> {
         let correlation = &request.correlation;
-        let mut usage = self.lock(correlation)?;
         if let Some(terminal) = &usage.terminal {
             return Err(terminal.clone());
         }
@@ -450,7 +554,7 @@ impl SessionConnectorRun {
                 ConnectorEffect::NotDispatched,
             ));
         }
-        let context = self.context(correlation);
+        let context = base_context.clone();
         context
             .check()
             .map_err(|e| e.failure(correlation, ConnectorEffect::NotDispatched))?;
@@ -465,12 +569,30 @@ impl SessionConnectorRun {
             .quotes
             .quote_request(&self.allocation, request, source)
             .map_err(|e| session_failure(e, correlation, ConnectorEffect::NotDispatched))?;
-        self.reserve(&mut usage, &quote, readonly, correlation)?;
+        self.reserve(usage, &quote, readonly, correlation)?;
         let operation = Operation::Request(request.clone(), source.cloned());
         let context = context
             .with_guard(self.operation_guard(operation.clone(), quote.clone()))
             .with_final_guard(self.final_guard(operation));
         let preflight = |dispatch: &ConnectorDispatch| {
+            // Retain the narrowest CG-09 deadline across every retry. A fresh
+            // authorization may revoke/narrow it, but cannot restart the clock.
+            use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
+            let remaining = u64::try_from(dispatch.deadline.seconds())
+                .ok()
+                .and_then(|seconds| UNIX_EPOCH.checked_add(Duration::from_secs(seconds)))
+                .and_then(|deadline| deadline.duration_since(SystemTime::now()).ok())
+                .ok_or_else(|| {
+                    admitted_deadline.set(Instant::now());
+                    failure(
+                        ConnectorFailureCode::Timeout,
+                        correlation,
+                        ConnectorEffect::NotDispatched,
+                    )
+                })?;
+            let now = Instant::now();
+            admitted_deadline
+                .set(now + remaining.min(admitted_deadline.get().saturating_duration_since(now)));
             context
                 .check()
                 .map_err(|e| e.failure(correlation, ConnectorEffect::NotDispatched))?;
@@ -526,10 +648,14 @@ impl SessionConnectorRun {
     }
 }
 
-impl ConnectorApplicationPort for SessionConnectorRun {
-    fn discover(&self, target: &ConnectorTarget) -> Result<ConnectorInventory, ConnectorFailure> {
-        let correlation = &self.context.correlation;
-        let mut usage = self.lock(correlation)?;
+impl SessionConnectorRun {
+    fn discover_once(
+        &self,
+        usage: &mut Usage,
+        target: &ConnectorTarget,
+        base_context: &CallContext,
+    ) -> Result<ConnectorInventory, ConnectorFailure> {
+        let correlation = &base_context.correlation;
         if let Some(terminal) = &usage.terminal {
             return Err(terminal.clone());
         }
@@ -540,7 +666,7 @@ impl ConnectorApplicationPort for SessionConnectorRun {
                 ConnectorEffect::NotDispatched,
             ));
         }
-        let context = self.context(correlation);
+        let context = base_context.clone();
         context
             .check()
             .map_err(|e| e.failure(correlation, ConnectorEffect::NotDispatched))?;
@@ -555,7 +681,7 @@ impl ConnectorApplicationPort for SessionConnectorRun {
             .quotes
             .quote_discovery(&self.allocation, target)
             .map_err(|e| session_failure(e, correlation, ConnectorEffect::NotDispatched))?;
-        self.reserve(&mut usage, &quote, true, correlation)?;
+        self.reserve(usage, &quote, true, correlation)?;
         let operation = Operation::Discovery(target.clone());
         let context = context
             .with_guard(self.operation_guard(operation.clone(), quote.clone()))
@@ -580,6 +706,12 @@ impl ConnectorApplicationPort for SessionConnectorRun {
             .check()
             .map_err(|e| e.failure(correlation, ConnectorEffect::NoMutation))?;
         Ok(inventory)
+    }
+}
+impl ConnectorApplicationPort for SessionConnectorRun {
+    fn discover(&self, target: &ConnectorTarget) -> Result<ConnectorInventory, ConnectorFailure> {
+        let mut usage = self.lock(&self.context.correlation)?;
+        self.discover_once(&mut usage, target, &self.context)
     }
     fn invoke(&self, request: &ConnectorRequest) -> Result<ConnectorObservation, ConnectorFailure> {
         self.request(request, None)
