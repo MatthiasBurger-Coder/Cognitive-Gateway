@@ -1,5 +1,6 @@
 //! Operator-owned read-only definitions. Captured data never grants a claim or
 //! connector operation; the installed source still joins current live authority.
+use super::world_definitions::{AtomicBeforeAdmission, AtomicBeforeDefinitions};
 use crate::{
     codex_workspace::LocalCodexHost,
     declarative_cli::host_mapping,
@@ -71,6 +72,8 @@ pub(in crate::local_sessions) struct ReadonlyRuntimeAdmission {
     pub access_profile: NonEmptyText,
     pub documents: Vec<DocumentAdmission>,
     pub goal_reads: Vec<GoalReadAdmission>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub complete_before: Option<AtomicBeforeAdmission>,
 }
 #[derive(Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -212,6 +215,7 @@ pub(in crate::local_sessions) struct ReadonlyDefinitions {
     pub documents: BTreeMap<ReferenceId, (Pin, Value)>,
     pub definition_pins: Vec<Pin>,
     pub fingerprint: ContentDigest,
+    pub before: Option<AtomicBeforeDefinitions>,
 }
 
 impl NormalizationDocument {
@@ -367,6 +371,16 @@ impl ReadonlyRuntimeAdmission {
                 .iter()
                 .map(|r| (&r.read.normalization, "cg.connector-normalization")),
         );
+        if let Some(world) = &self.complete_before {
+            roots.extend(world.roots());
+            if world.read.mapping_reference.is_empty()
+                || world.read.mapping_reference.len() > 128
+                || world.read.arguments.len() > 256
+                || canonical(&world.read.arguments)?.len() > 262_144
+            {
+                return Err(invalid());
+            }
+        }
         for (pin, contract) in roots {
             validate_pin(pin, &self.scope)?;
             if pin.contract.as_str() != contract {
@@ -542,6 +556,10 @@ impl ReadonlyRuntimeAdmission {
                     .goal_reads
                     .iter()
                     .any(|route| route.read.mapping_reference == record.reference)
+                    && !self
+                        .complete_before
+                        .as_ref()
+                        .is_some_and(|world| world.read.mapping_reference == record.reference)
             {
                 return Err(SessionError::AuthorityDenied);
             }
@@ -669,7 +687,7 @@ impl ReadonlyRuntimeAdmission {
             .collect::<Vec<_>>();
         definition_pins.push(self.reference()?);
         definition_pins.sort_by(|a, b| a.id.cmp(&b.id));
-        Ok(ReadonlyDefinitions {
+        let mut captured = ReadonlyDefinitions {
             runtime: self.clone(),
             command,
             compiled,
@@ -683,7 +701,31 @@ impl ReadonlyRuntimeAdmission {
             definition_pins,
             documents: metadata.documents,
             fingerprint: metadata.fingerprint,
-        })
+            before: None,
+        };
+        if let Some(world) = &self.complete_before {
+            let complete = world.capture(&captured)?;
+            let record = captured
+                .mapping
+                .records()
+                .iter()
+                .find(|r| r.reference == complete.read.mapping_reference)
+                .ok_or_else(invalid)?;
+            if record.capability != complete.read.capability
+                || record.source.as_ref() != Some(&complete.read.source)
+                || record.class.operation_class() != complete.profile.anchor_route.class
+            {
+                return Err(SessionError::StaleRevision);
+            }
+            if normalization_index(&captured.normalizations, &complete.read)?.is_none() {
+                captured.normalizations.push(ReadNormalization {
+                    read: complete.read.clone(),
+                    document: complete.normalization.clone(),
+                });
+            }
+            captured.before = Some(complete);
+        }
+        Ok(captured)
     }
     fn document<'a>(
         &self,
@@ -751,6 +793,11 @@ impl ReadonlyRuntimeAdmission {
                 .map(|route| &route.read.normalization),
         ) {
             self.document(&documents, pin)?;
+        }
+        if let Some(world) = &self.complete_before {
+            for (pin, _) in world.roots() {
+                self.document(&documents, pin)?;
+            }
         }
         let canonical_host = host
             .canonical

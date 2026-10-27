@@ -5,6 +5,7 @@ pub(super) mod read_association;
 mod source;
 mod target;
 mod verify;
+pub(super) mod world_definitions;
 
 #[cfg(test)]
 pub(in crate::local_sessions) use source::boundary_tests::Fixture as NativeBoundaryFixture;
