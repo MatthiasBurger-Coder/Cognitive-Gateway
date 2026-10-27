@@ -1,0 +1,80 @@
+{
+  "issue": 399,
+  "parent": 230,
+  "base_revision": "ec4bbcef944ebdaf2ce2f5a5c2657c2a254c91ef",
+  "status": "QUALIFIED_FOR_REVIEW",
+  "scope": "Expose the existing canonical native CG-09 input assembly as owned per-step/whole-plan data; evaluate retains the same assembly and PolicyEngine.",
+  "evidence_level": "NATIVE_APPLICATION_COMPONENT",
+  "verification": {
+    "policy_application_tests": 15,
+    "policy_engine_tests": 7,
+    "workspace": {
+      "passed": 1128,
+      "failed": 0,
+      "ignored": 4,
+      "boundary": "Four existing opt-in live-adapter/specialist PostgreSQL qualifications are not claimed as passed."
+    },
+    "clippy": "PASS",
+    "format": "PASS",
+    "architecture_guard": "PASS",
+    "architecture_tests": 83,
+    "platform_skips": 1,
+    "contract_tests": 26,
+    "existing_policy_coverage_gate": "PASS_UNCHANGED",
+    "coverage": {
+      "crates/gateway-application/src/policy_application.rs": {
+        "count": 190,
+        "covered": 189,
+        "percent": 99.47368421052632
+      },
+      "crates/gateway-policy/src/lib.rs": {
+        "count": 191,
+        "covered": 191,
+        "percent": 100.0
+      }
+    },
+    "commands": [
+      "CARGO_INCREMENTAL=0 CARGO_BUILD_JOBS=2 python3 scripts/cognitive-test-host.py cargo test --workspace --locked --target-dir /mnt/d/Projects/.codex-build/cg-399-build",
+      "CARGO_INCREMENTAL=0 CARGO_BUILD_JOBS=2 cargo clippy --workspace --all-targets --locked --target-dir /mnt/d/Projects/.codex-build/cg-399-build -- -D warnings",
+      "CARGO_INCREMENTAL=0 CARGO_BUILD_JOBS=2 CARGO_LLVM_COV_TARGET_DIR=/mnt/d/Projects/.codex-build/cg-399-cov-build cargo llvm-cov -p gateway-policy -p gateway-application --test policy_engine --test policy_application --locked --json --output-path /tmp/cg-399-policy-coverage.json",
+      "python3 scripts/check-policy-coverage.py --self-test",
+      "python3 scripts/check-policy-coverage.py /tmp/cg-399-policy-coverage.json",
+      "cargo fmt --check",
+      "bash scripts/check-architecture.sh",
+      "python3 -m unittest discover -s tests/architecture -p 'test_*.py'",
+      "python3 -m unittest discover -s tests/contracts -p 'test_*.py'",
+      "git diff --check"
+    ]
+  },
+  "acceptance": {
+    "AC1": "Both APIs validate complete native resolution and context before returning data.",
+    "AC2": "Native two-step planner/registry/resolver fixture preserves distinct requirement metadata and facts, Allow vs RequireEvidence and PolicyEngine parity; existing skill/process/NoOp/prerequisite/constraint cases remain green.",
+    "AC3": "Foreign facts/steps, changed scope/catalog/process/mode/profile and forged resolution deny; ambiguous resolution retains no selected capabilities.",
+    "AC4": "Owned mutable data only, no current-authority token/cache/Deserialize/transport/daemon dependency or Allow prerequisite.",
+    "AC5": "Existing >=95% policy gate, standard workspace/context regressions, Clippy, formatter and architecture/contract checks passed.",
+    "AC6": "Current source hashes, embedded source snapshots, raw coverage, logs and explicit component scope retained."
+  },
+  "review": {
+    "requirements": "connector_phase_resources: independent bounded missing-owner API and acceptance reviewed before extraction.",
+    "architecture": "connector_gate_review: independent actual isolated production-source and final native multistep test reviews CLEAR.",
+    "testing": "connector_budget_adapter: original WIP author identified extraction requirements and multistep gap; not claimed as independent security review. connector_phase_resources implemented the native test fixture; Root qualified the frozen candidate."
+  },
+  "source_bindings": {
+    "crates/gateway-application/src/policy_application.rs": "f5403e9015efd0d8561d531bcff17a5d909d53c2cb8c03778b1875cf7b4ae07d",
+    "crates/gateway-application/tests/policy_application.rs": "3d4a0ebf18e77cecb5f464da1d27668066401f2ea979375b870e80565924b82c",
+    "crates/gateway-policy/src/lib.rs": "0fc05382689ea0ab243ed9b11121d84022fed4070c631a8d9a5b281e44f3af88",
+    "scripts/check-policy-coverage.py": "f137b8e5df9d165e86b24783ede804e85789d0655690b7c7bdbff634475a252c",
+    "scripts/quality-gates.json": "70d7049e9a89bcc9c6927986b21b1e4d00237c05156e2f46c003b290ea8fb29b",
+    "docs/connector-admission-v1.md": "32fcdb1c89e978710e08d228a6bebb92dddcca42aa7c0a6b17b03d1072c41cbc"
+  },
+  "limitations": [
+    "Current facts must be authenticated by the caller and recaptured at each actual authority boundary.",
+    "The requested capability must still belong to the exact canonical step closure.",
+    "No concrete production ConnectorPolicySource, installed connector/session dispatch or #230/#274 completion is claimed.",
+    "Issue closure awaits reviewed merge."
+  ],
+  "retained_archive": {
+    "path": "docs/evidence/EPIC-07.07.01-native-policy-inputs-validation.json.gz",
+    "sha256": "42468333985f02cc0fb4e72a383bc1905f53e85c0ca9195cb8cd5f5ed502a107"
+  }
+}
