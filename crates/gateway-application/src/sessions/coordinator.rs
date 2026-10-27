@@ -379,6 +379,9 @@ impl<J: SessionRepositoryPort, H: StructuredSessionHost> SessionCoordinator<J, H
         current: FencedSession,
         command: CommandId,
     ) -> Result<SessionSnapshot, SessionError> {
+        if current.checkpoint.prepared_before.is_some() {
+            return Err(SessionError::UnsupportedCapability);
+        }
         if current.checkpoint.pre_execution_goal.is_some() {
             return self.verify_observed_goal(current, Some(command));
         }
@@ -462,7 +465,7 @@ impl<J: SessionRepositoryPort, H: StructuredSessionHost> SessionCoordinator<J, H
             claim.fence,
             deadline,
         )?;
-        let Some(candidate) = runtime.observe_goal(&claim.checkpoint, &mut resources)? else {
+        let Some(preparation) = runtime.prepare_readonly(&claim.checkpoint, &mut resources)? else {
             self.fail(&claim, SessionState::Failed)?;
             return Err(SessionError::UnsupportedCapability);
         };
@@ -473,6 +476,51 @@ impl<J: SessionRepositoryPort, H: StructuredSessionHost> SessionCoordinator<J, H
         if now >= until || std::time::Instant::now() >= deadline {
             return self.fail(&claim, SessionState::Failed);
         }
+        let candidate = match preparation {
+            ReadonlyPreparation::GoalSatisfied(candidate) => candidate,
+            ReadonlyPreparation::BeforeCaptured(captured) => {
+                let (reference, record) = prepare_before_record(&claim, &captured, now)?;
+                // Encoding and native validation can take time. The recorded
+                // validation instant stays immutable; admission checks use NOW.
+                decode_before_record(&reference, &record.bytes, self.host.now_ms()?)?;
+                if self.load(&claim.checkpoint.owner, &claim.checkpoint.snapshot.session)? != claim
+                {
+                    return Err(SessionError::StaleRevision);
+                }
+                let commit_now = self.host.now_ms()?;
+                if commit_now >= until || std::time::Instant::now() >= deadline {
+                    return self.fail(&claim, SessionState::Failed);
+                }
+                before_fresh_at(&captured.snapshot, commit_now)?;
+                let mut next = claim.checkpoint.clone();
+                next.snapshot.state = SessionState::Runnable;
+                next.snapshot.dispatch_knowledge = DispatchKnowledge::Prepared;
+                next.lease_until_ms = None;
+                next.prepared_before = Some(reference);
+                let persisted = self.append(&claim, None, next, vec![record])?;
+                // A commit acknowledgement alone cannot establish readable data.
+                // Decode the actual owner/kind/hash-linked stored record now.
+                let reloaded = load_prepared_before_current(
+                    &self.repository,
+                    &persisted.checkpoint,
+                    self.host.now_ms()?,
+                )?;
+                if self.load(
+                    &persisted.checkpoint.owner,
+                    &persisted.checkpoint.snapshot.session,
+                )? != persisted
+                {
+                    return Err(SessionError::StaleRevision);
+                }
+                let final_now = self.host.now_ms()?;
+                if final_now >= until || std::time::Instant::now() >= deadline {
+                    return Err(SessionError::ExpiredInteraction);
+                }
+                // No storage callback follows the final fence/time checks.
+                before_fresh_at(&reloaded, final_now)?;
+                return Ok(persisted.checkpoint.snapshot);
+            }
+        };
         let (marker, record) = candidate.into_record(&claim.checkpoint, now)?;
         let mut next = claim.checkpoint.clone();
         next.snapshot.state = SessionState::Runnable;
@@ -647,6 +695,13 @@ impl<J: SessionRepositoryPort, H: StructuredSessionHost> SessionCoordinator<J, H
     ) -> Result<SessionSnapshot, SessionError> {
         let current = self.load(owner, session)?;
         if current.checkpoint.goal.as_connector().is_some() {
+            if current.checkpoint.prepared_before.is_some() {
+                load_prepared_before_historical(&self.repository, &current.checkpoint)?;
+                if self.load(owner, session)? != current {
+                    return Err(SessionError::StaleRevision);
+                }
+                return Ok(current.checkpoint.snapshot);
+            }
             if current.checkpoint.snapshot.state == SessionState::Runnable
                 && current.checkpoint.pre_execution_goal.is_some()
             {
@@ -797,6 +852,7 @@ impl<J: SessionRepositoryPort, H: StructuredSessionHost> SessionApplicationPort
                 initial_assessment: None,
                 resource_ledger: None,
                 pre_execution_goal: None,
+                prepared_before: None,
             };
             if let Some(goal) = initial.goal.as_connector() {
                 let runtime = self

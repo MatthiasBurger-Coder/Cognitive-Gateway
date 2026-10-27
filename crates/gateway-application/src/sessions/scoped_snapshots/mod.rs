@@ -1,7 +1,7 @@
 //! Complete scoped snapshot DATA. This does not admit effects, establish current
 //! authority, prove a goal, or assert causal After acquisition. The future live
 //! consumer must supply authenticated acquisitions and persist Before legally.
-mod codec;
+pub(in crate::sessions) mod codec;
 mod identity;
 mod types;
 mod validation;

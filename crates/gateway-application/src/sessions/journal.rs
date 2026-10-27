@@ -53,6 +53,7 @@ pub struct SessionCheckpoint {
     pub initial_assessment: Option<InitialAssessment>,
     pub resource_ledger: Option<SessionResourceLedger>,
     pub pre_execution_goal: Option<PreExecutionGoalRef>,
+    pub prepared_before: Option<PreparedBeforeRef>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -72,7 +73,8 @@ impl SessionCheckpoint {
         self.snapshot.validate()?;
         self.budget.validate()?;
         match (&self.goal, &self.resource_ledger) {
-            (SupportedSessionGoal::Artifact(_), None) if self.pre_execution_goal.is_none() => {}
+            (SupportedSessionGoal::Artifact(_), None)
+                if self.pre_execution_goal.is_none() && self.prepared_before.is_none() => {}
             (SupportedSessionGoal::Connector(goal), Some(ledger)) => {
                 ledger.validate()?;
                 if ledger.reservations().len() > 1
@@ -112,6 +114,22 @@ impl SessionCheckpoint {
                         || self.snapshot.dispatch.as_ref() != Some(&r.binding().dispatch)
                         || r.binding().revision != self.snapshot.revision
                         || self.pre_execution_goal.is_some()
+                        || self.prepared_before.is_some()
+                    {
+                        return Err(SessionError::InvalidState);
+                    }
+                }
+                if let Some(before) = &self.prepared_before {
+                    before.validate_for(self)?;
+                    if self.pre_execution_goal.is_some()
+                        || self.snapshot.final_evidence.is_some()
+                        || !matches!(
+                            self.snapshot.state,
+                            SessionState::Runnable | SessionState::Failed | SessionState::Cancelled
+                        )
+                        || self.lease_until_ms.is_some()
+                        || (self.snapshot.state == SessionState::Runnable
+                            && self.snapshot.dispatch_knowledge != DispatchKnowledge::Prepared)
                     {
                         return Err(SessionError::InvalidState);
                     }
@@ -245,6 +263,7 @@ pub enum RecordKind {
     Artifact,
     Evidence,
     PreExecutionGoal,
+    CompleteBefore,
 }
 
 pub trait SessionRepositoryPort: SessionJournalPort + ArtifactStoragePort {
@@ -300,6 +319,7 @@ impl JournalAppend {
                     || (added == 1
                         && (old.snapshot.state != SessionState::Runnable
                             || old.pre_execution_goal.is_some()
+                            || old.prepared_before.is_some()
                             || self.next.snapshot.state != SessionState::Dispatching
                             || new_ledger.reservations().last().unwrap().binding().revision
                                 != self.next.snapshot.revision))
@@ -313,6 +333,7 @@ impl JournalAppend {
             && old.snapshot.state == SessionState::Dispatching
             && self.next.snapshot.state == SessionState::Runnable
             && self.next.pre_execution_goal.is_none()
+            && self.next.prepared_before.is_none()
         {
             return Err(SessionError::InvalidState);
         }
@@ -352,6 +373,45 @@ impl JournalAppend {
                         .pre_execution_goal
                         .as_ref()
                         .is_none_or(|m| m.record != r.reference))
+        }) {
+            return Err(SessionError::InvalidState);
+        }
+        match (&old.prepared_before, &self.next.prepared_before) {
+            (Some(a), Some(b)) if a == b => {}
+            (None, None) => {}
+            (None, Some(before))
+                if old.snapshot.state == SessionState::Dispatching
+                    && self.next.snapshot.state == SessionState::Runnable
+                    && before.binding.capture.revision == old.snapshot.revision
+                    && before
+                        .binding
+                        .reservation
+                        .as_ref()
+                        .is_some_and(|r| r.fence == current.fence)
+                    && before.committed_revision == self.next.snapshot.revision =>
+            {
+                let matching = self
+                    .records
+                    .iter()
+                    .filter(|r| {
+                        r.kind == RecordKind::CompleteBefore && r.reference == before.record
+                    })
+                    .collect::<Vec<_>>();
+                if matching.len() != 1 {
+                    return Err(SessionError::InvalidState);
+                }
+                decode_before_record(before, &matching[0].bytes, before.validated_at_ms)?;
+            }
+            _ => return Err(SessionError::InvalidState),
+        }
+        if self.records.iter().any(|record| {
+            record.kind == RecordKind::CompleteBefore
+                && (old.prepared_before.is_some()
+                    || self
+                        .next
+                        .prepared_before
+                        .as_ref()
+                        .is_none_or(|r| r.record != record.reference))
         }) {
             return Err(SessionError::InvalidState);
         }

@@ -2527,3 +2527,12 @@ mod cognitive_router_execution {
         assert!(trace.attempts[0].model.is_none());
     }
 }
+
+#[path = "support/complete_scoped_snapshot_fixture.rs"]
+pub mod complete_snapshot_fixture;
+#[path = "support/goal_observation_harness.rs"]
+pub mod goal_observation_harness;
+#[path = "support/prepared_before_cases.rs"]
+mod prepared_before_cases;
+#[path = "support/prepared_before_fixture.rs"]
+mod prepared_before_fixture;

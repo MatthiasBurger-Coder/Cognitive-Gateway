@@ -47,6 +47,8 @@ struct Checkpoint {
     resource_ledger: Option<SessionResourceLedger>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pre_execution_goal: Option<PreExecutionGoalRef>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    prepared_before: Option<PreparedBeforeRef>,
     pending: Option<PendingWire>,
     accepted_consent: Option<Grant>,
     authority_events: Vec<EventWire>,
@@ -169,6 +171,7 @@ impl Checkpoint {
             budget: c.budget.clone(),
             resource_ledger: c.resource_ledger.clone(),
             pre_execution_goal: c.pre_execution_goal.clone(),
+            prepared_before: c.prepared_before.clone(),
             pending: c.pending.as_ref().map(|p| match p {
                 PendingInteraction::Source(q) => PendingWire::Source(q.clone()),
                 PendingInteraction::Consent(a) => PendingWire::Consent(a.clone()),
@@ -240,6 +243,7 @@ impl Checkpoint {
             budget: self.budget.clone(),
             resource_ledger: self.resource_ledger.clone(),
             pre_execution_goal: self.pre_execution_goal.clone(),
+            prepared_before: self.prepared_before.clone(),
             pending: self.pending.as_ref().map(|p| match p {
                 PendingWire::Source(q) => PendingInteraction::Source(q.clone()),
                 PendingWire::Consent(a) => PendingInteraction::Consent(a.clone()),
@@ -376,6 +380,22 @@ impl Journal {
             {
                 return Err(SessionError::StorageUnavailable);
             }
+            if let Some(before) = &s.checkpoint.prepared_before {
+                let record = self
+                    .records
+                    .iter()
+                    .find(|record| {
+                        record.owner == s.checkpoint.owner
+                            && record.reference == before.record
+                            && record.kind == RecordKind::CompleteBefore
+                    })
+                    .ok_or(SessionError::StorageUnavailable)?;
+                // This validator already holds the PostgreSQL journal lock.
+                // Revalidate DATA directly; calling a repository loader here
+                // would recursively enter the same connection/transaction.
+                decode_before_record(before, &record.bytes, before.validated_at_ms)
+                    .map_err(|_| SessionError::StorageUnavailable)?;
+            }
             for (reference, kind) in [
                 (&s.checkpoint.artifact, RecordKind::Artifact),
                 (&s.checkpoint.snapshot.final_evidence, RecordKind::Evidence),
@@ -413,6 +433,23 @@ impl Journal {
                         && p.reference.id() == r.reference.id()
                         && p.reference.revision() == r.reference.revision()
                 })
+            {
+                return Err(SessionError::StorageUnavailable);
+            }
+            if r.kind == RecordKind::CompleteBefore
+                && self
+                    .sessions
+                    .iter()
+                    .filter(|session| {
+                        session.checkpoint.owner == r.owner
+                            && session
+                                .checkpoint
+                                .prepared_before
+                                .as_ref()
+                                .is_some_and(|before| before.record == r.reference)
+                    })
+                    .count()
+                    != 1
             {
                 return Err(SessionError::StorageUnavailable);
             }
@@ -716,6 +753,11 @@ impl SessionJournalPort for PostgresSessionStore {
                         .pre_execution_goal
                         .as_ref()
                         .map(|marker| &marker.record),
+                    RecordKind::CompleteBefore => transition
+                        .next
+                        .prepared_before
+                        .as_ref()
+                        .map(|before| &before.record),
                 };
                 if target != Some(&record.reference) {
                     return Err(SessionError::InvalidState);
