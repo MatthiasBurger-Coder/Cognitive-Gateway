@@ -344,3 +344,10 @@ constraint and grounding validators, then emits an audit receipt. It has no
 provider or action dispatch path. Role measurements pass individual threshold
 and provenance gates; fixtures cannot establish promotion eligibility. See
 [qualification commands and release limits](../invocation-qualification.md).
+
+EPIC-07.08 implements [connector resilience](../connector-resilience-v1.md) in
+the application recovery engine and outer MCP host. Session retries share the
+original aggregate allocation, deadline and cancellation token; uncertain effects
+remain blocked pending independent reconciliation. Per-host backpressure and a
+single half-open circuit probe bound provider work. Synthetic subprocess proofs
+do not establish live provider or installed-client qualification.

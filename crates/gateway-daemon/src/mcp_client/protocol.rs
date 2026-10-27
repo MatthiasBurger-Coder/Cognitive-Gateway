@@ -236,6 +236,18 @@ impl Session {
                 if !error["message"].is_string() {
                     return Err(Error::Protocol);
                 }
+                // Explicit Gateway adapter profile, not a universal MCP error code.
+                // Unknown peer codes remain protocol errors; never parse prose.
+                if code == -32029 {
+                    let millis = match error.get("data").and_then(|data| data.get("retryAfterMs")) {
+                        None => 1000,
+                        Some(value) => value
+                            .as_u64()
+                            .filter(|ms| *ms <= 3_600_000)
+                            .ok_or(Error::Protocol)?,
+                    };
+                    return Err(Error::RateLimited(Duration::from_millis(millis)));
+                }
                 return Err(Error::Remote(code));
             }
             return value

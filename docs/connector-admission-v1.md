@@ -87,7 +87,9 @@ candidate source hashes, commands, measured coverage and independent review.
 The CI connector-admission gate requires at least 95% measured line coverage
 for both `connector_policy.rs` and its `connectors.rs` contract.
 
-This is the bounded #369 contract and adapter prerequisite. Installing a concrete
-policy/consent source, durable session orchestration, model proposals, provider
-credentials, retries and live effects remain with their existing owners and
-#230/#274. This component does not claim completion of EPIC-07 or EPIC-08.
+The bounded #369 contract is now composed by the installed read-only
+`ObservedGoalRuntime` through its current native `GoalSource` and durable
+PostgreSQL claim/audit boundary. See [#230 integration and acceptance](connector-policy-integration.md)
+for the complete enforcement matrix. General installed model proposals,
+mutation consent continuation, retries and live provider effects remain with
+their existing owners and #274. Neither parent epic is closed by this boundary.

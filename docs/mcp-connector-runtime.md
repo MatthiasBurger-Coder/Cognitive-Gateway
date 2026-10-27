@@ -305,3 +305,9 @@ gates. The evidence record is [EPIC-07.01](evidence/EPIC-07.01-architecture.json
 #225 can build the manifest foundation; #226–#232 implement these boundaries;
 #233/#234 prove GitHub and independent adapters; #235 owns end-to-end/live effects.
 No parent-epic completion or real connector availability is implied by this slice.
+
+### Connector resilience
+
+[Connector resilience v1](connector-resilience-v1.md) defines the EPIC-07.08
+retry engine, provider recovery metadata, shared deadlines and aggregate spending,
+rate-limit profile, circuit breaker, backpressure and content-free health events.
