@@ -123,6 +123,13 @@ pub fn admit_invocation_ir(
         || tools
             .iter()
             .any(|(id, t)| d.permitted_capabilities.get(id) != Some(&t.binding))
+        || tools.values().any(|tool| {
+            tool.validate_connector_binding().is_err()
+                || tool
+                    .connector_inventory
+                    .as_ref()
+                    .is_some_and(|pin| pin.scope != d.task.scope)
+        })
     {
         return Err(E::InvalidBinding);
     }

@@ -121,7 +121,7 @@
   },
   {
     "name": "EPIC-07.13 trusted connector admission coverage",
-    "command": "cargo llvm-cov -p gateway-application -p gateway-daemon --test connectors --test connector_policy --test mcp_client --locked --json --output-path \"$EVIDENCE_DIR/connector-policy-coverage.json\"\npython3 scripts/check-connector-policy-coverage.py --self-test\npython3 scripts/check-connector-policy-coverage.py \"$EVIDENCE_DIR/connector-policy-coverage.json\""
+    "command": "cargo llvm-cov -p gateway-application -p gateway-daemon -p gateway-policy --lib --test connectors --test connector_policy --test mcp_client --test connector_proposals --test output_verification --test prompt_ir --test prompt_rendering --test policy_application --test policy_engine --locked --json --output-path \"$EVIDENCE_DIR/connector-policy-coverage.json\"\npython3 scripts/check-connector-policy-coverage.py --self-test\npython3 scripts/check-connector-policy-coverage.py \"$EVIDENCE_DIR/connector-policy-coverage.json\""
   },
   {
     "name": "CG-10 context coverage gate",
@@ -193,7 +193,7 @@
   },
   {
     "name": "EPIC-06.04 deterministic prompt rendering and accounting coverage",
-    "command": "CARGO_LLVM_COV_TARGET_DIR=target/prompt-rendering-coverage cargo llvm-cov -p gateway-domain -p gateway-application -p gateway-daemon --test prompt_rendering --test invocation_host --test model_adapters --locked --json --output-path \"$EVIDENCE_DIR/prompt-rendering-coverage.json\"\npython3 scripts/check-prompt-rendering-coverage.py --self-test\npython3 scripts/check-prompt-rendering-coverage.py \"$EVIDENCE_DIR/prompt-rendering-coverage.json\""
+    "command": "CARGO_LLVM_COV_TARGET_DIR=target/prompt-rendering-coverage cargo llvm-cov -p gateway-domain -p gateway-application -p gateway-daemon --lib --test prompt_rendering --test invocation_host --test model_adapters --locked --json --output-path \"$EVIDENCE_DIR/prompt-rendering-coverage.json\"\npython3 scripts/check-prompt-rendering-coverage.py --self-test\npython3 scripts/check-prompt-rendering-coverage.py \"$EVIDENCE_DIR/prompt-rendering-coverage.json\""
   },
   {
     "name": "EPIC-06.02 deterministic invocation routing coverage",

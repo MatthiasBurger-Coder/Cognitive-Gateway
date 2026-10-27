@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-"""Require >=95% measured line coverage for the connector admission contracts and adapter."""
+"""Require >=95% coverage for connector admission and verified proposal dispatch."""
 import json
 import sys
 
 EXPECTED = (
     "crates/gateway-application/src/connectors.rs",
     "crates/gateway-application/src/connector_policy.rs",
+    "crates/gateway-application/src/connector_proposals.rs",
 )
 
 

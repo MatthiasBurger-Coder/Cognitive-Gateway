@@ -2,7 +2,8 @@
 //! host responsibility. Rendering does not authorize or dispatch an invocation.
 use crate::model_invocation::PreparedModelInvocation;
 use gateway_context::PlannedContextHandoff;
-use gateway_domain::semantic_output::OutputType;
+use gateway_domain::prompt_ir::InvocationIrError;
+use gateway_domain::semantic_output::{OutputField, OutputType};
 use gateway_domain::{model_invocation::validate_model_binding, prompt_rendering::*, *};
 use serde::Serialize;
 use serde_json::{Value, json};
@@ -13,6 +14,142 @@ pub struct ToolDefinition {
     pub binding: ResolvedReference<CapabilityId>,
     pub description: NonEmptyText,
     pub input: OutputType,
+    /// Exact operator-mapped connector inventory used to admit this tool schema.
+    /// Connector dispatch rejects missing or drifted inventory bindings.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub connector_inventory: Option<ConnectorToolInventoryBinding>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+pub struct ConnectorToolInventoryBinding {
+    pub connector: NonEmptyText,
+    pub scope: ContextScopeId,
+    pub revision: ContentDigest,
+    pub argument_schema_digest: ContentDigest,
+    /// Complete mapped wire schema, including descriptive metadata. Its content
+    /// identity is distinct from the parsed model argument type.
+    pub argument_schema: Value,
+}
+
+impl ToolDefinition {
+    /// Build the model-visible closed schema from an operator-mapped MCP tool
+    /// schema. Preserve its exact content pin while validating the supported
+    /// argument semantics; the inventory revision catches other wire drift.
+    pub fn from_connector_schema(
+        binding: ResolvedReference<CapabilityId>,
+        description: NonEmptyText,
+        target: crate::connectors::ConnectorTarget,
+        inventory_revision: ContentDigest,
+        argument_schema_digest: ContentDigest,
+        schema: &Value,
+    ) -> Result<Self, InvocationIrError> {
+        if target.scope != binding.scope {
+            return Err(InvocationIrError::InvalidBinding);
+        }
+        let input = parse_connector_input_schema(schema)?;
+        let tool = Self {
+            binding,
+            description,
+            input,
+            connector_inventory: Some(ConnectorToolInventoryBinding {
+                connector: target.connector,
+                scope: target.scope,
+                revision: inventory_revision,
+                argument_schema_digest,
+                argument_schema: schema.clone(),
+            }),
+        };
+        tool.validate_connector_binding()?;
+        Ok(tool)
+    }
+
+    /// Shared live admission/binding check. Raw content identity and accepted
+    /// argument semantics must both match; metadata never grants permission.
+    pub(crate) fn validate_connector_binding(&self) -> Result<(), InvocationIrError> {
+        if let Some(pin) = &self.connector_inventory {
+            let raw_digest = context_content_digest(
+                &serde_json::to_vec(&pin.argument_schema)
+                    .map_err(|_| InvocationIrError::InvalidBinding)?,
+            );
+            if pin.scope != self.binding.scope
+                || raw_digest != pin.argument_schema_digest
+                || parse_connector_input_schema(&pin.argument_schema)? != self.input
+            {
+                return Err(InvocationIrError::InvalidBinding);
+            }
+        }
+        Ok(())
+    }
+}
+
+fn schema_keywords_are_supported(
+    schema: &Value,
+    allow_object_shape: bool,
+) -> Result<(), InvocationIrError> {
+    let object = schema
+        .as_object()
+        .ok_or(InvocationIrError::InvalidBinding)?;
+    if object.keys().any(|key| {
+        !matches!(key.as_str(), "$schema" | "description" | "title" | "type")
+            && !(allow_object_shape
+                && matches!(
+                    key.as_str(),
+                    "properties" | "required" | "additionalProperties"
+                ))
+    }) || schema
+        .get("$schema")
+        .is_some_and(|value| value.as_str() != Some("https://json-schema.org/draft/2020-12/schema"))
+        || ["description", "title"]
+            .iter()
+            .any(|key| schema.get(key).is_some_and(|value| !value.is_string()))
+    {
+        return Err(InvocationIrError::InvalidBinding);
+    }
+    Ok(())
+}
+
+fn parse_connector_input_schema(schema: &Value) -> Result<OutputType, InvocationIrError> {
+    schema_keywords_are_supported(schema, true)?;
+    if schema["type"] != "object" || schema["additionalProperties"] != false {
+        return Err(InvocationIrError::InvalidBinding);
+    }
+    let properties = schema["properties"]
+        .as_object()
+        .ok_or(InvocationIrError::InvalidBinding)?;
+    let required = schema
+        .get("required")
+        .map(|value| value.as_array().ok_or(InvocationIrError::InvalidBinding))
+        .transpose()?
+        .cloned()
+        .unwrap_or_default();
+    let mut required_names = std::collections::BTreeSet::new();
+    for value in required {
+        let name = value.as_str().ok_or(InvocationIrError::InvalidBinding)?;
+        if !properties.contains_key(name) || !required_names.insert(name.to_owned()) {
+            return Err(InvocationIrError::InvalidBinding);
+        }
+    }
+    let mut fields = BTreeMap::new();
+    for (name, property) in properties {
+        if name.is_empty() {
+            return Err(InvocationIrError::InvalidBinding);
+        }
+        schema_keywords_are_supported(property, false)?;
+        let value_type = match property["type"].as_str() {
+            Some("string") => OutputType::String {},
+            Some("integer") => OutputType::Integer {},
+            Some("boolean") => OutputType::Boolean {},
+            _ => return Err(InvocationIrError::InvalidBinding),
+        };
+        fields.insert(
+            name.clone(),
+            OutputField {
+                required: required_names.contains(name),
+                value_type,
+            },
+        );
+    }
+    Ok(OutputType::Object { fields })
 }
 /// Complete immutable canonical sections, not an independently constructible IR.
 #[derive(Debug)]
@@ -172,3 +309,7 @@ pub fn render_data(input: &RenderInput) -> Value {
         .remove("instructions");
     json!({"semantic":data, "tools":input.tools, "output_schema":input.output_schema})
 }
+
+#[cfg(test)]
+#[path = "prompt_rendering/connector_schema_tests.rs"]
+mod connector_schema_tests;

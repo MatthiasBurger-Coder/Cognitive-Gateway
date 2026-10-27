@@ -59,15 +59,25 @@ impl ConnectorResult {
     }
     /// Revalidate public port records before ingestion, including custom adapters.
     pub fn validate(d: &ConnectorDispatch, o: &ConnectorObservation) -> Result<(), ResultError> {
+        if o.acquired_at > d.deadline {
+            return Err(ResultError::Binding);
+        }
+        Self::validate_for_request(&d.request, o)
+    }
+    /// Validate public-port result data against its exact request. The actual
+    /// connector host still owns current policy admission and dispatch deadline;
+    /// this method never constructs or substitutes an authorization grant.
+    pub fn validate_for_request(
+        r: &ConnectorRequest,
+        o: &ConnectorObservation,
+    ) -> Result<(), ResultError> {
         let m = &o.metadata;
-        let r = &d.request;
         if o.target != r.target
             || o.inventory_revision != r.inventory_revision
             || o.correlation != r.correlation
             || m.task != r.task
             || m.step != r.step
             || m.execution != r.execution
-            || o.acquired_at > d.deadline
             || m.observed_at.is_some_and(|t| t > o.acquired_at)
         {
             return Err(ResultError::Binding);

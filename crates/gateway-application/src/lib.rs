@@ -9,6 +9,7 @@ pub mod cognitive_routing;
 pub mod completeness;
 pub mod connector_manifest;
 pub mod connector_policy;
+pub mod connector_proposals;
 pub mod connector_results;
 pub mod connectors;
 pub mod context;
