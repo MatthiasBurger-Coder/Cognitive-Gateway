@@ -48,6 +48,10 @@ fn installed_atomic_world_denies_partial_foreign_inconsistent_and_oversized_expo
 #[test]
 fn installed_atomic_world_enforces_live_authority_budgets_claims_and_atomic_commit() {
     for case in [
+        "pre-revoke",
+        "pre-cancel",
+        "pre-config",
+        "pre-normalization",
         "budget",
         "schema-drift",
         "credential",

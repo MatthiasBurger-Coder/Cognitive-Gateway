@@ -140,7 +140,7 @@ def mutate_case(root,case):
     docs={d['pin']['id']:{'pin':d['pin'],'path':Path(d['path']),'body':json.loads(Path(d['path']).read_text())} for d in runtime['documents']}
     universe=docs['atomic-universe']['body'];profile=docs['atomic-profile']['body'];provider=docs['atomic-provider']['body'];normalization=docs['atomic-normalization']['body'];route=docs['atomic-route']['body']
     if case=='age':
-        profile['max_age_seconds']=2;normalization['acquisition']['semantics']['max_age_seconds']=2
+        profile['max_age_seconds']=30;normalization['acquisition']['semantics']['max_age_seconds']=30
     elif case=='missing-member':universe['objects'].pop()
     elif case=='duplicate-subject':universe['objects'][0]['subjects'].append(universe['objects'][0]['subjects'][0])
     elif case=='missing-version':universe['objects'][0]['version_subject']=['state','absent','version']
@@ -185,7 +185,8 @@ def run(case):
         environment=dict(legacy.canonical.CHILD_ENV)
         if 'LLVM_PROFILE_FILE' in os.environ:environment['LLVM_PROFILE_FILE']=os.environ['LLVM_PROFILE_FILE']
         if case=='age':mutate_case(root,'age')
-        negative=case in ('membership','epoch','version','object','identity','missing','extra','type','oversized','record-oversized','budget','commit-failure','revoke','cancel','config-drift','quote-drift','deadline','schema-drift','credential')
+        pre_send=case in ('pre-revoke','pre-cancel','pre-config','pre-normalization')
+        negative=pre_send or case in ('membership','epoch','version','object','identity','missing','extra','type','oversized','record-oversized','budget','commit-failure','revoke','cancel','config-drift','quote-drift','deadline','schema-drift','credential')
         response_faults=('membership','epoch','version','object','identity','missing','extra','type','oversized','record-oversized')
         if case in response_faults:(root/'response-fault').write_text(case)
         if case=='credential':
@@ -198,7 +199,9 @@ def run(case):
             tool=json.loads((root/'wire-tool.json').read_text());tool['outputSchema']['description']='unregistered schema revision';(root/'wire-tool.json').write_bytes(encoded(tool))
         if case=='satisfied':
             world=json.loads((root/'atomic-world.json').read_text());world['fields']['second']=True;write_world(root,world)
-        race=case in ('revoke','cancel','config-drift','quote-drift','deadline')
+        race=pre_send or case in ('revoke','cancel','config-drift','quote-drift','deadline')
+        barrier='discovery' if pre_send else 'world'
+        if pre_send:(root/'pause-discovery').touch()
         if race or case=='interrupted':(root/'pause-world').touch()
         client=legacy.Client(launch,environment=environment)
         trigger=None
@@ -251,10 +254,10 @@ def run(case):
                     try:responses.put(client.exchange('tools/call',{'name':'cg_session_continue_v2','arguments':continued}))
                     except BaseException as error:responses.put(error)
                 worker=threading.Thread(target=continuing);worker.start();until=time.monotonic()+25
-                while not (root/'world-waiting').exists():
-                    assert time.monotonic()<until,'actual export barrier not reached'
+                while not (root/(barrier+'-waiting')).exists():
+                    assert time.monotonic()<until,'actual provider barrier not reached'
                     time.sleep(.01)
-                if case=='cancel':
+                if case in ('cancel','pre-cancel'):
                     second=legacy.Client(launch,environment=environment)
                     try:
                         second.initialize();live=legacy.call(second,request('inspect',{'session_id':initial['session']}))['result']['session']
@@ -264,12 +267,14 @@ def run(case):
                 elif case=='deadline':time.sleep(10.5)
                 else:
                     changed=json.loads(Path(launch[13]).read_text())
-                    if case=='revoke':changed['mappings'][0]['sessions']['enabled']=False
-                    elif case=='config-drift':changed['mappings'][0]['sessions']['observed_goal_runtime']['revision']='changed'
+                    if case in ('revoke','pre-revoke'):changed['mappings'][0]['sessions']['enabled']=False
+                    elif case in ('config-drift','pre-config'):changed['mappings'][0]['sessions']['observed_goal_runtime']['revision']='changed'
+                    elif case=='pre-normalization':
+                        path=root/'atomic-normalization.json';doc=json.loads(path.read_text());doc['revision_field']='other_revision';path.write_bytes(encoded(doc))
                     else:
                         path=root/'quotes.json';doc=json.loads(path.read_text());doc['discovery']['connector_calls']+=1;path.write_bytes(encoded(doc))
                     Path(launch[13]).write_bytes(encoded(changed))
-                (root/'release-world').touch();worker.join(timeout=45);assert not worker.is_alive()
+                (root/('release-'+barrier)).touch();worker.join(timeout=45);assert not worker.is_alive()
                 reply=responses.get_nowait();assert isinstance(reply,dict),type(reply)
                 assert 'error' in reply or reply['result']['structuredContent']['status']=='error',reply
                 done=None
@@ -280,7 +285,7 @@ def run(case):
                 assert not stored['sessions'][0]['checkpoint'].get('prepared_before')
                 requests=[json.loads(l) for l in (root/'wire.jsonl').read_text().splitlines()] if (root/'wire.jsonl').exists() else []
                 calls=[r for r in requests if r['method']=='tools/call']
-                if case in ('budget','schema-drift','credential'):assert not calls,calls
+                if pre_send or case in ('budget','schema-drift','credential'):assert not calls,calls
                 assert len([r for r in calls if r['params']['arguments']['query']=='project'])<=1
                 assert not stored['grants']
                 print('INSTALLED_COMPLETE_BEFORE_QUALIFIED',case,flush=True)
@@ -323,7 +328,7 @@ def run(case):
                     for item in value:no_model(item)
             no_model(cp['resource_ledger'])
             snapshot_before=copy.deepcopy(stored)
-            if case=='age':time.sleep(3)
+            if case=='age':time.sleep(31)
             # The existing private operator discloses exactly saved DATA and
             # cannot issue authority, move revision or reacquire after restart.
             operator=root/'inspect-before.json';operator.write_bytes(encoded({'session_id':prepared['session'],'issuer':admission['mappings'][0]['principal'],'decision':'inspect-before'}))
@@ -334,7 +339,7 @@ def run(case):
             assert journal(scope)==snapshot_before
             # Replay of the exact capture command and unsupported marker Continue
             # cannot reacquire or consume a second command/revision/reservation.
-            duplicate=legacy.call(client,continued);assert duplicate['result']['session']==prepared
+            duplicate=legacy.call(client,continued,'error');assert duplicate['diagnostics']==[{'code':'CG_DUPLICATE_COMMAND'}],duplicate
             rejected=legacy.call(client,request('continue',{'session_id':prepared['session'],'command_id':'marker-only','expected_revision':prepared['revision']}),'error')
             assert rejected['diagnostics']==[{'code':'CG_UNSUPPORTED_CAPABILITY'}],rejected
             assert journal(scope)==snapshot_before
@@ -353,7 +358,7 @@ def run(case):
             assert foreign.returncode!=0 and 'snapshot' not in json.loads(foreign.stdout).get('result',{})
             assert journal(scope)==snapshot_before
         finally:
-            (root/'release-world').touch()
+            (root/'release-world').touch();(root/'release-discovery').touch()
             if trigger:legacy.sql('DROP TRIGGER IF EXISTS '+trigger+' ON cg_cognitive_journals; DROP FUNCTION IF EXISTS '+trigger+'();')
             assert client.close()==0
             if sys.exc_info()[0]:print(''.join(client.errors),file=sys.stderr)
