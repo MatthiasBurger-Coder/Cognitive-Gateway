@@ -28,7 +28,10 @@ That semantic declaration is an operator qualification requirement. It does not
 turn an arbitrary single RPC into proof of consistency. The controlled provider
 used here reads one immutable complete world document once, with atomic rename
 for updates, emits a genuine global non-reused epoch, observed membership digest
-and per-object versions, and requires its admitted credential environment. An
+and per-object versions, and requires its admitted credential environment. Its writer rejects reused global
+epochs and requires a new member version when member data changes. A concurrent
+update test verifies that one export retains one complete generation while a
+new generation is published. An
 external provider requires separate evidence that it implements this contract.
 The stored acquisition keeps the actual export-root request and metadata; member
 reads reference that one acquisition without inventing per-object requests.

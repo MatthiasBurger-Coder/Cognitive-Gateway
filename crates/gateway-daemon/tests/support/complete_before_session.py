@@ -132,6 +132,20 @@ def configure(root):
     return launch,request,intent,root
 
 def write_world(root,world):
+    # The controlled provider owns a non-reused global generation domain. Its
+    # writer publishes one immutable complete generation with atomic rename.
+    assert world['fields']['epoch']==world['epoch']
+    history_path=root/'world-generations.json'
+    history=json.loads(history_path.read_text()) if history_path.exists() else []
+    if (root/'atomic-world.json').exists():
+        prior=json.loads((root/'atomic-world.json').read_text())
+        if prior==world:return
+        assert world['epoch'] not in history,'global epoch reuse rejected'
+        for member,fields in [('one',('first','one_bytes')),('two',('second','two_bytes')),('hidden',('hidden_bytes',))]:
+            if any(prior['fields'][field]!=world['fields'][field] for field in fields):
+                assert prior['fields'][member+'_version']!=world['fields'][member+'_version'],'changed object requires a new observed version'
+    assert world['epoch'] not in history
+    history.append(world['epoch']);history_path.write_bytes(encoded(history))
     temporary=root/'atomic-world.pending';temporary.write_bytes(encoded(world));temporary.replace(root/'atomic-world.json')
 
 def mutate_case(root,case):
@@ -198,8 +212,8 @@ def run(case):
         if case=='schema-drift':
             tool=json.loads((root/'wire-tool.json').read_text());tool['outputSchema']['description']='unregistered schema revision';(root/'wire-tool.json').write_bytes(encoded(tool))
         if case=='satisfied':
-            world=json.loads((root/'atomic-world.json').read_text());world['fields']['second']=True;write_world(root,world)
-        race=pre_send or case in ('revoke','cancel','config-drift','quote-drift','deadline')
+            world=json.loads((root/'atomic-world.json').read_text());world['fields']['second']=True;world['fields']['two_version']='object-v10';world['epoch']='world-epoch-43';world['fields']['epoch']=world['epoch'];write_world(root,world)
+        race=pre_send or case in ('revoke','cancel','config-drift','quote-drift','deadline','atomic-update')
         barrier='discovery' if pre_send else 'world'
         if pre_send:(root/'pause-discovery').touch()
         if race or case=='interrupted':(root/'pause-world').touch()
@@ -265,6 +279,13 @@ def run(case):
                         assert cancelled['result']['session']['state']=='cancelled'
                     finally:assert second.close()==0
                 elif case=='deadline':time.sleep(10.5)
+                elif case=='atomic-update':
+                    changed=json.loads((root/'atomic-world.json').read_text());changed['epoch']='world-epoch-43';changed['fields'].update(epoch=changed['epoch'],hidden_bytes=999,hidden_version='object-v3');write_world(root,changed)
+                    # Even an operator-side writer cannot reuse an old generation.
+                    stale=copy.deepcopy(changed);stale['epoch']='world-epoch-42';stale['fields']['epoch']=stale['epoch']
+                    try:write_world(root,stale)
+                    except AssertionError:pass
+                    else:raise AssertionError('provider writer accepted a reused epoch')
                 else:
                     changed=json.loads(Path(launch[13]).read_text())
                     if case in ('revoke','pre-revoke'):changed['mappings'][0]['sessions']['enabled']=False
@@ -276,8 +297,11 @@ def run(case):
                     Path(launch[13]).write_bytes(encoded(changed))
                 (root/('release-'+barrier)).touch();worker.join(timeout=45);assert not worker.is_alive()
                 reply=responses.get_nowait();assert isinstance(reply,dict),type(reply)
-                assert 'error' in reply or reply['result']['structuredContent']['status']=='error',reply
-                done=None
+                if negative:
+                    assert 'error' in reply or reply['result']['structuredContent']['status']=='error',reply
+                    done=None
+                else:
+                    done=reply['result']['structuredContent'];assert done['status']=='ok',done
             elif case not in ('lost-response','interrupted'):done=legacy.call(client,continued,'error' if negative else 'ok')
             if negative:
                 stored=journal(scope)
@@ -312,6 +336,10 @@ def run(case):
             assert {s for m in members for s in m['subjects']}=={'state.first','state.second','state.one.bytes','state.one.version','state.two.bytes','state.two.version','state.hidden.bytes','state.hidden.version'}
             assert len(world['acquisitions'])==1,'Atomic export must retain ONE true root acquisition, not per-object inventions'
             assert world['acquisitions'][0]['observation']['metadata']['object_reference']=='target-project'
+            if case=='atomic-update':
+                assert json.loads((root/'atomic-world.json').read_text())['fields']['hidden_bytes']==999
+                observations=json.loads(world['acquisitions'][0]['observation']['records'])['observations']
+                assert any(o['value']=={'kind':'INTEGER','value':777} for o in observations),observations
             requests=[json.loads(line) for line in (root/'wire.jsonl').read_text().splitlines()]
             effects=[r for r in requests if r['method']=='tools/call']
             assert len([r for r in effects if r['params']['arguments']['query']=='project'])==1

@@ -83,3 +83,8 @@ fn installed_before_lost_client_reply_recovers_actual_committed_bytes_without_re
 fn installed_interrupted_uncommitted_export_fails_after_lease_without_reacquisition() {
     run("interrupted");
 }
+
+#[test]
+fn installed_atomic_export_keeps_one_generation_across_a_concurrent_complete_world_update() {
+    run("atomic-update");
+}
