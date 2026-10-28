@@ -26,7 +26,7 @@ class ShellEntrypoints(unittest.TestCase):
         stub = f'#!{sys.executable}\n' + '''import json, os, pathlib, sys
 name = pathlib.Path(sys.argv[0]).name
 entry = {'tool':name, 'args':sys.argv[1:], 'cwd':os.getcwd()}
-if name == 'cargo' and sys.argv[1:3] == ['llvm-cov', 'clean']:
+if name == 'cargo' and sys.argv[1:2] == ['llvm-cov']:
     entry['profiles'] = {key:os.environ.get('CARGO_PROFILE_' + key + '_OPT_LEVEL')
                          for key in ('DEV', 'TEST')}
     entry['compiler_flags'] = {key:os.environ.get(key)
@@ -42,6 +42,8 @@ if name == 'cargo' and sys.argv[1] == 'install':
         path = root / binary
         path.write_text('#!/bin/sh\\nexit 0\\n')
         path.chmod(0o755)
+if name == 'cargo' and sys.argv[1:3] == ['llvm-cov', 'clean'] and 'CG_SHELL_TEST_CLEAN_EXIT' in os.environ:
+    sys.exit(int(os.environ['CG_SHELL_TEST_CLEAN_EXIT']))
 sys.exit(int(os.environ.get('CG_SHELL_TEST_EXIT', '0')))
 '''
         for tool in ('docker', 'curl', 'cargo', 'openssl'):
@@ -108,6 +110,24 @@ sys.exit(int(os.environ.get('CG_SHELL_TEST_EXIT', '0')))
                     self.assertEqual(result.returncode, 17, result.stderr)
                     self.assertEqual(self.calls()[-1]['compiler_flags'], expected)
 
+    def test_domain_coverage_uses_the_shared_compiler_environment(self):
+        self.env.pop('CARGO_ENCODED_RUSTFLAGS', None)
+        gates = json.loads((ROOT / 'tests/scripts/quality-gates.json').read_text())
+        command = next(gate['command'] for gate in gates if gate['name'] == 'Domain coverage gate')
+        env = {**self.env, 'RUSTFLAGS':'-C debuginfo=1',
+               'EVIDENCE_DIR':str(self.root / 'domain evidence'),
+               'CG_SHELL_TEST_CLEAN_EXIT':'0', 'CG_SHELL_TEST_EXIT':'17'}
+        result = subprocess.run(['bash', '-euo', 'pipefail', '-c', command],
+                                cwd=ROOT, env=env, capture_output=True, text=True)
+        self.assertEqual(result.returncode, 17, result.stderr)
+        calls = self.calls()
+        self.assertEqual(len(calls), 2)
+        self.assertEqual(calls[0]['args'], ['llvm-cov', 'clean', '--workspace'])
+        self.assertEqual(calls[1]['compiler_flags'],
+                         {'RUSTFLAGS':'-C debuginfo=1 -C link-dead-code',
+                          'CARGO_ENCODED_RUSTFLAGS':None})
+        self.assertIn(str(self.root / 'domain evidence/domain-coverage.json'), calls[1]['args'])
+
     @unittest.skipUnless(sys.platform.startswith('linux'), 'Linux-only installer')
     def test_installer_only_installs_requested_clis_and_preserves_path_boundaries(self):
         destination = self.root / 'installed tools'
@@ -121,6 +141,8 @@ sys.exit(int(os.environ.get('CG_SHELL_TEST_EXIT', '0')))
 
     def test_invalid_arguments_never_invoke_external_tools(self):
         for script, args in [(INSTALL, ['--root']), (INSTALL, ['--root', 'relative']),
+                ('tests/scripts/with-coverage-env.sh', []),
+                ('tests/scripts/with-coverage-env.sh', ['--unknown']),
                 (POSTGRES+'start.sh', ['extra']), (MODEL+'service.sh', ['unknown']),
                 (MODEL+'service.sh', ['stop', 'extra']), (MODEL+'models.sh', ['start']),
                 (MODEL+'models.sh', ['promote']), (MODEL+'models.sh', ['inspect', 'extra'])]:

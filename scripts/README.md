@@ -50,6 +50,7 @@ PostgreSQL qualification uses the disposable host supplied by
 
 | Runner | Responsibility |
 | --- | --- |
+| [`with-coverage-env.sh`](../tests/scripts/with-coverage-env.sh) | Apply coverage compiler flags to the current shell when sourced, or execute a supplied command with those flags. |
 | [`check-architecture.sh`](../tests/scripts/check-architecture.sh) | Check Cargo dependency direction and catalog/project boundaries. Starts no services. |
 | [`qualify-shared-sessions.sh`](../tests/scripts/qualify-shared-sessions.sh) | Shared-session runtime, persistence and CLI/MCP parity. |
 | [`qualify-observed-goal-sessions.sh`](../tests/scripts/qualify-observed-goal-sessions.sh) | Observed-goal sessions with PostgreSQL and coverage evidence. |
@@ -62,8 +63,9 @@ Usage errors exit 2. Other failures propagate the invoked tool's status; setup
 failures can exit 1. Help exits 0. Historical reports under `docs/evidence/` retain
 the paths and commands recorded when they were produced.
 
-The Before-journal and atomic-Before runners retain unreferenced function bodies
-with `-C link-dead-code`. This keeps LLVM's combined native/test report from
-hiding an executed accessor behind an unused coverage stub. Existing compiler
-flags are preserved, including Cargo's encoded-flags precedence. This affects
-instrumented builds only; test selections and coverage requirements stay fixed.
+The Before-journal, atomic-Before and Domain coverage builds use
+`with-coverage-env.sh` to retain unreferenced function bodies with
+`-C link-dead-code`. This keeps LLVM's combined report from hiding an executed
+accessor behind an unused coverage stub. Existing compiler flags are preserved,
+including Cargo's encoded-flags precedence. This affects instrumented builds
+only; test selections and coverage requirements stay fixed.
