@@ -13,12 +13,9 @@ impl Setup {
             std::process::id(),
             NEXT.fetch_add(1, std::sync::atomic::Ordering::Relaxed)
         ));
-        let output = Command::new("python3")
+        let output = Command::new(env!("CARGO_BIN_EXE_cg-local"))
+            .arg("--setup")
             .args([
-                concat!(
-                    env!("CARGO_MANIFEST_DIR"),
-                    "/../../scripts/bootstrap-codex-local.py"
-                ),
                 "--repository",
                 env!("CARGO_MANIFEST_DIR"),
                 "--output",
@@ -74,7 +71,7 @@ fn bootstrap_check_and_headless_protocol_parity() {
         .args([
             concat!(
                 env!("CARGO_MANIFEST_DIR"),
-                "/../../scripts/check-codex-local.py"
+                "/../../tests/scripts/check-codex-local.py"
             ),
             "--setup",
             setup.root.to_str().unwrap(),
@@ -221,4 +218,108 @@ fn cli_rejects_bad_setup_and_credentials_without_echo() {
     let bad = setup.run(&["--check"]);
     assert_eq!(bad.status.code(), Some(2));
     assert!(!String::from_utf8_lossy(&bad.stderr).contains("DO_NOT_ECHO"));
+}
+
+#[test]
+fn setup_rejects_malformed_options_and_preserves_existing_output() {
+    for args in [
+        vec!["--setup"],
+        vec!["--setup", "--output"],
+        vec!["--setup", "--api-key", "DO_NOT_ECHO"],
+        vec!["--setup", "--output", "one", "--output", "DO_NOT_ECHO"],
+    ] {
+        let output = Command::new(env!("CARGO_BIN_EXE_cg-local"))
+            .args(args)
+            .output()
+            .unwrap();
+        assert_eq!(output.status.code(), Some(2));
+        assert!(output.stdout.is_empty());
+        let diagnostic = String::from_utf8_lossy(&output.stderr);
+        assert!(diagnostic.contains("CG_BOOTSTRAP_FAILED"));
+        assert!(!diagnostic.contains("DO_NOT_ECHO"));
+    }
+    let setup = Setup::new();
+    let before = std::fs::read(setup.root.join("config.toml")).unwrap();
+    let output = Command::new(env!("CARGO_BIN_EXE_cg-local"))
+        .args([
+            "--setup",
+            "--repository",
+            env!("CARGO_MANIFEST_DIR"),
+            "--output",
+        ])
+        .arg(&setup.root)
+        .args(["--client-name", "codex", "--client-version", "1.0"])
+        .output()
+        .unwrap();
+    assert_eq!(output.status.code(), Some(2));
+    assert_eq!(
+        before,
+        std::fs::read(setup.root.join("config.toml")).unwrap()
+    );
+}
+
+#[test]
+fn setup_is_native_private_and_independent_of_checkout_templates_at_runtime() {
+    let setup = Setup::new();
+    let output = setup.root.join("nested").join("new setup");
+    let result = Command::new(env!("CARGO_BIN_EXE_cg-local"))
+        .current_dir(&setup.root)
+        .env("OPENAI_API_KEY", "DO_NOT_ECHO")
+        .args(["--setup", "--repository"])
+        .arg(&setup.root)
+        .arg("--output")
+        .arg(&output)
+        .args(["--client-name", "codex", "--client-version", "1.0"])
+        .output()
+        .unwrap();
+    assert!(
+        result.status.success(),
+        "{}",
+        String::from_utf8_lossy(&result.stderr)
+    );
+    assert_eq!(
+        serde_json::from_slice::<Value>(&result.stdout).unwrap()["status"],
+        "ready"
+    );
+    for name in [
+        "admission.json",
+        "request.json",
+        "launch.json",
+        "config.toml",
+    ] {
+        assert!(
+            !std::fs::read_to_string(output.join(name))
+                .unwrap()
+                .contains("DO_NOT_ECHO")
+        );
+    }
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        assert_eq!(
+            std::fs::metadata(&output).unwrap().permissions().mode() & 0o777,
+            0o700
+        );
+    }
+}
+
+#[cfg(unix)]
+#[test]
+fn setup_rejects_non_utf8_repository_without_panicking_or_writing_configuration() {
+    use std::os::unix::ffi::OsStringExt;
+    let setup = Setup::new();
+    let repository = setup.root.join(std::ffi::OsString::from_vec(vec![0xff]));
+    std::fs::create_dir(&repository).unwrap();
+    let output = setup.root.join("invalid-setup");
+    let result = Command::new(env!("CARGO_BIN_EXE_cg-local"))
+        .args(["--setup", "--repository"])
+        .arg(repository)
+        .arg("--output")
+        .arg(&output)
+        .args(["--client-name", "codex", "--client-version", "1.0"])
+        .output()
+        .unwrap();
+    assert_eq!(result.status.code(), Some(2));
+    assert!(result.stdout.is_empty());
+    assert!(!output.exists());
 }

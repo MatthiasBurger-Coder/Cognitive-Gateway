@@ -119,7 +119,7 @@ including these foundations. Live deployment integration is downstream work.
 | G05 | #266/#178 mandatory deterministic verification | `verify_output` requires grounding for evidence/claim rules | Real admitted IR; existing Process/Policy/semantic checks remain mandatory | Host Passed without adapter rejected; adapter success accepted; unavailable and changed-context denial | VERIFIED application integration with synthetic host |
 | G06 | #178 coverage, fixtures and operator guidance | Per-file coverage gate; quality/architecture configuration | Existing Rust/Python tooling | See [retained qualification](evidence/EPIC-06.07-grounding.json) | VERIFIED component; per-file coverage ≥95% |
 
-Run the EPIC-06.07 entry in `scripts/quality-gates.json` to reproduce measured
+Run the EPIC-06.07 entry in `tests/scripts/quality-gates.json` to reproduce measured
 coverage. The component tests use real canonical IR construction and real domain
 records with synthetic authentication/storage/observation ports. They establish
 the deterministic service contract; full installed-host/provider integration,

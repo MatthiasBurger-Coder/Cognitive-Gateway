@@ -300,7 +300,7 @@ Review checklist (single-agent architecture review; no external approval implied
 
 Run `cargo test -p gateway-application --test connectors --locked`,
 `python3 -m unittest discover -s tests/architecture -p 'test_*connect*.py'`,
-`bash scripts/check-architecture.sh`, `cargo fmt --check` and the existing quality
+`bash tests/scripts/check-architecture.sh`, `cargo fmt --check` and the existing quality
 gates. The evidence record is [EPIC-07.01](evidence/EPIC-07.01-architecture.json).
 #225 can build the manifest foundation; #226–#232 implement these boundaries;
 #233/#234 prove GitHub and independent adapters; #235 owns end-to-end/live effects.

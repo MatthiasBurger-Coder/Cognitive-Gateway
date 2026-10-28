@@ -40,7 +40,7 @@ before multi-step implementation and an improved skill. The original named skill
 was found in the adjacent Tiny-Swarm-World checkout. Its four perspectives were
 applied as sequential role passes by one agent, not independent reviewers.
 Target governance is `.agents/AGENTS.md` (DEVELOPMENT / FULL_PATH); quality
-commands come from `scripts/quality-gates.json` and `.github/workflows/rust.yml`.
+commands come from `tests/scripts/quality-gates.json` and `.github/workflows/rust.yml`.
 No workflow engine or Python-specific product architecture is imposed on CG.
 
 - Requirement engineer: #126 includes nineteen original criteria plus five
@@ -124,7 +124,7 @@ their component evidence is retained, not upgraded to product evidence.
 | GAP-09 | Supported reconnect/restart preserves pending state and consumed budgets | #276 persistence/recovery, #277 cumulative limits | PLANNED, CG-14 diagnostic JSON is not a checkpoint | restart/service evidence and concurrent-owner/duplicate-dispatch negatives | BLOCKED |
 | GAP-10 | Actual installed Codex can invoke CG without a CG key | installed CLI/app-server -> env -i -> cg-mcp | CLI 0.162.1 available; no retained invocation evidence | INSTALLED_CLIENT version/identity/protocol/discovery/call/parity | OPEN |
 | GAP-11 | Strict scope/provenance/sensitivity/policy and existing services remain authoritative | current facade, resolver/context/policy services and admitted host | component gates passed | existing negatives plus newly shipped production paths | PARTIAL |
-| GAP-12 | All applicable gates and >=95% changed-production coverage | scripts/quality-gates.json / coverage manifests | existing component proof retained | actual changed-file measurement and gate logs | PARTIAL |
+| GAP-12 | All applicable gates and >=95% changed-production coverage | tests/scripts/quality-gates.json / coverage manifests | existing component proof retained | actual changed-file measurement and gate logs | PARTIAL |
 | GAP-13 | Complete parent criteria and source-bound release/closure evidence | #296 / #126; #279 separate system owner | report explicitly NOT_COMPLETE | full acceptance matrix and status/limitation reconciliation | OPEN |
 | GAP-14 | Better planning/skill from demonstrated causes | .agents/skills/three-amigos-requirement-gatekeeper | original skill present only in TSW | structure validation plus realistic readiness/closure cases | IN_PROGRESS |
 

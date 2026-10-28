@@ -201,9 +201,9 @@ sensitive data, provider credentials and deterministic execution results.
 - New dependencies, workspace crates and edges require architecture graph review.
   This decision adds none.
 
-`scripts/check-dependencies.py` checks normalized Cargo dependencies, including
+`tests/scripts/check-dependencies.py` checks normalized Cargo dependencies, including
 normal/dev/build/target edges, renamed packages and source substitution, against
-the reviewed allowlist. `scripts/check-architecture.sh` runs it in the release gate.
+the reviewed allowlist. `tests/scripts/check-architecture.sh` runs it in the release gate.
 Provider/MCP mutation regressions are in `tests/architecture/test_dependencies.py`.
 These enforce crate edges; they cannot prove locally defined DTO neutrality or
 secret isolation. Module/type review and runtime qualification remain required.
@@ -227,4 +227,4 @@ trust decision. CLI fallback must use the same facade, validation and policy.
 | Authentication ownership | Local trust assumptions and no-key contract |
 | Unknown clients/versions fail closed | Admission table; implementation/qualification in #237/#238/#245 |
 | Read-only default, CG-authorized elevation | Operation classes and existing policy semantics |
-| Enforceable dependency boundary | `bash scripts/check-architecture.sh`; `python3 -m unittest discover -s tests/architecture` |
+| Enforceable dependency boundary | `bash tests/scripts/check-architecture.sh`; `python3 -m unittest discover -s tests/architecture` |

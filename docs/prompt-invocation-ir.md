@@ -114,7 +114,7 @@ confidence, using existing foundations. Live hosts/adapters are excluded.
 | I06 | #178 >=95% coverage, architecture/docs | Versioned additive Rust modules, CI coverage gate | Existing Rust/Python gates | Per-file measured coverage, architecture regressions, lint/format; retained report | VERIFIED; [evidence](evidence/EPIC-06.03-prompt-ir.json) |
 
 Run `cargo test -p gateway-application --test prompt_ir --locked` and the
-EPIC-06.03 entry in `scripts/quality-gates.json`. Fixtures reuse actual canonical
+EPIC-06.03 entry in `tests/scripts/quality-gates.json`. Fixtures reuse actual canonical
 CG-10 producer construction in `tests/fixtures/prompt-rendering-v1/support.rs`;
 `tests/fixtures/prompt-ir-v1/denials.json` freezes diagnostic spellings. This proves
 structural isolation and deterministic Gateway behavior, not probabilistic model

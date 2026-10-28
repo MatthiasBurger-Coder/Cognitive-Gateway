@@ -75,14 +75,14 @@ mkdir -p target/cg30-development
 CG30_QUALIFICATION_OUTPUT="$PWD/target/cg30-development/cg30-qualification.json" \
   cargo test -p gateway-application --test context_application --locked \
   reflex_cases::cg30::cognitive_runtime_release_qualification -- --exact
-python3 scripts/qualify-cg30.py --metrics target/cg30-development/cg30-qualification.json
+python3 tests/scripts/qualify-cg30.py --metrics target/cg30-development/cg30-qualification.json
 ```
 
 Release qualification on the clean candidate, using a fresh evidence directory:
 
 ```sh
-python3 scripts/quality-gate.py --output target/v0.3-release-evidence
-python3 scripts/qualify-cg30.py --bundle target/v0.3-release-evidence \
+python3 tests/scripts/quality-gate.py --output target/v0.3-release-evidence
+python3 tests/scripts/qualify-cg30.py --bundle target/v0.3-release-evidence \
   --output target/v0.3-release-report.json
 ```
 

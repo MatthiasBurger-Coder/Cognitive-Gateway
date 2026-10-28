@@ -28,5 +28,5 @@ class ContextPlanningBoundary(unittest.TestCase):
         self.assertNotIn("gateway_application", context)
 
     def test_per_file_coverage_gate_is_part_of_release(self):
-        gates = json.loads((ROOT / "scripts/quality-gates.json").read_text())
+        gates = json.loads((ROOT / "tests/scripts/quality-gates.json").read_text())
         self.assertEqual(len([g for g in gates if "check-context-planning-coverage.py" in g["command"]]), 1)

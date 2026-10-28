@@ -5,7 +5,7 @@ from pathlib import Path
 import unittest
 
 ROOT = Path(__file__).resolve().parents[2]
-spec = importlib.util.spec_from_file_location("connector_dependencies", ROOT / "scripts/check-dependencies.py")
+spec = importlib.util.spec_from_file_location("connector_dependencies", ROOT / "tests/scripts/check-dependencies.py")
 guard = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(guard)
 

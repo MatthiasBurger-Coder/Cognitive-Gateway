@@ -22,12 +22,12 @@ class PromptRenderingArchitecture(unittest.TestCase):
 
     def test_measured_coverage_gate_rejects_missing_and_undercovered_files(self):
         spec = importlib.util.spec_from_file_location(
-            "prompt_coverage", ROOT / "scripts/check-prompt-rendering-coverage.py")
+            "prompt_coverage", ROOT / "tests/scripts/check-prompt-rendering-coverage.py")
         gate = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(gate)
         gate.self_test()
         self.assertEqual(len(gate.EXPECTED), 3)
-        configured = next(g for g in json.loads((ROOT / "scripts/quality-gates.json").read_text())
+        configured = next(g for g in json.loads((ROOT / "tests/scripts/quality-gates.json").read_text())
                           if g["name"].startswith("EPIC-06.04"))
         for required in ("cargo llvm-cov", "--test prompt_rendering", "--locked",
                          "--test invocation_host", "--test model_adapters",

@@ -43,6 +43,6 @@ Run the repository gates from the root:
 cargo test --workspace
 cargo clippy --workspace --all-targets -- -D warnings
 cargo fmt --check
-bash scripts/check-architecture.sh
-python3 scripts/quality-gate.py
+bash tests/scripts/check-architecture.sh
+python3 tests/scripts/quality-gate.py
 ```

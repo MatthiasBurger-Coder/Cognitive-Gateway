@@ -358,7 +358,7 @@ code, published schema or fixture changed. Executed checks:
 | --- | --- |
 | `python3 -m unittest discover -s tests/contracts -p 'test_*.py'` | PASS, 12 tests; CONTRACT, frozen v1 fixtures and strict compatibility |
 | `cargo test -p gateway-daemon --test codex_contracts --locked` | PASS, 2 tests; CONTRACT, domain execution enums and canonical assessment preservation |
-| `bash scripts/check-architecture.sh` | PASS, Cargo dependency and architecture guards |
+| `bash tests/scripts/check-architecture.sh` | PASS, Cargo dependency and architecture guards |
 | `python3 -m unittest discover -s tests/architecture -p 'test_*.py'` | PASS, 19 tests; qualification/gate regression checks |
 | Relative Markdown link existence and `git diff --check` | PASS, documentation integrity |
 

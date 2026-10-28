@@ -79,8 +79,8 @@ cargo test -p gateway-daemon --test codex_isolation --test codex_local_cli --tes
 cargo llvm-cov -p gateway-application -p gateway-daemon --lib --bin cg-mcp --bin cg-local \
   --test local_mcp --test codex_facade --test codex_isolation --test codex_local_cli --locked \
   --json --output-path target/codex-security-coverage.json
-python3 scripts/check-local-mcp-coverage.py target/codex-security-coverage.json
-python3 scripts/quality-gate.py
+python3 tests/scripts/check-local-mcp-coverage.py target/codex-security-coverage.json
+python3 tests/scripts/quality-gate.py
 ```
 
 Synthetic credential fixtures are checked in under `tests/fixtures/codex-security`.

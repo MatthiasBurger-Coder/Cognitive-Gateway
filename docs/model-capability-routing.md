@@ -114,7 +114,7 @@ one implementing agent; no independent review or approval is claimed.
 
 The shared positive/negative fixture builders are in
 `tests/fixtures/model-routing-v1/support.rs`. Run the EPIC-06.02 entry in
-`scripts/quality-gates.json` for measured coverage. The retained
+`tests/scripts/quality-gates.json` for measured coverage. The retained
 [evidence report](evidence/EPIC-06.02-model-routing.json) records executed checks
 and binds their source files. This evidence qualifies the routing service and
 trusted-host integration with a test runtime, not an installed inference adapter

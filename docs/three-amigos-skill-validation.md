@@ -98,8 +98,8 @@ The prerequisite ledger for this bounded slice has no production foundations:
   PASS, 31 tests. These test architecture and qualification invariants, not model
   compliance with the skill. Printed FAIL results belong to expected negative
   test fixtures; the suite result is OK.
-- `bash scripts/check-architecture.sh`: PASS.
-- `python3 scripts/qualify-epic04.py --output target/epic04-297-missing-evidence`:
+- `bash tests/scripts/check-architecture.sh`: PASS.
+- `python3 tests/scripts/qualify-epic04.py --output target/epic04-297-missing-evidence`:
   expected exit 1; NOT_COMPLETE, closure denied, all 24 requirements BLOCKED.
   This exercised the missing-input refusal, not runtime qualification.
 - `git diff --check`: PASS.

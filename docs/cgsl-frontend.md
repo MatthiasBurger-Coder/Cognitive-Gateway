@@ -54,7 +54,7 @@ Run:
 cargo test -p gateway-cgsl --locked
 cargo clippy -p gateway-cgsl --all-targets --locked -- -D warnings
 cargo llvm-cov -p gateway-cgsl --all-targets --locked --ignore-filename-regex 'gateway-domain' --fail-under-lines 95 --json --output-path target/cgsl-coverage.json
-python3 scripts/check-dependencies.py
+python3 tests/scripts/check-dependencies.py
 python3 -m unittest discover -s tests/architecture -p test_dependencies.py
 ```
 

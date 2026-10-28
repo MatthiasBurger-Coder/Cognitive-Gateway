@@ -2,7 +2,7 @@
 
 This directory contains cross-crate architecture and contract-test specifications. Unit tests remain colocated with the owning crate; integration tests that exercise more than one crate belong here when the workspace has behavior to exercise.
 
-The bootstrap quality baseline is the executable architecture guard at [`../scripts/check-architecture.sh`](../scripts/check-architecture.sh), together with the workspace commands documented in the root README:
+The bootstrap quality baseline is the executable architecture guard at [`scripts/check-architecture.sh`](scripts/check-architecture.sh), together with the workspace commands documented in the root README:
 
 ```text
 cargo fmt --check
@@ -12,6 +12,22 @@ cargo clippy --workspace --all-targets -- -D warnings
 ```
 
 The [`architecture/`](architecture/) area records cross-crate architecture-test contracts. Schema and Execution Context IR compatibility tests are added with the corresponding domain and catalog-loading slices; CG-01 intentionally introduces no provider, RAG or MCP behavior to test.
+
+## Test tooling
+
+[`scripts/`](scripts/) contains the quality-gate runner and manifests, architecture
+and coverage checks, disposable test hosts, and component/integration qualification
+scripts, CLI/MCP smoke checks, benchmarks and their measurement helpers.
+Run these commands from the repository root, for example:
+
+```bash
+python3 tests/scripts/quality-gate.py
+```
+
+[`../scripts/`](../scripts/README.md) documents the shell entry points for installation
+and service management. Every shell runner supports `--help` without starting a test or service. Product setup is implemented in Rust as `cg-local --setup`.
+Historical reports under `docs/evidence/` retain the paths recorded when their
+evidence was produced.
 
 ## Current test coverage
 
@@ -82,7 +98,7 @@ external temporary files. See [the proof and replay commands](../docs/declarativ
 
 ## Declarative v0.1 release quality
 
-Run `python3 scripts/quality-gate.py` for the complete CG-13 gate. See [the release checklist](../docs/declarative-quality-gates.md) for requirements, evidence and EPIC acceptance traceability.
+Run `python3 tests/scripts/quality-gate.py` for the complete CG-13 gate. See [the release checklist](../docs/declarative-quality-gates.md) for requirements, evidence and EPIC acceptance traceability.
 
 CG-30 v0.3 acceptance lives in `gateway-application/tests/support/cg30.rs`, under the context application test target. It retains fixture classification, routing, failure and lifecycle evidence. See [the qualification report](../docs/epic-03-release-qualification.md) for thresholds and reproduction. `tests/architecture/test_cg30_qualification.py` proves release admission rejects incomplete, altered, failed and dirty-candidate bundles.
 

@@ -147,12 +147,12 @@ Run:
 cargo test --workspace
 cargo clippy --workspace --all-targets -- -D warnings
 cargo fmt --check
-bash scripts/check-architecture.sh
+bash tests/scripts/check-architecture.sh
 cargo llvm-cov -p gateway-policy -p gateway-application \
   --test policy_engine --test policy_application \
   --json --output-path target/cg09-coverage.json
-python3 scripts/check-policy-coverage.py --self-test
-python3 scripts/check-policy-coverage.py target/cg09-coverage.json
+python3 tests/scripts/check-policy-coverage.py --self-test
+python3 tests/scripts/check-policy-coverage.py target/cg09-coverage.json
 ```
 
 On a workspace shared between Windows and Linux, set

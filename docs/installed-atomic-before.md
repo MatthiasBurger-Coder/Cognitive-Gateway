@@ -65,8 +65,8 @@ state through the existing coordinator; no blind provider retry is introduced.
 Reproduce installed qualification with:
 
 ```sh
-CARGO_BUILD_JOBS=1 python3 scripts/cognitive-test-host.py -- \
-  bash scripts/qualify-atomic-before.sh /tmp/atomic-before-evidence
+CARGO_BUILD_JOBS=1 python3 tests/scripts/cognitive-test-host.py -- \
+  bash tests/scripts/qualify-atomic-before.sh /tmp/atomic-before-evidence
 ```
 
 The disposable host supplies real PostgreSQL. Without it, conditional installed

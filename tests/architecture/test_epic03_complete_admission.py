@@ -16,13 +16,13 @@ def module(name, path):
     spec.loader.exec_module(result)
     return result
 
-cg30 = module('complete_cg30', 'scripts/qualify-cg30.py')
-coverage = module('complete_coverage', 'scripts/check-epic03-coverage.py')
+cg30 = module('complete_cg30', 'tests/scripts/qualify-cg30.py')
+coverage = module('complete_coverage', 'tests/scripts/check-epic03-coverage.py')
 
 
 class CompleteAdmissionTests(unittest.TestCase):
     def fixture(self, root):
-        subprocess.run([sys.executable, ROOT / 'scripts/benchmark-offline-learning.py', root / 'epic03-ml-experiment.json'], check=True, capture_output=True)
+        subprocess.run([sys.executable, ROOT / 'tests/scripts/benchmark-offline-learning.py', root / 'epic03-ml-experiment.json'], check=True, capture_output=True)
         manifests = []
         for version in (2, 3):
             model_path = root / f'epic03-cpu-model-v{version}.json'

@@ -109,7 +109,7 @@ invocation owner; no new CLI command or runtime capability is claimed here.
 | B08 | #177 >=95% new production coverage | semantic_planning.rs | COMPONENT: llvm-cov and dedicated CI gate | VERIFIED |
 
 Run `cargo test -p gateway-application --test semantic_planning --locked` and the
-EPIC-05.12 entry in `scripts/quality-gates.json`. Retained, source-bound results and
+EPIC-05.12 entry in `tests/scripts/quality-gates.json`. Retained, source-bound results and
 broader repository limitations are in
 [`EPIC-05.12-semantic-planning.json`](evidence/EPIC-05.12-semantic-planning.json).
 These results qualify this component, not the full parent epic or installed runtime.

@@ -80,7 +80,7 @@ The preserved integration worktree is reference material. Existing installed
 artifact and readonly-goal paths, frozen public v2 schemas and execution gates
 remain regression boundaries.
 
-Qualification uses `scripts/qualify-complete-snapshots.sh` and the unchanged
+Qualification uses `tests/scripts/qualify-complete-snapshots.sh` and the unchanged
 strict 95% line gate for each of the four executable production modules.
 `types.rs` contains declarations only and has no executable LLVM line entry;
 its types participate in compilation and the contract tests. It is not assigned

@@ -8,7 +8,7 @@ import unittest
 from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[2]
-SPEC = importlib.util.spec_from_file_location("cg30", ROOT / "scripts/qualify-cg30.py")
+SPEC = importlib.util.spec_from_file_location("cg30", ROOT / "tests/scripts/qualify-cg30.py")
 cg30 = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(cg30)
 
@@ -24,7 +24,7 @@ class QualificationTests(unittest.TestCase):
                 cg30.count(invalid)
 
     def fixture(self, root):
-        manifest = json.loads((ROOT / "scripts/quality-gates.json").read_text())
+        manifest = json.loads((ROOT / "tests/scripts/quality-gates.json").read_text())
         files = {name: "{}" for name in ("cg30-qualification.json", "cg16-coverage.json", "cg23-evaluation.json",
                                        "cg24-promotion.json", "cg25-reflex.json", "cg27-fixture-benchmark.json", "cg28-learning.json", "cg29-fabric.json", "cg03-host.json", "epic03-ml-experiment.json", "epic03-live-release.json", "epic03-durable-workers.json", "epic03-worker-container.json", "epic03-python-coverage.json", "epic03-cpu-model-v2.json", "epic03-cpu-model-v3.json", "epic03-cpu-evaluation-v2.json", "epic03-cpu-evaluation-v3.json")}
         for name, content in files.items():

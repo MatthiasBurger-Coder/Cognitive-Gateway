@@ -9,7 +9,7 @@ import unittest
 from unittest.mock import patch
 
 ROOT=Path(__file__).resolve().parents[2]
-SPEC=importlib.util.spec_from_file_location('invocation_live',ROOT/'scripts/qualify-invocation-live.py')
+SPEC=importlib.util.spec_from_file_location('invocation_live',ROOT/'tests/scripts/qualify-invocation-live.py')
 LIVE=importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(LIVE)
 

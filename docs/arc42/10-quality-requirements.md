@@ -48,7 +48,7 @@ provided through explicit runtime or adapter inputs.
 
 ## 10.8 Declarative v0.1 release evidence
 
-The complete required gate is `python3 scripts/quality-gate.py`. Local and CI
+The complete required gate is `python3 tests/scripts/quality-gate.py`. Local and CI
 execution share the same ordered gate manifest. Any failing or unexecuted
 required gate prevents a passing result. Existing 95% crate/file coverage
 thresholds remain mandatory. Frozen CLI fixtures protect Situation, Delta,

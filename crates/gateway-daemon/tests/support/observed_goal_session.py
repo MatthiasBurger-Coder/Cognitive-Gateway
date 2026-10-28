@@ -57,7 +57,7 @@ class Client(existing.Client):
 def configure(root, multiple, policy_case=None):
     repository=root/'project';repository.mkdir()
     setup=root/'setup'
-    subprocess.run(['python3',str(ROOT/'scripts/bootstrap-codex-local.py'),'--repository',str(repository),'--output',str(setup),'--bin-dir',str(BIN),'--client-name','codex','--client-version','1.0'],check=True,capture_output=True,timeout=20)
+    subprocess.run([str(BIN/'cg-local'),'--setup','--repository',str(repository),'--output',str(setup),'--bin-dir',str(BIN),'--client-name','codex','--client-version','1.0'],check=True,capture_output=True,timeout=20)
     launch=json.loads((setup/'launch.json').read_text()); request=json.loads((setup/'request.json').read_text())
     admission_path=Path(launch[13]); admission=json.loads(admission_path.read_text()); entry=admission['mappings'][0]
     scope='observed-'+uuid.uuid4().hex;entry['canonical_scope']=scope

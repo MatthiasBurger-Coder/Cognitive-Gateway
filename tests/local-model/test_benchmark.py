@@ -126,7 +126,7 @@ class BenchmarkTests(unittest.TestCase):
     def test_cli_records_fixture_evidence_and_preserves_existing_report(self):
         with tempfile.TemporaryDirectory() as directory:
             output = Path(directory) / 'report.json'
-            command = [sys.executable, str(ROOT / 'scripts/benchmark-local-model.py'),
+            command = [sys.executable, str(ROOT / 'tests/scripts/benchmark-local-model.py'),
                        '--warm-rounds', '1', '--output', str(output)]
             first = subprocess.run(command, capture_output=True, text=True)
             self.assertEqual(first.returncode, 0, first.stderr)

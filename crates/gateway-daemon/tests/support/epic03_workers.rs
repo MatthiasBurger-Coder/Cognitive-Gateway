@@ -1,8 +1,8 @@
 use super::*;
 
 fn durable_connection() -> String {
-    let raw =
-        std::env::var("CG_COGNITIVE_TEST_DATABASE").expect("run scripts/cognitive-test-host.py");
+    let raw = std::env::var("CG_COGNITIVE_TEST_DATABASE")
+        .expect("run tests/scripts/cognitive-test-host.py");
     let mut client = postgres::Client::connect(&raw, postgres::NoTls).unwrap();
     let schema = format!(
         "workers_{}_{}",

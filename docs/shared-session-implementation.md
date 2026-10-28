@@ -132,7 +132,7 @@ immutable digest, exact goal/basis, current policy and verification checks.
 ## Qualification and rollback
 
 ```bash
-python3 scripts/cognitive-test-host.py bash scripts/qualify-shared-sessions.sh /tmp/cg-session-evidence
+python3 tests/scripts/cognitive-test-host.py bash tests/scripts/qualify-shared-sessions.sh /tmp/cg-session-evidence
 ```
 
 This runs against a disposable loopback PostgreSQL host, requires the database
@@ -142,7 +142,7 @@ share the database without exhausting another scenario's bounded journal,
 independently validates public responses, retains transition transcripts and
 verified evidence, and enforces measured >=95% coverage for every applicable
 changed executable production file. The same gate is registered in
-`scripts/quality-gates.json`. Architecture, frozen contracts, format, Clippy and
+`tests/scripts/quality-gates.json`. Architecture, frozen contracts, format, Clippy and
 workspace tests remain separate checks.
 
 Storage uses journal kind `task-sessions-v2`, schema version 2, alongside existing

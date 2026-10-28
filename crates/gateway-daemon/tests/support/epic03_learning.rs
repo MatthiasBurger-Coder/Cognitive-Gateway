@@ -386,7 +386,7 @@ fn real_cpu_adapter_uses_governed_sources_separate_training_and_held_out_test() 
 
 fn durable_connection() -> String {
     let raw = std::env::var("CG_COGNITIVE_TEST_DATABASE")
-        .expect("run through scripts/cognitive-test-host.py");
+        .expect("run through tests/scripts/cognitive-test-host.py");
     let mut client = postgres::Client::connect(&raw, postgres::NoTls).unwrap();
     let schema = format!(
         "cg03_{}_{}",

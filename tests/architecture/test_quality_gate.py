@@ -7,7 +7,7 @@ import unittest
 from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[2]
-spec = importlib.util.spec_from_file_location("runner", ROOT / "scripts/quality-gate.py")
+spec = importlib.util.spec_from_file_location("runner", ROOT / "tests/scripts/quality-gate.py")
 runner = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(runner)
 
@@ -23,10 +23,10 @@ class EvidenceTests(unittest.TestCase):
     def test_empty_or_invalid_manifest_cannot_pass(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            (root / "scripts").mkdir()
+            (root / "tests/scripts").mkdir(parents=True)
             for index, gates in enumerate([[], {}, [{"name": "empty", "command": ""}],
                                            [{"name": "same", "command": "true"}] * 2]):
-                (root / "scripts/quality-gates.json").write_text(json.dumps(gates))
+                (root / "tests/scripts/quality-gates.json").write_text(json.dumps(gates))
                 with patch.object(runner, "ROOT", root), \
                      patch("sys.argv", ["quality-gate.py", "--output", str(root / str(index))]):
                     with self.assertRaises(ValueError):
@@ -35,8 +35,8 @@ class EvidenceTests(unittest.TestCase):
     def exercise(self, codes, changed=False):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            (root / "scripts").mkdir()
-            (root / "scripts/quality-gates.json").write_text(json.dumps([
+            (root / "tests/scripts").mkdir(parents=True)
+            (root / "tests/scripts/quality-gates.json").write_text(json.dumps([
                 {"name": "first", "command": "true"}, {"name": "second", "command": "true"}]))
             output = root / "evidence"
             with patch.object(runner, "ROOT", root), patch.object(runner, "capture", return_value="test"), \

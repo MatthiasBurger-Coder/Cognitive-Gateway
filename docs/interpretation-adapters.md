@@ -87,8 +87,8 @@ completeness test target. Run:
 ```text
 cargo test -p gateway-application --test completeness --test interpretation --locked
 cargo llvm-cov -p gateway-application --test completeness --locked --json --output-path target/interpretation-adapters-coverage.json
-python3 scripts/check-interpretation-adapters-coverage.py --self-test
-python3 scripts/check-interpretation-adapters-coverage.py target/interpretation-adapters-coverage.json
+python3 tests/scripts/check-interpretation-adapters-coverage.py --self-test
+python3 tests/scripts/check-interpretation-adapters-coverage.py target/interpretation-adapters-coverage.json
 ```
 
 The per-module line coverage gate requires 95% and is registered in the shared
