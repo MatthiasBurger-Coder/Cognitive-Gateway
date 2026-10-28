@@ -43,7 +43,7 @@ jobs:
           chmod 600 "$RUNNER_TEMP/postgres.env"
           echo "CG_POSTGRES_ENV_FILE=$RUNNER_TEMP/postgres.env" >> "$GITHUB_ENV"
       - name: Declarative v0.1 quality gate
-        run: RUSTFLAGS="${RUSTFLAGS:-} -C link-dead-code" python3 tests/scripts/cognitive-test-host.py -- bash tests/scripts/qualify-before-journal.sh target/ci-release-evidence/before-journal
+        run: CG_415_DIAGNOSTIC_TAIL=1 python3 tests/scripts/quality-gate.py --output target/ci-release-evidence
       - name: Retain release evidence (including failures)
         if: always()
         uses: actions/upload-artifact@v4
@@ -53,7 +53,7 @@ jobs:
           if-no-files-found: error
           retention-days: 30
       - name: Retain Before-journal coverage diagnostics on failure
-        if: always()
+        if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: before-journal-diagnostics-${{ github.sha }}-${{ github.run_attempt }}

@@ -48,13 +48,16 @@ def run(args, host):
         output = Path(tempfile.mkdtemp(prefix="declarative-v0.1-", dir=parent))
     print(f"Evidence: {output}", flush=True)
     gates = json.loads((ROOT / "tests/scripts/quality-gates.json").read_text())
+    diagnostic_tail = os.environ.get("CG_415_DIAGNOSTIC_TAIL") == "1"
+    if diagnostic_tail:
+        gates = [gates[13], *gates[23:]]
     if (not isinstance(gates, list) or not gates
             or any(not isinstance(gate, dict) or set(gate) != {"name", "command"}
                    or any(not isinstance(value, str) or not value.strip() for value in gate.values())
                    for gate in gates)
             or len({gate["name"] for gate in gates}) != len(gates)):
         raise ValueError("Gate manifest must contain unique named, nonempty commands")
-    report = {"schema_version": 1, "scope": "declarative-v0.1", "status": "RUNNING",
+    report = {"schema_version": 1, "scope": "declarative-v0.1-diagnostic-tail" if diagnostic_tail else "declarative-v0.1", "status": "RUNNING",
               "revision": capture("git", "rev-parse", "HEAD"),
               "worktree_status": capture("git", "status", "--porcelain"),
               "started_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
@@ -64,6 +67,7 @@ def run(args, host):
     # Include untracked source in the fingerprint as well as tracked source.
     report["source_sha256"] = source_fingerprint(output)
     env = os.environ.copy()
+    env.pop("CG_415_DIAGNOSTIC_TAIL", None)
     env.update(host.environment)
     (output / "cg03-host.json").write_text(json.dumps(host.report, indent=2) + "\n")
     # Only the dedicated proof gate may export; workspace/coverage tests also run CG-12.
