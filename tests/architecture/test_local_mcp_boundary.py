@@ -23,7 +23,7 @@ class LocalMcpBoundaryTests(unittest.TestCase):
             self.assertNotIn(forbidden, source)
 
     def test_coverage_gate_rejects_missing_and_undercovered_adapter_files(self):
-        spec = importlib.util.spec_from_file_location("local_mcp_coverage", ROOT / "scripts/check-local-mcp-coverage.py")
+        spec = importlib.util.spec_from_file_location("local_mcp_coverage", ROOT / "tests/scripts/check-local-mcp-coverage.py")
         coverage = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(coverage)
         coverage.self_test()

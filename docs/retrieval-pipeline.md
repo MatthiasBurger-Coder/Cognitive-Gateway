@@ -55,5 +55,5 @@ application pipeline and outer adapter modules. Reproduce it with:
 
 ```sh
 CARGO_BUILD_JOBS=1 cargo llvm-cov --workspace --tests --json --output-path target/cg16-workspace-coverage.json
-python3 scripts/check-cg16-coverage.py target/cg16-workspace-coverage.json
+python3 tests/scripts/check-cg16-coverage.py target/cg16-workspace-coverage.json
 ```

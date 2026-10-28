@@ -24,6 +24,7 @@ pub mod durable_workers;
 
 pub mod local_mcp;
 
+pub mod codex_setup;
 pub mod codex_workspace;
 pub mod local_sessions;
 pub mod session_store;

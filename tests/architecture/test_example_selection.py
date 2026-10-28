@@ -28,7 +28,7 @@ class ExampleSelectionBoundary(unittest.TestCase):
         self.assertNotIn("gateway_application", context)
 
     def test_producer_conformance_coverage_is_a_release_gate(self):
-        gates = json.loads((ROOT / "scripts/quality-gates.json").read_text())
+        gates = json.loads((ROOT / "tests/scripts/quality-gates.json").read_text())
         matches = [g for g in gates if "check-example-selection-coverage.py" in g["command"]]
         self.assertEqual(len(matches), 1)
         self.assertIn("--test example_selection --test context_planning", matches[0]["command"])

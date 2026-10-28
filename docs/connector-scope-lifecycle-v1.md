@@ -109,9 +109,9 @@ Run focused qualification with:
 
 ```bash
 cargo test -p gateway-application --test connector_admission --locked
-python3 scripts/cognitive-test-host.py -- cargo test -p gateway-daemon --lib --test mcp_client --test observed_goal_sessions --test complete_before_sessions --locked -- --test-threads=1
-CARGO_BUILD_JOBS=1 CARGO_LLVM_COV_TARGET_DIR=target/mcp-client-coverage python3 scripts/cognitive-test-host.py -- cargo llvm-cov -p gateway-application -p gateway-daemon --lib --test connector_admission --test mcp_client --test observed_goal_sessions --test complete_before_sessions --locked --json --output-path target/connector-admission-coverage.json -- --test-threads=1
-python3 scripts/check-connector-admission-coverage.py target/connector-admission-coverage.json
+python3 tests/scripts/cognitive-test-host.py -- cargo test -p gateway-daemon --lib --test mcp_client --test observed_goal_sessions --test complete_before_sessions --locked -- --test-threads=1
+CARGO_BUILD_JOBS=1 CARGO_LLVM_COV_TARGET_DIR=target/mcp-client-coverage python3 tests/scripts/cognitive-test-host.py -- cargo llvm-cov -p gateway-application -p gateway-daemon --lib --test connector_admission --test mcp_client --test observed_goal_sessions --test complete_before_sessions --locked --json --output-path target/connector-admission-coverage.json -- --test-threads=1
+python3 tests/scripts/check-connector-admission-coverage.py target/connector-admission-coverage.json
 ```
 
 The quality gate requires at least 95% measured line coverage for each of the

@@ -118,7 +118,7 @@ fn execution(name: &str) -> VerifiedExecution {
 }
 
 #[test]
-#[ignore = "requires the PostgreSQL Compose service; run scripts/test-postgres.sh"]
+#[ignore = "requires the PostgreSQL Compose service; run tests/scripts/test-postgres.sh"]
 fn postgres_round_trip_revalidates_and_preserves_negative_evidence() {
     let config = config();
     let connection_string = format!(

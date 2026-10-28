@@ -113,7 +113,7 @@ CG29_FABRIC_OUTPUT="$PWD/target/cg29-fabric.json" \
   cargo test -p gateway-daemon --test worker_fabric --locked
 cargo llvm-cov -p gateway-domain -p gateway-application -p gateway-daemon \
   --test worker_fabric --json --output-path target/cg29-coverage.json
-python3 scripts/check-cg29-coverage.py target/cg29-coverage.json
+python3 tests/scripts/check-cg29-coverage.py target/cg29-coverage.json
 ```
 
 The existing full quality gate includes CG-29 correlated recovery/deduplication

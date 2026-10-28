@@ -18,7 +18,7 @@ class ModelInvocationArchitecture(unittest.TestCase):
         self.assertNotIn("gateway-application", (ROOT / "crates/gateway-domain/Cargo.toml").read_text())
 
     def test_measured_contract_coverage_is_part_of_release_gate(self):
-        gates = json.loads((ROOT / "scripts/quality-gates.json").read_text())
+        gates = json.loads((ROOT / "tests/scripts/quality-gates.json").read_text())
         gate = next(g for g in gates if g["name"].startswith("EPIC-06.01"))
         self.assertIn("cargo llvm-cov", gate["command"])
         self.assertIn("--test model_invocation", gate["command"])
@@ -35,7 +35,7 @@ class ModelRoutingArchitecture(unittest.TestCase):
             self.assertNotIn(forbidden, source)
 
     def test_measured_routing_coverage_is_part_of_release_gate(self):
-        gates = json.loads((ROOT / "scripts/quality-gates.json").read_text())
+        gates = json.loads((ROOT / "tests/scripts/quality-gates.json").read_text())
         gate = next(g for g in gates if g["name"].startswith("EPIC-06.02"))
         for command in ("cargo llvm-cov", "--test model_routing", "--test cognitive_routing",
                         "check-model-routing-coverage.py", "--self-test"):

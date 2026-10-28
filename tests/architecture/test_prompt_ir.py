@@ -21,13 +21,13 @@ class PromptIrArchitecture(unittest.TestCase):
             self.assertIn(owner, application)
 
     def test_measured_coverage_and_gate_rejection_are_part_of_ci(self):
-        gates = json.loads((ROOT / "scripts/quality-gates.json").read_text())
+        gates = json.loads((ROOT / "tests/scripts/quality-gates.json").read_text())
         gate = next(g for g in gates if g["name"].startswith("EPIC-06.03"))
         for required in ("cargo llvm-cov", "--test prompt_ir", "--self-test",
                          "check-prompt-ir-coverage.py"):
             self.assertIn(required, gate["command"])
         spec = importlib.util.spec_from_file_location(
-            "prompt_ir_coverage", ROOT / "scripts/check-prompt-ir-coverage.py")
+            "prompt_ir_coverage", ROOT / "tests/scripts/check-prompt-ir-coverage.py")
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
         module.self_test()

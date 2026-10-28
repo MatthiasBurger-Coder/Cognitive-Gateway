@@ -101,7 +101,7 @@ confidence; concrete provider/session hosts excluded and tracked above.
 | P03 | Provisional streams, #178 | OutputStream push/finish | Adapter must signal completion | streams_require_completion_and_overflow_is_terminal | VERIFIED, component |
 | P04 | Bounded repair proposals, #265 | OutputRepairSession → mandatory budget port | Concrete aggregate ledger owned by #268 | repairs_are_correlated_bounded_and_require_aggregate_admission | VERIFIED, synthetic host port |
 | P05 | No raw text/commands/tool dispatch, #265 | Pure parsing service → #266 verification | Current Process/Policy remains mandatory | Existing constraint rejection tests and architecture dependency/effect checks | VERIFIED, component |
-| P06 | Documentation, >=95% coverage, traceability | Operator/arc42 docs and CI gate | Existing llvm-cov tooling | scripts/check-output-parsing-coverage.py and retained evidence | VERIFIED, retained qualification |
+| P06 | Documentation, >=95% coverage, traceability | Operator/arc42 docs and CI gate | Existing llvm-cov tooling | tests/scripts/check-output-parsing-coverage.py and retained evidence | VERIFIED, retained qualification |
 
 Evidence: [EPIC-06.05 qualification](evidence/EPIC-06.05-output-parsing.json).
 These criteria qualify the requested parsing contracts, not the full parent epic

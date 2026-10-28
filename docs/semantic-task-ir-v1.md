@@ -237,7 +237,7 @@ fixtures and documentation together. There are no deprecated v1.0 members.
 `crates/gateway-domain/tests/semantic_task_v1.rs` checks the Rust contract;
 `tests/contracts/test_semantic_task_contract.py` checks JSON Schema and frozen
 canonical bytes independently. The standard domain coverage gate requires
-95% line coverage, with `scripts/check-semantic-task-coverage.py` enforcing
+95% line coverage, with `tests/scripts/check-semantic-task-coverage.py` enforcing
 the same minimum for the new module separately in the standard quality gate.
 This slice does not claim production reference resolution,
 natural-language compilation or end-to-end executable handoff.

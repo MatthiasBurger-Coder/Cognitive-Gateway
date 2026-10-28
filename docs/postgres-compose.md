@@ -8,11 +8,10 @@ database and user are both `cognitive_gateway`. The host port defaults to
 
 ## Start
 
-On Linux, `./scripts/install-linux.sh --with-postgres` installs the CLIs and
-starts the database. To start the database independently:
+The CLI installer only installs binaries. Start the database separately:
 
 ```bash
-./scripts/start-postgres.sh
+./scripts/operations/postgres/start.sh
 ```
 
 On first start, the script creates
@@ -41,13 +40,13 @@ namespace. Keep the project name stable to reuse the same data volume.
 Run these commands from the repository root:
 
 ```bash
-./scripts/postgres-compose.sh ps
-./scripts/postgres-compose.sh exec postgres pg_isready -U cognitive_gateway -d cognitive_gateway
-./scripts/postgres-compose.sh down
+./scripts/operations/postgres/compose.sh ps
+./scripts/operations/postgres/compose.sh exec postgres pg_isready -U cognitive_gateway -d cognitive_gateway
+./scripts/operations/postgres/compose.sh down
 docker volume ls
 ```
 
-`./scripts/postgres-compose.sh down` leaves the named volume intact. Adding `-v`
+`./scripts/operations/postgres/compose.sh down` leaves the named volume intact. Adding `-v`
 removes the volume and its data; use it only when intentionally deleting the
 database. Changing the image to another PostgreSQL major version requires a
 database upgrade, not just a tag change.
@@ -71,8 +70,8 @@ ln -s ~/.config/cognitive-gateway/postgres.env .env
 ```
 
 If Docker reports that an existing Compose network does not exist, recreate
-the project network with `./scripts/postgres-compose.sh down`, then run
-`./scripts/start-postgres.sh`. The named data volume is retained by `down`.
+the project network with `./scripts/operations/postgres/compose.sh down`, then run
+`./scripts/operations/postgres/start.sh`. The named data volume is retained by `down`.
 
 ## Backup
 
@@ -80,7 +79,7 @@ Before upgrades or volume changes, make a logical backup to a protected
 location outside the Compose volume:
 
 ```bash
-./scripts/postgres-compose.sh exec -T postgres pg_dump -U cognitive_gateway -d cognitive_gateway -Fc > cognitive-gateway.dump
+./scripts/operations/postgres/compose.sh exec -T postgres pg_dump -U cognitive_gateway -d cognitive_gateway -Fc > cognitive-gateway.dump
 ```
 
 The dump may contain sensitive data. `PostgresMemoryStore` persists governed
@@ -90,6 +89,6 @@ inspection. The memory adapter accepts reference-only payloads, so inline
 payload bytes are never stored in this database. A forget decision removes the
 reference from the current entry; erasing the referenced content remains the
 responsibility of its owning store. Run the integration test with
-`./scripts/test-postgres.sh`. `cg patterns --scope <project-scope> --json`
+`./tests/scripts/test-postgres.sh`. `cg patterns --scope <project-scope> --json`
 inspects stored experience directly. The CLI does not write verified executions;
 callers use the Rust adapter after verifying a runtime outcome.

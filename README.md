@@ -24,12 +24,15 @@ crates/
 └── gateway-daemon/
 ```
 
+See [the shell entry-point catalog](scripts/README.md) for responsibilities,
+arguments, prerequisites and side effects.
+
 ## Installation on Linux
 
 With Rust 1.89 or newer and Cargo installed, run the installer from the repository root:
 
 ```bash
-./scripts/install-linux.sh
+./scripts/install/linux-cli.sh
 export PATH="$HOME/.cargo/bin:$PATH"
 cg --help
 cg-registry --help
@@ -39,30 +42,30 @@ The script installs `cg` and `cg-registry` from this checkout. By default,
 it uses `CARGO_INSTALL_ROOT`, `CARGO_HOME`, or `$HOME/.cargo` as the install
 root, in that order. The executables are placed in the root's `bin` directory.
 The `PATH` command above applies to the `$HOME/.cargo` default.
-For a custom location, run `./scripts/install-linux.sh --root /absolute/path`
+For a custom location, run `./scripts/install/linux-cli.sh --root /absolute/path`
 and add `/absolute/path/bin` to `PATH`. Rerunning the script updates both CLIs
 to the current checkout. The script can also be called from another directory
 by its absolute path.
 
 ### Optional PostgreSQL service
 
-To install the CLIs and start PostgreSQL with persistent storage, use:
+Installation and service startup are separate operations. To start PostgreSQL
+with persistent storage, use:
 
 ```bash
-./scripts/install-linux.sh --with-postgres
+./scripts/operations/postgres/start.sh
 ```
 
-For an existing CLI installation, start only the database with
-`./scripts/start-postgres.sh`. The first start creates a private
+The first start creates a private
 `~/.config/cognitive-gateway/postgres.env` with a random password. Compose
 stores database files in a named Docker volume, which survives container
-recreation and `./scripts/postgres-compose.sh down`. The service
+recreation and `./scripts/operations/postgres/compose.sh down`. The service
 listens on `127.0.0.1:55432` by default. See
 [`docs/postgres-compose.md`](docs/postgres-compose.md) for configuration,
 Nexus image override, checks and backup instructions.
 
 The CG-22 PostgreSQL adapters persist governed memory and verified-execution
-references; `./scripts/test-postgres.sh` exercises restart-safe revalidation
+references; `./tests/scripts/test-postgres.sh` exercises restart-safe revalidation
 against this service. `cg patterns --scope <project-scope> --json` inspects the
 stored experience. Verified outcomes are written through the Rust adapter.
 See the adapter boundary in
@@ -110,7 +113,7 @@ makes `cg-registry` directly resolvable from the shell.
 Run the complete declarative v0.1 gate from the repository root:
 
 ```bash
-python3 scripts/quality-gate.py
+python3 tests/scripts/quality-gate.py
 ```
 
 Requires Bash, Python 3.11+, Git, Rust with `rustfmt`, `clippy` and
@@ -212,7 +215,7 @@ The [closed-loop application API](docs/closed-loop-execution.md) dispatches
 authorized steps through a replaceable runtime port, reassesses observed
 evidence, and continues or replans within explicit iteration and retry limits.
 
-The optional local model service can be started with `scripts/model.sh start`;
+The optional local model service can be started with `scripts/operations/local-model/service.sh start`;
 see [the operator guide](docs/local-model-runtime.md) for installation, qualification,
 promotion, rollback and the independent Gateway container.
 

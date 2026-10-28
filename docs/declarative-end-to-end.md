@@ -143,11 +143,11 @@ Reproduce the quality checks from the repository root:
 cargo test --workspace
 cargo fmt --all -- --check
 cargo clippy --workspace --all-targets -- -D warnings
-bash scripts/check-architecture.sh
+bash tests/scripts/check-architecture.sh
 cargo llvm-cov -p gateway-daemon --all-targets --fail-under-lines 95 \
   --json --output-path /tmp/cg12-coverage.json
-python3 scripts/check-cli-coverage.py --self-test
-python3 scripts/check-cli-coverage.py /tmp/cg12-coverage.json
+python3 tests/scripts/check-cli-coverage.py --self-test
+python3 tests/scripts/check-cli-coverage.py /tmp/cg12-coverage.json
 git diff --check
 ```
 

@@ -29,4 +29,4 @@ An export pins a `MemoryEligibilityReference` containing schema version, scope, 
 
 ## Verification
 
-Run `cargo test --workspace`, `cargo clippy --workspace --all-targets -- -D warnings`, `cargo fmt --check`, `bash scripts/check-architecture.sh`, and `python3 scripts/quality-gate.py`. The complete gate records revision-bound evidence under `target/release-evidence/`.
+Run `cargo test --workspace`, `cargo clippy --workspace --all-targets -- -D warnings`, `cargo fmt --check`, `bash tests/scripts/check-architecture.sh`, and `python3 tests/scripts/quality-gate.py`. The complete gate records revision-bound evidence under `target/release-evidence/`.

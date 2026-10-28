@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parents[2]
 
 class BootstrapTests(unittest.TestCase):
     def run_bootstrap(self, repository, output, version='1.0', bin_dir=None):
-        command = ['python3', str(ROOT / 'scripts/bootstrap-codex-local.py'),
+        command = [str(ROOT / 'target/debug/cg-local'), '--setup',
                    '--repository', str(repository), '--output', str(output),
                    '--client-name', 'codex', '--client-version', version]
         if bin_dir:
@@ -36,7 +36,7 @@ class BootstrapTests(unittest.TestCase):
             self.assertEqual(admission['mappings'][0]['resources'][0]['provenance'][0]['sensitivity'], 'PUBLIC')
             for path in output.iterdir():
                 self.assertNotIn('DO_NOT_ECHO', path.read_text())
-            smoke = subprocess.run(['python3', str(ROOT / 'scripts/check-codex-local.py'),
+            smoke = subprocess.run(['python3', str(ROOT / 'tests/scripts/check-codex-local.py'),
                                     '--setup', str(output)], cwd=ROOT, capture_output=True,
                                    text=True, timeout=45)
             self.assertEqual(smoke.returncode, 0, smoke.stderr)
@@ -58,9 +58,9 @@ class BootstrapTests(unittest.TestCase):
                 self.assertNotIn('DO_NOT_ECHO', result.stderr)
                 self.assertFalse((output / 'config.toml').exists())
                 self.assertFalse((output / 'launch.json').exists())
-        for script in ['bootstrap-codex-local.py', 'check-codex-local.py']:
-            result = subprocess.run(['python3', str(ROOT / 'scripts' / script),
-                                     '--api-key', 'DO_NOT_ECHO'], capture_output=True,
+        for command in [[str(ROOT / 'target/debug/cg-local'), '--setup'],
+                        ['python3', str(ROOT / 'tests/scripts/check-codex-local.py')]]:
+            result = subprocess.run(command + ['--api-key', 'DO_NOT_ECHO'], capture_output=True,
                                     text=True, timeout=10)
             self.assertEqual(result.returncode, 2)
             self.assertNotIn('DO_NOT_ECHO', result.stderr)

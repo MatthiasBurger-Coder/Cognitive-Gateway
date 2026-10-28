@@ -173,6 +173,6 @@ boundary excludes installed provider and full policy qualification.
 | R07 | Only authorized host can dispatch | private Runtime + required admission port | Full current CG-09 policy service #230 pending | Denial/revalidation/tampered request/scope tests and privacy compile-fail test | VERIFIED at component/runtime boundary; see evidence report |
 
 Run the focused qualification and the per-file coverage gate with the commands
-in `scripts/quality-gates.json` (EPIC-07.03). Retained results and source bindings
+in `tests/scripts/quality-gates.json` (EPIC-07.03). Retained results and source bindings
 are in `docs/evidence/EPIC-07.03-runtime.json`. They qualify the library/runtime
 candidate and synthetic server, not live external effects or EPIC-07 completion.

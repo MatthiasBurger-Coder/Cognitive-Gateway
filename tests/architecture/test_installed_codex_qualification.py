@@ -11,7 +11,7 @@ import tempfile
 import unittest
 
 ROOT = Path(__file__).resolve().parents[2]
-SCRIPT = ROOT / 'scripts/qualify-installed-codex.py'
+SCRIPT = ROOT / 'tests/scripts/qualify-installed-codex.py'
 SPEC = importlib.util.spec_from_file_location('installed_codex', SCRIPT)
 runner = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(runner)

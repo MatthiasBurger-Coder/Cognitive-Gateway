@@ -335,7 +335,7 @@ implements component resolution. Clarification integration and complete EPIC-05
 acceptance remain planned.
 
 Validation on 2026-10-11: all 35 architecture regression tests passed;
-`bash scripts/check-architecture.sh` passed; local Markdown targets in the
+`bash tests/scripts/check-architecture.sh` passed; local Markdown targets in the
 seven changed documents were checked; `git diff --check` passed. No production
 code changed. The decision vectors above specify future runtime assertions;
 these documentation/architecture checks do not execute semantic resolution.

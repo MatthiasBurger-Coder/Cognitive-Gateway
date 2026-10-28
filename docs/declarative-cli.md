@@ -18,7 +18,7 @@ For CG-22, `cg patterns --scope <project-scope> --json` reads the local
 PostgreSQL experience and memory stores and rechecks eligibility before
 reporting patterns. Use `--at <unix-seconds>` for a fixed inspection time.
 `cg patterns --report <file-or-json> --json` displays an existing report.
-Both forms are read-only. Start the database with `./scripts/start-postgres.sh`
+Both forms are read-only. Start the database with `./scripts/operations/postgres/start.sh`
 and see [the PostgreSQL setup](postgres-compose.md) for credential handling.
 
 ## Runnable walkthrough
@@ -260,10 +260,10 @@ cargo test -p gateway-daemon --all-targets
 cargo test --workspace
 cargo fmt --check
 cargo clippy --workspace --all-targets -- -D warnings
-bash scripts/check-architecture.sh
+bash tests/scripts/check-architecture.sh
 cargo llvm-cov -p gateway-daemon --all-targets --json --output-path target/cg11-coverage.json
-python3 scripts/check-cli-coverage.py --self-test
-python3 scripts/check-cli-coverage.py target/cg11-coverage.json
+python3 tests/scripts/check-cli-coverage.py --self-test
+python3 tests/scripts/check-cli-coverage.py target/cg11-coverage.json
 ```
 
 The CG-11 coverage gate checks each new production file independently at 95%.

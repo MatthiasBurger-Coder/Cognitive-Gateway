@@ -166,7 +166,7 @@ validator; no database, installation or canonical catalog migration is involved.
 | D05 | Preserve retry/idempotency | MappingRecord, snapshot/digest | #231 reconciliation separate | Provider-key required-input tests and metadata-sensitive revision tests | VERIFIED at component boundary |
 | D06 | Existing capability/source semantics | Existing application inventory and CG-03 definition | CG registry remains Agent/Skill authority | Typed capability/source assertions, existing registry query resolution and exact resource dispatch | VERIFIED at component boundary |
 
-Run the EPIC-07.04 command in `scripts/quality-gates.json`, independent contract
+Run the EPIC-07.04 command in `tests/scripts/quality-gates.json`, independent contract
 tests and architecture/format/clippy checks. The [retained evidence](evidence/EPIC-07.04-mapping.json)
 binds results to candidate sources. Runtime tests use an independent stdio
 subprocess with test-only admission/normalization; they do not qualify live

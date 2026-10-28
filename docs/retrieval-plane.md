@@ -223,10 +223,10 @@ and incompatibility, and exact/estimated/unknown token semantics.
 ```sh
 cargo test --workspace --locked
 cargo clippy --workspace --all-targets -- -D warnings
-./scripts/check-architecture.sh
+./tests/scripts/check-architecture.sh
 cargo llvm-cov -p gateway-domain --all-targets --json --output-path target/cg15-coverage.json
-python3 scripts/check-retrieval-coverage.py --self-test
-python3 scripts/check-retrieval-coverage.py target/cg15-coverage.json
+python3 tests/scripts/check-retrieval-coverage.py --self-test
+python3 tests/scripts/check-retrieval-coverage.py target/cg15-coverage.json
 ```
 
 The repository quality gate requires at least 95% measured line coverage in

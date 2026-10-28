@@ -1,6 +1,6 @@
 //! Headless operator adapter over the same admitted application facade as MCP.
 use gateway_application::codex::{CodexApplicationPort, RequestContext};
-use gateway_daemon::{codex_workspace::admit_local, local_mcp};
+use gateway_daemon::{codex_setup, codex_workspace::admit_local, local_mcp};
 use serde_json::json;
 use std::{
     collections::BTreeMap,
@@ -17,14 +17,26 @@ fn main() {
     std::panic::set_hook(Box::new(|_| {
         eprintln!("CG_INTERNAL_ERROR: local worker failed")
     }));
-    let mut args: Vec<String> = std::env::args().skip(1).collect();
+    let mut args: Vec<String> = std::env::args_os()
+        .skip(1)
+        .map(|arg| {
+            arg.into_string()
+                .unwrap_or_else(|_| fail("CG_INVALID_INPUT", "provide UTF-8 command arguments"))
+        })
+        .collect();
     if args == ["--help"] {
         println!(
-            "cg-local --check | --operation OP --request FILE\nRequired launch options (same as cg-mcp): --client-name NAME --client-version VERSION --principal ID --workspace ID --project ID --binding ID --admission FILE --cwd ABSOLUTE_PATH --repository ABSOLUTE_PATH --session ID\nJSON stdout; fixed diagnostics stderr. Exit 0: success, 1: facade denial, 2: setup/input failure. No retries or provider credentials."
+            "cg-local --setup --repository DIR --output NEW_DIR --client-name NAME --client-version VERSION [--bin-dir DIR]\ncg-local --check | --operation OP --request FILE\nRequired launch options (same as cg-mcp): --client-name NAME --client-version VERSION --principal ID --workspace ID --project ID --binding ID --admission FILE --cwd ABSOLUTE_PATH --repository ABSOLUTE_PATH --session ID\nJSON stdout; fixed diagnostics stderr. Exit 0: success, 1: facade denial, 2: setup/input failure. No retries or provider credentials."
         );
         return;
     }
-    if !local_mcp::environment_allowed(std::env::vars_os().map(|(name, _)| name)) {
+    let setup = args.first().is_some_and(|arg| arg == "--setup");
+    if setup {
+        args = codex_setup::create(&args[1..]).unwrap_or_else(|_| {
+            fail("CG_BOOTSTRAP_FAILED", "use cg-local --help; supply an existing repository, executable cg-mcp/cg-local, valid client identity and a new writable output directory")
+        });
+    }
+    if !setup && !local_mcp::environment_allowed(std::env::vars_os().map(|(name, _)| name)) {
         fail(
             "CG_CREDENTIAL_ENV_DENIED",
             "launch with an empty environment (env -i)",

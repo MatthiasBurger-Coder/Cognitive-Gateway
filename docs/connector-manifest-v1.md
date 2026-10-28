@@ -187,9 +187,9 @@ Reproduce with:
 cargo test -p gateway-application --test connector_manifest --test connectors --locked
 python3 -m unittest discover -s tests/contracts -p test_connector_manifest.py
 CARGO_BUILD_JOBS=1 CARGO_LLVM_COV_TARGET_DIR=target/connector-manifest-coverage cargo llvm-cov -p gateway-application --test connector_manifest --locked --json --output-path target/connector-manifest-coverage.json
-python3 scripts/check-connector-manifest-coverage.py --self-test
-python3 scripts/check-connector-manifest-coverage.py target/connector-manifest-coverage.json
-bash scripts/check-architecture.sh
+python3 tests/scripts/check-connector-manifest-coverage.py --self-test
+python3 tests/scripts/check-connector-manifest-coverage.py target/connector-manifest-coverage.json
+bash tests/scripts/check-architecture.sh
 cargo clippy -p gateway-application --test connector_manifest --test connectors --locked -- -D warnings
 cargo fmt --check
 ```

@@ -80,6 +80,6 @@ model invocation belong to EPIC-06; learned routing belongs to EPIC-03.
 | R05: The public decision records selection, reason, input context, evidence, output, provenance, findings and usage. | Application `StrategyDecision::to_json`; no hidden reasoning field | Application public trace test and authorized handoff test |
 
 Run `cargo test --workspace`, `cargo clippy --workspace --all-targets -- -D warnings`,
-`cargo fmt --check`, `bash scripts/check-architecture.sh` and
-`python3 scripts/quality-gate.py` from the repository root. The established
+`cargo fmt --check`, `bash tests/scripts/check-architecture.sh` and
+`python3 tests/scripts/quality-gate.py` from the repository root. The established
 quality gate writes revision-bound evidence under `target/release-evidence/`.

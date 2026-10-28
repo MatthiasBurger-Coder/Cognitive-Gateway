@@ -131,7 +131,7 @@ No EPIC-05 implementation dependency cycle is introduced.
 Run component tests with
 `cargo test -p gateway-domain -p gateway-application --test model_invocation --locked`.
 Run the measured per-file gate using the EPIC-06.01 entry in
-`scripts/quality-gates.json`. See
+`tests/scripts/quality-gates.json`. See
 [evidence](evidence/EPIC-06.01-model-contracts.json) for executed checks and source
 bindings. [Production routing (#262)](model-capability-routing.md) is implemented
 as a separate application service. [Prompt/Invocation IR (#263)](prompt-invocation-ir.md)
@@ -229,7 +229,7 @@ Issue-level production integration remains dependent on that prerequisite.
 | R07 | >=95% introduced production coverage | `check-prompt-rendering-coverage.py`, release gate | Per-file measured coverage for domain/application/outer adapter; missing and undercovered evidence rejected |
 
 Run `cargo test -p gateway-daemon --test prompt_rendering --locked` and the
-EPIC-06.04 measured gate in `scripts/quality-gates.json`. Qualification scope and
+EPIC-06.04 measured gate in `tests/scripts/quality-gates.json`. Qualification scope and
 executed evidence are retained in
 [`EPIC-06.04-prompt-rendering.json`](evidence/EPIC-06.04-prompt-rendering.json).
 Live-provider and installed-host E2E are not claimed by these offline tests.

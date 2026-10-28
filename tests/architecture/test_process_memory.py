@@ -7,7 +7,7 @@ import unittest
 from unittest.mock import patch, Mock
 
 SPEC = importlib.util.spec_from_file_location(
-    'process_memory', Path(__file__).resolve().parents[2] / 'scripts/process_memory.py')
+    'process_memory', Path(__file__).resolve().parents[2] / 'tests/scripts/process_memory.py')
 memory = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(memory)
 

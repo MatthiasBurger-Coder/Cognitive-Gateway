@@ -9,7 +9,7 @@ from pathlib import Path
 import subprocess
 
 ROOT = Path.cwd().resolve()
-if not (ROOT / 'scripts/qualify-invocation.py').is_file():
+if not (ROOT / 'tests/scripts/qualify-invocation.py').is_file():
     raise SystemExit('Run this reviewer from the repository root.')
 
 
@@ -39,8 +39,8 @@ def same_json(actual, expected):
 
 
 def main():
-    q = module('fixture_qualification', ROOT / 'scripts/qualify-invocation.py')
-    live = module('live_qualification', ROOT / 'scripts/qualify-invocation-live.py')
+    q = module('fixture_qualification', ROOT / 'tests/scripts/qualify-invocation.py')
+    live = module('live_qualification', ROOT / 'tests/scripts/qualify-invocation-live.py')
     manifest = q.validate_manifest(read(q.MANIFEST))
     dataset = read(ROOT / 'models/datasets/invocation-extraction-v2.json')
     checks = []

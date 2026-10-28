@@ -61,7 +61,7 @@ Executed against the above base plus this documentation diff on 2026-10-17:
 | `cargo test -p gateway-context --test prompt_handoff_reference --locked` | PASS: 3 tests; equivalent offline layouts, missing metadata/authority rejection and provider independence |
 | `python3 -m unittest discover -s tests/architecture -p 'test_*.py'` | PASS: 39 passed, one Windows-only WinDLL test skipped on Linux |
 | `python3 -m unittest discover -s tests/contracts -p 'test_*.py'` | PASS: 17 tests |
-| `bash scripts/check-architecture.sh` | PASS: dependency graph and architecture guard |
+| `bash tests/scripts/check-architecture.sh` | PASS: dependency graph and architecture guard |
 | Changed/new Markdown relative-link target audit and `git diff --check` | PASS: local targets exist; no whitespace errors |
 
 No production code changed, so new production coverage is not applicable. Existing

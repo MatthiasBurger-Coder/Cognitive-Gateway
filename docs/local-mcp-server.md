@@ -94,13 +94,13 @@ cargo test -p gateway-daemon --lib local_mcp --locked
 cargo test -p gateway-daemon --test local_mcp --locked
 cargo clippy -p gateway-daemon --all-targets --locked -- -D warnings
 python3 -m unittest discover -s tests/contracts
-python3 scripts/check-local-mcp-protocol.py
-bash scripts/check-architecture.sh
+python3 tests/scripts/check-local-mcp-protocol.py
+bash tests/scripts/check-architecture.sh
 python3 -m unittest discover -s tests/architecture
 cargo llvm-cov -p gateway-application -p gateway-daemon --lib --bin cg --bin cg-mcp --bin cg-local \
   --test local_mcp --test codex_facade --test codex_isolation --test codex_local_cli --test codex_qualification --test codex_canonical --test declarative_cli \
   --json --output-path target/local-mcp-coverage.json
-python3 scripts/check-local-mcp-coverage.py target/local-mcp-coverage.json
+python3 tests/scripts/check-local-mcp-coverage.py target/local-mcp-coverage.json
 ```
 
 The conformance fixture exercises initialization, notification gating, resource

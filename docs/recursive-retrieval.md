@@ -61,6 +61,6 @@ current CG-09 policy and CG-04 process inputs before execution.
 CARGO_BUILD_JOBS=1 CARGO_INCREMENTAL=0 cargo test --workspace --locked
 CARGO_BUILD_JOBS=1 CARGO_INCREMENTAL=0 cargo clippy --workspace --all-targets -- -D warnings
 cargo fmt --check
-bash scripts/check-architecture.sh
-python3 scripts/quality-gate.py
+bash tests/scripts/check-architecture.sh
+python3 tests/scripts/quality-gate.py
 ```

@@ -181,8 +181,8 @@ Run the dedicated gate with:
 cargo llvm-cov -p gateway-domain -p gateway-application -p gateway-context \
   --test example_selection --test context_planning --locked --json \
   --output-path target/example-selection-coverage.json
-python3 scripts/check-example-selection-coverage.py --self-test
-python3 scripts/check-example-selection-coverage.py target/example-selection-coverage.json
+python3 tests/scripts/check-example-selection-coverage.py --self-test
+python3 tests/scripts/check-example-selection-coverage.py target/example-selection-coverage.json
 ```
 
 The gate checks each new production module and the materially changed CG-10

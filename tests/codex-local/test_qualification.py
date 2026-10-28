@@ -99,7 +99,7 @@ class Qualification(unittest.TestCase):
         repository = self.root / name
         repository.mkdir()
         setup = self.root / ('setup-' + name)
-        subprocess.run(['python3', str(ROOT / 'scripts/bootstrap-codex-local.py'),
+        subprocess.run([str(BIN / 'cg-local'), '--setup',
                         '--repository', str(repository), '--output', str(setup),
                         '--bin-dir', str(BIN), '--client-name', 'codex', '--client-version', '1.0'],
                        check=True, capture_output=True, timeout=15)

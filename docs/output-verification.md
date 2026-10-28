@@ -116,7 +116,7 @@ moderate confidence. Live provider/store compositions are downstream work.
 | V07 | #178 >=95% and traceability/docs | Per-file measured gate, architecture/CI integration | Rust/Python repository gates | Domain verification 100%; application verification 98.08%; modified invocation modules 100%; architecture and regression qualification | VERIFIED; [evidence](evidence/EPIC-06.06-output-verification.json) |
 
 Run `cargo test -p gateway-application --test output_verification --test prompt_ir --locked`
-and the EPIC-06.06 entry in `scripts/quality-gates.json`. Frozen diagnostic fixture:
+and the EPIC-06.06 entry in `tests/scripts/quality-gates.json`. Frozen diagnostic fixture:
 `tests/fixtures/output-verification-v1/diagnostics.json`. Tests use real canonical
 producer construction and synthetic trusted stores. No installed-host/provider,
 external-effect verification, complete #265/#267 delivery or parent-epic completion

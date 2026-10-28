@@ -153,8 +153,8 @@ gate now requires at least 95% independently for both production modules.
 ```bash
 cargo test -p gateway-domain --test semantic_resolution --test semantic_task_v1 --locked
 cargo llvm-cov -p gateway-domain --all-targets --fail-under-lines 95 --json --output-path target/semantic-domain-coverage.json
-python3 scripts/check-semantic-task-coverage.py --self-test
-python3 scripts/check-semantic-task-coverage.py target/semantic-domain-coverage.json
+python3 tests/scripts/check-semantic-task-coverage.py --self-test
+python3 tests/scripts/check-semantic-task-coverage.py target/semantic-domain-coverage.json
 ```
 
 This establishes domain contract behavior and existing IR admission, not an

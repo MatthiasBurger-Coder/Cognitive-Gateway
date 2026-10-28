@@ -6,7 +6,7 @@ import unittest
 from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[2]
-SPEC = importlib.util.spec_from_file_location('qualification', ROOT / 'scripts/qualify-codex-local.py')
+SPEC = importlib.util.spec_from_file_location('qualification', ROOT / 'tests/scripts/qualify-codex-local.py')
 QUALIFICATION = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(QUALIFICATION)
 

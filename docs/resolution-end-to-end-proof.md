@@ -125,10 +125,10 @@ remain independent dimensions; neither implies policy approval.
 cargo fmt --check
 cargo test --workspace
 cargo clippy --workspace --all-targets -- -D warnings
-bash scripts/check-architecture.sh
+bash tests/scripts/check-architecture.sh
 cargo llvm-cov -p gateway-application --all-targets --json --output-path target/cg08-coverage.json
-pwsh -NoProfile -File scripts/check-resolution-coverage.ps1 -SelfTest
-pwsh -NoProfile -File scripts/check-resolution-coverage.ps1 -ReportPath target/cg08-coverage.json
+python3 tests/scripts/check-resolution-coverage.py --self-test
+python3 tests/scripts/check-resolution-coverage.py target/cg08-coverage.json
 ```
 
 Local measurement on 2026-09-09 (covered/executable lines):
@@ -153,7 +153,7 @@ Every module is >=95%. No exclusions are used. The CI gate discovers every
 file; missing, duplicate, zero-line and below-threshold evidence fail. It compares
 counts without percentage rounding and self-tests its negative paths. Existing
 domain/registry/CLI gates remain unchanged. Production implementation is Rust-only;
-PowerShell is a quality-check script, not a runtime dependency.
+Python is used for the quality check, not as a runtime dependency.
 
 ## Recorded acceptance review
 

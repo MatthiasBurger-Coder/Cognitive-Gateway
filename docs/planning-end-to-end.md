@@ -69,7 +69,7 @@ Run the reproducible acceptance gate with:
 cargo test --workspace
 cargo llvm-cov -p gateway-application --all-targets --summary-only --fail-under-lines 95
 cargo clippy --workspace --all-targets -- -D warnings
-./scripts/check-architecture.sh
+./tests/scripts/check-architecture.sh
 cargo fmt --all -- --check
 git diff --check
 ```
