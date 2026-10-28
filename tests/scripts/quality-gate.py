@@ -50,7 +50,7 @@ def run(args, host):
     gates = json.loads((ROOT / "tests/scripts/quality-gates.json").read_text())
     diagnostic_tail = os.environ.get("CG_415_DIAGNOSTIC_TAIL") == "1"
     if diagnostic_tail:
-        gates = [gates[13], *gates[23:]]
+        gates = [gates[13], gates[26], gates[27], *gates[37:]]
     if (not isinstance(gates, list) or not gates
             or any(not isinstance(gate, dict) or set(gate) != {"name", "command"}
                    or any(not isinstance(value, str) or not value.strip() for value in gate.values())

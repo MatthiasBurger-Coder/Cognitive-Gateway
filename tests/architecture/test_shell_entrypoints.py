@@ -88,7 +88,7 @@ sys.exit(int(os.environ.get('CG_SHELL_TEST_EXIT', '0')))
                 self.assertEqual(call['args'], ['llvm-cov', 'clean', '--workspace'])
                 self.assertEqual(call['profiles'], {'DEV':'1', 'TEST':'1'})
 
-    def test_before_qualifications_keep_function_bodies_and_inherited_compiler_flags(self):
+    def test_native_qualifications_keep_function_bodies_and_inherited_compiler_flags(self):
         self.env.pop('RUSTFLAGS', None)
         self.env.pop('CARGO_ENCODED_RUSTFLAGS', None)
         cases = [
@@ -100,7 +100,7 @@ sys.exit(int(os.environ.get('CG_SHELL_TEST_EXIT', '0')))
             ({'CARGO_ENCODED_RUSTFLAGS':''},
              {'RUSTFLAGS':None, 'CARGO_ENCODED_RUSTFLAGS':'-C\x1flink-dead-code'}),
         ]
-        for runner in ('before-journal', 'atomic-before'):
+        for runner in ('shared-sessions', 'before-journal', 'atomic-before'):
             for inherited, expected in cases:
                 with self.subTest(runner=runner, flags=inherited):
                     result = self.run_script('tests/scripts/qualify-' + runner + '.sh',
@@ -109,6 +109,31 @@ sys.exit(int(os.environ.get('CG_SHELL_TEST_EXIT', '0')))
                         CG_SHELL_TEST_EXIT='17', **inherited)
                     self.assertEqual(result.returncode, 17, result.stderr)
                     self.assertEqual(self.calls()[-1]['compiler_flags'], expected)
+
+    def test_single_cargo_qualifications_use_the_shared_compiler_environment(self):
+        self.env.pop('CARGO_ENCODED_RUSTFLAGS', None)
+        for runner in ('observed-goal-sessions', 'complete-snapshots'):
+            with self.subTest(runner=runner):
+                result = self.run_script('tests/scripts/qualify-' + runner + '.sh',
+                    str(self.root / runner), CG_COGNITIVE_TEST_DATABASE='test-host-supplied',
+                    CARGO_LLVM_COV_TARGET_DIR=str(self.root / 'coverage'),
+                    RUSTFLAGS='-C debuginfo=1', CG_SHELL_TEST_CLEAN_EXIT='0', CG_SHELL_TEST_EXIT='17')
+                self.assertEqual(result.returncode, 17, result.stderr)
+                self.assertEqual(self.calls()[-1]['compiler_flags'],
+                                 {'RUSTFLAGS':'-C debuginfo=1 -C link-dead-code',
+                                  'CARGO_ENCODED_RUSTFLAGS':None})
+
+    def test_declared_rust_coverage_builds_use_the_shared_environment(self):
+        for filename in ('quality-gates.json', 'invocation-acceptance.json'):
+            data = json.loads((ROOT / 'tests/scripts' / filename).read_text())
+            gates = data if isinstance(data, list) else data['gates']
+            for gate in gates:
+                for line in gate['command'].splitlines():
+                    prefix, found, arguments = line.partition('cargo llvm-cov ')
+                    if not found or arguments.split()[0] in ('clean', 'report', 'show-env'):
+                        continue
+                    with self.subTest(manifest=filename, gate=gate.get('name', gate.get('id'))):
+                        self.assertTrue(prefix.rstrip().endswith('tests/scripts/with-coverage-env.sh'))
 
     def test_domain_coverage_uses_the_shared_compiler_environment(self):
         self.env.pop('CARGO_ENCODED_RUSTFLAGS', None)

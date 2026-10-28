@@ -24,7 +24,7 @@ mkdir -p "$output"
 output="$(cd "$output" && pwd -P)"
 export CARGO_LLVM_COV_TARGET_DIR="${CARGO_LLVM_COV_TARGET_DIR:-$PWD/target/complete-snapshot-coverage}"
 cargo llvm-cov clean --workspace
-cargo llvm-cov -p gateway-application --test complete_scoped_snapshots --locked \
+tests/scripts/with-coverage-env.sh cargo llvm-cov -p gateway-application --test complete_scoped_snapshots --locked \
   --json --output-path "$output/coverage.json"
 python3 tests/scripts/check-complete-snapshot-coverage.py --self-test
 python3 tests/scripts/check-complete-snapshot-coverage.py "$output/coverage.json" > "$output/coverage-counts.txt"

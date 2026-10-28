@@ -28,7 +28,7 @@ output="$(cd "$output" && pwd -P)"
 export CARGO_PROFILE_DEV_OPT_LEVEL=1 CARGO_PROFILE_TEST_OPT_LEVEL=1
 export CARGO_LLVM_COV_TARGET_DIR="${CARGO_LLVM_COV_TARGET_DIR:-$PWD/target/observed-goal-coverage}"
 cargo llvm-cov clean --workspace
-cargo llvm-cov -p gateway-application -p gateway-daemon --all-targets --locked \
+tests/scripts/with-coverage-env.sh cargo llvm-cov -p gateway-application -p gateway-daemon --all-targets --locked \
   --json --output-path "$output/coverage.json" -- --test-threads=1
 python3 tests/scripts/check-observed-goal-coverage.py --self-test
 python3 tests/scripts/check-observed-goal-coverage.py "$output/coverage.json" > "$output/coverage-counts.txt"

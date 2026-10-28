@@ -27,6 +27,7 @@ output="$(cd "$output" && pwd -P)"
 # Native complete-Before reads must run within the unchanged real deadlines.
 # Keep the Rust tests and the subsequent private CLI checks in one profile.
 export CARGO_PROFILE_DEV_OPT_LEVEL=1 CARGO_PROFILE_TEST_OPT_LEVEL=1
+source tests/scripts/with-coverage-env.sh
 export CG_SESSION_EVIDENCE_DIR="$output"
 : > "$output/transitions.jsonl"
 export CARGO_TARGET_DIR="${CARGO_LLVM_COV_TARGET_DIR:-$PWD/target/session-coverage}"
