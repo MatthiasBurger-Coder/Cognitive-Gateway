@@ -7,6 +7,7 @@ pub mod closed_loop;
 pub mod codex;
 pub mod cognitive_routing;
 pub mod completeness;
+pub mod connector_admission;
 pub mod connector_manifest;
 pub mod connector_policy;
 pub mod connector_proposals;

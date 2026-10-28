@@ -373,6 +373,9 @@ impl Runtime {
         if target != &self.target {
             return Err(Error::Configuration);
         }
+        self.admission
+            .admit_target(target)
+            .map_err(|f| Error::SessionDenied(f.code))?;
         context.check()?;
         let state = self
             .lock(&context)
@@ -395,6 +398,9 @@ impl Runtime {
             expected_revision,
         )?;
         context.check()?;
+        self.admission
+            .admit_target(target)
+            .map_err(|f| Error::SessionDenied(f.code))?;
         if schema.target != *target
             || schema.capability != *capability
             || &schema.inventory_revision != expected_revision
@@ -458,7 +464,13 @@ impl Runtime {
         preflight: Option<&DispatchPreflight<'_>>,
     ) -> Result<ConnectorObservation, ConnectorFailure> {
         let request = &dispatch.request;
-        let mut context = supplied.clone();
+        let admission = self.admission.clone();
+        let guard_target = self.target.clone();
+        let mut context = supplied.with_guard(Arc::new(move || {
+            admission
+                .admit_target(&guard_target)
+                .map_err(|failure| Error::SessionDenied(failure.code))
+        }));
         if preflight.is_some() {
             let admission = self.admission.clone();
             let dispatch = dispatch.clone();
@@ -836,6 +848,17 @@ impl Runtime {
                 active.cancel();
             }
         }
+        let context = if draining {
+            context
+        } else {
+            let admission = self.admission.clone();
+            let target = target.clone();
+            context.with_guard(Arc::new(move || {
+                admission
+                    .admit_target(&target)
+                    .map_err(|failure| Error::SessionDenied(failure.code))
+            }))
+        };
         let until = Instant::now() + self.limits.shutdown * 4;
         let mut state = loop {
             match self.lock(&context) {
@@ -920,7 +943,13 @@ impl Runtime {
         preflight: Option<&dyn Fn() -> Result<(), ConnectorFailure>>,
         bootstrap: bool,
     ) -> Result<ConnectorInventory, ConnectorFailure> {
-        let mut context = supplied.clone();
+        let admission = self.admission.clone();
+        let guard_target = self.target.clone();
+        let mut context = supplied.with_guard(Arc::new(move || {
+            admission
+                .admit_target(&guard_target)
+                .map_err(|failure| Error::SessionDenied(failure.code))
+        }));
         if preflight.is_some() {
             let admission = self.admission.clone();
             let target = target.clone();

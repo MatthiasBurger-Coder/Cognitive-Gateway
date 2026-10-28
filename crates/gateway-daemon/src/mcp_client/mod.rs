@@ -5,6 +5,7 @@ mod host;
 mod json;
 pub mod mapping;
 pub mod normalization;
+pub mod plugins;
 mod protocol;
 mod resilience;
 pub use resilience::ResilienceConfig;

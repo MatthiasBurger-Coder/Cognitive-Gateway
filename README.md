@@ -144,6 +144,7 @@ Canonical entry points:
 - [`docs/codex-scope-isolation.md`](docs/codex-scope-isolation.md) — explicit workspace/session admission, provenance and isolation (#240)
 - [`docs/codex-secret-isolation.md`](docs/codex-secret-isolation.md) — no-key credential admission, sensitive-data disclosure and fixed diagnostics (#241)
 - [`docs/local-mcp-server.md`](docs/local-mcp-server.md) — implemented stdio MCP lifecycle/discovery and injectable application facade
+- [Connector admission and lifecycle](docs/connector-scope-lifecycle-v1.md) — explicit project/session/request allowlist, runtime revocation and deterministic rebuild (#232).
 - [`docs/mcp-connector-runtime.md`](docs/mcp-connector-runtime.md) — CG -> external MCP architecture and [implemented protocol runtime](docs/mcp-client-runtime.md), [deterministic mapping](docs/connector-mapping-v1.md), [canonical normalization](docs/connector-result-v1.md) and [credential isolation boundary](docs/connector-credentials-v1.md); policy and live provider integration remain pending
 - [`docs/local-model-runtime.md`](docs/local-model-runtime.md) — optional containerized local model service, CPU qualification and model lifecycle
 - [`docs/offline-learning.md`](docs/offline-learning.md) — CG-28 governed signals, offline dataset/training interfaces and model release/rollback.
