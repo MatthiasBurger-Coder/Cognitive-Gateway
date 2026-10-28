@@ -61,3 +61,9 @@ PostgreSQL qualification uses the disposable host supplied by
 Usage errors exit 2. Other failures propagate the invoked tool's status; setup
 failures can exit 1. Help exits 0. Historical reports under `docs/evidence/` retain
 the paths and commands recorded when they were produced.
+
+The Before-journal and atomic-Before runners retain unreferenced function bodies
+with `-C link-dead-code`. This keeps LLVM's combined native/test report from
+hiding an executed accessor behind an unused coverage stub. Existing compiler
+flags are preserved, including Cargo's encoded-flags precedence. This affects
+instrumented builds only; test selections and coverage requirements stay fixed.

@@ -29,6 +29,8 @@ entry = {'tool':name, 'args':sys.argv[1:], 'cwd':os.getcwd()}
 if name == 'cargo' and sys.argv[1:3] == ['llvm-cov', 'clean']:
     entry['profiles'] = {key:os.environ.get('CARGO_PROFILE_' + key + '_OPT_LEVEL')
                          for key in ('DEV', 'TEST')}
+    entry['compiler_flags'] = {key:os.environ.get(key)
+                               for key in ('RUSTFLAGS', 'CARGO_ENCODED_RUSTFLAGS')}
 with open(os.environ['CG_SHELL_TEST_LOG'], 'a') as output:
     output.write(json.dumps(entry) + '\\n')
 if name == 'openssl':
@@ -83,6 +85,28 @@ sys.exit(int(os.environ.get('CG_SHELL_TEST_EXIT', '0')))
                 self.assertEqual(call['tool'], 'cargo')
                 self.assertEqual(call['args'], ['llvm-cov', 'clean', '--workspace'])
                 self.assertEqual(call['profiles'], {'DEV':'1', 'TEST':'1'})
+
+    def test_before_qualifications_keep_function_bodies_and_inherited_compiler_flags(self):
+        self.env.pop('RUSTFLAGS', None)
+        self.env.pop('CARGO_ENCODED_RUSTFLAGS', None)
+        cases = [
+            ({'RUSTFLAGS':'-C debuginfo=1'},
+             {'RUSTFLAGS':'-C debuginfo=1 -C link-dead-code', 'CARGO_ENCODED_RUSTFLAGS':None}),
+            ({'RUSTFLAGS':'-C debuginfo=2', 'CARGO_ENCODED_RUSTFLAGS':'-C\x1fdebuginfo=1'},
+             {'RUSTFLAGS':'-C debuginfo=2',
+              'CARGO_ENCODED_RUSTFLAGS':'-C\x1fdebuginfo=1\x1f-C\x1flink-dead-code'}),
+            ({'CARGO_ENCODED_RUSTFLAGS':''},
+             {'RUSTFLAGS':None, 'CARGO_ENCODED_RUSTFLAGS':'-C\x1flink-dead-code'}),
+        ]
+        for runner in ('before-journal', 'atomic-before'):
+            for inherited, expected in cases:
+                with self.subTest(runner=runner, flags=inherited):
+                    result = self.run_script('tests/scripts/qualify-' + runner + '.sh',
+                        str(self.root / runner), CG_COGNITIVE_TEST_DATABASE='test-host-supplied',
+                        CARGO_LLVM_COV_TARGET_DIR=str(self.root / 'coverage'),
+                        CG_SHELL_TEST_EXIT='17', **inherited)
+                    self.assertEqual(result.returncode, 17, result.stderr)
+                    self.assertEqual(self.calls()[-1]['compiler_flags'], expected)
 
     @unittest.skipUnless(sys.platform.startswith('linux'), 'Linux-only installer')
     def test_installer_only_installs_requested_clis_and_preserves_path_boundaries(self):

@@ -27,6 +27,16 @@ mkdir -p "$output"
 output="$(cd "$output" && pwd -P)"
 # Keep instrumented tests and native CLI consumers in one optimized profile.
 export CARGO_PROFILE_DEV_OPT_LEVEL=1 CARGO_PROFILE_TEST_OPT_LEVEL=1
+# Retain real function bodies: unused coverage stubs can hide executed accessor records.
+if [[ -v CARGO_ENCODED_RUSTFLAGS ]]; then
+  if [[ -n $CARGO_ENCODED_RUSTFLAGS ]]; then
+    CARGO_ENCODED_RUSTFLAGS+=$'\x1f'
+  fi
+  CARGO_ENCODED_RUSTFLAGS+=$'-C\x1flink-dead-code'
+  export CARGO_ENCODED_RUSTFLAGS
+else
+  export RUSTFLAGS="${RUSTFLAGS:+$RUSTFLAGS }-C link-dead-code"
+fi
 export CARGO_TARGET_DIR="${CARGO_LLVM_COV_TARGET_DIR:-$PWD/target/before-journal-coverage}"
 cargo llvm-cov clean --workspace
 eval "$(cargo llvm-cov show-env --sh)"

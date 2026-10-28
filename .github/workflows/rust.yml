@@ -59,6 +59,8 @@ jobs:
           name: before-journal-diagnostics-${{ github.sha }}-${{ github.run_attempt }}
           path: |
             target/before-journal-coverage/debug/deps/complete_scoped_snapshots-*
+            !target/before-journal-coverage/debug/deps/*.d
+            !target/before-journal-coverage/debug/deps/*.o
             target/before-journal-coverage/*.profdata
             target/before-journal-coverage/*.profraw
           if-no-files-found: ignore
