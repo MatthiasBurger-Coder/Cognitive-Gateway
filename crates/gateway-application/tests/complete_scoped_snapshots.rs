@@ -112,7 +112,11 @@ fn atomic_export_is_one_actual_group_and_retains_false_and_non_goal_native_facts
     let f = Fixture::atomic();
     let snapshot = f.validate().unwrap();
     assert_eq!(snapshot.profile(), &f.profile);
-    assert_eq!(snapshot.consistency(), &f.consistency);
+    // Exercise the public accessor even when optimized coverage builds inline getters.
+    let consistency = std::hint::black_box::<fn(&CompleteScopedSnapshot) -> &SnapshotConsistency>(
+        CompleteScopedSnapshot::consistency,
+    );
+    assert_eq!(consistency(&snapshot), &f.consistency);
     assert_eq!(snapshot.acquisitions().len(), 1);
     assert_eq!(snapshot.object_reads().len(), 2);
     assert_eq!(
