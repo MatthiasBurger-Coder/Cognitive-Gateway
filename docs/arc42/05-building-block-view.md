@@ -166,7 +166,7 @@ execution may use it.
 
 ### Enforced dependency graph (CG-13)
 
-`scripts/check-dependencies.py` checks Cargo metadata for every workspace
+`tests/scripts/check-dependencies.py` checks Cargo metadata for every workspace
 member and every normal, development, build, optional and target dependency.
 The reviewed direct dependency allowlist is:
 

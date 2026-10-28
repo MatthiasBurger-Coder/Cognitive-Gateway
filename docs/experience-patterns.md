@@ -87,6 +87,6 @@ groups, reordered/noisy inputs, semantic-only nominations, project and runtime
 separation, eligibility rejection, mismatched validation, duplicate signals,
 and resource limits.
 The ignored PostgreSQL integration test can be run against the local Compose
-service with `./scripts/test-postgres.sh`. It covers database reconnect for
+service with `./tests/scripts/test-postgres.sh`. It covers database reconnect for
 both stores, idempotency, conflicting replays, capacity, negative evidence,
 revocation, forget decisions and payload-reference removal.

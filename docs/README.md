@@ -258,7 +258,7 @@ The approved CG-02 v2 handoff extension is documented in
 
 ## Declarative v0.1 release quality
 
-Run `python3 scripts/quality-gate.py` for the complete CG-13 gate. See [the release checklist](declarative-quality-gates.md) for requirements, evidence and EPIC acceptance traceability.
+Run `python3 tests/scripts/quality-gate.py` for the complete CG-13 gate. See [the release checklist](declarative-quality-gates.md) for requirements, evidence and EPIC acceptance traceability.
 
 ## Closed-loop execution
 
@@ -324,3 +324,5 @@ separate qualification work.
 
 - [Complete Before journal (#407)](complete-before-journal.md): coordinator-owned atomic persistence, exact immutable references and historical private inspection.
 - [Installed atomic Before (#408)](installed-atomic-before.md): complete independent world acquisition through credentialed MCP, current native authority, actual PostgreSQL and explicit supported profile/size boundaries.
+
+- [Scoped connector admission and lifecycle](connector-scope-lifecycle-v1.md): #232 canonical allowlist, exact binding, private runtime lifecycle and rebuild evidence.

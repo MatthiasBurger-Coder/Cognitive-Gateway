@@ -133,7 +133,7 @@ shared run dispatch → adversarial integration fixtures → measured gates → 
 | B07 | #268 versioned contracts, >=95% materially changed production coverage | Domain/application, CI gate | `limits_wire_version_unknown_fields_and_zero_bounds_fail`, `check-invocation-resilience-coverage.py`, architecture regression |
 
 Run `cargo test -p gateway-application --test invocation_resilience --locked`.
-The EPIC-06.08 entry in `scripts/quality-gates.json` measures each introduced
+The EPIC-06.08 entry in `tests/scripts/quality-gates.json` measures each introduced
 production file at >=95%, rejects absent/duplicate/invalid evidence, and runs the
 checker self-tests. Executed results and candidate source hashes are recorded in
 [evidence](evidence/EPIC-06.08-invocation-resilience.json). Live providers and

@@ -135,7 +135,7 @@ measured coverage for the equivalent Rust changes and native memory helper.
 
 Reproduce with `cargo test -p gateway-application --test semantic_planning -p
 gateway-cgsl --test frontend --locked`, `python -m unittest discover -s
-tests/architecture -p "test_*.py"`, and `python scripts/check-dependencies.py`.
+tests/architecture -p "test_*.py"`, and `python tests/scripts/check-dependencies.py`.
 All are included by existing workspace test and architecture quality gates.
 Execution results and limits are retained in
 [EPIC-05.13 evidence](evidence/EPIC-05.13-process-boundary.json).

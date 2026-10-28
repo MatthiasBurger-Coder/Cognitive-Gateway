@@ -107,9 +107,9 @@ and build edges and has explicit mutation tests for that restriction.
 ```sh
 cargo test -p gateway-domain -p gateway-cgsl -p gateway-application --locked
 cargo llvm-cov -p gateway-application --test completeness --locked --json --output-path target/completeness-coverage.json
-python3 scripts/check-completeness-coverage.py --self-test
-python3 scripts/check-completeness-coverage.py target/completeness-coverage.json
-python3 scripts/check-dependencies.py
+python3 tests/scripts/check-completeness-coverage.py --self-test
+python3 tests/scripts/check-completeness-coverage.py target/completeness-coverage.json
+python3 tests/scripts/check-dependencies.py
 python3 -m unittest discover -s tests/architecture -p test_dependencies.py
 cargo fmt --all --check
 cargo clippy -p gateway-application --all-targets --locked -- -D warnings

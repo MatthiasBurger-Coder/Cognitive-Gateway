@@ -5,20 +5,20 @@
 ```sh
 rustup component add rustfmt clippy llvm-tools-preview
 cargo install cargo-llvm-cov --locked
-python3 scripts/quality-gate.py
+python3 tests/scripts/quality-gate.py
 ```
 
 Run from a checkout with Bash, Git, Python 3.11+ and the Rust toolchain installed.
 Install offline contract-validation dependencies with
 `python3 -m pip install -r tests/contracts/requirements.txt` before running the gate.
-Start the local PostgreSQL service with `./scripts/start-postgres.sh` before a
+Start the local PostgreSQL service with `./scripts/operations/postgres/start.sh` before a
 local full gate run. The daemon coverage step executes the CG-22 database
 integration test; CI provides an isolated PostgreSQL service automatically.
 No provider, LLM, database or runtime service is needed. Cargo may need network
 access to fetch dependencies; after provisioning, the core tests run locally.
 `--output <new-directory>` chooses the evidence location; existing directories
 are refused. There is no skip or reduced-threshold option. The runner invokes
-the ordered commands in [quality-gates.json](../scripts/quality-gates.json).
+the ordered commands in [quality-gates.json](../tests/scripts/quality-gates.json).
 The [Rust Quality workflow](../.github/workflows/rust.yml) executes this same
 entry point on pull requests, main pushes and manual dispatch.
 
@@ -48,7 +48,7 @@ releases and canary/rollback decisions in `cg28-learning.json`. It enforces 95%
 line coverage for signal/dataset/offline-job coordination and model release
 coordination. See [governed offline learning](offline-learning.md).
 
-For focused diagnosis, use `./scripts/check-architecture.sh`,
+For focused diagnosis, use `./tests/scripts/check-architecture.sh`,
 `python3 -m unittest discover -s tests/architecture`, or the exact command
 recorded for a failed step. Focused checks do not substitute for a complete run.
 
@@ -95,7 +95,7 @@ suites run under the mandatory workspace test step.
 
 | EPIC acceptance criteria | Required evidence |
 | --- | --- |
-| Framework-independent core; mechanical dependency boundaries | `scripts/check-dependencies.py`, `scripts/check-architecture.sh`, `tests/architecture/test_dependencies.py`; exact graph in arc42 §5 |
+| Framework-independent core; mechanical dependency boundaries | `tests/scripts/check-dependencies.py`, `tests/scripts/check-architecture.sh`, `tests/architecture/test_dependencies.py`; exact graph in arc42 §5 |
 | Project-agnostic canonical data; no profiles; explicit external input | `gateway-registry/tests/catalog_contract.rs`, `project_agnostic.rs`; `gateway-process/tests/process_platform_integration.rs`; `gateway-daemon/tests/declarative_cli/cg12.rs`; catalog/profile guard |
 | Knowledge and capability ports are separate; future retrieval/model adapters cannot bypass authority | `gateway-application` port contracts and unit tests; `gateway-context/tests/compiled_context.rs` authority-injection cases; `gateway-application/tests/policy_application.rs`; CG-12 blocked/denied cases |
 | Operating Mode and Execution Profile independent | `gateway-domain/tests/reference_scenarios.rs`, `gateway-context/tests/context_compiler.rs` (all nine combinations) |

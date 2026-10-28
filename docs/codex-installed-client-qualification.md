@@ -12,7 +12,7 @@ is `codex-mcp-client / 0.162.1`; requested and negotiated protocol versions are
 
 ```sh
 cargo build -p gateway-daemon --bin cg --bin cg-mcp --bin cg-local --locked
-python3 scripts/cognitive-test-host.py python3 scripts/qualify-installed-codex.py \
+python3 tests/scripts/cognitive-test-host.py python3 tests/scripts/qualify-installed-codex.py \
   --shared-session-fixture --output target/installed-codex-shared
 ```
 

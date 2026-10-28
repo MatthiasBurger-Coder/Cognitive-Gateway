@@ -151,13 +151,13 @@ function itself executes a runtime.
 cargo test --workspace
 cargo clippy --workspace --all-targets -- -D warnings
 cargo fmt --check
-bash scripts/check-architecture.sh
+bash tests/scripts/check-architecture.sh
 cargo llvm-cov -p gateway-context -p gateway-application \
   --test compiled_context --test budgeted_selection --test context_application \
   --test context_compiler --test v2_handoff \
   --json --output-path target/cg10-coverage.json
-python3 scripts/check-context-coverage.py --self-test
-python3 scripts/check-context-coverage.py target/cg10-coverage.json
+python3 tests/scripts/check-context-coverage.py --self-test
+python3 tests/scripts/check-context-coverage.py target/cg10-coverage.json
 ```
 
 The coverage gate checks every CG-10 production file separately at 95% and

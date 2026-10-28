@@ -12,7 +12,7 @@ import unittest
 from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[2]
-SPEC = importlib.util.spec_from_file_location('epic04_acceptance', ROOT / 'scripts/qualify-epic04.py')
+SPEC = importlib.util.spec_from_file_location('epic04_acceptance', ROOT / 'tests/scripts/qualify-epic04.py')
 GATE = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(GATE)
 
@@ -41,12 +41,12 @@ class Epic04AcceptanceTests(unittest.TestCase):
         """Validate the adjudicator with disk evidence; this is no runtime qualification."""
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
-            scripts = root / 'scripts'
-            scripts.mkdir()
+            scripts = root / 'tests/scripts'
+            scripts.mkdir(parents=True)
             for name in ('qualify-codex-local.py', 'check-local-mcp-coverage.py',
                          'check-session-runtime-coverage.py', 'quality-gates.json',
                          'epic04-acceptance.json'):
-                shutil.copyfile(ROOT / 'scripts' / name, scripts / name)
+                shutil.copyfile(ROOT / 'tests/scripts' / name, scripts / name)
             for name in ('Cargo.toml', 'Cargo.lock', 'crates/example/src/lib.rs'):
                 path = root / name
                 path.parent.mkdir(parents=True, exist_ok=True)

@@ -128,9 +128,9 @@ process pause, missing authorization, denial, hard failure, blockers and budgets
 cargo test -p gateway-application --test context_application closed_loop
 cargo llvm-cov -p gateway-application --test context_application \
   --json --output-path /tmp/cg14-coverage.json
-python3 scripts/check-closed-loop-coverage.py --self-test
-python3 scripts/check-closed-loop-coverage.py /tmp/cg14-coverage.json
-python3 scripts/quality-gate.py
+python3 tests/scripts/check-closed-loop-coverage.py --self-test
+python3 tests/scripts/check-closed-loop-coverage.py /tmp/cg14-coverage.json
+python3 tests/scripts/quality-gate.py
 ```
 
 The complete quality gate enforces **95% line coverage** for the closed-loop

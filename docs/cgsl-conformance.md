@@ -87,8 +87,8 @@ cargo test -p gateway-application --test interpretation --test completeness --te
 cargo test -p gateway-domain --test semantic_task_v1 --test semantic_resolution --test semantic_output --locked
 cargo test -p gateway-context --test prompt_handoff_reference --locked
 CARGO_TARGET_DIR=target/epic05-15-coverage cargo llvm-cov -p gateway-cgsl --all-targets --locked --ignore-filename-regex gateway-domain --fail-under-lines 95 --json --output-path target/cgsl-conformance-coverage.json
-python3 scripts/check-cgsl-conformance-coverage.py --self-test
-python3 scripts/check-cgsl-conformance-coverage.py target/cgsl-conformance-coverage.json
+python3 tests/scripts/check-cgsl-conformance-coverage.py --self-test
+python3 tests/scripts/check-cgsl-conformance-coverage.py target/cgsl-conformance-coverage.json
 ```
 
 The separate coverage target directory avoids mixing Windows PDB artifacts with

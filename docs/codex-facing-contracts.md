@@ -263,7 +263,7 @@ python3 -m pip install -r tests/contracts/requirements.txt
 python3 -m unittest discover -s tests/contracts -v
 cargo test -p gateway-daemon --test codex_contracts --locked
 cargo test -p gateway-daemon --test declarative_cli --locked cg12::
-bash scripts/check-architecture.sh
+bash tests/scripts/check-architecture.sh
 python3 -m unittest discover -s tests/architecture
 cargo fmt --check
 ```
@@ -274,7 +274,7 @@ authority flags, mismatched input/result contracts, sensitive diagnostic text an
 invalid session projections. Rust tests pin the wire execution enums to existing
 domain enums and preserve the canonical situation payload. These run in the
 existing quality gate without weakening coverage. Run the full
-`python3 scripts/quality-gate.py` for release qualification; focused checks do
+`python3 tests/scripts/quality-gate.py` for release qualification; focused checks do
 not claim a working MCP endpoint or completed session E2E. No executable behavior
 is added in #237, so live MCP E2E is deferred to the implementation slices.
 

@@ -154,7 +154,7 @@ evidence of what the model said.
 | Assumption lifecycle | Exhaustive transition-pair test `assumption_lifecycle_has_no_promotion_or_reactivation` |
 
 Run `cargo test -p gateway-domain --locked` and the domain/semantic coverage
-gate in `scripts/quality-gates.json`. These tests establish domain contracts,
+gate in `tests/scripts/quality-gates.json`. These tests establish domain contracts,
 not the future compiler, resolver, lifecycle persistence or runtime path.
 
 Validation on 2026-10-16: domain all-target tests and the 95% coverage gate

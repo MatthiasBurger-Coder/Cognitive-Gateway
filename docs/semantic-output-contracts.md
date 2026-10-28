@@ -115,4 +115,4 @@ includes `semantic_output.rs` at the existing 95% threshold.
 
 Run `cargo test -p gateway-domain --locked`,
 `python -m unittest discover -s tests/contracts`, and the domain coverage gate in
-`scripts/quality-gates.json`. Existing task 1.0 fixtures remain unchanged.
+`tests/scripts/quality-gates.json`. Existing task 1.0 fixtures remain unchanged.

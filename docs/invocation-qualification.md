@@ -116,7 +116,7 @@ contract dependencies and coverage.py (>=7). No model runtime or credentials are
 needed for fixtures. Run fixture qualification (new output directory required):
 
 ```sh
-python3 scripts/qualify-invocation.py --run --output target/invocation-qualification
+python3 tests/scripts/qualify-invocation.py --run --output target/invocation-qualification
 ```
 
 Without `--run`, it writes a NOT_RUN plan and exits nonzero. The runner invokes the
@@ -152,7 +152,7 @@ role metrics and installed-host composition remain required before full release.
 
 ## Criterion traceability
 
-The machine-readable [acceptance manifest](../scripts/invocation-acceptance.json)
+The machine-readable [acceptance manifest](../tests/scripts/invocation-acceptance.json)
 contains exact test names and executable gate dependencies for all 22 parent criteria,
 11 issue criteria and four tokenization/operational/security additions. The runner
 verifies mapped test symbols exist, reruns their entire suites and requires each
@@ -279,7 +279,7 @@ exact configured wire model name. Both adapters may use the same backend; the
 report labels this and makes no independent-provider or cloud-model claim.
 
 ```sh
-python3 scripts/qualify-invocation-live.py \
+python3 tests/scripts/qualify-invocation-live.py \
   --installed-profile /private/installed-model.json \
   --service cg-invocation-model-q8 \
   --runtime cg-invocation-runtime-live \

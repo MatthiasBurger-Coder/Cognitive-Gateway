@@ -70,5 +70,5 @@ cargo test -p gateway-daemon --lib --test local_mcp --test declarative_cli
 cargo clippy --workspace --all-targets -- -D warnings
 python3 -m unittest discover -s tests/contracts
 python3 -m unittest discover -s tests/architecture
-python3 scripts/check-local-mcp-protocol.py
+python3 tests/scripts/check-local-mcp-protocol.py
 ```

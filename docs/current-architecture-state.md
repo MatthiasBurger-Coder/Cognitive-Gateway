@@ -60,6 +60,11 @@ flowchart LR
 
 ## Capability status
 
+EPIC-07.09 (#232): [scoped connector admission and lifecycle](connector-scope-lifecycle-v1.md)
+implements the canonical allowlist, exact project/session/request binding, private
+plugin hosts, revocation and rebuild. Independent stdio qualification covers the
+lifecycle; live-provider parent acceptance remains separate.
+
 | Area | Status | Notes |
 | --- | --- | --- |
 | Typed domain model / ExecutionContextIR | IMPLEMENTED | Versioned domain and serialization contracts exist. |

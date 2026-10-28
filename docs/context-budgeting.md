@@ -37,8 +37,8 @@ Run the issue's full validation commands from the repository root:
 cargo test --workspace
 cargo clippy --workspace --all-targets -- -D warnings
 cargo fmt --check
-bash scripts/check-architecture.sh
-python3 scripts/quality-gate.py
+bash tests/scripts/check-architecture.sh
+python3 tests/scripts/quality-gate.py
 ```
 
 The focused suites are `gateway-context/tests/budgeted_selection.rs` and `gateway-application/tests/context_application.rs`. The established quality runner writes revision-bound logs and coverage in `target/release-evidence/`.

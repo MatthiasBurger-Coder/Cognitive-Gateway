@@ -22,13 +22,13 @@ class InvocationResilienceArchitecture(unittest.TestCase):
             self.assertIn(owner, source)
 
     def test_ci_enforces_measured_coverage_and_denies_invalid_evidence(self):
-        gate = next(g for g in json.loads((ROOT / "scripts/quality-gates.json").read_text())
+        gate = next(g for g in json.loads((ROOT / "tests/scripts/quality-gates.json").read_text())
                     if g["name"].startswith("EPIC-06.08"))
         for command in ("cargo llvm-cov", "--test invocation_resilience", "--locked",
                         "check-invocation-resilience-coverage.py", "--self-test"):
             self.assertIn(command, gate["command"])
         spec = importlib.util.spec_from_file_location(
-            "resilience_coverage", ROOT / "scripts/check-invocation-resilience-coverage.py")
+            "resilience_coverage", ROOT / "tests/scripts/check-invocation-resilience-coverage.py")
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
         module.self_test()

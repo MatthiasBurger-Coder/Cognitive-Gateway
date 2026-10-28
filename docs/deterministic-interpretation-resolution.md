@@ -125,8 +125,8 @@ they do not qualify an external registry/database/session authority adapter.
 ```sh
 cargo test -p gateway-application --test interpretation --locked
 cargo llvm-cov -p gateway-domain -p gateway-application --test interpretation --locked --json --output-path target/interpretation-coverage.json
-python3 scripts/check-interpretation-coverage.py --self-test
-python3 scripts/check-interpretation-coverage.py target/interpretation-coverage.json
+python3 tests/scripts/check-interpretation-coverage.py --self-test
+python3 tests/scripts/check-interpretation-coverage.py target/interpretation-coverage.json
 ```
 
 CI runs the same coverage command and requires at least 95% measured line coverage

@@ -1,6 +1,6 @@
 # Architecture tests
 
-Run `python3 scripts/quality-gate.py` for the complete release gate, or
+Run `python3 tests/scripts/quality-gate.py` for the complete release gate, or
 `python3 -m unittest discover -s tests/architecture` for guard regression tests.
 
 `check-architecture.sh` combines Cargo metadata dependency checks with catalog

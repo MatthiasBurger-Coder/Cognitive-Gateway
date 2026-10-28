@@ -42,8 +42,8 @@ report, rather than by the closed status of the ten implementation issues.
 On the clean candidate commit, run:
 
 ```sh
-CARGO_BUILD_JOBS=1 python3 scripts/quality-gate.py --output target/epic03-complete-evidence
-python3 scripts/qualify-cg30.py --bundle target/epic03-complete-evidence \
+CARGO_BUILD_JOBS=1 python3 tests/scripts/quality-gate.py --output target/epic03-complete-evidence
+python3 tests/scripts/qualify-cg30.py --bundle target/epic03-complete-evidence \
   --output target/epic03-complete-release-report.json
 ```
 

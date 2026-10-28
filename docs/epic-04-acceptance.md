@@ -39,7 +39,7 @@ production plane or second coordinator is added.
 ## Reproduce and interpret
 
 ```sh
-python3 scripts/qualify-epic04.py --run --output target/epic04-acceptance
+python3 tests/scripts/qualify-epic04.py --run --output target/epic04-acceptance
 ```
 
 Use a new output directory outside tracked source. This executes the complete
@@ -52,7 +52,7 @@ access is unsuccessful; an absent report never becomes a successful fallback.
 To reconcile already executed reports without rerunning them:
 
 ```sh
-python3 scripts/qualify-epic04.py --output target/epic04-review \
+python3 tests/scripts/qualify-epic04.py --output target/epic04-review \
   --quality target/epic04-acceptance/quality/summary.json \
   --component target/epic04-acceptance/quality/epic04-component/report.json \
   --installed target/epic04-acceptance/installed/report.json
@@ -82,7 +82,7 @@ runner. #296's implementation closure is distinct from parent product closure.
 
 ## Stable requirement matrix
 
-The executable manifest is `scripts/epic04-acceptance.json`. Its 24 stable IDs
+The executable manifest is `tests/scripts/epic04-acceptance.json`. Its 24 stable IDs
 preserve issue order; each contains the production owner/path, dependency state,
 automated test path, qualification command and required evidence levels. The
 runner fills VERIFIED/BLOCKED from actual input validation, never child states.

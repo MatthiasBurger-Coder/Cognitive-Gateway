@@ -91,7 +91,7 @@ Wichtige Quellanker:
 
 [EPIC-04 #126](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/issues/126) und [Acceptance Enforcement #296](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/issues/296) sind auf GitHub geschlossen. `docs/epic-04-acceptance.md` verlangt nach einer Korrektur vom **2026-10-11** weiterhin eine **frische, vollständige Reconciliation von 24 Anforderungen**. Component-, Shared Runtime- und Installed-Client-Evidence dürfen laut Dokument nur ihren **eigenen** Prüfungsumfang qualifizieren.
 
-**Quality Finding QG-01 (P1):** Issue-Status und dokumentierter aktueller Gesamt-Abnahmestand sind nicht ohne neuen Report konsistent. Den erforderlichen vollständigen Runner `python3 scripts/qualify-epic04.py --run --output target/epic04-acceptance` auf einem festgehaltenen Commit ausführen; `QUALIFIED_EPIC_04`, `epic_04_status: COMPLETE` und `closure_allowed: true` nur bei belegter Vollständigkeit übernehmen. Anschließend Issue/Evidence/Status synchronisieren. [#279](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/issues/279) bleibt **separat** und darf nicht implizit als bestanden gelten.
+**Quality Finding QG-01 (P1):** Issue-Status und dokumentierter aktueller Gesamt-Abnahmestand sind nicht ohne neuen Report konsistent. Den erforderlichen vollständigen Runner `python3 tests/scripts/qualify-epic04.py --run --output target/epic04-acceptance` auf einem festgehaltenen Commit ausführen; `QUALIFIED_EPIC_04`, `epic_04_status: COMPLETE` und `closure_allowed: true` nur bei belegter Vollständigkeit übernehmen. Anschließend Issue/Evidence/Status synchronisieren. [#279](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/issues/279) bleibt **separat** und darf nicht implizit als bestanden gelten.
 
 ### 4.2 Reichweite des derzeitigen Session-Hosts
 
@@ -207,7 +207,7 @@ Das Beispiel ist **Zielverhalten**, keine Behauptung, dass es am Referenzstand b
 | QG-06 | Crash/Retry führt nicht zu blindem zweiten Write | Journal-, fencing-, recovery- und uncertain-effect-Tests | EPIC-08 |
 | QG-07 | Ergebnis nur bei unabhängig nachgewiesenem Desired State `verified` | Git diff, Build, Tests, Evidence-Provenienz | EPIC-08 |
 | QG-08 | Deterministischer Replay darf keine Live-Aktionen ausführen | Offline replay + denied side effects | EPIC-08 |
-| QG-09 | Geltende >=95%-Coverage- und Architektur-Gates ohne Ausnahme | `scripts/quality-gate.py` inkl. fail-closed Negativtests | Release |
+| QG-09 | Geltende >=95%-Coverage- und Architektur-Gates ohne Ausnahme | `tests/scripts/quality-gate.py` inkl. fail-closed Negativtests | Release |
 | QG-10 | Laufzeit-/Token-/Kostenbudgets und Operator-Audit verfügbar | korrelierte Session/Invocation/Tool-Messungen | EPIC-06/08 |
 | QG-11 | Realer, isolierter Bugfix-End-to-End-Run erfolgreich | tatsächlicher externer Issue-Fetch, Coding-Run, unabhängig grüne Tests | EPIC-07/08 |
 | QG-12 | Reproduzierbarer Dokumentationsstand | Status/ADRs/Runbook + Version/Revision/Evidence links | Architektur |

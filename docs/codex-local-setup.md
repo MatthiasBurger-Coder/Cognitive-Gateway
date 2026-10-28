@@ -15,16 +15,17 @@ credentials and outbound adapters; they are not an admission fallback.
 ## Build and bootstrap
 
 Prerequisites: current stable Rust/Cargo supporting the workspace's Rust 2024
-edition, Python 3.11+, and a POSIX environment providing `env -i` (Linux, macOS or WSL).
+edition and a POSIX environment providing `env -i` (Linux, macOS or WSL).
+Python 3.11+ is only required for the separate smoke-test checker.
 Native Windows launch needs a separately controlled environment-clearing launcher;
 the example does not qualify that transport. Run these commands at the checkout root:
 
 ```sh
 cargo build -p gateway-daemon --bin cg-mcp --bin cg-local --locked
-python3 scripts/bootstrap-codex-local.py \
+./target/debug/cg-local --setup \
   --repository "$PWD" --output target/codex-local-example \
   --client-name codex --client-version 1.0
-python3 scripts/check-codex-local.py --setup target/codex-local-example
+python3 tests/scripts/check-codex-local.py --setup target/codex-local-example
 ```
 
 The `codex / 1.0` pair is a reproducible synthetic fixture identity, **not a
@@ -36,7 +37,7 @@ qualified installed Codex version**. Bootstrap succeeds with a JSON object whose
 Codex local smoke passed: protocol 2025-11-25, 13 tools, admitted scope, CLI/MCP results identical, no provider environment
 ```
 
-The bootstrap creates a new private directory containing `admission.json`,
+The Rust infrastructure adapter `cg-local --setup` creates a new private directory containing `admission.json`,
 `request.json`, `launch.json` and `config.toml`; it never edits your Codex settings
 or overwrites an existing directory. Choose a new output directory when rerunning.
 The admitted resource is explicitly PUBLIC synthetic smoke evidence, derived from
@@ -44,8 +45,8 @@ the checked-in [example request](../examples/codex-local/situation.inspect.reque
 It does not scan or admit checkout files. The
 [empty admission example](../examples/codex-local/admission.example.json) shows
 the configuration shape without admitting content. If using `CARGO_TARGET_DIR`
-or installed binaries, pass `--bin-dir /absolute/path/to/bin` to both scripts.
-Neither script installs dependencies or builds binaries implicitly.
+or installed binaries, pass `--bin-dir /absolute/path/to/bin` to `cg-local --setup` and the smoke checker.
+Neither command installs dependencies or builds binaries implicitly.
 
 ## Configure the actual client
 
@@ -223,10 +224,10 @@ Regression commands from the checkout root:
 cargo test -p gateway-daemon --test codex_local_cli --test codex_isolation --test local_mcp --locked
 cargo test -p gateway-application --test codex_facade --locked
 python3 -m unittest discover -s tests/codex-local
-python3 scripts/check-local-mcp-protocol.py
+python3 tests/scripts/check-local-mcp-protocol.py
 cargo fmt --all --check
 cargo clippy --workspace --all-targets --locked -- -D warnings
-bash scripts/check-architecture.sh
+bash tests/scripts/check-architecture.sh
 ```
 
 The smoke checker exchanges frames one at a time before closing stdin, verifies
@@ -234,7 +235,8 @@ initialization, 13-tool discovery, successful admitted inspection and exact
 CLI/MCP canonical response equality in empty environments. It uses no Codex
 account or provider. Automated tests cover setup diagnostics, foreign scope,
 policy and classification denial, credential/duplicate input rejection and
-bootstrap configuration. This evidence establishes local reproducibility; it
+bootstrap configuration. Setup uses the existing Rust admission validator; Python is
+only needed for the separate smoke test. This evidence establishes local reproducibility; it
 does not claim live Codex qualification, which is provided separately by #295.
 
 | #244 acceptance criterion | Evidence |

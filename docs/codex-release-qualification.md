@@ -32,7 +32,7 @@ Run from the checkout root with Rust/Cargo, cargo-llvm-cov, Python 3.11+ and the
 packages in `tests/contracts/requirements.txt` installed:
 
 ```sh
-python3 scripts/qualify-codex-local.py --output target/epic04-qualification
+python3 tests/scripts/qualify-codex-local.py --output target/epic04-qualification
 ```
 
 The output directory must be new. The harness builds binaries, runs canonical,
@@ -72,7 +72,7 @@ sessions. Each report retains its own scope; full parent acceptance requires
 | Unsupported protocol/schema versions | Executable wrong-version/malformed/duplicate scenario; `codex_facade.rs::validation_precedence_scope_versions_and_pins_fail_closed` | Fail closed; no downgrade |
 | Timeout/cancel/disconnect | Executable idle deadline, EOF and reconnect; `local_mcp::runtime::tests::active_cancel_disconnect_errors_and_deadline_are_bounded`, overload/panic/write/frame-budget faults | Active faults use injected ports/transports; no durable rollback claim |
 | Resolve/explain/context/provenance | `codex_qualification.rs::canonical_inspect_resolve_explain_and_context_are_deterministic_through_mcp`; facade stale-step/policy/lineage regressions | Shipped host and CLI parity with admitted fixture snapshots; additional injected-host component proof |
-| No provider dependency in inner authority | `scripts/check-architecture.sh`, `test_dependencies.py`, `test_local_mcp_boundary.py` | Cargo dependency mutations plus framing/module guards |
+| No provider dependency in inner authority | `tests/scripts/check-architecture.sh`, `test_dependencies.py`, `test_local_mcp_boundary.py` | Cargo dependency mutations plus framing/module guards |
 | Architecture remains green | `architecture.log`, `architecture-regressions.log`, workspace Clippy | Existing gates unchanged |
 | >=95% materially changed production coverage | `local-mcp-coverage.json`, per-file coverage in report | Canonical host/mapping and changed pipeline added to measured gate; >=95% for each required file |
 | Session start/status, pauses and cancellation projections | `codex_qualification.rs::shared_host_start_status_pause_and_cancellation_projections_cross_the_bridge`; `session-projections.json` | Shared host contract projection proof; durable lifecycle is separately exercised by #294/#295 |

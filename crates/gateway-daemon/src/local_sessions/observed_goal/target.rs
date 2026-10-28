@@ -21,6 +21,7 @@ use crate::{
 use gateway_application::{
     PlanningCapabilitySnapshot,
     closed_loop::{ClosedLoop, LoopRules},
+    connector_admission::{ConnectorRegistration, ConnectorRegistry, ConnectorScopeBinding},
     connector_manifest::InventoryKind,
     connector_policy::Cg09ConnectorAdmission,
     connectors::*,
@@ -302,6 +303,37 @@ fn capture_preparation(
             defs.runtime.connector.as_str(),
             defs.manifest.definition().server_id.clone(),
         );
+        // The source already authenticates the durable owner/claim. Build the
+        // derived allowlist only from the captured operator-owned runtime pin.
+        let binding = ConnectorScopeBinding {
+            project: NonEmptyText::new(checkpoint.owner.project.as_str())
+                .map_err(|_| SessionError::InvalidInput)?,
+            scope: source.target().scope,
+            session: Some(
+                NonEmptyText::new(checkpoint.snapshot.session.as_str())
+                    .map_err(|_| SessionError::InvalidInput)?,
+            ),
+            request: Some(
+                NonEmptyText::new(checkpoint.snapshot.run.as_str())
+                    .map_err(|_| SessionError::InvalidInput)?,
+            ),
+        };
+        let registry = ConnectorRegistry::rebuild(
+            vec![ConnectorRegistration {
+                binding: binding.clone(),
+                manifest: defs.manifest.clone(),
+                enabled: true,
+            }],
+            &defs.runtime.compatibility.build(),
+        )
+        .map_err(|_| SessionError::AuthorityDenied)?;
+        let admission = registry
+            .bind(
+                &binding,
+                &source.target(),
+                Arc::new(Cg09ConnectorAdmission::new(PolicySource(source.clone()))),
+            )
+            .map_err(|_| SessionError::AuthorityDenied)?;
         let bundle = qualified_scalar_host(
             QualifiedScalarConfig {
                 allocation: view,
@@ -320,7 +352,7 @@ fn capture_preparation(
                 ),
             },
             Box::new(factory),
-            Arc::new(Cg09ConnectorAdmission::new(PolicySource(source.clone()))),
+            admission,
             source.clone(),
             Arc::new(()),
         )

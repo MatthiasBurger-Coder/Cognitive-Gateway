@@ -28,12 +28,12 @@ RAM for model context and serving. GPU access is absent from the base deployment
 and CPU inference explicitly requests zero GPU layers.
 
 ```bash
-scripts/model.sh start
-scripts/model.sh install /models/qwen3-8b-q4.json
-scripts/model.sh test qwen3-8b-q4
-scripts/model.sh promote qwen3-8b-q4
-scripts/model.sh ready
-scripts/model.sh inspect
+scripts/operations/local-model/service.sh start
+scripts/operations/local-model/models.sh install /models/qwen3-8b-q4.json
+scripts/operations/local-model/models.sh test qwen3-8b-q4
+scripts/operations/local-model/models.sh promote qwen3-8b-q4
+scripts/operations/local-model/service.sh ready
+scripts/operations/local-model/models.sh inspect
 ```
 
 First download can take longer than the default 180 second request deadline.
@@ -124,10 +124,10 @@ The directory is mounted read-only so adding a model manifest needs no Gateway
 rebuild. Then:
 
 ```bash
-scripts/model.sh install /models/replacement.json
-scripts/model.sh test replacement-id
-scripts/model.sh promote replacement-id
-scripts/model.sh rollback semantic-interpreter
+scripts/operations/local-model/models.sh install /models/replacement.json
+scripts/operations/local-model/models.sh test replacement-id
+scripts/operations/local-model/models.sh promote replacement-id
+scripts/operations/local-model/models.sh rollback semantic-interpreter
 ```
 
 The install and test steps leave the active alias intact and available. Registry
@@ -163,8 +163,8 @@ CPU remains the repository default; for a local NVIDIA installation use:
 
 ```bash
 export CG_MODEL_ACCELERATION=nvidia
-scripts/model.sh config
-scripts/model.sh start
+scripts/operations/local-model/service.sh config
+scripts/operations/local-model/service.sh start
 ```
 
 The NVIDIA override (`compose.model.gpu.yaml`) requests all NVIDIA GPUs with
@@ -182,11 +182,11 @@ Vulkan-capable runtime image because the 0.11.10 reference predates packaged Vul
 support. Examples for supported Linux hosts:
 
 ```bash
-CG_MODEL_ACCELERATION=amd scripts/model.sh config
-CG_MODEL_ACCELERATION=amd scripts/model.sh start
+CG_MODEL_ACCELERATION=amd scripts/operations/local-model/service.sh config
+CG_MODEL_ACCELERATION=amd scripts/operations/local-model/service.sh start
 # Register a new candidate whose runtime_version matches the chosen image.
-CG_MODEL_ACCELERATION=vulkan CG_MODEL_VULKAN_IMAGE=ollama/ollama:0.12.11 scripts/model.sh config
-CG_MODEL_ACCELERATION=vulkan CG_MODEL_VULKAN_IMAGE=ollama/ollama:0.12.11 scripts/model.sh start
+CG_MODEL_ACCELERATION=vulkan CG_MODEL_VULKAN_IMAGE=ollama/ollama:0.12.11 scripts/operations/local-model/service.sh config
+CG_MODEL_ACCELERATION=vulkan CG_MODEL_VULKAN_IMAGE=ollama/ollama:0.12.11 scripts/operations/local-model/service.sh start
 ```
 
 Use the same backend environment for all subsequent operator commands. For
@@ -208,7 +208,7 @@ target/model-venv/bin/python -m pip install -r services/local-model/requirements
 target/model-venv/bin/python -m unittest discover -s tests/local-model -v
 cargo test -p gateway-daemon --test local_inference --locked
 # Requires an empty registry, sufficient memory, and full model download:
-CG_MODEL_TIMEOUT=1800 python3 scripts/test-local-model.py --output target/cg27-real-proof
+CG_MODEL_TIMEOUT=1800 python3 tests/scripts/test-local-model.py --output target/cg27-real-proof
 ```
 
 The real proof exports CPU cold/warm samples, independent Rust/container
@@ -221,7 +221,7 @@ Neither result claims to benchmark an unreleased generation. An existing registr
 is preserved and rejected by this proof; use a fresh `CG_MODEL_PROJECT_NAME` and
 `CG_MODEL_SERVICE_PORT` for a separate proof deployment.
 
-`runtime_unavailable`: inspect `scripts/model.sh logs` and container health;
+`runtime_unavailable`: inspect `scripts/operations/local-model/service.sh logs` and container health;
 verify endpoint and configured deadline. `model_missing`: check the persistent
 artifact volume. `provenance_changed`: runtime/artifact/template no longer matches
 the qualified profile; restore the pinned runtime/snapshot or register and qualify
@@ -285,7 +285,7 @@ consume the same manifest without becoming core dependencies.
 Run an offline baseline without downloading models or starting containers:
 
 ```bash
-target/model-venv/bin/python scripts/benchmark-local-model.py \
+target/model-venv/bin/python tests/scripts/benchmark-local-model.py \
   --warm-rounds 3 --output target/cg27-fixture.json
 ```
 
@@ -311,12 +311,12 @@ the reference runtime adapter directly; it does not expand the serving alias's
 qualified `semantic-proposal/1.0` contract or promote the benchmark profile.
 
 ```bash
-target/model-venv/bin/python scripts/benchmark-local-model.py \
+target/model-venv/bin/python tests/scripts/benchmark-local-model.py \
   --adapter ollama --profile target/installed-benchmark-profile.json \
   --endpoint http://127.0.0.1:11434 --acceleration cpu \
   --warm-rounds 3 --output target/cg27-cpu.json
 # On an independently configured GPU runtime, retain a separate report:
-target/model-venv/bin/python scripts/benchmark-local-model.py \
+target/model-venv/bin/python tests/scripts/benchmark-local-model.py \
   --adapter ollama --profile target/installed-benchmark-profile.json \
   --endpoint http://127.0.0.1:11434 --acceleration nvidia \
   --warm-rounds 3 --output target/cg27-nvidia.json

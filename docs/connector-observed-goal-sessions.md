@@ -104,14 +104,14 @@ expired observations, corruption and a competing fence prevent completion.
 Run the installed integration test against a disposable PostgreSQL host:
 
 ```bash
-python3 scripts/cognitive-test-host.py cargo test -p gateway-daemon --test observed_goal_sessions
+python3 tests/scripts/cognitive-test-host.py cargo test -p gateway-daemon --test observed_goal_sessions
 ```
 
 Run the complete registered qualification, including the application and daemon
 regressions and the strict per-file production coverage gate:
 
 ```bash
-python3 scripts/cognitive-test-host.py bash scripts/qualify-observed-goal-sessions.sh /tmp/cg-observed-goal-evidence
+python3 tests/scripts/cognitive-test-host.py bash tests/scripts/qualify-observed-goal-sessions.sh /tmp/cg-observed-goal-evidence
 ```
 
 The test must run with PostgreSQL enabled to constitute installed runtime

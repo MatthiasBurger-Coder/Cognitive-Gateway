@@ -1092,3 +1092,6 @@ fn real_stdio_resource_crosses_canonical_normalization_ingestion_and_context_bou
 
 #[path = "support/connector_policy_cases.rs"]
 mod connector_policy_cases;
+
+#[path = "support/connector_lifecycle_cases.rs"]
+mod connector_lifecycle_cases;

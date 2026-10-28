@@ -300,7 +300,7 @@ Review checklist (single-agent architecture review; no external approval implied
 
 Run `cargo test -p gateway-application --test connectors --locked`,
 `python3 -m unittest discover -s tests/architecture -p 'test_*connect*.py'`,
-`bash scripts/check-architecture.sh`, `cargo fmt --check` and the existing quality
+`bash tests/scripts/check-architecture.sh`, `cargo fmt --check` and the existing quality
 gates. The evidence record is [EPIC-07.01](evidence/EPIC-07.01-architecture.json).
 #225 can build the manifest foundation; #226–#232 implement these boundaries;
 #233/#234 prove GitHub and independent adapters; #235 owns end-to-end/live effects.
@@ -311,3 +311,10 @@ No parent-epic completion or real connector availability is implied by this slic
 [Connector resilience v1](connector-resilience-v1.md) defines the EPIC-07.08
 retry engine, provider recovery metadata, shared deadlines and aggregate spending,
 rate-limit profile, circuit breaker, backpressure and content-free health events.
+
+## Scoped admission implementation (#232)
+
+[Scoped connector admission and lifecycle](connector-scope-lifecycle-v1.md) defines the
+immutable canonical allowlist, exact project/session/request binding, derived
+index, private plugin manager and revocation/rebuild rules. The observed-goal
+composition root binds its existing operator definitions to the durable owner.
