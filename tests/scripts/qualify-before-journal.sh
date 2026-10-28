@@ -25,6 +25,8 @@ cd "$(dirname "$0")/../.."
 output="${1:?Supply an evidence directory}"
 mkdir -p "$output"
 output="$(cd "$output" && pwd -P)"
+# Keep instrumented tests and native CLI consumers in one optimized profile.
+export CARGO_PROFILE_DEV_OPT_LEVEL=1 CARGO_PROFILE_TEST_OPT_LEVEL=1
 export CARGO_TARGET_DIR="${CARGO_LLVM_COV_TARGET_DIR:-$PWD/target/before-journal-coverage}"
 cargo llvm-cov clean --workspace
 eval "$(cargo llvm-cov show-env --sh)"

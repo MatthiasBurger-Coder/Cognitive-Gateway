@@ -25,8 +25,12 @@ class ShellEntrypoints(unittest.TestCase):
         self.log = self.root / 'calls.jsonl'
         stub = f'#!{sys.executable}\n' + '''import json, os, pathlib, sys
 name = pathlib.Path(sys.argv[0]).name
+entry = {'tool':name, 'args':sys.argv[1:], 'cwd':os.getcwd()}
+if name == 'cargo' and sys.argv[1:3] == ['llvm-cov', 'clean']:
+    entry['profiles'] = {key:os.environ.get('CARGO_PROFILE_' + key + '_OPT_LEVEL')
+                         for key in ('DEV', 'TEST')}
 with open(os.environ['CG_SHELL_TEST_LOG'], 'a') as output:
-    output.write(json.dumps({'tool':name, 'args':sys.argv[1:], 'cwd':os.getcwd()}) + '\\n')
+    output.write(json.dumps(entry) + '\\n')
 if name == 'openssl':
     print('a' * 64)
 if name == 'cargo' and sys.argv[1] == 'install':
@@ -65,6 +69,20 @@ sys.exit(int(os.environ.get('CG_SHELL_TEST_EXIT', '0')))
                 self.assertIn('Usage:', output.stdout)
         self.assertEqual(self.calls(), [])
         self.assertFalse(Path(self.env['CG_POSTGRES_ENV_FILE']).exists())
+
+    def test_native_qualifications_use_one_profile_before_building(self):
+        for runner in ('shared-sessions', 'observed-goal-sessions', 'before-journal', 'atomic-before'):
+            with self.subTest(runner=runner):
+                result = self.run_script('tests/scripts/qualify-' + runner + '.sh',
+                    str(self.root / runner), CG_COGNITIVE_TEST_DATABASE='test-host-supplied',
+                    CARGO_LLVM_COV_TARGET_DIR=str(self.root / 'coverage'),
+                    CARGO_PROFILE_DEV_OPT_LEVEL='0', CARGO_PROFILE_TEST_OPT_LEVEL='2',
+                    CG_SHELL_TEST_EXIT='17')
+                self.assertEqual(result.returncode, 17, result.stderr)
+                call = self.calls()[-1]
+                self.assertEqual(call['tool'], 'cargo')
+                self.assertEqual(call['args'], ['llvm-cov', 'clean', '--workspace'])
+                self.assertEqual(call['profiles'], {'DEV':'1', 'TEST':'1'})
 
     @unittest.skipUnless(sys.platform.startswith('linux'), 'Linux-only installer')
     def test_installer_only_installs_requested_clis_and_preserves_path_boundaries(self):

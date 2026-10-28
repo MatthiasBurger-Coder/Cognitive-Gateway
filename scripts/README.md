@@ -41,6 +41,10 @@ Other service settings remain in the Compose files and their existing operator g
 These remain under `tests/scripts/`. Run them from the checkout root; each supports
 `--help`. Qualification runners require exactly one evidence directory. They reset
 coverage build state and write reports; reusing a directory can overwrite evidence.
+Native runtime qualification (shared sessions, observed goals, Before journal and
+atomic Before) pins both Cargo dev and test optimization to level 1 for one
+consistent instrumented test/CLI profile. These process-local settings do not
+change `Cargo.toml` or installed binaries.
 PostgreSQL qualification uses the disposable host supplied by
 `python3 tests/scripts/cognitive-test-host.py -- bash RUNNER EVIDENCE_DIR`.
 
