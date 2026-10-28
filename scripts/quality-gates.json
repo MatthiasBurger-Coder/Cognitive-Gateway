@@ -274,5 +274,9 @@
   {
     "name": "EPIC-08.03.04 installed atomic Before capture and coverage",
     "command": "CARGO_BUILD_JOBS=1 CARGO_LLVM_COV_TARGET_DIR=target/atomic-before-coverage python3 scripts/cognitive-test-host.py -- bash scripts/qualify-atomic-before.sh \"$EVIDENCE_DIR/atomic-before\""
+  },
+  {
+    "name": "EPIC-07.09 scoped admission and plugin lifecycle coverage",
+    "command": ": \"${CG_COGNITIVE_TEST_DATABASE:?Run through the disposable cognitive test host}\"\nCARGO_BUILD_JOBS=1 CARGO_LLVM_COV_TARGET_DIR=target/mcp-client-coverage cargo llvm-cov -p gateway-application -p gateway-daemon --lib --test connector_admission --test mcp_client --test observed_goal_sessions --test complete_before_sessions --locked --json --output-path \"$EVIDENCE_DIR/connector-admission-coverage.json\" -- --test-threads=1\npython3 scripts/check-connector-admission-coverage.py --self-test\npython3 scripts/check-connector-admission-coverage.py \"$EVIDENCE_DIR/connector-admission-coverage.json\""
   }
 ]

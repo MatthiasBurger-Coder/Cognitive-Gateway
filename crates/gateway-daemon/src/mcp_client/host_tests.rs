@@ -199,9 +199,14 @@ fn connector_mappings_without_a_tool_schema_are_unavailable_by_default() {
 
 #[test]
 fn tool_schema_lookup_is_scope_bound_and_requires_current_discovery() {
-    let host = build(configuration()).unwrap();
+    let mut host = build(configuration()).unwrap();
     let capability = CapabilityId::new("records.read").unwrap();
     let revision = ContentDigest::new("a".repeat(64)).unwrap();
+    assert_eq!(
+        host.tool_schema(&configuration().target, &capability, &revision),
+        Err(Error::SessionDenied(ConnectorFailureCode::ProtocolError))
+    );
+    host.runtime.admission = Arc::new(MetadataOnly);
     let mut wrong_scope = configuration().target;
     wrong_scope.scope = ContextScopeId::new("other-scope").unwrap();
     assert_eq!(
@@ -214,7 +219,35 @@ fn tool_schema_lookup_is_scope_bound_and_requires_current_discovery() {
     );
 }
 
+// Metadata tests explicitly admit the configured target while keeping all
+// dispatch authority denied.
+struct MetadataOnly;
+impl ConnectorAdmission for MetadataOnly {
+    fn admit_target(&self, target: &ConnectorTarget) -> Result<(), ConnectorFailure> {
+        if target == &configuration().target {
+            Ok(())
+        } else {
+            Err(denied())
+        }
+    }
+    fn authorize(
+        &self,
+        request: &ConnectorRequest,
+        source: Option<&SourceId>,
+    ) -> Result<ConnectorDispatch, ConnectorFailure> {
+        Deny.authorize(request, source)
+    }
+    fn revalidate(
+        &self,
+        dispatch: &ConnectorDispatch,
+        source: Option<&SourceId>,
+    ) -> Result<(), ConnectorFailure> {
+        Deny.revalidate(dispatch, source)
+    }
+}
+
 struct SchemaMapping {
+    revoke: Option<Arc<gateway_application::connector_admission::ScopedConnectorAdmission>>,
     wrong_binding: bool,
     delay: std::time::Duration,
 }
@@ -254,6 +287,9 @@ impl ConnectorMapping for SchemaMapping {
         capability: &CapabilityId,
         inventory_revision: &ContentDigest,
     ) -> Result<super::super::mapping::MappedToolSchema, Error> {
+        if let Some(admission) = &self.revoke {
+            admission.revoke();
+        }
         if !self.delay.is_zero() {
             std::thread::sleep(self.delay);
         }
@@ -286,8 +322,9 @@ fn ready_host_with_delay(wrong_binding: bool, delay: std::time::Duration) -> Mcp
     let host = McpConnectorHost::new(
         config,
         Box::new(Deny),
-        Arc::new(Deny),
+        Arc::new(MetadataOnly),
         Box::new(SchemaMapping {
+            revoke: None,
             wrong_binding,
             delay,
         }),
@@ -326,8 +363,9 @@ fn tool_schema_checks_deadline_after_mapping_returns() {
     let host = McpConnectorHost::new(
         config,
         Box::new(Deny),
-        Arc::new(Deny),
+        Arc::new(MetadataOnly),
         Box::new(SchemaMapping {
+            revoke: None,
             wrong_binding: false,
             delay: std::time::Duration::from_millis(250),
         }),
@@ -625,5 +663,44 @@ fn absent_recovery_contract_is_explicitly_unsafe_and_disabled_health_is_unavaila
     assert_eq!(
         host.health_snapshot().health,
         gateway_application::connector_resilience::ConnectorHealth::Unavailable
+    );
+}
+
+#[test]
+fn tool_schema_does_not_release_metadata_revoked_inside_mapping() {
+    use gateway_application::connector_admission::*;
+    let config = configuration();
+    let binding = ConnectorScopeBinding {
+        project: NonEmptyText::new("project").unwrap(),
+        scope: config.target.scope.clone(),
+        session: None,
+        request: None,
+    };
+    let registry = ConnectorRegistry::rebuild(
+        vec![ConnectorRegistration {
+            binding: binding.clone(),
+            manifest: config.manifest,
+            enabled: true,
+        }],
+        &config.profile,
+    )
+    .unwrap();
+    let admission = registry
+        .bind(&binding, &config.target, Arc::new(MetadataOnly))
+        .unwrap();
+    let mut host = ready_host(false);
+    host.runtime.admission = admission.clone();
+    host.runtime.mapping = Box::new(SchemaMapping {
+        revoke: Some(admission),
+        wrong_binding: false,
+        delay: std::time::Duration::ZERO,
+    });
+    assert_eq!(
+        host.tool_schema(
+            &config.target,
+            &CapabilityId::new("records.read").unwrap(),
+            &ContentDigest::new("a".repeat(64)).unwrap()
+        ),
+        Err(Error::SessionDenied(ConnectorFailureCode::PermissionDenied))
     );
 }
