@@ -598,7 +598,7 @@
     },
     {
       "id": "runner-coverage",
-      "command": "COVERAGE_FILE=\"$EVIDENCE_DIR/runner-coverage.data\" python3 -m coverage run --source=scripts -m unittest discover -s tests/architecture -p test_invocation_qualification.py\nCOVERAGE_FILE=\"$EVIDENCE_DIR/runner-coverage.data\" python3 -m coverage json -o \"$EVIDENCE_DIR/runner-coverage.json\"\nCOVERAGE_FILE=\"$EVIDENCE_DIR/runner-coverage.data\" python3 -m coverage report --include=\"*/qualify-invocation.py\" --fail-under=95",
+      "command": "COVERAGE_FILE=\"$EVIDENCE_DIR/runner-coverage.data\" python3 -m coverage run --source=tests/scripts -m unittest discover -s tests/architecture -p test_invocation_qualification.py\nCOVERAGE_FILE=\"$EVIDENCE_DIR/runner-coverage.data\" python3 -m coverage json -o \"$EVIDENCE_DIR/runner-coverage.json\"\nCOVERAGE_FILE=\"$EVIDENCE_DIR/runner-coverage.data\" python3 -m coverage report --include=\"*/qualify-invocation.py\" --fail-under=95",
       "rust_tests": false
     },
     {
