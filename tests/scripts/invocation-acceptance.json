@@ -563,7 +563,7 @@
   "gates": [
     {
       "id": "components",
-      "command": "cargo llvm-cov -p gateway-domain -p gateway-application -p gateway-daemon --locked --test model_invocation --test model_routing --test cognitive_routing --test context_application --test prompt_ir --test prompt_rendering --test output_verification --test invocation_resilience --test model_adapters --test invocation_qualification --test invocation_host --json --output-path \"$EVIDENCE_DIR/coverage.json\"",
+      "command": "tests/scripts/with-coverage-env.sh cargo llvm-cov -p gateway-domain -p gateway-application -p gateway-daemon --locked --test model_invocation --test model_routing --test cognitive_routing --test context_application --test prompt_ir --test prompt_rendering --test output_verification --test invocation_resilience --test model_adapters --test invocation_qualification --test invocation_host --json --output-path \"$EVIDENCE_DIR/coverage.json\"",
       "rust_tests": true
     },
     {

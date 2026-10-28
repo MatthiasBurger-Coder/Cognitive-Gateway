@@ -63,9 +63,13 @@ Usage errors exit 2. Other failures propagate the invoked tool's status; setup
 failures can exit 1. Help exits 0. Historical reports under `docs/evidence/` retain
 the paths and commands recorded when they were produced.
 
-The Before-journal, atomic-Before and Domain coverage builds use
-`with-coverage-env.sh` to retain unreferenced function bodies with
-`-C link-dead-code`. This keeps LLVM's combined report from hiding an executed
+Rust coverage builds use `with-coverage-env.sh` to retain unreferenced
+function bodies with `-C link-dead-code`. This keeps LLVM's combined report from
+hiding an executed
 accessor behind an unused coverage stub. Existing compiler flags are preserved,
 including Cargo's encoded-flags precedence. This affects instrumented builds
 only; test selections and coverage requirements stay fixed.
+
+Native runners with several Cargo invocations source the shared environment;
+single-build runners and manifest commands execute Cargo through the wrapper.
+This keeps the measurement policy in one place across all Rust coverage gates.
