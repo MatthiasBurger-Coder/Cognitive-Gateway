@@ -51,3 +51,20 @@ class ConnectorArchitectureTests(unittest.TestCase):
                 guard.check(metadata)
         finally:
             guard.ALLOWED["gateway-domain"] = saved
+
+
+class IndependentConnectorBoundaryTests(unittest.TestCase):
+    def test_provider_names_stay_out_of_core(self):
+        for crate in ("gateway-domain", "gateway-application", "gateway-policy",
+                      "gateway-context", "gateway-process", "gateway-registry"):
+            for path in (ROOT / "crates" / crate / "src").rglob("*.rs"):
+                source = path.read_text()
+                for provider in ("conformance.documents", "documents.fetch",
+                                 "DocumentResultNormalizer"):
+                    self.assertNotIn(provider, source, str(path))
+
+    def test_second_adapter_does_not_import_first_provider(self):
+        for path in (ROOT / "crates/gateway-daemon/src/conformance_connector").glob("*.rs"):
+            source = path.read_text()
+            self.assertNotIn("github_connector", source)
+            self.assertNotIn("GitHubConnector", source)

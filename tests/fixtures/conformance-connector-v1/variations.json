@@ -1,0 +1,14 @@
+[
+  {"mode":"wrong-version","stage":"connect","code":"IncompatibleVersion"},
+  {"mode":"nested-schema","stage":"discover","code":"SchemaMismatch"},
+  {"mode":"open-schema","stage":"discover","code":"SchemaMismatch"},
+  {"mode":"schema-drift","stage":"discover","code":"SchemaMismatch"},
+  {"mode":"unknown-tool","stage":"discover","code":"SchemaMismatch"},
+  {"mode":"duplicate-tool","stage":"discover","code":"SchemaMismatch"},
+  {"mode":"bad-result","stage":"invoke","code":"SchemaMismatch"},
+  {"mode":"wrong-object","stage":"invoke","code":"SchemaMismatch"},
+  {"mode":"tool-error","stage":"invoke","code":"NotFound"},
+  {"mode":"rpc-error","stage":"invoke","code":"ProtocolError"},
+  {"mode":"malformed-json","stage":"invoke","code":"ProtocolError"},
+  {"mode":"wrong-id","stage":"invoke","code":"ProtocolError"}
+]

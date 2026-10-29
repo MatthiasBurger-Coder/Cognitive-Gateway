@@ -54,3 +54,6 @@ pub(crate) mod complete_snapshot_fixture;
 #[cfg(test)]
 #[path = "../../gateway-application/tests/support/prepared_before_fixture.rs"]
 pub(crate) mod prepared_before_fixture;
+
+/// Independent synthetic MCP reference server and explicit document projection.
+pub mod conformance_connector;
