@@ -128,6 +128,8 @@ sys.exit(int(os.environ.get('CG_SHELL_TEST_EXIT', '0')))
             data = json.loads((ROOT / 'tests/scripts' / filename).read_text())
             gates = data if isinstance(data, list) else data['gates']
             for gate in gates:
+                if filename == 'quality-gates.json':
+                    self.assertNotIn('CARGO_LLVM_COV_TARGET_DIR=', gate['command'])
                 for line in gate['command'].splitlines():
                     prefix, found, arguments = line.partition('cargo llvm-cov ')
                     if not found or arguments.split()[0] in ('clean', 'report', 'show-env'):

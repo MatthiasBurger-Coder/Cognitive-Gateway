@@ -88,7 +88,8 @@ def main():
         if args.coverage_report:
             coverage.write_bytes(args.coverage_report.read_bytes())
         else:
-            command = ['cargo', 'llvm-cov', '-p', 'gateway-application', '-p', 'gateway-daemon', '--lib',
+            command = ['bash', str(ROOT / 'tests/scripts/with-coverage-env.sh'),
+                       'cargo', 'llvm-cov', '-p', 'gateway-application', '-p', 'gateway-daemon', '--lib',
                        '--bin', 'cg', '--bin', 'cg-mcp', '--bin', 'cg-local', '--test', 'local_mcp', '--test', 'codex_facade',
                        '--test', 'codex_isolation', '--test', 'codex_local_cli', '--test', 'codex_qualification',
                        '--test', 'codex_canonical', '--test', 'declarative_cli', '--locked', '--json', '--output-path', str(coverage)]

@@ -69,13 +69,18 @@ def run(args, host):
     env = os.environ.copy()
     env.pop("CG_415_DIAGNOSTIC_TAIL", None)
     env.update(host.environment)
+    target = Path(env.get("CARGO_TARGET_DIR") or "target")
+    coverage_target = Path(env.get("CARGO_LLVM_COV_TARGET_DIR") or target / "llvm-cov-target")
+    if not coverage_target.is_absolute():
+        coverage_target = ROOT / coverage_target
+    env["CARGO_LLVM_COV_TARGET_DIR"] = str(coverage_target)
     (output / "cg03-host.json").write_text(json.dumps(host.report, indent=2) + "\n")
     # Only the dedicated proof gate may export; workspace/coverage tests also run CG-12.
     env.pop("CG12_EXPORT_DIR", None)
     for name in ("CG03_LIVE_OUTPUT", "CG03_DURABLE_WORKER_OUTPUT"):
         env.pop(name, None)
     report["build_environment"] = {name: env[name] for name in
-                                   ("CARGO_BUILD_JOBS", "CARGO_TARGET_DIR", "RUST_TEST_THREADS")
+                                   ("CARGO_BUILD_JOBS", "CARGO_TARGET_DIR", "CARGO_LLVM_COV_TARGET_DIR", "RUST_TEST_THREADS")
                                    if name in env}
     with tempfile.TemporaryDirectory(prefix="cg13-") as temporary:
         env.update(RUNNER_TEMP=temporary, EVIDENCE_DIR=str(output), CARGO_TERM_COLOR="never")
@@ -98,6 +103,16 @@ def run(args, host):
                 gate["status"] = "PASS" if result.returncode == 0 else "FAIL"
                 if result.returncode:
                     raise RuntimeError(f"{gate['name']} failed; see {output / gate['log']}")
+                # Reports are durable evidence; successful builds are disposable.
+                # One cache bounds disk use across the many isolated coverage epochs.
+                gate["cleanup_log"] = f"{index + 1:02d}-cleanup.log"
+                with (output / gate["cleanup_log"]).open("w") as log:
+                    cleanup = subprocess.run(["cargo", "llvm-cov", "clean", "--workspace"],
+                                             cwd=ROOT, env=env, stdout=log, stderr=subprocess.STDOUT)
+                gate["cleanup_exit_code"] = cleanup.returncode
+                if cleanup.returncode:
+                    raise RuntimeError(f"Coverage cache cleanup after {gate['name']} failed; "
+                                       f"see {output / gate['cleanup_log']}")
             if (source_fingerprint(output) != report["source_sha256"]
                     or capture("git", "rev-parse", "HEAD") != report["revision"]):
                 raise RuntimeError("Source changed during the gate; rerun against a stable checkout")
