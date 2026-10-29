@@ -1,0 +1,1870 @@
+{
+  "discovery": {
+    "prompts": [],
+    "resources": [],
+    "templates": [],
+    "tools": [
+      {
+        "inputSchema": {
+          "additionalProperties": false,
+          "properties": {},
+          "required": [],
+          "type": "object"
+        },
+        "name": "github.repository.read",
+        "outputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "content": {
+              "type": "string"
+            },
+            "object": {
+              "type": "string"
+            },
+            "partial": {
+              "type": "boolean"
+            },
+            "revision": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "object",
+            "content",
+            "partial"
+          ],
+          "type": "object"
+        }
+      },
+      {
+        "inputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "ref": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "ref"
+          ],
+          "type": "object"
+        },
+        "name": "github.tree.read",
+        "outputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "content": {
+              "type": "string"
+            },
+            "object": {
+              "type": "string"
+            },
+            "partial": {
+              "type": "boolean"
+            },
+            "revision": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "object",
+            "content",
+            "partial"
+          ],
+          "type": "object"
+        }
+      },
+      {
+        "inputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "path": {
+              "type": "string"
+            },
+            "ref": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "path",
+            "ref"
+          ],
+          "type": "object"
+        },
+        "name": "github.file.read",
+        "outputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "content": {
+              "type": "string"
+            },
+            "object": {
+              "type": "string"
+            },
+            "partial": {
+              "type": "boolean"
+            },
+            "revision": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "object",
+            "content",
+            "partial"
+          ],
+          "type": "object"
+        }
+      },
+      {
+        "inputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "page": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "page"
+          ],
+          "type": "object"
+        },
+        "name": "github.branches.read",
+        "outputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "content": {
+              "type": "string"
+            },
+            "object": {
+              "type": "string"
+            },
+            "partial": {
+              "type": "boolean"
+            },
+            "revision": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "object",
+            "content",
+            "partial"
+          ],
+          "type": "object"
+        }
+      },
+      {
+        "inputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "page": {
+              "type": "integer"
+            },
+            "ref": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "ref",
+            "page"
+          ],
+          "type": "object"
+        },
+        "name": "github.commits.read",
+        "outputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "content": {
+              "type": "string"
+            },
+            "object": {
+              "type": "string"
+            },
+            "partial": {
+              "type": "boolean"
+            },
+            "revision": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "object",
+            "content",
+            "partial"
+          ],
+          "type": "object"
+        }
+      },
+      {
+        "inputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "ref": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "ref"
+          ],
+          "type": "object"
+        },
+        "name": "github.commit.read",
+        "outputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "content": {
+              "type": "string"
+            },
+            "object": {
+              "type": "string"
+            },
+            "partial": {
+              "type": "boolean"
+            },
+            "revision": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "object",
+            "content",
+            "partial"
+          ],
+          "type": "object"
+        }
+      },
+      {
+        "inputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "number": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "number"
+          ],
+          "type": "object"
+        },
+        "name": "github.issue.read",
+        "outputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "content": {
+              "type": "string"
+            },
+            "object": {
+              "type": "string"
+            },
+            "partial": {
+              "type": "boolean"
+            },
+            "revision": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "object",
+            "content",
+            "partial"
+          ],
+          "type": "object"
+        }
+      },
+      {
+        "inputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "number": {
+              "type": "integer"
+            },
+            "page": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "number",
+            "page"
+          ],
+          "type": "object"
+        },
+        "name": "github.issue.comments",
+        "outputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "content": {
+              "type": "string"
+            },
+            "object": {
+              "type": "string"
+            },
+            "partial": {
+              "type": "boolean"
+            },
+            "revision": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "object",
+            "content",
+            "partial"
+          ],
+          "type": "object"
+        }
+      },
+      {
+        "inputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "number": {
+              "type": "integer"
+            },
+            "page": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "number",
+            "page"
+          ],
+          "type": "object"
+        },
+        "name": "github.issue.labels",
+        "outputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "content": {
+              "type": "string"
+            },
+            "object": {
+              "type": "string"
+            },
+            "partial": {
+              "type": "boolean"
+            },
+            "revision": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "object",
+            "content",
+            "partial"
+          ],
+          "type": "object"
+        }
+      },
+      {
+        "inputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "number": {
+              "type": "integer"
+            },
+            "page": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "number",
+            "page"
+          ],
+          "type": "object"
+        },
+        "name": "github.issue.subissues",
+        "outputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "content": {
+              "type": "string"
+            },
+            "object": {
+              "type": "string"
+            },
+            "partial": {
+              "type": "boolean"
+            },
+            "revision": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "object",
+            "content",
+            "partial"
+          ],
+          "type": "object"
+        }
+      },
+      {
+        "inputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "page": {
+              "type": "integer"
+            },
+            "query": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "query",
+            "page"
+          ],
+          "type": "object"
+        },
+        "name": "github.issue.search",
+        "outputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "content": {
+              "type": "string"
+            },
+            "object": {
+              "type": "string"
+            },
+            "partial": {
+              "type": "boolean"
+            },
+            "revision": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "object",
+            "content",
+            "partial"
+          ],
+          "type": "object"
+        }
+      },
+      {
+        "inputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "number": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "number"
+          ],
+          "type": "object"
+        },
+        "name": "github.pull_request.read",
+        "outputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "content": {
+              "type": "string"
+            },
+            "object": {
+              "type": "string"
+            },
+            "partial": {
+              "type": "boolean"
+            },
+            "revision": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "object",
+            "content",
+            "partial"
+          ],
+          "type": "object"
+        }
+      },
+      {
+        "inputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "number": {
+              "type": "integer"
+            },
+            "page": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "number",
+            "page"
+          ],
+          "type": "object"
+        },
+        "name": "github.pull_request.files",
+        "outputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "content": {
+              "type": "string"
+            },
+            "object": {
+              "type": "string"
+            },
+            "partial": {
+              "type": "boolean"
+            },
+            "revision": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "object",
+            "content",
+            "partial"
+          ],
+          "type": "object"
+        }
+      },
+      {
+        "inputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "number": {
+              "type": "integer"
+            },
+            "page": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "number",
+            "page"
+          ],
+          "type": "object"
+        },
+        "name": "github.pull_request.reviews",
+        "outputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "content": {
+              "type": "string"
+            },
+            "object": {
+              "type": "string"
+            },
+            "partial": {
+              "type": "boolean"
+            },
+            "revision": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "object",
+            "content",
+            "partial"
+          ],
+          "type": "object"
+        }
+      },
+      {
+        "inputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "number": {
+              "type": "integer"
+            },
+            "page": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "number",
+            "page"
+          ],
+          "type": "object"
+        },
+        "name": "github.pull_request.comments",
+        "outputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "content": {
+              "type": "string"
+            },
+            "object": {
+              "type": "string"
+            },
+            "partial": {
+              "type": "boolean"
+            },
+            "revision": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "object",
+            "content",
+            "partial"
+          ],
+          "type": "object"
+        }
+      },
+      {
+        "inputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "page": {
+              "type": "integer"
+            },
+            "ref": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "ref",
+            "page"
+          ],
+          "type": "object"
+        },
+        "name": "github.checks.read",
+        "outputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "content": {
+              "type": "string"
+            },
+            "object": {
+              "type": "string"
+            },
+            "partial": {
+              "type": "boolean"
+            },
+            "revision": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "object",
+            "content",
+            "partial"
+          ],
+          "type": "object"
+        }
+      },
+      {
+        "inputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "ref": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "ref"
+          ],
+          "type": "object"
+        },
+        "name": "github.status.read",
+        "outputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "content": {
+              "type": "string"
+            },
+            "object": {
+              "type": "string"
+            },
+            "partial": {
+              "type": "boolean"
+            },
+            "revision": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "object",
+            "content",
+            "partial"
+          ],
+          "type": "object"
+        }
+      },
+      {
+        "inputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "page": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "page"
+          ],
+          "type": "object"
+        },
+        "name": "github.workflow.runs",
+        "outputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "content": {
+              "type": "string"
+            },
+            "object": {
+              "type": "string"
+            },
+            "partial": {
+              "type": "boolean"
+            },
+            "revision": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "object",
+            "content",
+            "partial"
+          ],
+          "type": "object"
+        }
+      },
+      {
+        "inputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "number": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "number"
+          ],
+          "type": "object"
+        },
+        "name": "github.workflow.read",
+        "outputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "content": {
+              "type": "string"
+            },
+            "object": {
+              "type": "string"
+            },
+            "partial": {
+              "type": "boolean"
+            },
+            "revision": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "object",
+            "content",
+            "partial"
+          ],
+          "type": "object"
+        }
+      },
+      {
+        "inputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "number": {
+              "type": "integer"
+            },
+            "page": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "number",
+            "page"
+          ],
+          "type": "object"
+        },
+        "name": "github.workflow.jobs",
+        "outputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "content": {
+              "type": "string"
+            },
+            "object": {
+              "type": "string"
+            },
+            "partial": {
+              "type": "boolean"
+            },
+            "revision": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "object",
+            "content",
+            "partial"
+          ],
+          "type": "object"
+        }
+      },
+      {
+        "inputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "number": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "number"
+          ],
+          "type": "object"
+        },
+        "name": "github.workflow.job",
+        "outputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "content": {
+              "type": "string"
+            },
+            "object": {
+              "type": "string"
+            },
+            "partial": {
+              "type": "boolean"
+            },
+            "revision": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "object",
+            "content",
+            "partial"
+          ],
+          "type": "object"
+        }
+      },
+      {
+        "inputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "number": {
+              "type": "integer"
+            },
+            "page": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "number",
+            "page"
+          ],
+          "type": "object"
+        },
+        "name": "github.workflow.artifacts",
+        "outputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "content": {
+              "type": "string"
+            },
+            "object": {
+              "type": "string"
+            },
+            "partial": {
+              "type": "boolean"
+            },
+            "revision": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "object",
+            "content",
+            "partial"
+          ],
+          "type": "object"
+        }
+      }
+    ]
+  },
+  "manifest": {
+    "digest": "4a7cb6eece3d3b10858b76ca53a5dcbb8bdaa5957b06f583343d6afe6fbd663c",
+    "manifest": {
+      "compatibility": {
+        "gateway_major": 0,
+        "minimum_gateway_minor": 1,
+        "port_version": "2"
+      },
+      "configuration_ref": "config.github.reference.v1",
+      "connector_id": "github.reference",
+      "deprecation": null,
+      "health": {
+        "contract_ref": "health.ping.v1",
+        "interval_seconds": 30,
+        "timeout_seconds": 5
+      },
+      "inventory": [
+        {
+          "capability_mapping_ref": "mapping.github.branches.read.v1",
+          "kind": "tool",
+          "name": "github.branches.read",
+          "schema_digest": "db03429808f3ce5e972c443a7aa43cd7e4fc4237fd596124be83e4f06194c5cd",
+          "source_mapping_ref": "mapping.github.branches.read.v1"
+        },
+        {
+          "capability_mapping_ref": "mapping.github.checks.read.v1",
+          "kind": "tool",
+          "name": "github.checks.read",
+          "schema_digest": "4ab11d893627d73e8213ba328c41472d83383d23383fd6c94eb7ccf3f3da7fa7",
+          "source_mapping_ref": "mapping.github.checks.read.v1"
+        },
+        {
+          "capability_mapping_ref": "mapping.github.commit.read.v1",
+          "kind": "tool",
+          "name": "github.commit.read",
+          "schema_digest": "25a1dd5f70169e4fbfe32cda1310c6392e605db3f3ea5d757e5e89a9814d7cd8",
+          "source_mapping_ref": "mapping.github.commit.read.v1"
+        },
+        {
+          "capability_mapping_ref": "mapping.github.commits.read.v1",
+          "kind": "tool",
+          "name": "github.commits.read",
+          "schema_digest": "cb6e176173100bdebeaf8af5821f124daa219db168db011f1b5c88539224d766",
+          "source_mapping_ref": "mapping.github.commits.read.v1"
+        },
+        {
+          "capability_mapping_ref": "mapping.github.file.read.v1",
+          "kind": "tool",
+          "name": "github.file.read",
+          "schema_digest": "a768e08782f0b1990a8624f0764f826b49d2349911433678bb58d18603e21470",
+          "source_mapping_ref": "mapping.github.file.read.v1"
+        },
+        {
+          "capability_mapping_ref": "mapping.github.issue.comments.v1",
+          "kind": "tool",
+          "name": "github.issue.comments",
+          "schema_digest": "9fbd44064ad234673954d6da0f4d7ea213b843ecb923e67a3c7f815dc7fa0973",
+          "source_mapping_ref": "mapping.github.issue.comments.v1"
+        },
+        {
+          "capability_mapping_ref": "mapping.github.issue.labels.v1",
+          "kind": "tool",
+          "name": "github.issue.labels",
+          "schema_digest": "0a090a2a13ad1f1fabedcc31cb16eb95be64795dd4c5368ff9de93ad5b4d59db",
+          "source_mapping_ref": "mapping.github.issue.labels.v1"
+        },
+        {
+          "capability_mapping_ref": "mapping.github.issue.read.v1",
+          "kind": "tool",
+          "name": "github.issue.read",
+          "schema_digest": "830fbc6cd42e89a83cccdec10ef01c8a31c8eccf3230e1b63d3d73106c8fe648",
+          "source_mapping_ref": "mapping.github.issue.read.v1"
+        },
+        {
+          "capability_mapping_ref": "mapping.github.issue.search.v1",
+          "kind": "tool",
+          "name": "github.issue.search",
+          "schema_digest": "5c31319677f3f5bf1cfe6421408a6fb46496c78e04e7b788e18e94004760b5d6",
+          "source_mapping_ref": "mapping.github.issue.search.v1"
+        },
+        {
+          "capability_mapping_ref": "mapping.github.issue.subissues.v1",
+          "kind": "tool",
+          "name": "github.issue.subissues",
+          "schema_digest": "f3e55714fb2613d67f24cd042b8ed58ff29649d421df97144bcd36da1547025d",
+          "source_mapping_ref": "mapping.github.issue.subissues.v1"
+        },
+        {
+          "capability_mapping_ref": "mapping.github.pull-request.comments.v1",
+          "kind": "tool",
+          "name": "github.pull_request.comments",
+          "schema_digest": "e3f8509eeb273fe3e5ae1d49dddbbf249ed48a86f9040ab9b24ca62bdd230a2e",
+          "source_mapping_ref": "mapping.github.pull-request.comments.v1"
+        },
+        {
+          "capability_mapping_ref": "mapping.github.pull-request.files.v1",
+          "kind": "tool",
+          "name": "github.pull_request.files",
+          "schema_digest": "ff1e033f941bc7a2bfb6911b78b8292cd56e149d9b291ffcab26012b41cf056d",
+          "source_mapping_ref": "mapping.github.pull-request.files.v1"
+        },
+        {
+          "capability_mapping_ref": "mapping.github.pull-request.read.v1",
+          "kind": "tool",
+          "name": "github.pull_request.read",
+          "schema_digest": "8905295f858e0f0b0446514edb8cf7077c2705979e160d617d8151f65d3aac0d",
+          "source_mapping_ref": "mapping.github.pull-request.read.v1"
+        },
+        {
+          "capability_mapping_ref": "mapping.github.pull-request.reviews.v1",
+          "kind": "tool",
+          "name": "github.pull_request.reviews",
+          "schema_digest": "7a0495f76e92625143882530fb638abdb4723835f1875da008516054fab22e57",
+          "source_mapping_ref": "mapping.github.pull-request.reviews.v1"
+        },
+        {
+          "capability_mapping_ref": "mapping.github.repository.read.v1",
+          "kind": "tool",
+          "name": "github.repository.read",
+          "schema_digest": "ac01e0621dfcf6813f75036ff4ca08bb498218b474a66be49c9c5c60aa7499cf",
+          "source_mapping_ref": "mapping.github.repository.read.v1"
+        },
+        {
+          "capability_mapping_ref": "mapping.github.status.read.v1",
+          "kind": "tool",
+          "name": "github.status.read",
+          "schema_digest": "e3240f0ac72252c68e507c3ef990f4b3fa033a1bf44c4590b471bfdbcf6542f4",
+          "source_mapping_ref": "mapping.github.status.read.v1"
+        },
+        {
+          "capability_mapping_ref": "mapping.github.tree.read.v1",
+          "kind": "tool",
+          "name": "github.tree.read",
+          "schema_digest": "54076a26c6041a823e8fa0a39b0a81bafeac557b0c888751f283de40d98c1735",
+          "source_mapping_ref": "mapping.github.tree.read.v1"
+        },
+        {
+          "capability_mapping_ref": "mapping.github.workflow.artifacts.v1",
+          "kind": "tool",
+          "name": "github.workflow.artifacts",
+          "schema_digest": "10437289392a8a808a3741d647878145040f28a6b76faf54804e28b886faa0cf",
+          "source_mapping_ref": "mapping.github.workflow.artifacts.v1"
+        },
+        {
+          "capability_mapping_ref": "mapping.github.workflow.job.v1",
+          "kind": "tool",
+          "name": "github.workflow.job",
+          "schema_digest": "35b9e4a3b6e7e8c60d58433698b7608b603a35ed23ed3f84d0b67b2de3210134",
+          "source_mapping_ref": "mapping.github.workflow.job.v1"
+        },
+        {
+          "capability_mapping_ref": "mapping.github.workflow.jobs.v1",
+          "kind": "tool",
+          "name": "github.workflow.jobs",
+          "schema_digest": "fb76ec0ec42c932fb3bfc4b1dc092f26f2242156ccb075ce395b73009b824da8",
+          "source_mapping_ref": "mapping.github.workflow.jobs.v1"
+        },
+        {
+          "capability_mapping_ref": "mapping.github.workflow.read.v1",
+          "kind": "tool",
+          "name": "github.workflow.read",
+          "schema_digest": "2391e4be0c7bb54c0cc10b33270239598eadfdfb79e79697758069977df0bfe6",
+          "source_mapping_ref": "mapping.github.workflow.read.v1"
+        },
+        {
+          "capability_mapping_ref": "mapping.github.workflow.runs.v1",
+          "kind": "tool",
+          "name": "github.workflow.runs",
+          "schema_digest": "0737f79ad55a25fc05aa89ba45195c11da9583e1bb7a21d53fbd2b7d01bdaa51",
+          "source_mapping_ref": "mapping.github.workflow.runs.v1"
+        }
+      ],
+      "lifecycle": "enabled",
+      "manifest_version": "1.0",
+      "profiles": {
+        "authentication": "auth.github.readonly",
+        "sensitivity": "sensitivity.internal",
+        "trust": "trust.external.unverified"
+      },
+      "protocol": {
+        "name": "mcp",
+        "rpc_version": "2.0",
+        "version": "2025-11-25"
+      },
+      "server_id": "github.reference.local",
+      "server_version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "transport": "stdio",
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      }
+    }
+  },
+  "mapping": {
+    "mapping_version": "1.0",
+    "records": [
+      {
+        "capability": "github.repository.read",
+        "class": "READ",
+        "consent": "policy",
+        "idempotency": "idempotent",
+        "kind": "tool",
+        "name": "github.repository.read",
+        "reference": "mapping.github.repository.read.v1",
+        "result_schema": {
+          "additionalProperties": false,
+          "properties": {
+            "content": {
+              "type": "string"
+            },
+            "object": {
+              "type": "string"
+            },
+            "partial": {
+              "type": "boolean"
+            },
+            "revision": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "object",
+            "content",
+            "partial"
+          ],
+          "type": "object"
+        },
+        "retry_safety": "read_only",
+        "side_effects": "none",
+        "source": "source.github.repository.read"
+      },
+      {
+        "capability": "github.tree.read",
+        "class": "READ",
+        "consent": "policy",
+        "idempotency": "idempotent",
+        "kind": "tool",
+        "name": "github.tree.read",
+        "reference": "mapping.github.tree.read.v1",
+        "result_schema": {
+          "additionalProperties": false,
+          "properties": {
+            "content": {
+              "type": "string"
+            },
+            "object": {
+              "type": "string"
+            },
+            "partial": {
+              "type": "boolean"
+            },
+            "revision": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "object",
+            "content",
+            "partial"
+          ],
+          "type": "object"
+        },
+        "retry_safety": "read_only",
+        "side_effects": "none",
+        "source": "source.github.tree.read"
+      },
+      {
+        "capability": "github.file.read",
+        "class": "READ",
+        "consent": "policy",
+        "idempotency": "idempotent",
+        "kind": "tool",
+        "name": "github.file.read",
+        "reference": "mapping.github.file.read.v1",
+        "result_schema": {
+          "additionalProperties": false,
+          "properties": {
+            "content": {
+              "type": "string"
+            },
+            "object": {
+              "type": "string"
+            },
+            "partial": {
+              "type": "boolean"
+            },
+            "revision": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "object",
+            "content",
+            "partial"
+          ],
+          "type": "object"
+        },
+        "retry_safety": "read_only",
+        "side_effects": "none",
+        "source": "source.github.file.read"
+      },
+      {
+        "capability": "github.branches.read",
+        "class": "READ",
+        "consent": "policy",
+        "idempotency": "idempotent",
+        "kind": "tool",
+        "name": "github.branches.read",
+        "reference": "mapping.github.branches.read.v1",
+        "result_schema": {
+          "additionalProperties": false,
+          "properties": {
+            "content": {
+              "type": "string"
+            },
+            "object": {
+              "type": "string"
+            },
+            "partial": {
+              "type": "boolean"
+            },
+            "revision": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "object",
+            "content",
+            "partial"
+          ],
+          "type": "object"
+        },
+        "retry_safety": "read_only",
+        "side_effects": "none",
+        "source": "source.github.branches.read"
+      },
+      {
+        "capability": "github.commits.read",
+        "class": "READ",
+        "consent": "policy",
+        "idempotency": "idempotent",
+        "kind": "tool",
+        "name": "github.commits.read",
+        "reference": "mapping.github.commits.read.v1",
+        "result_schema": {
+          "additionalProperties": false,
+          "properties": {
+            "content": {
+              "type": "string"
+            },
+            "object": {
+              "type": "string"
+            },
+            "partial": {
+              "type": "boolean"
+            },
+            "revision": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "object",
+            "content",
+            "partial"
+          ],
+          "type": "object"
+        },
+        "retry_safety": "read_only",
+        "side_effects": "none",
+        "source": "source.github.commits.read"
+      },
+      {
+        "capability": "github.commit.read",
+        "class": "READ",
+        "consent": "policy",
+        "idempotency": "idempotent",
+        "kind": "tool",
+        "name": "github.commit.read",
+        "reference": "mapping.github.commit.read.v1",
+        "result_schema": {
+          "additionalProperties": false,
+          "properties": {
+            "content": {
+              "type": "string"
+            },
+            "object": {
+              "type": "string"
+            },
+            "partial": {
+              "type": "boolean"
+            },
+            "revision": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "object",
+            "content",
+            "partial"
+          ],
+          "type": "object"
+        },
+        "retry_safety": "read_only",
+        "side_effects": "none",
+        "source": "source.github.commit.read"
+      },
+      {
+        "capability": "github.issue.read",
+        "class": "READ",
+        "consent": "policy",
+        "idempotency": "idempotent",
+        "kind": "tool",
+        "name": "github.issue.read",
+        "reference": "mapping.github.issue.read.v1",
+        "result_schema": {
+          "additionalProperties": false,
+          "properties": {
+            "content": {
+              "type": "string"
+            },
+            "object": {
+              "type": "string"
+            },
+            "partial": {
+              "type": "boolean"
+            },
+            "revision": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "object",
+            "content",
+            "partial"
+          ],
+          "type": "object"
+        },
+        "retry_safety": "read_only",
+        "side_effects": "none",
+        "source": "source.github.issue.read"
+      },
+      {
+        "capability": "github.issue.comments",
+        "class": "READ",
+        "consent": "policy",
+        "idempotency": "idempotent",
+        "kind": "tool",
+        "name": "github.issue.comments",
+        "reference": "mapping.github.issue.comments.v1",
+        "result_schema": {
+          "additionalProperties": false,
+          "properties": {
+            "content": {
+              "type": "string"
+            },
+            "object": {
+              "type": "string"
+            },
+            "partial": {
+              "type": "boolean"
+            },
+            "revision": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "object",
+            "content",
+            "partial"
+          ],
+          "type": "object"
+        },
+        "retry_safety": "read_only",
+        "side_effects": "none",
+        "source": "source.github.issue.comments"
+      },
+      {
+        "capability": "github.issue.labels",
+        "class": "READ",
+        "consent": "policy",
+        "idempotency": "idempotent",
+        "kind": "tool",
+        "name": "github.issue.labels",
+        "reference": "mapping.github.issue.labels.v1",
+        "result_schema": {
+          "additionalProperties": false,
+          "properties": {
+            "content": {
+              "type": "string"
+            },
+            "object": {
+              "type": "string"
+            },
+            "partial": {
+              "type": "boolean"
+            },
+            "revision": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "object",
+            "content",
+            "partial"
+          ],
+          "type": "object"
+        },
+        "retry_safety": "read_only",
+        "side_effects": "none",
+        "source": "source.github.issue.labels"
+      },
+      {
+        "capability": "github.issue.subissues",
+        "class": "READ",
+        "consent": "policy",
+        "idempotency": "idempotent",
+        "kind": "tool",
+        "name": "github.issue.subissues",
+        "reference": "mapping.github.issue.subissues.v1",
+        "result_schema": {
+          "additionalProperties": false,
+          "properties": {
+            "content": {
+              "type": "string"
+            },
+            "object": {
+              "type": "string"
+            },
+            "partial": {
+              "type": "boolean"
+            },
+            "revision": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "object",
+            "content",
+            "partial"
+          ],
+          "type": "object"
+        },
+        "retry_safety": "read_only",
+        "side_effects": "none",
+        "source": "source.github.issue.subissues"
+      },
+      {
+        "capability": "github.issue.search",
+        "class": "SEARCH",
+        "consent": "policy",
+        "idempotency": "idempotent",
+        "kind": "tool",
+        "name": "github.issue.search",
+        "reference": "mapping.github.issue.search.v1",
+        "result_schema": {
+          "additionalProperties": false,
+          "properties": {
+            "content": {
+              "type": "string"
+            },
+            "object": {
+              "type": "string"
+            },
+            "partial": {
+              "type": "boolean"
+            },
+            "revision": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "object",
+            "content",
+            "partial"
+          ],
+          "type": "object"
+        },
+        "retry_safety": "read_only",
+        "side_effects": "none",
+        "source": "source.github.issue.search"
+      },
+      {
+        "capability": "github.pull_request.read",
+        "class": "READ",
+        "consent": "policy",
+        "idempotency": "idempotent",
+        "kind": "tool",
+        "name": "github.pull_request.read",
+        "reference": "mapping.github.pull-request.read.v1",
+        "result_schema": {
+          "additionalProperties": false,
+          "properties": {
+            "content": {
+              "type": "string"
+            },
+            "object": {
+              "type": "string"
+            },
+            "partial": {
+              "type": "boolean"
+            },
+            "revision": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "object",
+            "content",
+            "partial"
+          ],
+          "type": "object"
+        },
+        "retry_safety": "read_only",
+        "side_effects": "none",
+        "source": "source.github.pull_request.read"
+      },
+      {
+        "capability": "github.pull_request.files",
+        "class": "READ",
+        "consent": "policy",
+        "idempotency": "idempotent",
+        "kind": "tool",
+        "name": "github.pull_request.files",
+        "reference": "mapping.github.pull-request.files.v1",
+        "result_schema": {
+          "additionalProperties": false,
+          "properties": {
+            "content": {
+              "type": "string"
+            },
+            "object": {
+              "type": "string"
+            },
+            "partial": {
+              "type": "boolean"
+            },
+            "revision": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "object",
+            "content",
+            "partial"
+          ],
+          "type": "object"
+        },
+        "retry_safety": "read_only",
+        "side_effects": "none",
+        "source": "source.github.pull_request.files"
+      },
+      {
+        "capability": "github.pull_request.reviews",
+        "class": "READ",
+        "consent": "policy",
+        "idempotency": "idempotent",
+        "kind": "tool",
+        "name": "github.pull_request.reviews",
+        "reference": "mapping.github.pull-request.reviews.v1",
+        "result_schema": {
+          "additionalProperties": false,
+          "properties": {
+            "content": {
+              "type": "string"
+            },
+            "object": {
+              "type": "string"
+            },
+            "partial": {
+              "type": "boolean"
+            },
+            "revision": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "object",
+            "content",
+            "partial"
+          ],
+          "type": "object"
+        },
+        "retry_safety": "read_only",
+        "side_effects": "none",
+        "source": "source.github.pull_request.reviews"
+      },
+      {
+        "capability": "github.pull_request.comments",
+        "class": "READ",
+        "consent": "policy",
+        "idempotency": "idempotent",
+        "kind": "tool",
+        "name": "github.pull_request.comments",
+        "reference": "mapping.github.pull-request.comments.v1",
+        "result_schema": {
+          "additionalProperties": false,
+          "properties": {
+            "content": {
+              "type": "string"
+            },
+            "object": {
+              "type": "string"
+            },
+            "partial": {
+              "type": "boolean"
+            },
+            "revision": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "object",
+            "content",
+            "partial"
+          ],
+          "type": "object"
+        },
+        "retry_safety": "read_only",
+        "side_effects": "none",
+        "source": "source.github.pull_request.comments"
+      },
+      {
+        "capability": "github.checks.read",
+        "class": "READ",
+        "consent": "policy",
+        "idempotency": "idempotent",
+        "kind": "tool",
+        "name": "github.checks.read",
+        "reference": "mapping.github.checks.read.v1",
+        "result_schema": {
+          "additionalProperties": false,
+          "properties": {
+            "content": {
+              "type": "string"
+            },
+            "object": {
+              "type": "string"
+            },
+            "partial": {
+              "type": "boolean"
+            },
+            "revision": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "object",
+            "content",
+            "partial"
+          ],
+          "type": "object"
+        },
+        "retry_safety": "read_only",
+        "side_effects": "none",
+        "source": "source.github.checks.read"
+      },
+      {
+        "capability": "github.status.read",
+        "class": "READ",
+        "consent": "policy",
+        "idempotency": "idempotent",
+        "kind": "tool",
+        "name": "github.status.read",
+        "reference": "mapping.github.status.read.v1",
+        "result_schema": {
+          "additionalProperties": false,
+          "properties": {
+            "content": {
+              "type": "string"
+            },
+            "object": {
+              "type": "string"
+            },
+            "partial": {
+              "type": "boolean"
+            },
+            "revision": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "object",
+            "content",
+            "partial"
+          ],
+          "type": "object"
+        },
+        "retry_safety": "read_only",
+        "side_effects": "none",
+        "source": "source.github.status.read"
+      },
+      {
+        "capability": "github.workflow.runs",
+        "class": "READ",
+        "consent": "policy",
+        "idempotency": "idempotent",
+        "kind": "tool",
+        "name": "github.workflow.runs",
+        "reference": "mapping.github.workflow.runs.v1",
+        "result_schema": {
+          "additionalProperties": false,
+          "properties": {
+            "content": {
+              "type": "string"
+            },
+            "object": {
+              "type": "string"
+            },
+            "partial": {
+              "type": "boolean"
+            },
+            "revision": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "object",
+            "content",
+            "partial"
+          ],
+          "type": "object"
+        },
+        "retry_safety": "read_only",
+        "side_effects": "none",
+        "source": "source.github.workflow.runs"
+      },
+      {
+        "capability": "github.workflow.read",
+        "class": "READ",
+        "consent": "policy",
+        "idempotency": "idempotent",
+        "kind": "tool",
+        "name": "github.workflow.read",
+        "reference": "mapping.github.workflow.read.v1",
+        "result_schema": {
+          "additionalProperties": false,
+          "properties": {
+            "content": {
+              "type": "string"
+            },
+            "object": {
+              "type": "string"
+            },
+            "partial": {
+              "type": "boolean"
+            },
+            "revision": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "object",
+            "content",
+            "partial"
+          ],
+          "type": "object"
+        },
+        "retry_safety": "read_only",
+        "side_effects": "none",
+        "source": "source.github.workflow.read"
+      },
+      {
+        "capability": "github.workflow.jobs",
+        "class": "READ",
+        "consent": "policy",
+        "idempotency": "idempotent",
+        "kind": "tool",
+        "name": "github.workflow.jobs",
+        "reference": "mapping.github.workflow.jobs.v1",
+        "result_schema": {
+          "additionalProperties": false,
+          "properties": {
+            "content": {
+              "type": "string"
+            },
+            "object": {
+              "type": "string"
+            },
+            "partial": {
+              "type": "boolean"
+            },
+            "revision": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "object",
+            "content",
+            "partial"
+          ],
+          "type": "object"
+        },
+        "retry_safety": "read_only",
+        "side_effects": "none",
+        "source": "source.github.workflow.jobs"
+      },
+      {
+        "capability": "github.workflow.job",
+        "class": "READ",
+        "consent": "policy",
+        "idempotency": "idempotent",
+        "kind": "tool",
+        "name": "github.workflow.job",
+        "reference": "mapping.github.workflow.job.v1",
+        "result_schema": {
+          "additionalProperties": false,
+          "properties": {
+            "content": {
+              "type": "string"
+            },
+            "object": {
+              "type": "string"
+            },
+            "partial": {
+              "type": "boolean"
+            },
+            "revision": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "object",
+            "content",
+            "partial"
+          ],
+          "type": "object"
+        },
+        "retry_safety": "read_only",
+        "side_effects": "none",
+        "source": "source.github.workflow.job"
+      },
+      {
+        "capability": "github.workflow.artifacts",
+        "class": "READ",
+        "consent": "policy",
+        "idempotency": "idempotent",
+        "kind": "tool",
+        "name": "github.workflow.artifacts",
+        "reference": "mapping.github.workflow.artifacts.v1",
+        "result_schema": {
+          "additionalProperties": false,
+          "properties": {
+            "content": {
+              "type": "string"
+            },
+            "object": {
+              "type": "string"
+            },
+            "partial": {
+              "type": "boolean"
+            },
+            "revision": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "object",
+            "content",
+            "partial"
+          ],
+          "type": "object"
+        },
+        "retry_safety": "read_only",
+        "side_effects": "none",
+        "source": "source.github.workflow.artifacts"
+      }
+    ]
+  },
+  "normalization": {
+    "digest_field": null,
+    "fields": {
+      "content": "github.content",
+      "partial": "github.partial"
+    },
+    "object_field": "object",
+    "revision_field": "revision"
+  },
+  "repository": "owner/repo"
+}

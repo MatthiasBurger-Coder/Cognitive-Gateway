@@ -38,6 +38,9 @@ pub mod invocation_host;
 /// Outbound MCP client; separate from the inbound Codex server.
 pub mod mcp_client;
 
+/// Optional outer GitHub reference MCP server; no provider types enter core.
+pub mod github_connector;
+
 // Shared native test data and the one actual coordinator allocation harness.
 #[cfg(test)]
 #[path = "../../gateway-application/tests/support/goal_observation_harness.rs"]
