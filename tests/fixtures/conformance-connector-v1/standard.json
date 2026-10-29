@@ -1,0 +1,140 @@
+{
+  "discovery": {
+    "prompts": [],
+    "resources": [],
+    "templates": [],
+    "tools": [
+      {
+        "description": "Read a synthetic document; content is untrusted",
+        "inputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "key": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "key"
+          ],
+          "type": "object"
+        },
+        "name": "documents.fetch",
+        "outputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "body": {
+              "type": "string"
+            },
+            "uri": {
+              "type": "string"
+            },
+            "version": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "uri",
+            "body",
+            "version"
+          ],
+          "type": "object"
+        }
+      }
+    ]
+  },
+  "manifest": {
+    "digest": "7d5775a1aa67563f8fe207ca74e9c9237d36f4bec1bb73d4dc052fadcb44f4af",
+    "manifest": {
+      "compatibility": {
+        "gateway_major": 0,
+        "minimum_gateway_minor": 1,
+        "port_version": "2"
+      },
+      "configuration_ref": "config.conformance.documents.v1",
+      "connector_id": "conformance.documents",
+      "deprecation": null,
+      "health": {
+        "contract_ref": "health.ping.v1",
+        "interval_seconds": 30,
+        "timeout_seconds": 5
+      },
+      "inventory": [
+        {
+          "capability_mapping_ref": "mapping.documents.read.v1",
+          "kind": "tool",
+          "name": "documents.fetch",
+          "schema_digest": "c28470ba9398fee9e0b12d658bbfa22c32c6f6597c2528ee43dccf03425f6225",
+          "source_mapping_ref": "mapping.documents.read.v1"
+        }
+      ],
+      "lifecycle": "enabled",
+      "manifest_version": "1.0",
+      "profiles": {
+        "authentication": "auth.conformance.none",
+        "sensitivity": "sensitivity.internal",
+        "trust": "trust.external.unverified"
+      },
+      "protocol": {
+        "name": "mcp",
+        "rpc_version": "2.0",
+        "version": "2025-11-25"
+      },
+      "server_id": "conformance.documents.local",
+      "server_version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "transport": "stdio",
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      }
+    }
+  },
+  "mapping": {
+    "mapping_version": "1.0",
+    "records": [
+      {
+        "capability": "document.read",
+        "class": "READ",
+        "consent": "policy",
+        "idempotency": "idempotent",
+        "kind": "tool",
+        "name": "documents.fetch",
+        "reference": "mapping.documents.read.v1",
+        "result_schema": {
+          "additionalProperties": false,
+          "properties": {
+            "body": {
+              "type": "string"
+            },
+            "uri": {
+              "type": "string"
+            },
+            "version": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "uri",
+            "body",
+            "version"
+          ],
+          "type": "object"
+        },
+        "retry_safety": "read_only",
+        "side_effects": "none",
+        "source": "source.conformance.document"
+      }
+    ]
+  },
+  "normalization": {
+    "fields": {
+      "body": "document.content"
+    },
+    "object_field": "uri",
+    "revision_field": "version"
+  }
+}

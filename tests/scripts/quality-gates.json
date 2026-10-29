@@ -282,5 +282,9 @@
   {
     "name": "EPIC-07.10 GitHub reference connector and scoped evidence coverage",
     "command": "CARGO_BUILD_JOBS=1 CARGO_LLVM_COV_TARGET_DIR=target/github-reference-coverage cargo llvm-cov -p gateway-daemon --lib --test github_connector --locked --json --output-path \"$EVIDENCE_DIR/github-connector-coverage.json\" -- github_connector\npython3 tests/scripts/check-github-connector-coverage.py --self-test\npython3 tests/scripts/check-github-connector-coverage.py \"$EVIDENCE_DIR/github-connector-coverage.json\""
+  },
+  {
+    "name": "EPIC-07.11 independent connector, cross-provider conformance and coverage",
+    "command": "CARGO_BUILD_JOBS=1 CARGO_LLVM_COV_TARGET_DIR=target/conformance-connector-coverage cargo llvm-cov -p gateway-daemon --test conformance_connector --locked --json --output-path \"$EVIDENCE_DIR/conformance-connector-coverage.json\" -- --test-threads=1\npython3 tests/scripts/check-conformance-connector-coverage.py --self-test\npython3 tests/scripts/check-conformance-connector-coverage.py \"$EVIDENCE_DIR/conformance-connector-coverage.json\""
   }
 ]
