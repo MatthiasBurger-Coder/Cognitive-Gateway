@@ -73,3 +73,9 @@ only; test selections and coverage requirements stay fixed.
 Native runners with several Cargo invocations source the shared environment;
 single-build runners and manifest commands execute Cargo through the wrapper.
 This keeps the measurement policy in one place across all Rust coverage gates.
+
+The full quality runner uses one coverage build cache and cleans generated
+workspace artifacts after each successful gate. JSON reports, logs and hashes
+stay in the evidence bundle. A failed gate stops before cleanup, preserving its
+build and profiling data for diagnosis. Standalone runners still accept an
+explicit `CARGO_LLVM_COV_TARGET_DIR`.
