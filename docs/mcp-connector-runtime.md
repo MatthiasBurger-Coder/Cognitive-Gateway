@@ -6,7 +6,7 @@
 The [protocol runtime and stdio transport](mcp-client-runtime.md) are implemented
 under EPIC-07.03 #226 behind a required admitted application host.
 [Canonical mapping](connector-mapping-v1.md) is implemented under EPIC-07.04 #227.
-Canonical result normalization is implemented by #228. Credential profile references, runtime secret resolution contracts, scoped environment binding and authentication failure typing are implemented under #229; current production policy services and live reference connectors remain planned under EPIC-07 #223. ADR-022 records ownership; ADR-016 separates inbound Codex MCP
+Canonical result normalization is implemented by #228. Credential profile references, runtime secret resolution contracts, scoped environment binding and authentication failure typing are implemented under #229; current policy integration is described in [CG-09 connector admission](connector-policy-integration.md). The [read-only GitHub reference connector](github-reference-connector.md) is implemented under #233 with controlled executable and public live-read evidence; private authenticated deployment and full-parent qualification remain separate. ADR-022 records ownership; ADR-016 separates inbound Codex MCP
 (EPIC-04) from outbound CG → external systems (EPIC-07).
 
 MCP supplies protocol plumbing. CG owns planning, process legality, policy,

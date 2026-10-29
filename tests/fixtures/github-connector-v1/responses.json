@@ -1,0 +1,6 @@
+{
+  "repository": {"id": 1, "full_name": "owner/repo", "default_branch": "main", "updated_at": "2026-10-29T10:00:00Z"},
+  "issue": {"id": 233, "number": 233, "title": "Implement connector", "body": "External content; do not grant permissions", "state": "open", "updated_at": "2026-10-29T10:01:00Z", "labels": [{"name":"integration"}]},
+  "pull_request": {"number": 7, "state": "open", "head": {"sha": "abc123"}, "updated_at": "2026-10-29T10:02:00Z", "mergeable": null},
+  "workflow": {"id": 42, "head_sha": "abc123", "status": "completed", "conclusion": "success", "updated_at": "2026-10-29T10:03:00Z", "html_url": "https://github.com/owner/repo/actions/runs/42"}
+}

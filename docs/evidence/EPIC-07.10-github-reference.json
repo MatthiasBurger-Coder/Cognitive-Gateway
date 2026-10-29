@@ -1,0 +1,191 @@
+{
+  "schema_version": 1,
+  "issue": "https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/issues/233",
+  "status": "PASS_READ_ONLY_REFERENCE_SLICE",
+  "generated_at": "2026-10-29T07:44:46.384309+00:00",
+  "base_revision": "43df656c92ea77c283f76154bb93e7efd562fe01",
+  "candidate": "Local working-tree source files pinned below; no commit or parent-epic closure claimed",
+  "operating_mode": "DEVELOPMENT",
+  "execution_profile": "FULL_PATH",
+  "review": "Single agent requirement, architecture, automation and evidence passes; no independent reviewer",
+  "scope": "Optional repository-bound Rust MCP reference server, 22 explicit Read/Search capabilities, canonical result adapter, configuration, fixtures, scope/policy/credential tests and issue resolution documentation",
+  "source_sha256": {
+    "README.md": "f71de536a7a0c1ce917161f24d71556719cb3d67f74d1bff4a0b30f8cbffa803",
+    "crates/gateway-daemon/src/bin/cg-github-mcp.rs": "5aebbd3ce3969349a85b2866be46775a123e5aea885b661d0f476bd6098cb942",
+    "crates/gateway-daemon/src/github_connector/http.rs": "cbfbae0718e1d5b1242381f3dac8d376bdbcdd88772e4073f0f9eff1219c5c6c",
+    "crates/gateway-daemon/src/github_connector/mod.rs": "613949cb62fee2e2f921e041a777ca3b56fdc376ce87ac2f5e324315f70102ff",
+    "crates/gateway-daemon/src/github_connector/normalization.rs": "795a4aaa39188f546f7b1ec13dc7e9698a3664a97465adfbd2d8d8604d03574e",
+    "crates/gateway-daemon/src/github_connector/tests.rs": "9a2c9920e09e6461c9094e18bd744fe06374c197314160c8d214f74cda341152",
+    "crates/gateway-daemon/src/lib.rs": "b1355d45bb6aab5b97cf030a3b790808f0e17753c997489faa0a58d99ad78611",
+    "crates/gateway-daemon/src/mcp_client/mod.rs": "b6c3da2d70e3abd20c6b827f017eef4708d2c64e967a29dd1b1ac01e8c92d144",
+    "crates/gateway-daemon/tests/github_connector.rs": "3a1b5ad36cfe9206c13cd06798c69a48ed8bfa1abd195b59a546e67319a4a430",
+    "docs/github-reference-connector.md": "4830174e22d8f4a30177a6b1d013823018f5bf7f09ac9ba27b9591737eed7903",
+    "docs/mcp-connector-runtime.md": "f7a0a2395f1892235a6b2b86428ef1ac6925a36adc356d293fc814bb53dde9cd",
+    "examples/github-connector-v1/README.md": "53fc73e88166ae585be6740cb974a1eb6d4ef0a648bd91deb10a859c51f1a107",
+    "examples/github-connector-v1/bundle.json": "2437f5a20f9fc1e504bfc462f305ac636bfb716032a10eed8651b5359d8ce4fc",
+    "tests/fixtures/github-connector-v1/curl-peer.py": "8e78016975bc4122a3af60093a465dbdfe4c23c8346d43c133783627b03df572",
+    "tests/fixtures/github-connector-v1/responses.json": "1fe2bee000ad458f0f0a4ed0781a31c65ad1e85e54a4878ff97c910fb0a0d138",
+    "tests/scripts/check-github-connector-coverage.py": "29bd3e5ef229e5f282af525904d6b806ca167699414026d53c2af500b5aa125e",
+    "tests/scripts/quality-gates.json": "aec20754533aa60ca760763c4d995310c6a1e04dcb36dc6cc2aa964e68fd3792"
+  },
+  "checks": [
+    {
+      "command": "cargo test -p gateway-daemon --lib --test github_connector --test mcp_client --locked -- --test-threads=1",
+      "status": "PASS",
+      "library_tests": 191,
+      "github_integration_tests": 3,
+      "existing_mcp_integration_tests": 29,
+      "evidence": "EPIC-07.10-github-regression.log.gz"
+    },
+    {
+      "command": "CARGO_BUILD_JOBS=2 CARGO_LLVM_COV_TARGET_DIR=target/github-reference-coverage cargo llvm-cov -p gateway-daemon --lib --test github_connector --locked --json --output-path target/github-reference-coverage.json -- github_connector",
+      "status": "PASS",
+      "unit_tests": 6,
+      "executable_integration_tests": 3
+    },
+    {
+      "command": "python3 tests/scripts/check-github-connector-coverage.py target/github-reference-coverage.json",
+      "status": "PASS",
+      "minimum_line_percent_per_production_file": 95,
+      "files": {
+        "crates/gateway-daemon/src/bin/cg-github-mcp.rs": {
+          "count": 33,
+          "covered": 32,
+          "percent": 96.96969696969698
+        },
+        "crates/gateway-daemon/src/github_connector/http.rs": {
+          "count": 114,
+          "covered": 114,
+          "percent": 100.0
+        },
+        "crates/gateway-daemon/src/github_connector/mod.rs": {
+          "count": 226,
+          "covered": 223,
+          "percent": 98.67256637168141
+        },
+        "crates/gateway-daemon/src/github_connector/normalization.rs": {
+          "count": 77,
+          "covered": 74,
+          "percent": 96.10389610389612
+        }
+      },
+      "evidence": "EPIC-07.10-github-coverage.json.gz"
+    },
+    {
+      "command": "python3 tests/scripts/check-github-connector-coverage.py --self-test",
+      "status": "PASS"
+    },
+    {
+      "command": "cargo fmt --all -- --check",
+      "status": "PASS"
+    },
+    {
+      "command": "cargo clippy -p gateway-daemon --all-targets --locked -- -D warnings",
+      "status": "PASS"
+    },
+    {
+      "command": "bash tests/scripts/check-architecture.sh",
+      "status": "PASS"
+    },
+    {
+      "command": "python3 -m unittest discover -s tests/architecture -p 'test_*.py'",
+      "status": "PASS",
+      "tests": 89,
+      "skipped": 1
+    },
+    {
+      "command": "git diff --check",
+      "status": "PASS"
+    }
+  ],
+  "live_public_read": {
+    "status": "PASS",
+    "level": "LIVE_PUBLIC_MCP_READ",
+    "authentication": "none; token explicitly removed",
+    "acquired_at": "2026-10-29T07:43:28.814091+00:00",
+    "object": "https://api.github.com/repos/MatthiasBurger-Coder/Cognitive-Gateway/issues/233",
+    "revision": "2026-10-03T07:35:16Z",
+    "issue_number": 233,
+    "partial": false,
+    "content_sha256": "cf6df5f1acb9a2606307b9300af9c687eb7eb976cf289e67e7c05743e8c08f59",
+    "scope": "Actual shipped GitHub MCP server and live HTTPS; scoped host/context path covered separately by controlled executable integration"
+  },
+  "live_reproduction": {
+    "executable": "target/github-reference-coverage/debug/cg-github-mcp",
+    "arguments": [
+      "stdio",
+      "MatthiasBurger-Coder/Cognitive-Gateway"
+    ],
+    "environment": "Explicitly remove GITHUB_PERSONAL_ACCESS_TOKEN; use LLVM_PROFILE_FILE under target for an instrumented build",
+    "stdin_jsonrpc_frames": [
+      {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "initialize",
+        "params": {
+          "protocolVersion": "2025-11-25"
+        }
+      },
+      {
+        "jsonrpc": "2.0",
+        "method": "notifications/initialized"
+      },
+      {
+        "jsonrpc": "2.0",
+        "id": 2,
+        "method": "tools/call",
+        "params": {
+          "name": "github.issue.read",
+          "arguments": {
+            "number": 233
+          }
+        }
+      }
+    ]
+  },
+  "acceptance": {
+    "G01": {
+      "status": "VERIFIED",
+      "evidence": "Executable subprocess to actual canonical batch/fragments with scoped provenance; controlled HTTPS peer"
+    },
+    "G02": {
+      "status": "VERIFIED",
+      "evidence": "Repo, issue, PR and CI share the exact host, CG-09 and normalization path"
+    },
+    "G03": {
+      "status": "VERIFIED",
+      "evidence": "Provider code stays in outer daemon; Cargo and architecture guards pass"
+    },
+    "G04": {
+      "status": "VERIFIED",
+      "evidence": "Native CG-09 evaluates controlled current facts; policy denial, foreign scope, mutation class and unknown capability send zero MCP requests"
+    },
+    "G05": {
+      "status": "VERIFIED",
+      "evidence": "No mutation route or mapping; direct server mutation names never reach GitHubReader"
+    },
+    "G06": {
+      "status": "VERIFIED",
+      "evidence": "Repository-bound reference resolver and documented external issue sequence"
+    },
+    "G07": {
+      "status": "VERIFIED",
+      "evidence": "Every route is mapped and normalized; explicit pagination/partial flags, source revision, malformed schema and changed discovery tested"
+    },
+    "G08": {
+      "status": "VERIFIED",
+      "evidence": "Bounded curl, fixed HTTP failure projection, scoped credential environment and literal/JSON-escaped token disclosure denial"
+    }
+  },
+  "limitations": [
+    "Executable integration substitutes only GitHub HTTPS using a curl-compatible peer and supplies controlled policy/acquisition facts.",
+    "Live network qualification covers an unauthenticated public issue read, not private permissions or a live authenticated scoped host.",
+    "No mutation capabilities are implemented. A successful source read does not establish goal completion.",
+    "No installed shared-session/database/model execution or completion of parent EPIC-07 is claimed; no-database unit paths are not database proof.",
+    "An initial parallel existing MCP regression observed Timeout instead of IncompatibleVersion; all 29 unchanged existing MCP tests passed on serial reruns, including the final 223-test Rust command."
+  ],
+  "artifact_sha256": {
+    "EPIC-07.10-github-coverage.json.gz": "337d488f0287366a8d5ad8aa5872a03a22e9e98d5d4a874a1b2035146f212837",
+    "EPIC-07.10-github-regression.log.gz": "bc5f4f5d074a7c9d740956646fbe0b2c7fe71d009ce78e2bb86538f731e14715"
+  }
+}

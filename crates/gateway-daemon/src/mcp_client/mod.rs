@@ -2,7 +2,7 @@
 //! admitted application host; public wire discovery never confers authority.
 pub(crate) mod credential_file;
 mod host;
-mod json;
+pub(crate) mod json;
 pub mod mapping;
 pub mod normalization;
 pub mod plugins;

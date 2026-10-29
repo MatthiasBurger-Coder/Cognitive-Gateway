@@ -224,3 +224,7 @@ with CG-06 lineage, scope/quality propagation, acknowledgement/read-back separat
 and reference-only context adapters. Application port revision 2 requires manifest
 and inventory regeneration. Production credentials/policy and live effects remain
 separate qualification work.
+
+The optional [GitHub MCP reference connector](docs/github-reference-connector.md)
+provides repository-bound reads through the existing scoped connector runtime.
+Build `cg-github-mcp` and export its pinned manifest/mappings with `describe`.
