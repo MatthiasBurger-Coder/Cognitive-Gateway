@@ -331,6 +331,13 @@ impl StructuredSessionHost for Host {
         } else {
             0
         };
+        if change == 7 {
+            let mut input = fixture::input();
+            input.scope = ContextScopeId::new("foreign-project").unwrap();
+            input.plan_scope = input.scope.clone();
+            input.situation_scope = input.scope.clone();
+            f = fixture::Fixture::from_input(input);
+        }
         if change == 1 {
             f.projection.mapping.step = PlanStepId::new("wrong").unwrap();
         }
@@ -484,6 +491,73 @@ fn failure_before_and_after_artifact_commit_is_reconciled_without_budget_reset()
         assert_eq!(c.details(&owner(), &s.session).unwrap().budget, old.budget);
         assert_eq!(c.recover(&owner(), &s.session).unwrap(), recovered);
     }
+}
+
+#[test]
+fn scope_drift_before_commit_or_independent_verification_never_satisfies_the_registered_goal() {
+    for point in [3, 4] {
+        let c = coordinator(false);
+        let initial = start(&c);
+        c.host.change_at.store(point, Ordering::SeqCst);
+        c.host.change.store(7, Ordering::SeqCst);
+        let failed = continue_task(&c, &initial).unwrap();
+        assert_eq!(failed.state, SessionState::Failed);
+        let checkpoint = c.details(&owner(), &initial.session).unwrap();
+        assert_eq!(checkpoint.budget.actions, 1);
+        assert_eq!(checkpoint.artifact.is_some(), point == 4);
+        assert!(checkpoint.snapshot.final_evidence.is_none());
+        for (_, record) in &c.repository.rows.lock().unwrap().records {
+            if record.kind == RecordKind::Artifact {
+                let artifact: serde_json::Value = serde_json::from_slice(&record.bytes).unwrap();
+                assert_eq!(
+                    artifact["scope"],
+                    checkpoint.goal.artifact_basis().unwrap().scope.as_str()
+                );
+            }
+        }
+        assert_eq!(c.recover(&owner(), &initial.session).unwrap(), failed);
+    }
+}
+
+#[test]
+fn recovery_of_a_journaled_cancellation_fences_the_claim_without_redispatch() {
+    let c = coordinator(false);
+    let initial = start(&c);
+    c.repository.fail_at.store(2, Ordering::SeqCst);
+    assert_eq!(
+        continue_task(&c, &initial),
+        Err(SessionError::StorageUnavailable)
+    );
+    let current = c.repository.load(&owner(), &initial.session).unwrap();
+    let mut next = current.checkpoint.clone();
+    next.snapshot.state = SessionState::Cancelling;
+    next.snapshot.revision = next.snapshot.revision.next().unwrap();
+    next.lease_until_ms = None;
+    let cancelling = c
+        .repository
+        .append(
+            &owner(),
+            JournalAppend {
+                session: initial.session.clone(),
+                expected_revision: current.checkpoint.snapshot.revision,
+                fence: current.fence,
+                command: None,
+                next,
+                records: vec![],
+            },
+        )
+        .unwrap();
+    let prepares = c.host.prepares.load(Ordering::SeqCst);
+    let cancelled = c.recover(&owner(), &initial.session).unwrap();
+    assert_eq!(cancelled.state, SessionState::Cancelled);
+    assert_eq!(cancelled.dispatch_knowledge, DispatchKnowledge::Stopped);
+    let stopped = c.repository.load(&owner(), &initial.session).unwrap();
+    assert!(stopped.fence.value() > cancelling.fence.value());
+    assert_eq!(stopped.checkpoint.budget, current.checkpoint.budget);
+    assert_eq!(c.host.prepares.load(Ordering::SeqCst), prepares);
+    assert!(stopped.checkpoint.artifact.is_none());
+    assert!(stopped.checkpoint.snapshot.final_evidence.is_none());
+    assert_eq!(c.recover(&owner(), &initial.session).unwrap(), cancelled);
 }
 #[test]
 fn current_inputs_policy_authority_and_deadline_are_checked_after_reservation() {

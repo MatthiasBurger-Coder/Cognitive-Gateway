@@ -1,0 +1,327 @@
+{
+  "schema_version": 1,
+  "issues": [
+    223,
+    235
+  ],
+  "system_qualification_issue": 279,
+  "requirements": [
+    {
+      "id": "E07-01",
+      "source": "#223 / #235",
+      "category": "Plugin / Protocol",
+      "requirement": "External connectors attach without deterministic core changes",
+      "gate": "providers",
+      "test": "cross_provider_same_capability_policy_runtime_and_context_contracts"
+    },
+    {
+      "id": "E07-02",
+      "source": "#223 / #235",
+      "category": "Plugin / Protocol",
+      "requirement": "Explicit server identity/version/transport",
+      "gate": "manifest",
+      "test": "compatibility_matrix_uses_only_explicit_runtime_metadata"
+    },
+    {
+      "id": "E07-03",
+      "source": "#223 / #235",
+      "category": "Plugin / Protocol",
+      "requirement": "Deterministic tool/resource inventory",
+      "gate": "runtime-lib",
+      "test": "mcp_client::mapping::tests::permutations_are_stable_and_changes_invalidate_the_snapshot"
+    },
+    {
+      "id": "E07-04",
+      "source": "#223 / #235",
+      "category": "Plugin / Protocol",
+      "requirement": "Incompatible MCP/schema versions fail closed",
+      "gate": "providers",
+      "test": "independent_protocol_schema_and_failure_matrix"
+    },
+    {
+      "id": "E07-05",
+      "source": "#223 / #235",
+      "category": "Plugin / Protocol",
+      "requirement": "Discovery creates no catalog authority",
+      "gate": "runtime-lib",
+      "test": "mcp_client::mapping::tests::canonical_capabilities_use_existing_registry_queries_without_automatic_registration"
+    },
+    {
+      "id": "E07-06",
+      "source": "#223 / #235",
+      "category": "Capability and Policy",
+      "requirement": "Explicit canonical mappings",
+      "gate": "runtime",
+      "test": "canonical_mapping_drives_real_tool_and_resource_calls_but_never_grants_authority"
+    },
+    {
+      "id": "E07-07",
+      "source": "#223 / #235",
+      "category": "Capability and Policy",
+      "requirement": "Read/search/inspect/mutate/admin distinction",
+      "gate": "policy",
+      "test": "each_operation_class_uses_its_canonical_cg09_capability_and_exact_dispatch"
+    },
+    {
+      "id": "E07-08",
+      "source": "#223 / #235",
+      "category": "Capability and Policy",
+      "requirement": "Unknown/ambiguous mappings fail closed",
+      "gate": "runtime-lib",
+      "test": "mcp_client::mapping::tests::strict_document_parser_and_mapping_conflicts_fail_closed"
+    },
+    {
+      "id": "E07-09",
+      "source": "#223 / #235",
+      "category": "Capability and Policy",
+      "requirement": "Availability never authorizes",
+      "gate": "runtime",
+      "test": "connector_policy_cases::cg09_discovery_and_mapping_metadata_never_supply_authorization_or_consent"
+    },
+    {
+      "id": "E07-10",
+      "source": "#223 / #235",
+      "category": "Capability and Policy",
+      "requirement": "Mutation policy and consent",
+      "gate": "policy",
+      "test": "inspect_requires_canonical_inspect_permission_and_mutate_requires_consent"
+    },
+    {
+      "id": "E07-11",
+      "source": "#223 / #235",
+      "category": "Data / Evidence",
+      "requirement": "Existing Evidence/Provenance/ContextFragment normalization",
+      "gate": "runtime",
+      "test": "real_stdio_resource_crosses_canonical_normalization_ingestion_and_context_boundary"
+    },
+    {
+      "id": "E07-12",
+      "source": "#223 / #235",
+      "category": "Data / Evidence",
+      "requirement": "Source revision/digest/acquisition retained",
+      "gate": "runtime-lib",
+      "test": "mcp_client::normalization::tests::canonical_round_trip_preserves_lineage_quality_and_reference_only_context"
+    },
+    {
+      "id": "E07-13",
+      "source": "#223 / #235",
+      "category": "Data / Evidence",
+      "requirement": "Trust/sensitivity/freshness/conflict retained",
+      "gate": "runtime-lib",
+      "test": "mcp_client::normalization::tests::stale_conflict_partial_and_unknown_freshness_survive"
+    },
+    {
+      "id": "E07-14",
+      "source": "#223 / #235",
+      "category": "Data / Evidence",
+      "requirement": "Provider payload cannot bypass validation",
+      "gate": "runtime-lib",
+      "test": "mcp_client::normalization::tests::malformed_values_and_provider_authority_claims_fail_closed"
+    },
+    {
+      "id": "E07-15",
+      "source": "#223 / #235",
+      "category": "Security",
+      "requirement": "Credentials outside core/context/evidence",
+      "gate": "runtime",
+      "test": "credential_echo_from_real_stdio_peer_is_rejected_before_normalization"
+    },
+    {
+      "id": "E07-16",
+      "source": "#223 / #235",
+      "category": "Security",
+      "requirement": "Secret-safe diagnostics/audit",
+      "gate": "github",
+      "test": "github_connector_curl_is_bounded_secret_safe_and_projects_http_failures_without_provider_text"
+    },
+    {
+      "id": "E07-17",
+      "source": "#223 / #235",
+      "category": "Security",
+      "requirement": "Cross-project scope isolation",
+      "gate": "runtime",
+      "test": "admission_scope_binding_mapping_and_revision_are_checked_before_effects"
+    },
+    {
+      "id": "E07-18",
+      "source": "#223 / #235",
+      "category": "Security",
+      "requirement": "Configuration cannot broaden permissions",
+      "gate": "admission",
+      "test": "admission_preserves_policy_and_revokes_all_bound_operation_paths"
+    },
+    {
+      "id": "E07-19",
+      "source": "#223 / #235",
+      "category": "Runtime Resilience",
+      "requirement": "Typed timeout/cancellation/retry/rate-limit",
+      "gate": "runtime",
+      "test": "cancellation_timeout_backpressure_disable_and_effect_uncertainty"
+    },
+    {
+      "id": "E07-20",
+      "source": "#223 / #235",
+      "category": "Runtime Resilience",
+      "requirement": "Uncertain mutation never blindly retries",
+      "gate": "resilience",
+      "test": "unsafe_acknowledged_and_uncertain_effects_never_replay"
+    },
+    {
+      "id": "E07-21",
+      "source": "#223 / #235",
+      "category": "Runtime Resilience",
+      "requirement": "Failure retains Process/Policy authority",
+      "gate": "proposals",
+      "test": "current_native_policy_denial_missing_mutation_consent_and_pre_effect_change_send_zero"
+    },
+    {
+      "id": "E07-22",
+      "source": "#223 / #235",
+      "category": "Runtime Resilience",
+      "requirement": "Observable health/degraded state",
+      "gate": "runtime",
+      "test": "connector_resilience_cases::persistent_real_peer_failures_open_the_host_circuit_and_emit_health"
+    },
+    {
+      "id": "E07-23",
+      "source": "#223 / #235",
+      "category": "Reference Integration",
+      "requirement": "GitHub MCP outside core",
+      "gate": "github",
+      "test": "github_connector_executable_github_issue_repository_pr_ci_to_scoped_evidence_and_context_through_cg09"
+    },
+    {
+      "id": "E07-24",
+      "source": "#223 / #235",
+      "category": "Reference Integration",
+      "requirement": "Issue into scoped context with provenance",
+      "gate": "github",
+      "test": "github_connector_executable_github_issue_repository_pr_ci_to_scoped_evidence_and_context_through_cg09"
+    },
+    {
+      "id": "E07-25",
+      "source": "#223 / #235",
+      "category": "Reference Integration",
+      "requirement": "Repository/PR/CI through same architecture",
+      "gate": "github",
+      "test": "github_connector_executable_github_issue_repository_pr_ci_to_scoped_evidence_and_context_through_cg09"
+    },
+    {
+      "id": "E07-26",
+      "source": "#223 / #235",
+      "category": "Reference Integration",
+      "requirement": "Independent conformance provider",
+      "gate": "providers",
+      "test": "cross_provider_same_capability_policy_runtime_and_context_contracts"
+    },
+    {
+      "id": "E07-27",
+      "source": "#223 / #235",
+      "category": "End-to-End",
+      "requirement": "External reference through planning/resolution/policy/context compilation",
+      "gate": "github",
+      "test": "github_external_reference_to_planning_resolution_policy_and_compiled_context_golden"
+    },
+    {
+      "id": "E07-28",
+      "source": "#223 / #235",
+      "category": "End-to-End",
+      "requirement": "Existing quality/architecture gates",
+      "gate": "quality",
+      "test": null
+    },
+    {
+      "id": "E07-29",
+      "source": "#223 / #235",
+      "category": "End-to-End",
+      "requirement": "Applicable production coverage >=95%",
+      "gate": "quality",
+      "test": null
+    },
+    {
+      "id": "E07-30",
+      "source": "#223 / #235",
+      "category": "End-to-End",
+      "requirement": "Deterministic failure/security/compatibility/scope tests",
+      "gate": "providers",
+      "test": "independent_protocol_schema_and_failure_matrix"
+    },
+    {
+      "id": "E07-31",
+      "source": "#223 / #235",
+      "category": "2026-10-04 cross-plane additions",
+      "requirement": "Controlled real action and independent verification; live/synthetic separation",
+      "gate": "live-effects",
+      "test": "live_adapter_profile_controlled_effect_acknowledgement_and_lost_response_require_independent_readback"
+    },
+    {
+      "id": "E07-32",
+      "source": "#223 / #235",
+      "category": "2026-10-04 cross-plane additions",
+      "requirement": "Dispatch/result contracts for #274",
+      "gate": "proposals",
+      "test": "ambiguous_mutation_send_keeps_prior_observation_and_never_sends_later_proposals"
+    },
+    {
+      "id": "E07-33",
+      "source": "#223 / #235",
+      "category": "2026-10-04 cross-plane additions",
+      "requirement": "Uncertain-effect and independent-readback contracts consumed by #276",
+      "gate": "runtime-lib",
+      "test": "mcp_client::normalization::tests::acknowledgements_and_separate_readback_are_distinct"
+    },
+    {
+      "id": "E07-34",
+      "source": "#223 Agent Architecture Integration Review 2026-10-04",
+      "category": "Parent cross-plane additions",
+      "requirement": "Actual tools/call and resource reads",
+      "gate": "runtime",
+      "test": "canonical_mapping_drives_real_tool_and_resource_calls_but_never_grants_authority"
+    },
+    {
+      "id": "E07-35",
+      "source": "#223 Agent Architecture Integration Review 2026-10-04",
+      "category": "Parent cross-plane additions",
+      "requirement": "Exact capability/arguments/scope/task/step/execution/policy/consent/inventory dispatch bindings",
+      "gate": "runtime",
+      "test": "connector_policy_cases::cg09_exact_request_and_source_substitution_matrix_has_zero_peer_effects"
+    },
+    {
+      "id": "E07-36",
+      "source": "#223 Agent Architecture Integration Review 2026-10-04",
+      "category": "Parent cross-plane additions",
+      "requirement": "Acknowledgement/model explanation differs from independent observation",
+      "gate": "runtime-lib",
+      "test": "mcp_client::normalization::tests::acknowledgements_and_separate_readback_are_distinct"
+    },
+    {
+      "id": "E07-37",
+      "source": "#223 Agent Architecture Integration Review 2026-10-04",
+      "category": "Parent cross-plane additions",
+      "requirement": "Provider idempotency/readback metadata never permits unsafe retry",
+      "gate": "runtime",
+      "test": "connector_resilience_cases::provider_recovery_metadata_rejects_wrong_keys_unsafe_readback_and_stale_bindings"
+    },
+    {
+      "id": "E07-38",
+      "source": "#223 Agent Architecture Integration Review 2026-10-04",
+      "category": "Parent cross-plane additions",
+      "requirement": "Real effects independently verified and normalized outcomes forwarded to #274/#276",
+      "gate": "live-effects",
+      "test": "live_adapter_profile_controlled_effect_acknowledgement_and_lost_response_require_independent_readback"
+    },
+    {
+      "id": "E07-39",
+      "source": "#223 Agent Architecture Integration Review 2026-10-04",
+      "category": "Parent cross-plane additions",
+      "requirement": "Connector retries/timeouts consume the retained aggregate session allocation without resetting counters",
+      "gate": "runtime-lib",
+      "test": "mcp_client::session_budget::boundary_tests::retries_and_reconnects_charge_the_same_native_session_slice"
+    }
+  ],
+  "acceptance_boundary": {
+    "source": "ADR-022 and #223 responsibility split; #235 cross-plane additions 2026-10-04",
+    "connector_qualification": "Qualify versioned dispatch/result/recovery and aggregate-accounting contracts for consumers #274/#276/#277; exercise a real effect and independently acquired observation.",
+    "separate_system_acceptance": "EPIC-08 owns complete session mutation orchestration, durable external dispatch recovery and whole-session qualification #279. Their full implementation is not asserted by this report."
+  }
+}

@@ -497,3 +497,7 @@ pub trait SessionResourceAuthorityPort: Send + Sync {
         Err(SessionError::UnsupportedCapability)
     }
 }
+
+#[cfg(test)]
+#[path = "resource_boundary_tests.rs"]
+mod boundary_tests;

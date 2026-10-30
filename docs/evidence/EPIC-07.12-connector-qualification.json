@@ -1,0 +1,104 @@
+{
+  "issue": 235,
+  "parent_issue": 223,
+  "system_qualification_issue": 279,
+  "status": "QUALIFIED_COMPONENT_SCOPE",
+  "epic_07_status": "NOT_COMPLETE",
+  "closure_allowed": false,
+  "revision": "659c52da60c7e6bb4f51722d1b6825468ecba623",
+  "branch": "feat/235-connector-qualification",
+  "evidence_kind": "synthetic component; real stdio subprocesses with controlled GitHub HTTP peer",
+  "source_binding_note": "Full source snapshot and exact command logs are retained in the bundle. Snapshot precedes addition of this evidence record and bundle.",
+  "source_sha256": {
+    "crates/gateway-daemon/tests/github_connector.rs": "7019f2272ff6a0d7307bf3db4766f46b4170492598798002d15182d2b5cf3b95",
+    "tests/scripts/qualify-connectors.py": "6b4da7c25c6991a7a3bf250f0e53f04338b8635b14394637c7047b4d5695165d",
+    "tests/scripts/connector-acceptance.json": "c0a92df440e906ba1c42489bb3ea5df574f3b91e29a37896f40a640b0add8270",
+    "tests/scripts/quality-gates.json": "dedf1364cf0810f808d6a383a4fd847561e2498e1391ccac511f6a83efa2809e",
+    "tests/architecture/test_connector_qualification.py": "fb0f7e873a9676b57854d1b9dd4f9dc0569556eaa955326de73610d27c8bd109",
+    "tests/fixtures/connector-qualification-v1/golden.json": "a286c55822e6486254d5e57b97e3d1069682e3bbb9ff64f5d39605f46322a2ff",
+    "docs/connector-release-qualification.md": "389a6a41f94fe266799e525a36b44e62a3ac967e3069a7192509ae345f37ac1a",
+    "docs/current-architecture-state.md": "103745d897fa729048108245fe1d799350d2430c7ce927360ddd3a86398464a4",
+    "docs/README.md": "dc05106b00a966b16314f66160f76fc508c70c17f81614e1c43a81021c6f4699"
+  },
+  "validation_bundle": "EPIC-07.12-connector-qualification-validation.json.gz",
+  "validation_bundle_sha256": "caa5e14a751a7be86089a1da63f10a766322a205d88de67924c3ee4a8a975406",
+  "checks": [
+    {
+      "name": "Connector qualification",
+      "status": "PASS",
+      "rust_tests": 173,
+      "gates": 11
+    },
+    {
+      "name": "Evidence runner regressions",
+      "status": "PASS",
+      "tests": 9,
+      "measured_lines": 88,
+      "covered_lines": 87,
+      "minimum_percent": 95
+    },
+    {
+      "name": "Architecture regression suite",
+      "status": "PASS",
+      "tests": 100,
+      "skipped": 1
+    },
+    {
+      "name": "Architecture dependency guard",
+      "status": "PASS"
+    },
+    {
+      "name": "cargo fmt --all --check",
+      "status": "PASS"
+    },
+    {
+      "name": "cargo clippy -p gateway-daemon --test github_connector --locked -- -D warnings",
+      "status": "PASS"
+    }
+  ],
+  "requirement_count": 39,
+  "verified_component_requirements": 32,
+  "open_acceptance": [
+    {
+      "id": "E07-27",
+      "requirement": "External reference through planning/resolution/policy/context compilation",
+      "reason": "Controlled component golden is covered; installed natural-language external-reference \u2192 semantic/planning/resolution/CG-09/CG-10 flow remains unqualified."
+    },
+    {
+      "id": "E07-28",
+      "requirement": "Existing quality/architecture gates",
+      "reason": "The connector architecture guard runs here; full workspace quality evidence remains a separate mandatory gate."
+    },
+    {
+      "id": "E07-29",
+      "requirement": "Applicable production coverage >=95%",
+      "reason": "Run all applicable production coverage gates in tests/scripts/quality-gates.json against this candidate."
+    },
+    {
+      "id": "E07-31",
+      "requirement": "Controlled real action and independent verification; live/synthetic separation",
+      "reason": "Controlled live target/action and independently acquired post-effect observations are not qualified."
+    },
+    {
+      "id": "E07-33",
+      "requirement": "Durable uncertain-effect reconciliation for #276",
+      "reason": "#276 durable dispatch journal/crash recovery/reconciliation remains planned; component retry refusal is not recovery proof."
+    },
+    {
+      "id": "E07-38",
+      "requirement": "Real effects independently verified and normalized outcomes forwarded to #274/#276",
+      "reason": "Live independent observations forwarded to installed #274/#276 consumers are not qualified."
+    },
+    {
+      "id": "E07-39",
+      "requirement": "Retries/timeouts consume #277 durable aggregate limits without counter resets",
+      "reason": "#277 durable aggregate accounting across installed session retries/recovery requires system qualification."
+    }
+  ],
+  "production_changes": false,
+  "limitations": [
+    "Installed natural-language/session entrypoint and live effects remain unqualified.",
+    "No external mutation, durable crash recovery, fencing or exactly-once guarantee is established.",
+    "Full workspace and all applicable production coverage gates were not rerun; previous evidence is not substituted for them."
+  ]
+}

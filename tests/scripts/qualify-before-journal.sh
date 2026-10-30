@@ -25,7 +25,8 @@ cd "$(dirname "$0")/../.."
 output="${1:?Supply an evidence directory}"
 mkdir -p "$output"
 output="$(cd "$output" && pwd -P)"
-export CARGO_TARGET_DIR="${CARGO_LLVM_COV_TARGET_DIR:-$PWD/target/before-journal-coverage}"
+export CARGO_LLVM_COV_TARGET_DIR="${CARGO_LLVM_COV_TARGET_DIR:-$PWD/target/before-journal-coverage}"
+export CARGO_TARGET_DIR="$CARGO_LLVM_COV_TARGET_DIR"
 cargo llvm-cov clean --workspace
 eval "$(cargo llvm-cov show-env --sh)"
 # Compile the identical test selection first, including the current real CLI
