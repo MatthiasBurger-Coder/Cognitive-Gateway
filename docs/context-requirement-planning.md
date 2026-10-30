@@ -1,5 +1,9 @@
 # Context requirement analysis and source selection
 
+Historical evidence and removed review documents are linked to their archived Git
+revision. They are not current acceptance evidence. Generate fresh reports in an
+output directory or retain them as CI artifacts.
+
 Issue #285 implements EPIC-05.17 between validated task meaning and acquisition.
 It follows ADR-007/008/015 and the [#192 boundary](prompt-ir-handoff-boundary.md).
 CGSL remains a task language. CG-15 owns retrieval, budgets and sufficiency;
@@ -197,7 +201,7 @@ production are separate owning issues, not hidden prerequisites for #285.
 | C13 | >=95% changed production coverage | Three new production modules | Dedicated per-file measured gate, included in release checks | VERIFIED |
 
 Executed commands, per-file measurements and completion status are recorded in
-[evidence/EPIC-05.17-context-planning.json](evidence/EPIC-05.17-context-planning.json).
+[evidence/EPIC-05.17-context-planning.json](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/blob/59f6db7e29478e2903cf69d6e5c7e65632876710/docs/evidence/EPIC-05.17-context-planning.json).
 
 Completion review: **VERIFIED** at the canonical producer/CG-10 handoff level.
 The 20 new conformance tests and 660 Rust regressions across the four affected

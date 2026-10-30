@@ -1,5 +1,9 @@
 # GitHub MCP reference connector — EPIC-07.10 #233
 
+Historical evidence and removed review documents are linked to their archived Git
+revision. They are not current acceptance evidence. Generate fresh reports in an
+output directory or retain them as CI artifacts.
+
 The optional `cg-github-mcp` Rust binary is a repository-bound, read-only MCP
 server. It translates the GitHub REST API into the existing closed scalar MCP
 profile. It is a CG reference adapter, **not GitHub's official MCP server**.
@@ -194,4 +198,4 @@ controlled policy/acquisition facts; it does not qualify installed shared-sessio
 persistence, a live authenticated GitHub deployment, model execution or the
 entire parent EPIC. Public live reads, if recorded separately, do not establish
 private-repository authentication. Coverage and command results are retained in
-`docs/evidence/EPIC-07.10-github-reference.json`.
+[`docs/evidence/EPIC-07.10-github-reference.json`](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/blob/59f6db7e29478e2903cf69d6e5c7e65632876710/docs/evidence/EPIC-07.10-github-reference.json).

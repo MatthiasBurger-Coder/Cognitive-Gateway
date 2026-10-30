@@ -13,7 +13,7 @@ resolve paths from their own location and can be called from another working dir
 
 | Entry point | Responsibility | Effects |
 | --- | --- | --- |
-| [`install/linux-cli.sh`](install/linux-cli.sh) | Build/install `cg` and `cg-registry` on Linux; optional `--root ABSOLUTE_DIR` | Cargo may download dependencies; replaces these executables in `ROOT/bin`. Does not start services or edit PATH. |
+| [`install/linux-cli.sh`](../install/linux-cli.sh) | Build/install `cg` and `cg-registry` on Linux; optional `--root ABSOLUTE_DIR` | Cargo may download dependencies; replaces these executables in `ROOT/bin`. Does not start services or edit PATH. |
 
 Installation and service startup are separate commands. The former
 `install-linux.sh --with-postgres` combination is replaced by the installer followed
@@ -23,18 +23,18 @@ by `operations/postgres/start.sh`.
 
 | Entry point | Responsibility | Effects |
 | --- | --- | --- |
-| [`operations/postgres/start.sh`](operations/postgres/start.sh) | Prepare private PostgreSQL configuration if absent; start and wait for the persistent service | Creates the credential file if needed, sets mode 600, starts containers. Preserves existing credentials and data. |
-| [`operations/postgres/compose.sh`](operations/postgres/compose.sh) | Forward Compose commands using the explicit PostgreSQL credential file | Depends on the command. `down` retains volumes; `down -v` deletes them. Never generates credentials. |
-| [`operations/local-model/compose.sh`](operations/local-model/compose.sh) | Select the acceleration overlay and forward Compose arguments | Depends on the requested Compose command. No model lifecycle decisions. |
-| [`operations/local-model/service.sh`](operations/local-model/service.sh) | `config`, `start`, `stop`, `logs`, `ready` for the local model stack | Starts/stops containers, reads logs/health or renders configuration. Stop retains volumes. |
-| [`operations/local-model/models.sh`](operations/local-model/models.sh) | `install`, `test`, `promote`, `rollback`, `disable`, `inspect` against the running model service | Delegates model download/pinned snapshot registration, inference qualification and release/alias changes to the service. Profile paths refer to the container filesystem. Never starts the stack. |
+| [`operations/postgres/start.sh`](../operations/postgres/start.sh) | Prepare private PostgreSQL configuration if absent; start and wait for the persistent service | Creates the credential file if needed, sets mode 600, starts containers. Preserves existing credentials and data. |
+| [`operations/postgres/compose.sh`](../operations/postgres/compose.sh) | Forward Compose commands using the explicit PostgreSQL credential file | Depends on the command. `down` retains volumes; `down -v` deletes them. Never generates credentials. |
+| [`operations/local-model/compose.sh`](../operations/local-model/compose.sh) | Select the acceleration overlay and forward Compose arguments | Depends on the requested Compose command. No model lifecycle decisions. |
+| [`operations/local-model/service.sh`](../operations/local-model/service.sh) | `config`, `start`, `stop`, `logs`, `ready` for the local model stack | Starts/stops containers, reads logs/health or renders configuration. Stop retains volumes. |
+| [`operations/local-model/models.sh`](../operations/local-model/models.sh) | `install`, `test`, `promote`, `rollback`, `disable`, `inspect` against the running model service | Delegates model download/pinned snapshot registration, inference qualification and release/alias changes to the service. Profile paths refer to the container filesystem. Never starts the stack. |
 
 PostgreSQL uses `CG_POSTGRES_ENV_FILE`, otherwise
 `${XDG_CONFIG_HOME:-$HOME/.config}/cognitive-gateway/postgres.env`.
 Model Compose uses `CG_MODEL_ACCELERATION=cpu|nvidia|gpu|amd|vulkan`; CPU is the default.
 Service health uses `CG_MODEL_SERVICE_PORT` (default 8091).
 Other service settings remain in the Compose files and their existing operator guides:
-[PostgreSQL](../docs/postgres-compose.md), [local models](../docs/local-model-runtime.md).
+[PostgreSQL](postgres-compose.md), [local models](local-model-runtime.md).
 
 ## Test runners
 
@@ -60,8 +60,8 @@ PostgreSQL qualification uses the disposable host supplied by
 | [`test-postgres.sh`](../tests/scripts/test-postgres.sh) | Start the persistent operator database and run PostgreSQL integration tests. This is separate from disposable qualification and writes test data. |
 
 Usage errors exit 2. Other failures propagate the invoked tool's status; setup
-failures can exit 1. Help exits 0. Historical reports under `docs/evidence/` retain
-the paths and commands recorded when they were produced.
+failures can exit 1. Help exits 0. Generated reports belong in the selected output directory or CI artifacts,
+not in the source tree.
 
 Rust coverage builds use `with-coverage-env.sh` to retain unreferenced
 function bodies with `-C link-dead-code`. This keeps LLVM's combined report from

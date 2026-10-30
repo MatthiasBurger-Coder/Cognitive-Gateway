@@ -1,5 +1,9 @@
 # Dynamic example and few-shot context selection
 
+Historical evidence and removed review documents are linked to their archived Git
+revision. They are not current acceptance evidence. Generate fresh reports in an
+output directory or retain them as CI artifacts.
+
 Issue [#286](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/issues/286),
 EPIC-05.18. This implements canonical producers and the actual CG-10/#192
 handoff. Production provider invocation remains #263 owned. ADR-007/008/015,
@@ -190,6 +194,6 @@ handoff at >=95% measured lines, without exclusions. Domain and application
 fixture tests run offline. Regression qualification also includes existing
 #285, CG-10, CGSL, architecture, contracts, formatting and Clippy checks.
 
-The [source-bound acceptance evidence](evidence/EPIC-05.18-example-selection.json)
+The [source-bound acceptance evidence](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/blob/59f6db7e29478e2903cf69d6e5c7e65632876710/docs/evidence/EPIC-05.18-example-selection.json)
 records executed results and the producer/runtime completion boundary. Compressed
 coverage and validation logs are retained beside it for review from Git.

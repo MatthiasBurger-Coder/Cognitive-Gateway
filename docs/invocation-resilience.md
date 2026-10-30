@@ -1,5 +1,9 @@
 # Bounded invocation retry, cancellation and degradation — EPIC-06.08 (#268)
 
+Historical evidence and removed review documents are linked to their archived Git
+revision. They are not current acceptance evidence. Generate fresh reports in an
+output directory or retain them as CI artifacts.
+
 `gateway-application::invocation_resilience::InvocationRun` owns one in-memory
 ledger across the initial invocation, malformed-output repair retries, transient
 failures and pre-admitted provider/model fallback. The domain contracts are in
@@ -136,5 +140,5 @@ Run `cargo test -p gateway-application --test invocation_resilience --locked`.
 The EPIC-06.08 entry in `tests/scripts/quality-gates.json` measures each introduced
 production file at >=95%, rejects absent/duplicate/invalid evidence, and runs the
 checker self-tests. Executed results and candidate source hashes are recorded in
-[evidence](evidence/EPIC-06.08-invocation-resilience.json). Live providers and
+[evidence](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/blob/59f6db7e29478e2903cf69d6e5c7e65632876710/docs/evidence/EPIC-06.08-invocation-resilience.json). Live providers and
 installed-host E2E remain separate qualification scopes.

@@ -1,5 +1,9 @@
 # 5. Building Block View
 
+Historical evidence and removed review documents are linked to their archived Git
+revision. They are not current acceptance evidence. Generate fresh reports in an
+output directory or retain them as CI artifacts.
+
 ## 5.1 Level 1
 
 ### Gateway Core
@@ -132,7 +136,7 @@ CG-20 adds provider-independent evaluation and release-threshold contracts in
 `gateway-application`, and versioned datasets and gate automation outside the
 core. CG-20D consumes these contracts in an external-project fake-port replay.
 Neither evaluation scores nor exported memory grant process or policy authority.
-See [EPIC-02 evaluation](../epic-02-evaluation.md) and [ADR-014](../adr/ADR-014-versioned-evaluation-and-learning-export.md).
+See [EPIC-02 evaluation](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/blob/59f6db7e29478e2903cf69d6e5c7e65632876710/docs/epic-02-evaluation.md) and [ADR-014](../adr/ADR-014-versioned-evaluation-and-learning-export.md).
 
 ## 5.3 Proposed Python services
 
@@ -383,7 +387,7 @@ See [operator and contract guide](../structured-output-parsing.md).
 
 ### Evidence and grounding verification
 
-`gateway-domain::grounding` owns version 1 trusted claim/snapshot contracts and stable diagnostics. `gateway-application::grounding` reuses EPIC-02 provenance, CG-06 evidence and existing quality types. `OutputVerificationPort` exposes the required `GroundingEvidencePort` for evidence/claim rules; store authentication and independent observation remain adapter responsibilities. See [integration and operator guidance](../evidence-grounding-verification.md).
+`gateway-domain::grounding` owns version 1 trusted claim/snapshot contracts and stable diagnostics. `gateway-application::grounding` reuses EPIC-02 provenance, CG-06 evidence and existing quality types. `OutputVerificationPort` exposes the required `GroundingEvidencePort` for evidence/claim rules; store authentication and independent observation remain adapter responsibilities. See [integration and operator guidance](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/blob/59f6db7e29478e2903cf69d6e5c7e65632876710/docs/evidence-grounding-verification.md).
 
 ### Bounded invocation resilience — EPIC-06.08
 
@@ -431,4 +435,4 @@ file to renderer/profile identity, validates the admitted task/agent/scope/outpu
 shape, and retains the full semantic context below the authority boundary. The
 V12 live qualification passed both native and Chat Completions HTTP paths against
 the same Docker backend. Exact artifacts and the bounded acceptance scope are
-recorded in [host/live evidence](../evidence/EPIC-06-host-live.json).
+recorded in [host/live evidence](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/blob/59f6db7e29478e2903cf69d6e5c7e65632876710/docs/evidence/EPIC-06-host-live.json).

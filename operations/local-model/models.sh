@@ -3,10 +3,10 @@
 set -euo pipefail
 usage() {
   cat <<'HELP'
-Usage: scripts/operations/local-model/models.sh inspect
-       scripts/operations/local-model/models.sh install /models/PROFILE.json
-       scripts/operations/local-model/models.sh test|promote|disable MODEL_ID
-       scripts/operations/local-model/models.sh rollback ROLE
+Usage: operations/local-model/models.sh inspect
+       operations/local-model/models.sh install /models/PROFILE.json
+       operations/local-model/models.sh test|promote|disable MODEL_ID
+       operations/local-model/models.sh rollback ROLE
 
 Requires the already running model-service and Docker Compose.
 install: download the model and register a pinned artifact snapshot (profile path is inside

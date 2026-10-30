@@ -1,5 +1,9 @@
 # Deterministic entity, reference and context resolution
 
+Historical evidence and removed review documents are linked to their archived Git
+revision. They are not current acceptance evidence. Generate fresh reports in an
+output directory or retain them as CI artifacts.
+
 EPIC-05.09 [#187](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/issues/187)
 implements the request-scoped resolver in
 [`gateway-application::interpretation`](../crates/gateway-application/src/interpretation.rs)
@@ -153,7 +157,7 @@ acceptance or authorize issue closure.
   and one missing installed-qualification report. The same five errors were
   reproduced in a clean detached worktree at the inspected baseline.
 
-The [source-bound evidence summary](evidence/EPIC-05.09-interpretation.json)
+The [source-bound evidence summary](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/blob/59f6db7e29478e2903cf69d6e5c7e65632876710/docs/evidence/EPIC-05.09-interpretation.json)
 records this component result and the broader qualification failures. These
 failures were not bypassed or repaired as part of the resolver change. Full
 repository qualification is not claimed.

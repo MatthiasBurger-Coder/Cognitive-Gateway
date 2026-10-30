@@ -1,5 +1,9 @@
 # 4. Solution Strategy
 
+Historical evidence and removed review documents are linked to their archived Git
+revision. They are not current acceptance evidence. Generate fresh reports in an
+output directory or retain them as CI artifacts.
+
 Cognitive Gateway uses a layered control-plane architecture.
 
 ```mermaid
@@ -111,4 +115,4 @@ eligible experience, pattern candidates, immutable learned procedure versions
 and explicit procedure lifecycle transitions. These contracts do not grant
 authority and remain subordinate to existing process/capability/policy
 identities. The EPIC-03 experience/pattern, evaluation, promotion and reflex
-reference runtime is implemented and covered by [complete acceptance](../epic-03-complete-acceptance.md). See [learned procedures](../learned-procedures.md).
+reference runtime is implemented and covered by [complete acceptance](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/blob/59f6db7e29478e2903cf69d6e5c7e65632876710/docs/epic-03-complete-acceptance.md). See [learned procedures](../learned-procedures.md).

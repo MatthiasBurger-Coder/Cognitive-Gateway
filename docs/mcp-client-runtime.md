@@ -1,5 +1,9 @@
 # Outbound MCP client runtime — EPIC-07.03 #226
 
+Historical evidence and removed review documents are linked to their archived Git
+revision. They are not current acceptance evidence. Generate fresh reports in an
+output directory or retain them as CI artifacts.
+
 ## Delivered boundary
 
 `gateway_daemon::mcp_client::McpConnectorHost` implements the versioned
@@ -174,5 +178,5 @@ boundary excludes installed provider and full policy qualification.
 
 Run the focused qualification and the per-file coverage gate with the commands
 in `tests/scripts/quality-gates.json` (EPIC-07.03). Retained results and source bindings
-are in `docs/evidence/EPIC-07.03-runtime.json`. They qualify the library/runtime
+are in [`docs/evidence/EPIC-07.03-runtime.json`](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/blob/59f6db7e29478e2903cf69d6e5c7e65632876710/docs/evidence/EPIC-07.03-runtime.json). They qualify the library/runtime
 candidate and synthetic server, not live external effects or EPIC-07 completion.

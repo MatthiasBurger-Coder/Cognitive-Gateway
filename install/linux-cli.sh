@@ -4,7 +4,7 @@ set -euo pipefail
 
 usage() {
   cat <<'HELP'
-Usage: scripts/install/linux-cli.sh [--root ABSOLUTE_DIR]
+Usage: install/linux-cli.sh [--root ABSOLUTE_DIR]
 
 Build and install cg and cg-registry from this checkout on Linux.
 Requires: Rust/Cargo. Default root: CARGO_INSTALL_ROOT, CARGO_HOME, or $HOME/.cargo.
@@ -44,7 +44,7 @@ if ! command -v cargo >/dev/null 2>&1; then
   echo 'Cargo is required. Install a Rust toolchain first.' >&2
   exit 1
 fi
-repo_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." && pwd -P)"
+repo_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
 cargo install --path "$repo_root/crates/gateway-daemon" \
   --bin cg --bin cg-registry --locked --force --root "$install_root"
 for binary in cg cg-registry; do

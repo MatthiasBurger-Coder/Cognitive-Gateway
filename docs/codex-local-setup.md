@@ -1,7 +1,11 @@
 # Codex local setup and operator runbook — EPIC-04.09 #244
 
+Historical evidence and removed review documents are linked to their archived Git
+revision. They are not current acceptance evidence. Generate fresh reports in an
+output directory or retain them as CI artifacts.
 
-Current full-parent acceptance is governed by [EPIC-04 acceptance](epic-04-acceptance.md).
+
+Current full-parent acceptance is governed by [EPIC-04 acceptance](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/blob/59f6db7e29478e2903cf69d6e5c7e65632876710/docs/epic-04-acceptance.md).
 Shared structured services and installed-client lifecycle proof are delivered;
 older evidence below retains its historical scope. Fresh full reconciliation
 determines the current parent acceptance state.

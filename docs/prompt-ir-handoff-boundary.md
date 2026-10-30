@@ -1,5 +1,9 @@
 # Prompt IR handoff boundary
 
+Historical evidence and removed review documents are linked to their archived Git
+revision. They are not current acceptance evidence. Generate fresh reports in an
+output directory or retain them as CI artifacts.
+
 Issue [#192](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/issues/192),
 parent #177. This specification extends ADR-015 and preserves ADR-007/008.
 MUST and MUST NOT are normative. `PromptIR` names a conceptual, provider-neutral
@@ -199,7 +203,7 @@ integration. The matrix separates verified boundary evidence from downstream wor
 The real installed invocation path, live providers and #266/#267 verification
 remain separate implementation work.
 Executed commands and source bindings are recorded in
-[the evidence record](evidence/EPIC-05.14-prompt-boundary.json).
+[the evidence record](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/blob/59f6db7e29478e2903cf69d6e5c7e65632876710/docs/evidence/EPIC-05.14-prompt-boundary.json).
 
 
 Completion review: the revised #192 definition scope is **VERIFIED**. The

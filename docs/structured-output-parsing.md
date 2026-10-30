@@ -1,5 +1,9 @@
 # Structured output parsing and tool proposals — #265
 
+Historical evidence and removed review documents are linked to their archived Git
+revision. They are not current acceptance evidence. Generate fresh reports in an
+output directory or retain them as CI artifacts.
+
 `gateway-application::output_parsing` consumes provider-neutral response bytes
 against the immutable admitted `InvocationIr` from #263. It reuses #266's
 `OutputProposalData`, `ToolCallProposal`, strict complete-JSON parser and
@@ -103,6 +107,6 @@ confidence; concrete provider/session hosts excluded and tracked above.
 | P05 | No raw text/commands/tool dispatch, #265 | Pure parsing service → #266 verification | Current Process/Policy remains mandatory | Existing constraint rejection tests and architecture dependency/effect checks | VERIFIED, component |
 | P06 | Documentation, >=95% coverage, traceability | Operator/arc42 docs and CI gate | Existing llvm-cov tooling | tests/scripts/check-output-parsing-coverage.py and retained evidence | VERIFIED, retained qualification |
 
-Evidence: [EPIC-06.05 qualification](evidence/EPIC-06.05-output-parsing.json).
+Evidence: [EPIC-06.05 qualification](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/blob/59f6db7e29478e2903cf69d6e5c7e65632876710/docs/evidence/EPIC-06.05-output-parsing.json).
 These criteria qualify the requested parsing contracts, not the full parent epic
 or a live provider/tool execution path.
