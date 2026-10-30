@@ -24,7 +24,7 @@ crates/
 └── gateway-daemon/
 ```
 
-See [the shell entry-point catalog](scripts/README.md) for responsibilities,
+See [the shell entry-point catalog](scripts/shell-entry-points.md) for responsibilities,
 arguments, prerequisites and side effects.
 
 ## Installation on Linux

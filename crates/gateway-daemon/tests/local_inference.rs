@@ -13,7 +13,7 @@ fn request() -> LocalInferenceRequest {
         role: "semantic-interpreter".into(),
         input_contract: "local-inference/1.0".into(),
         output_contract: "semantic-proposal/1.0".into(),
-        prompt: "Read README.md".into(),
+        prompt: "Read shell-entry-points.md".into(),
         output_schema: json!({"type": "object"}),
     }
 }

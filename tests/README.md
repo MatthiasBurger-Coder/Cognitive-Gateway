@@ -24,7 +24,7 @@ Run these commands from the repository root, for example:
 python3 tests/scripts/quality-gate.py
 ```
 
-[`../scripts/`](../scripts/README.md) documents the shell entry points for installation
+[`../scripts/`](../scripts/shell-entry-points.md) documents the shell entry points for installation
 and service management. Every shell runner supports `--help` without starting a test or service. Product setup is implemented in Rust as `cg-local --setup`.
 Historical reports under `docs/evidence/` retain the paths recorded when their
 evidence was produced.

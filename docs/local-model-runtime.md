@@ -75,7 +75,7 @@ Gateway container) and uses a total HTTP deadline and response size limit.
   "role": "semantic-interpreter",
   "input_contract": "local-inference/1.0",
   "output_contract": "semantic-proposal/1.0",
-  "prompt": "Read README.md",
+  "prompt": "Read shell-entry-points.md",
   "output_schema": {
     "type": "object",
     "additionalProperties": false,

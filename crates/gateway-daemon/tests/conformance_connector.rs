@@ -315,7 +315,7 @@ fn request(target: &ConnectorTarget, revision: ContentDigest, github: bool) -> C
         inventory_revision: revision,
         arguments: if github {
             [
-                (text("path"), TypedValue::String(text("README.md"))),
+                (text("path"), TypedValue::String(text("shell-entry-points.md"))),
                 (text("ref"), TypedValue::String(text("main"))),
             ]
             .into()
