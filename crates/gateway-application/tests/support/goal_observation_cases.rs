@@ -1229,3 +1229,43 @@ fn absolute_deadline_stops_new_tasks_and_retained_marker_verification_without_io
     assert_eq!(c.host.verifies.load(Ordering::SeqCst), verifies);
     assert_eq!(c.host.reads.load(Ordering::SeqCst), 1);
 }
+
+#[test]
+fn restoring_resource_ledgers_rejects_empty_admission_and_classifies_overspend() {
+    let limits = SessionResourceLimits {
+        cost_unit: ReferenceId::new("credits").unwrap(),
+        amounts: SessionResourceAmounts {
+            connector_calls: 3,
+            ..Default::default()
+        },
+    };
+    let mut ledger = SessionResourceLedger::new(limits.clone()).unwrap();
+    let mut empty_admission = serde_json::to_value(&ledger).unwrap();
+    empty_admission["limits"]["amounts"] =
+        serde_json::to_value(SessionResourceAmounts::default()).unwrap();
+
+    let goal = observed::goal(ContextScopeId::new("project-a").unwrap());
+    ledger
+        .reserve(data_binding(&goal).acquisition, limits.amounts)
+        .unwrap();
+    let wire = serde_json::to_value(&ledger).unwrap();
+    // Consuming the exact admitted allowance remains a valid durable ledger.
+    assert_eq!(
+        serde_json::from_value::<SessionResourceLedger>(wire.clone()).unwrap(),
+        ledger
+    );
+    let mut overspent = wire;
+    overspent["used"]["connector_calls"] = serde_json::json!(4);
+    for (case, invalid) in [
+        ("empty admission", empty_admission),
+        ("overspent", overspent),
+    ] {
+        let error = serde_json::from_value::<SessionResourceLedger>(invalid).unwrap_err();
+        assert!(
+            error
+                .to_string()
+                .contains(SessionError::LimitExceeded.code()),
+            "{case}: {error}"
+        );
+    }
+}

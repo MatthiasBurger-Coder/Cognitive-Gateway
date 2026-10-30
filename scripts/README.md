@@ -41,11 +41,16 @@ Other service settings remain in the Compose files and their existing operator g
 These remain under `tests/scripts/`. Run them from the checkout root; each supports
 `--help`. Qualification runners require exactly one evidence directory. They reset
 coverage build state and write reports; reusing a directory can overwrite evidence.
+Native runtime qualification (shared sessions, observed goals, Before journal and
+atomic Before) pins both Cargo dev and test optimization to level 1 for one
+consistent instrumented test/CLI profile. These process-local settings do not
+change `Cargo.toml` or installed binaries.
 PostgreSQL qualification uses the disposable host supplied by
 `python3 tests/scripts/cognitive-test-host.py -- bash RUNNER EVIDENCE_DIR`.
 
 | Runner | Responsibility |
 | --- | --- |
+| [`with-coverage-env.sh`](../tests/scripts/with-coverage-env.sh) | Apply coverage compiler flags to the current shell when sourced, or execute a supplied command with those flags. |
 | [`check-architecture.sh`](../tests/scripts/check-architecture.sh) | Check Cargo dependency direction and catalog/project boundaries. Starts no services. |
 | [`qualify-shared-sessions.sh`](../tests/scripts/qualify-shared-sessions.sh) | Shared-session runtime, persistence and CLI/MCP parity. |
 | [`qualify-observed-goal-sessions.sh`](../tests/scripts/qualify-observed-goal-sessions.sh) | Observed-goal sessions with PostgreSQL and coverage evidence. |
@@ -57,3 +62,20 @@ PostgreSQL qualification uses the disposable host supplied by
 Usage errors exit 2. Other failures propagate the invoked tool's status; setup
 failures can exit 1. Help exits 0. Historical reports under `docs/evidence/` retain
 the paths and commands recorded when they were produced.
+
+Rust coverage builds use `with-coverage-env.sh` to retain unreferenced
+function bodies with `-C link-dead-code`. This keeps LLVM's combined report from
+hiding an executed
+accessor behind an unused coverage stub. Existing compiler flags are preserved,
+including Cargo's encoded-flags precedence. This affects instrumented builds
+only; test selections and coverage requirements stay fixed.
+
+Native runners with several Cargo invocations source the shared environment;
+single-build runners and manifest commands execute Cargo through the wrapper.
+This keeps the measurement policy in one place across all Rust coverage gates.
+
+The full quality runner uses one coverage build cache and cleans generated
+workspace artifacts after each successful gate. JSON reports, logs and hashes
+stay in the evidence bundle. A failed gate stops before cleanup, preserving its
+build and profiling data for diagnosis. Standalone runners still accept an
+explicit `CARGO_LLVM_COV_TARGET_DIR`.
