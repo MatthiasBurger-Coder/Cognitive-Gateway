@@ -232,10 +232,12 @@ class Epic04AcceptanceTests(unittest.TestCase):
                     GATE.inspect('installed', paths['installed'], 'candidate')
                 self.assertFalse(GATE.reconcile(paths)['closure_allowed'])
 
-    def test_real_installed_report_cannot_be_upgraded_to_full_parent(self):
-        report = json.loads((ROOT / 'docs/evidence/EPIC-04.14-installed-codex/report.json').read_text())
-        with self.assertRaises(ValueError):
-            GATE.validate_binding(report, ROOT / 'docs/evidence/EPIC-04.14-installed-codex/report.json', GATE.revision())
+    def test_historical_installed_report_cannot_be_upgraded_to_full_parent(self):
+        with self.evidence_fixture() as (_, paths, reports):
+            report = reports['installed']
+            report['revision'] = 'historical-candidate'
+            with self.assertRaisesRegex(ValueError, 'Evidence revision differs from candidate'):
+                GATE.validate_binding(report, paths['installed'], 'candidate')
 
     def test_closure_claims_include_lists_urls_and_capitalization(self):
         for text in ('Closes #126', 'FIXES #245', 'Resolves #292, #126 and #245',

@@ -1,5 +1,9 @@
 # Invocation trace, replay and qualification — EPIC-06.10 (#270)
 
+Historical evidence and removed review documents are linked to their archived Git
+revision. They are not current acceptance evidence. Generate fresh reports in an
+output directory or retain them as CI artifacts.
+
 The invocation plane now provides content-free trace capture, deterministic
 revalidation of recorded outputs, role-specific metric gates and an executable
 revision-bound fixture qualification runner. Models propose; deterministic Gateway
@@ -206,7 +210,7 @@ The report records the precise candidate and outcomes; a historical green report
 cannot qualify changed code. Parent issue closure and live model promotion are
 not implied by completion of this component implementation.
 
-Retained candidate evidence: [EPIC-06.10 qualification](evidence/EPIC-06.10-invocation-qualification.json).
+Retained candidate evidence: [EPIC-06.10 qualification](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/blob/59f6db7e29478e2903cf69d6e5c7e65632876710/docs/evidence/EPIC-06.10-invocation-qualification.json).
 
 ## Operator invocation host
 
@@ -311,13 +315,13 @@ must return exactly the audit receipt bound to the recorded output and invocatio
 missing receipts, changed bindings and dispatchable result fields fail the probe.
 
 Continuation evidence is retained in
-[EPIC-06 host/live continuation](evidence/EPIC-06-host-live-continuation.json).
+[EPIC-06 host/live continuation](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/blob/59f6db7e29478e2903cf69d6e5c7e65632876710/docs/evidence/EPIC-06-host-live-continuation.json).
 Live candidates are evaluated in the isolated Docker laboratory described below.
 Offline checks and a base-suite pass cannot substitute for canonical-host HTTP
 conformance and the complete role-specific live gates.
 
 Candidate execution results and exact remaining acceptance gaps are retained in
-[the host/live evidence record](evidence/EPIC-06-host-live.json). A base-suite pass
+[the host/live evidence record](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/blob/59f6db7e29478e2903cf69d6e5c7e65632876710/docs/evidence/EPIC-06-host-live.json). A base-suite pass
 is separate from canonical-host qualification. Any failed semantic output,
 missing hardware capacity or unsuccessful metric gate leaves the live role
 unqualified; neither readiness nor a component pass closes the parent epic.
@@ -419,6 +423,6 @@ with ten exact cases and six operational probes per adapter. Native cold/warm
 maximum latency was 113627/75571 ms, runtime CPU 3394717 ms and resident model
 memory 3796726272 bytes. Chat Completions measured 112403/75975 ms, CPU 3388121 ms
 and memory 4602032640 bytes. These measurements apply to the pinned registered
-role, model and isolated runtime configuration. The [evidence record](evidence/EPIC-06-host-live.json)
+role, model and isolated runtime configuration. The [evidence record](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/blob/59f6db7e29478e2903cf69d6e5c7e65632876710/docs/evidence/EPIC-06-host-live.json)
 retains source-bound reports and synthetic full journals; earlier failed attempts
 remain failed. No capability-catalog promotion was performed.

@@ -1,5 +1,9 @@
 # Connector identity and manifest v1
 
+Historical evidence and removed review documents are linked to their archived Git
+revision. They are not current acceptance evidence. Generate fresh reports in an
+output directory or retain them as CI artifacts.
+
 EPIC-07.02 #225 implements the foundation contract under [ADR-022](adr/ADR-022-outbound-connector-ownership.md)
 and the [connector architecture](mcp-connector-runtime.md). Rust in
 [`gateway_application::connector_manifest`](../crates/gateway-application/src/connector_manifest.rs)
@@ -194,7 +198,7 @@ cargo clippy -p gateway-application --test connector_manifest --test connectors 
 cargo fmt --check
 ```
 
-The [evidence record](evidence/EPIC-07.02-manifest.json) binds this contract to the
+The [evidence record](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/blob/59f6db7e29478e2903cf69d6e5c7e65632876710/docs/evidence/EPIC-07.02-manifest.json) binds this contract to the
 candidate files and actual results. No live connector, resolved credential/profile,
 application authorization or parent EPIC-07 completion is claimed.
 

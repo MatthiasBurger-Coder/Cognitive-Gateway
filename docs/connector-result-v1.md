@@ -1,9 +1,13 @@
 # Canonical connector result and provenance boundary
 
+Historical evidence and removed review documents are linked to their archived Git
+revision. They are not current acceptance evidence. Generate fresh reports in an
+output directory or retain them as CI artifacts.
+
 EPIC-07.05 #228 implements `gateway_application::connector_results::ConnectorResult`
 and the outer `mcp_client::normalization::CanonicalResultNormalizer`. The Rust
 contract contains no provider JSON. The [normalization fixtures](../tests/fixtures/connector-result-v1/cases.json)
-and [evidence record](evidence/EPIC-07.05-normalization.json) qualify this slice.
+and [evidence record](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/blob/59f6db7e29478e2903cf69d6e5c7e65632876710/docs/evidence/EPIC-07.05-normalization.json) qualify this slice.
 
 The application port revision is now **2** because `ConnectorObservation` requires
 `ConnectorResultMetadata`. Existing methods and operation classes are unchanged.

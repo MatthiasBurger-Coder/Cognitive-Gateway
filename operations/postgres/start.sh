@@ -4,7 +4,7 @@ set -euo pipefail
 # Provision the PostgreSQL credential file if absent, then start the persistent service.
 if [[ ${1:-} == --help || ${1:-} == -h ]]; then
   cat <<'HELP'
-Usage: scripts/operations/postgres/start.sh
+Usage: operations/postgres/start.sh
 
 Create a private random-password file only if absent; validate and start PostgreSQL.
 CG_POSTGRES_ENV_FILE overrides ~/.config/cognitive-gateway/postgres.env (XDG_CONFIG_HOME honored).
@@ -17,7 +17,7 @@ HELP
 fi
 if (($#)); then echo 'Unexpected PostgreSQL start arguments; see --help.' >&2; exit 2; fi
 
-repo_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../../.." && pwd -P)"
+repo_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." && pwd -P)"
 env_file="${CG_POSTGRES_ENV_FILE:-${XDG_CONFIG_HOME:-${HOME:?HOME is required}/.config}/cognitive-gateway/postgres.env}"
 
 if ! command -v docker >/dev/null 2>&1 || ! docker compose version >/dev/null 2>&1; then
@@ -46,6 +46,6 @@ if grep -qx 'CG_POSTGRES_PASSWORD=replace-with-a-long-random-password' "$env_fil
   exit 1
 fi
 
-"$repo_root/scripts/operations/postgres/compose.sh" config --quiet
-"$repo_root/scripts/operations/postgres/compose.sh" up -d --wait postgres
+"$repo_root/operations/postgres/compose.sh" config --quiet
+"$repo_root/operations/postgres/compose.sh" up -d --wait postgres
 echo 'PostgreSQL is healthy. The named Docker volume retains its data across container recreation.'

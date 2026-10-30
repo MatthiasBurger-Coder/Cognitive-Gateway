@@ -1,5 +1,9 @@
 # Independent MCP document conformance adapter — EPIC-07.11 #234
 
+Historical evidence and removed review documents are linked to their archived Git
+revision. They are not current acceptance evidence. Generate fresh reports in an
+output directory or retain them as CI artifacts.
+
 `cg-conformance-mcp` is a second, independent, read-only Rust MCP server.
 It serves one synthetic document and has no GitHub dependency, network access,
 filesystem reads, credentials or mutation surface. It proves the plugin boundary
@@ -99,7 +103,7 @@ Run the EPIC-07.11 command in `tests/scripts/quality-gates.json` for measured
 >=95% line coverage per new production file. Also run GitHub/MCP regressions,
 formatting, clippy, architecture checks and `git diff --check`.
 Results and source/artifact bindings are retained in
-`docs/evidence/EPIC-07.11-independent-reference.json`.
+[`docs/evidence/EPIC-07.11-independent-reference.json`](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/blob/59f6db7e29478e2903cf69d6e5c7e65632876710/docs/evidence/EPIC-07.11-independent-reference.json).
 This qualifies #234's synthetic alternative. It does not qualify a live
 Confluence/Jira/filesystem deployment, credentials for such a deployment,
 installed shared-session persistence, external mutations, or parent EPIC-07

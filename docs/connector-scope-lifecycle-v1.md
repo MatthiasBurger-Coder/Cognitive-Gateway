@@ -1,5 +1,9 @@
 # Scoped connector admission and lifecycle (#232)
 
+Historical evidence and removed review documents are linked to their archived Git
+revision. They are not current acceptance evidence. Generate fresh reports in an
+output directory or retain them as CI artifacts.
+
 The application `connector_admission` module owns an immutable operator allowlist
 and its derived `ConnectorRegistry`. The daemon `mcp_client::plugins` module
 composes private MCP hosts and implements `ConnectorApplicationPort` through
@@ -123,4 +127,4 @@ use an independent Python MCP peer, not a live provider. Full parent #223 live
 provider/installed-client qualification remains owned by its acceptance suite;
 component evidence here does not claim that broader parent is complete.
 
-Qualification completed on 2026-10-28: [retained source-bound evidence](evidence/EPIC-07.09-scope-lifecycle.json) records 283 Rust tests in the comprehensive instrumented run, actual PostgreSQL/installed-binary scenarios, and all four per-file coverage gates above 95%. The new admission module reaches 100%. Architecture, contract, Clippy and formatting checks also pass. This qualifies #232 for review; it does not qualify the complete parent #223.
+Qualification completed on 2026-10-28: [retained source-bound evidence](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/blob/59f6db7e29478e2903cf69d6e5c7e65632876710/docs/evidence/EPIC-07.09-scope-lifecycle.json) records 283 Rust tests in the comprehensive instrumented run, actual PostgreSQL/installed-binary scenarios, and all four per-file coverage gates above 95%. The new admission module reaches 100%. Architecture, contract, Clippy and formatting checks also pass. This qualifies #232 for review; it does not qualify the complete parent #223.

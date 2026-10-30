@@ -1,5 +1,9 @@
 # Declarative v0.1 quality gates and release evidence (CG-13)
 
+Historical evidence and removed review documents are linked to their archived Git
+revision. They are not current acceptance evidence. Generate fresh reports in an
+output directory or retain them as CI artifacts.
+
 ## Run the complete gate
 
 ```sh
@@ -11,7 +15,7 @@ python3 tests/scripts/quality-gate.py
 Run from a checkout with Bash, Git, Python 3.11+ and the Rust toolchain installed.
 Install offline contract-validation dependencies with
 `python3 -m pip install -r tests/contracts/requirements.txt` before running the gate.
-Start the local PostgreSQL service with `./scripts/operations/postgres/start.sh` before a
+Start the local PostgreSQL service with `./operations/postgres/start.sh` before a
 local full gate run. The daemon coverage step executes the CG-22 database
 integration test; CI provides an isolated PostgreSQL service automatically.
 No provider, LLM, database or runtime service is needed. Cargo may need network
@@ -40,7 +44,7 @@ remains available. No production source exclusions are added.
 The CG-20 evaluation gate replays the versioned golden dataset, retains raw
 objective metrics in `cg20-evaluation.json`, and enforces 95% line coverage
 for both new evaluation production modules from the workspace report. See
-[EPIC-02 evaluation](epic-02-evaluation.md). The synthetic dataset report and
+[EPIC-02 evaluation](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/blob/59f6db7e29478e2903cf69d6e5c7e65632876710/docs/epic-02-evaluation.md). The synthetic dataset report and
 the external-project fake-port replay are separate evidence types.
 
 The CG-28 gate retains a reference-only synthetic dataset, immutable model

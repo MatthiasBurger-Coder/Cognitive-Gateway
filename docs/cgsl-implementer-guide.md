@@ -1,5 +1,9 @@
 # CGSL implementer guide
 
+Historical evidence and removed review documents are linked to their archived Git
+revision. They are not current acceptance evidence. Generate fresh reports in an
+output directory or retain them as CI artifacts.
+
 This is the entry point for implementing and independently reproducing CGSL 1.0
 and SemanticTaskIR 1.0. It completes the documentation scope of EPIC-05.16 #194.
 The specifications below define the contract; issue history is not required.
@@ -128,8 +132,8 @@ behavior. The [independent valid-source comparison](cgsl-conformance.md#independ
 additionally qualifies IR/digest equivalence with a separately implemented
 offline reader. Neither establishes a deployed host.
 
-The [EPIC-05.16 review and evidence record](epic-05.16-documentation-review.md)
+The [EPIC-05.16 review and evidence record](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/blob/59f6db7e29478e2903cf69d6e5c7e65632876710/docs/epic-05.16-documentation-review.md)
 maps documentation acceptance to source inspection and executed regressions.
-The subsequent [parent acceptance record](evidence/EPIC-05-parent-acceptance.json)
+The subsequent [parent acceptance record](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/blob/59f6db7e29478e2903cf69d6e5c7e65632876710/docs/evidence/EPIC-05-parent-acceptance.json)
 reconciles all 29 parent criteria, the late additions and the three audit findings
 against its exact source hashes, retained logs and measured coverage.

@@ -1,5 +1,9 @@
 # Deterministic connector discovery and mapping v1
 
+Historical evidence and removed review documents are linked to their archived Git
+revision. They are not current acceptance evidence. Generate fresh reports in an
+output directory or retain them as CI artifacts.
+
 EPIC-07.04 #227 supplies an explicit, provider-independent mapper for the
 [admitted outbound MCP host](mcp-client-runtime.md). The implementation is
 [`mcp_client::mapping`](../crates/gateway-daemon/src/mcp_client/mapping.rs);
@@ -167,7 +171,7 @@ validator; no database, installation or canonical catalog migration is involved.
 | D06 | Existing capability/source semantics | Existing application inventory and CG-03 definition | CG registry remains Agent/Skill authority | Typed capability/source assertions, existing registry query resolution and exact resource dispatch | VERIFIED at component boundary |
 
 Run the EPIC-07.04 command in `tests/scripts/quality-gates.json`, independent contract
-tests and architecture/format/clippy checks. The [retained evidence](evidence/EPIC-07.04-mapping.json)
+tests and architecture/format/clippy checks. The [retained evidence](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/blob/59f6db7e29478e2903cf69d6e5c7e65632876710/docs/evidence/EPIC-07.04-mapping.json)
 binds results to candidate sources. Runtime tests use an independent stdio
 subprocess with test-only admission/normalization; they do not qualify live
 providers, production credentials/policy/normalization, installed coordinator

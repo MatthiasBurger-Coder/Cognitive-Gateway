@@ -1,5 +1,9 @@
 # Tests
 
+Historical evidence and removed review documents are linked to their archived Git
+revision. They are not current acceptance evidence. Generate fresh reports in an
+output directory or retain them as CI artifacts.
+
 This directory contains cross-crate architecture and contract-test specifications. Unit tests remain colocated with the owning crate; integration tests that exercise more than one crate belong here when the workspace has behavior to exercise.
 
 The bootstrap quality baseline is the executable architecture guard at [`scripts/check-architecture.sh`](scripts/check-architecture.sh), together with the workspace commands documented in the root README:
@@ -24,10 +28,9 @@ Run these commands from the repository root, for example:
 python3 tests/scripts/quality-gate.py
 ```
 
-[`../scripts/`](../scripts/shell-entry-points.md) documents the shell entry points for installation
+[shell entry points](../docs/shell-entry-points.md) documents the shell entry points for installation
 and service management. Every shell runner supports `--help` without starting a test or service. Product setup is implemented in Rust as `cg-local --setup`.
-Historical reports under `docs/evidence/` retain the paths recorded when their
-evidence was produced.
+Generated reports are retained in the selected output directory or CI artifacts.
 
 ## Current test coverage
 
@@ -100,7 +103,7 @@ external temporary files. See [the proof and replay commands](../docs/declarativ
 
 Run `python3 tests/scripts/quality-gate.py` for the complete CG-13 gate. See [the release checklist](../docs/declarative-quality-gates.md) for requirements, evidence and EPIC acceptance traceability.
 
-CG-30 v0.3 acceptance lives in `gateway-application/tests/support/cg30.rs`, under the context application test target. It retains fixture classification, routing, failure and lifecycle evidence. See [the qualification report](../docs/epic-03-release-qualification.md) for thresholds and reproduction. `tests/architecture/test_cg30_qualification.py` proves release admission rejects incomplete, altered, failed and dirty-candidate bundles.
+CG-30 v0.3 acceptance lives in `gateway-application/tests/support/cg30.rs`, under the context application test target. It retains fixture classification, routing, failure and lifecycle evidence. See [the qualification report](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/blob/59f6db7e29478e2903cf69d6e5c7e65632876710/docs/epic-03-release-qualification.md) for thresholds and reproduction. `tests/architecture/test_cg30_qualification.py` proves release admission rejects incomplete, altered, failed and dirty-candidate bundles.
 
 ## Complete EPIC-03 acceptance
 
@@ -109,7 +112,7 @@ restart, durable inference rollback and competing-worker tests in coverage. The
 additional gate admits the CPU ML experiment, separate held-out evaluation, seeded
 Grid/Random search, calibration, drift/OOD, resource-limited processes and isolated
 container worker. Every new Rust module and the Python pipeline require at least
-95% measured line coverage. See [acceptance/reproduction](../docs/epic-03-complete-acceptance.md).
+95% measured line coverage. See [acceptance/reproduction](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/blob/59f6db7e29478e2903cf69d6e5c7e65632876710/docs/epic-03-complete-acceptance.md).
 
 The [CGSL conformance corpus](fixtures/cgsl-conformance-v1/README.md) and
 [component matrix](../docs/cgsl-conformance.md) cover canonical source/IR

@@ -3,7 +3,7 @@
 set -euo pipefail
 if [[ ${1:-} == --help || ${1:-} == -h || $# == 0 ]]; then
   cat <<'HELP'
-Usage: scripts/operations/local-model/compose.sh COMPOSE_ARGS...
+Usage: operations/local-model/compose.sh COMPOSE_ARGS...
 
 Run Docker Compose for the local model stack from any working directory.
 CG_MODEL_ACCELERATION: cpu (default), nvidia/gpu, amd or vulkan selects the overlay.
@@ -12,7 +12,7 @@ Effects and exit status: those of the requested Compose command. No command runs
 HELP
   exit 0
 fi
-repo_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../../.." && pwd -P)"
+repo_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." && pwd -P)"
 files=(-f "$repo_root/compose.model.yaml")
 case ${CG_MODEL_ACCELERATION:-cpu} in
   cpu) ;;

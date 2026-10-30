@@ -1,5 +1,9 @@
 # Connector release qualification — EPIC-07.12 #235
 
+Historical evidence and removed review documents are linked to their archived Git
+revision. They are not current acceptance evidence. Generate fresh reports in an
+output directory or retain them as CI artifacts.
+
 The qualification suite retains separate synthetic and authenticated live evidence
 for the complete connector acceptance surface. Rust owns runtime, mapping,
 normalization, CG-09 enforcement, retry decisions and aggregate accounting.
@@ -138,7 +142,7 @@ remain authoritative. Rollback removes this additive qualification suite, golden
 live test profiles and quality-manifest entry.
 
 The retained execution record is
-`docs/evidence/EPIC-07.12-connector-qualification.json`; its compressed validation
+[`docs/evidence/EPIC-07.12-connector-qualification.json`](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/blob/59f6db7e29478e2903cf69d6e5c7e65632876710/docs/evidence/EPIC-07.12-connector-qualification.json); its compressed validation
 bundle preserves reports and logs. Source bindings describe the candidate before
 adding the evidence record itself. Historical component evidence remains labelled
 with its original scope and cannot authorize full release acceptance.
