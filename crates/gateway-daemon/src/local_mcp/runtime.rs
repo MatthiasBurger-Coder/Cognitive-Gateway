@@ -590,6 +590,8 @@ mod tests {
             assert!(error.code().starts_with("CG_"));
         }
     }
+    include!("runtime_qualification_tests.rs");
+
     #[test]
     fn overload_and_unknown_cancellation_do_not_restart_work() {
         let (mut server, mut wire) = setup(

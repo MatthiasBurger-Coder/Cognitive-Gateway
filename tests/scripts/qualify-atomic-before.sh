@@ -27,7 +27,8 @@ mkdir -p "$output"
 output="$(cd "$output" && pwd -P)"
 export CARGO_PROFILE_DEV_OPT_LEVEL=1 CARGO_PROFILE_TEST_OPT_LEVEL=1
 source tests/scripts/with-coverage-env.sh
-export CARGO_TARGET_DIR="${CARGO_LLVM_COV_TARGET_DIR:-$PWD/target/atomic-before-coverage}"
+export CARGO_LLVM_COV_TARGET_DIR="${CARGO_LLVM_COV_TARGET_DIR:-$PWD/target/atomic-before-coverage}"
+export CARGO_TARGET_DIR="$CARGO_LLVM_COV_TARGET_DIR"
 cargo llvm-cov clean --workspace
 eval "$(cargo llvm-cov show-env --sh)"
 # Compile the identical test selection first, including the current real CLI

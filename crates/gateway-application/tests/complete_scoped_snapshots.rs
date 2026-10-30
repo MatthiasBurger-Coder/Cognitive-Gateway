@@ -180,6 +180,7 @@ fn atomic_export_is_one_actual_group_and_retains_false_and_non_goal_native_facts
 fn native_version_vectors_use_real_member_observations_under_one_global_anchor() {
     for f in [Fixture::versioned(), Fixture::bracketed()] {
         let snapshot = f.validate().unwrap();
+        assert_eq!(snapshot.consistency(), &f.consistency);
         assert_eq!(snapshot.object_versions().len(), 2);
         assert_ne!(
             snapshot.object_versions()[0].version,

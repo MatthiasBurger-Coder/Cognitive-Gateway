@@ -71,3 +71,6 @@ impl CompleteScopedSnapshot {
         &self.object_versions
     }
 }
+
+#[cfg(test)]
+mod boundary_tests;

@@ -21,6 +21,10 @@ prerequisite/evidence gates. Contract definition does not implement session serv
 
 ## Architecture Decisions
 
+[Connector release qualification](connector-release-qualification.md) documents
+the EPIC-07 security/failure suite, compatibility matrix and remaining live/system
+acceptance prerequisites.
+
 See [`adr/`](adr/) for accepted architecture decisions.
 
 ## CGSL implementation documentation

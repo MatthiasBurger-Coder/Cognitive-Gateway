@@ -65,6 +65,13 @@ implements the canonical allowlist, exact project/session/request binding, priva
 plugin hosts, revocation and rebuild. Independent stdio qualification covers the
 lifecycle; live-provider parent acceptance remains separate.
 
+EPIC-07.12 (#235): the [connector qualification suite](connector-release-qualification.md)
+collects source-bound synthetic and opt-in authenticated live connector evidence
+with a 39-row acceptance matrix, including the shipped native CLI chain,
+uncertain effects and independent readback. Release qualification also executes
+the complete quality/coverage manifest. General EPIC-08 session orchestration
+and parent acceptance remain separate; component success permits no closure.
+
 | Area | Status | Notes |
 | --- | --- | --- |
 | Typed domain model / ExecutionContextIR | IMPLEMENTED | Versioned domain and serialization contracts exist. |

@@ -278,5 +278,17 @@
   {
     "name": "EPIC-07.09 scoped admission and plugin lifecycle coverage",
     "command": ": \"${CG_COGNITIVE_TEST_DATABASE:?Run through the disposable cognitive test host}\"\nCARGO_BUILD_JOBS=1 CARGO_LLVM_COV_TARGET_DIR=target/mcp-client-coverage cargo llvm-cov -p gateway-application -p gateway-daemon --lib --test connector_admission --test mcp_client --test observed_goal_sessions --test complete_before_sessions --locked --json --output-path \"$EVIDENCE_DIR/connector-admission-coverage.json\" -- --test-threads=1\npython3 tests/scripts/check-connector-admission-coverage.py --self-test\npython3 tests/scripts/check-connector-admission-coverage.py \"$EVIDENCE_DIR/connector-admission-coverage.json\""
+  },
+  {
+    "name": "EPIC-07.10 GitHub reference connector and scoped evidence coverage",
+    "command": "CARGO_BUILD_JOBS=1 CARGO_LLVM_COV_TARGET_DIR=target/github-reference-coverage cargo llvm-cov -p gateway-daemon --lib --test github_connector --locked --json --output-path \"$EVIDENCE_DIR/github-connector-coverage.json\" -- github_connector\npython3 tests/scripts/check-github-connector-coverage.py --self-test\npython3 tests/scripts/check-github-connector-coverage.py \"$EVIDENCE_DIR/github-connector-coverage.json\""
+  },
+  {
+    "name": "EPIC-07.11 independent connector, cross-provider conformance and coverage",
+    "command": "CARGO_BUILD_JOBS=1 CARGO_LLVM_COV_TARGET_DIR=target/conformance-connector-coverage cargo llvm-cov -p gateway-daemon --test conformance_connector --locked --json --output-path \"$EVIDENCE_DIR/conformance-connector-coverage.json\" -- --test-threads=1\npython3 tests/scripts/check-conformance-connector-coverage.py --self-test\npython3 tests/scripts/check-conformance-connector-coverage.py \"$EVIDENCE_DIR/conformance-connector-coverage.json\""
+  },
+  {
+    "name": "EPIC-07.12 synthetic connector security/failure qualification (live release separate)",
+    "command": "COVERAGE_FILE=\"$EVIDENCE_DIR/connector-qualification-python.data\" python3 -m coverage run --source=tests/scripts -m unittest discover -s tests/architecture -p test_connector_qualification.py\nCOVERAGE_FILE=\"$EVIDENCE_DIR/connector-qualification-python.data\" python3 -m coverage report --include=\"*/qualify-connectors.py\" --fail-under=95\npython3 tests/scripts/qualify-connectors.py --run --output \"$EVIDENCE_DIR/connector-qualification\""
   }
 ]

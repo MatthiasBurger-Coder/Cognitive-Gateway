@@ -1,5 +1,11 @@
 #![forbid(unsafe_code)]
 
+#[cfg(test)]
+extern crate self as gateway_domain;
+
+#[cfg(test)]
+mod qualification_tests;
+
 pub mod agent;
 pub mod capability;
 pub mod capability_requirements;
