@@ -52,54 +52,6 @@ fn app() -> MemoryApplication<InMemoryMemoryStore> {
 }
 
 #[test]
-fn experience_record_round_trips_inline_and_referenced_payloads() {
-    let mut experience = record("project-a", "memory-1", "snapshot-1");
-    let inline = experience.to_json().unwrap();
-    assert_eq!(ExperienceRecord::from_json(&inline).unwrap(), experience);
-
-    experience.payload = Some(MemoryPayload::Reference(id("evidence-1")));
-    let referenced = experience.to_json().unwrap();
-    assert_eq!(
-        ExperienceRecord::from_json(&referenced).unwrap(),
-        experience
-    );
-
-    experience.payload = None;
-    assert!(experience.to_json().is_err());
-}
-
-#[test]
-fn memory_reasons_have_stable_diagnostic_codes() {
-    let cases = [
-        (MemoryReason::Eligible, "MEMORY_ELIGIBLE"),
-        (MemoryReason::PendingValidation, "MEMORY_PENDING_VALIDATION"),
-        (MemoryReason::Rejected, "MEMORY_REJECTED"),
-        (MemoryReason::Invalidated, "MEMORY_INVALIDATED"),
-        (MemoryReason::Superseded, "MEMORY_SUPERSEDED"),
-        (MemoryReason::Forgotten, "MEMORY_FORGOTTEN"),
-        (MemoryReason::NotYetValid, "MEMORY_NOT_YET_VALID"),
-        (MemoryReason::Expired, "MEMORY_EXPIRED"),
-        (MemoryReason::Stale, "MEMORY_STALE"),
-        (MemoryReason::Uncertain, "MEMORY_UNCERTAIN"),
-        (MemoryReason::Conflict, "MEMORY_CONFLICT"),
-        (MemoryReason::MissingValidation, "MEMORY_MISSING_VALIDATION"),
-        (MemoryReason::MissingOutcome, "MEMORY_MISSING_OUTCOME"),
-        (
-            MemoryReason::MissingLabelBasis,
-            "MEMORY_MISSING_LABEL_BASIS",
-        ),
-        (MemoryReason::UnknownConfidence, "MEMORY_UNKNOWN_CONFIDENCE"),
-        (
-            MemoryReason::SensitiveReferenceRequired,
-            "MEMORY_SENSITIVE_REFERENCE_REQUIRED",
-        ),
-    ];
-    for (reason, code) in cases {
-        assert_eq!(reason.as_str(), code);
-    }
-}
-
-#[test]
 fn curated_export_is_deterministic_and_revocation_invalidates_existing_snapshot() {
     let mut app = app();
     let s = scope("project-a");

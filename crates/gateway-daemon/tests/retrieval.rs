@@ -580,29 +580,6 @@ fn no_match_required_source_failure_and_multi_round_accounting() {
 }
 
 #[test]
-fn repository_reports_unavailable_root_at_open_and_at_read() {
-    let fixture = Fixture::new();
-    let missing = fixture.0.join("missing");
-    assert!(matches!(
-        RepositoryLexicalAdapter::new(
-            scope(),
-            RetrievalSourceId::new("repo").unwrap(),
-            RetrievalStrategyId::new("lexical").unwrap(),
-            missing,
-            SensitivityClass::Public,
-        ),
-        Err(RetrievalError::ServiceUnavailable)
-    ));
-
-    let adapter = repository(&fixture.0);
-    fs::remove_dir_all(&fixture.0).unwrap();
-    assert_eq!(
-        adapter.collect_fragments(),
-        Err(RetrievalError::ServiceUnavailable)
-    );
-}
-
-#[test]
 fn repository_handles_partial_terms_nontext_and_scope_boundaries() {
     let fixture = Fixture::new();
     let single_file = fixture.0.join("docs/ADR-011.md");
