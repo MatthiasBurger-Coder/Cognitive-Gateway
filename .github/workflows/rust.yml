@@ -2,8 +2,12 @@ name: Rust Quality
 
 on:
   pull_request:
+    paths-ignore:
+      - '**/*.md'
   push:
     branches: [main]
+    paths-ignore:
+      - '**/*.md'
   workflow_dispatch:
 
 permissions:
@@ -43,7 +47,7 @@ jobs:
           chmod 600 "$RUNNER_TEMP/postgres.env"
           echo "CG_POSTGRES_ENV_FILE=$RUNNER_TEMP/postgres.env" >> "$GITHUB_ENV"
       - name: Declarative v0.1 quality gate
-        run: CG_415_DIAGNOSTIC_TAIL=1 python3 tests/scripts/quality-gate.py --output target/ci-release-evidence
+        run: python3 tests/scripts/quality-gate.py --output target/ci-release-evidence
       - name: Retain release evidence (including failures)
         if: always()
         uses: actions/upload-artifact@v4

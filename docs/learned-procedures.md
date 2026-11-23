@@ -1,12 +1,16 @@
 # Learned Procedures and Governed Procedural Learning
 
+Historical evidence and removed review documents are linked to their archived Git
+revision. They are not current acceptance evidence. Generate fresh reports in an
+output directory or retain them as CI artifacts.
+
 ## Status
 
 **Implemented governed reference runtime — CG-21 through CG-30.**
 
 The model-independent contracts now participate in the complete governed
 experience → pattern → evaluation → promotion → reflex lifecycle. See
-[complete EPIC-03 acceptance](epic-03-complete-acceptance.md) for the CPU model,
+[complete EPIC-03 acceptance](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/blob/59f6db7e29478e2903cf69d6e5c7e65632876710/docs/epic-03-complete-acceptance.md) for the CPU model,
 durable runtime and revision-bound qualification scope.
 
 ## Purpose

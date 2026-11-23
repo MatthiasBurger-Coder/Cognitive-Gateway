@@ -1,5 +1,9 @@
 # CGSL conformance and compatibility
 
+Historical evidence and removed review documents are linked to their archived Git
+revision. They are not current acceptance evidence. Generate fresh reports in an
+output directory or retain them as CI artifacts.
+
 EPIC-05.15 [#193](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/issues/193)
 provides a portable [fixture corpus](../tests/fixtures/cgsl-conformance-v1/README.md),
 frozen IR/digest/source expectations, generated properties, and adversarial
@@ -40,7 +44,7 @@ projection from IR; use formatting to preserve interpretation documents.
 ## Requirement and evidence matrix
 
 All rows have component evidence. The executed candidate, commands, hashes and
-coverage are recorded in [the evidence record](evidence/EPIC-05.15-conformance.json).
+coverage are recorded in [the evidence record](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/blob/59f6db7e29478e2903cf69d6e5c7e65632876710/docs/evidence/EPIC-05.15-conformance.json).
 
 | ID | Requirement/source | Production owner and dependencies | Verification | Status |
 | --- | --- | --- | --- | --- |

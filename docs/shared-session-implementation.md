@@ -1,24 +1,28 @@
 # Shared structured-session implementation — #294
 
+Historical evidence and removed review documents are linked to their archived Git
+revision. They are not current acceptance evidence. Generate fresh reports in an
+output directory or retain them as CI artifacts.
+
 The additive connector path for an already satisfied original goal is described
 in [connector observed-goal sessions](connector-observed-goal-sessions.md). Its
 qualification is separate from the historical artifact baseline below.
 
 Delivery state reviewed 2026-10-11. Retained reports below keep their original
 candidate/source bindings; current full EPIC-04 acceptance requires a fresh
-[full qualification](epic-04-acceptance.md), separate from #279.
+[full qualification](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/blob/59f6db7e29478e2903cf69d6e5c7e65632876710/docs/epic-04-acceptance.md), separate from #279.
 
 The structured context-artifact runtime is implemented under its EPIC-08 owners
 and bound to both shipped local executables. The registered structured baseline
 is **QUALIFIED**: seven application runtime tests, five real PostgreSQL repository
 tests and eight actual CLI/MCP scenarios pass. All 14 applicable changed production
 files exceed 95% measured line coverage (minimum 95.17%).
-See the retained [runtime report](evidence/EPIC-04.13-shared-runtime.json),
-[coverage counts](evidence/EPIC-04.13-shared-runtime-coverage.json),
-[actual transitions](evidence/EPIC-04.13-shared-runtime-transitions.jsonl),
-[verified evidence](evidence/EPIC-04.13-shared-runtime-evidence.json) and
-[qualification log](evidence/EPIC-04.13-shared-runtime.log).
-The earlier [contract-only report](evidence/EPIC-04.13-shared-contracts.json)
+See the retained [runtime report](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/blob/59f6db7e29478e2903cf69d6e5c7e65632876710/docs/evidence/EPIC-04.13-shared-runtime.json),
+[coverage counts](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/blob/59f6db7e29478e2903cf69d6e5c7e65632876710/docs/evidence/EPIC-04.13-shared-runtime-coverage.json),
+[actual transitions](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/blob/59f6db7e29478e2903cf69d6e5c7e65632876710/docs/evidence/EPIC-04.13-shared-runtime-transitions.jsonl),
+[verified evidence](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/blob/59f6db7e29478e2903cf69d6e5c7e65632876710/docs/evidence/EPIC-04.13-shared-runtime-evidence.json) and
+[qualification log](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/blob/59f6db7e29478e2903cf69d6e5c7e65632876710/docs/evidence/EPIC-04.13-shared-runtime.log).
+The earlier [contract-only report](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/blob/59f6db7e29478e2903cf69d6e5c7e65632876710/docs/evidence/EPIC-04.13-shared-contracts.json)
 records the previous delivery and remains historical evidence.
 
 ## Production ownership

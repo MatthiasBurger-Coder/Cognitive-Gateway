@@ -1,5 +1,9 @@
 # Completeness validation and clarification planning
 
+Historical evidence and removed review documents are linked to their archived Git
+revision. They are not current acceptance evidence. Generate fresh reports in an
+output directory or retain them as CI artifacts.
+
 EPIC-05.10 (#188) delivers `gateway_application::completeness`, following
 [ADR-015](adr/ADR-015-semantic-task-ir-boundary.md), the
 [gap contracts](semantic-resolution-contracts.md) and
@@ -118,4 +122,4 @@ cargo clippy -p gateway-application --all-targets --locked -- -D warnings
 The quality runner now requires measured 95% coverage of the new production
 module. This is component evidence, not installed-client, persisted interaction
 or full parent-epic acceptance. See the source-bound
-[evidence record](evidence/EPIC-05.10-completeness.json) for executed outcomes.
+[evidence record](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/blob/59f6db7e29478e2903cf69d6e5c7e65632876710/docs/evidence/EPIC-05.10-completeness.json) for executed outcomes.

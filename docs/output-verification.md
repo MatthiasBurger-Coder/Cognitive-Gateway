@@ -1,5 +1,9 @@
 # Schema, reference and constraint verification — #266
 
+Historical evidence and removed review documents are linked to their archived Git
+revision. They are not current acceptance evidence. Generate fresh reports in an
+output directory or retain them as CI artifacts.
+
 `gateway-application::output_verification` verifies model proposals against the
 actual admitted `InvocationIr`. It reuses `semantic_output::OutputContract`,
 `VerificationContract`, `assess_result`, CG-10 task bindings and the captured tool
@@ -63,7 +67,7 @@ Required task checks use the pinned rule/verifier definitions already admitted
 by CG-10. `assess_result` computes schema validity locally and rejects missing,
 extra, failed or indeterminate semantic reports. In particular the host must
 scan every mandatory reference, not merely trust the model's reference list.
-Evidence/claim checks require the [#267 grounding integration](evidence-grounding-verification.md)
+Evidence/claim checks require the [#267 grounding integration](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/blob/59f6db7e29478e2903cf69d6e5c7e65632876710/docs/evidence-grounding-verification.md)
 in addition to semantic reports. The host exposes `GroundingEvidencePort` through
 `grounding`; evidence-required tasks fail closed without it. The core validates
 current support, provenance, scope, freshness, trust, sensitivity and independent
@@ -113,7 +117,7 @@ moderate confidence. Live provider/store compositions are downstream work.
 | V04 | #266 advisory critics | `verify_output` ignores critic signals for acceptance | Mandatory deterministic gates always required | Failed/indeterminate/no critics accept valid result; positive critic cannot override denial | VERIFIED (component) |
 | V05 | #266 exact invocation/task revisions | Full IR identity plus exact bytes digest, correlated `ConstraintReport` | Existing #263 immutable IR binds full task/context/provider/tool basis | Every identity field changed, changed inventory, stale output report, accepted/rejected audit correlation | VERIFIED (component) |
 | V06 | #178 tool proposals stay data | Exact inventory binding and argument schema; no dispatch dependency | #265 broader parsing/repair and #271 host effects remain separate | Unknown/changed tool pins and invalid arguments; architecture dependency guard | VERIFIED (component) |
-| V07 | #178 >=95% and traceability/docs | Per-file measured gate, architecture/CI integration | Rust/Python repository gates | Domain verification 100%; application verification 98.08%; modified invocation modules 100%; architecture and regression qualification | VERIFIED; [evidence](evidence/EPIC-06.06-output-verification.json) |
+| V07 | #178 >=95% and traceability/docs | Per-file measured gate, architecture/CI integration | Rust/Python repository gates | Domain verification 100%; application verification 98.08%; modified invocation modules 100%; architecture and regression qualification | VERIFIED; [evidence](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/blob/59f6db7e29478e2903cf69d6e5c7e65632876710/docs/evidence/EPIC-06.06-output-verification.json) |
 
 Run `cargo test -p gateway-application --test output_verification --test prompt_ir --locked`
 and the EPIC-06.06 entry in `tests/scripts/quality-gates.json`. Frozen diagnostic fixture:

@@ -1,5 +1,9 @@
 # Installed Codex interoperability — EPIC-04.14
 
+Historical evidence and removed review documents are linked to their archived Git
+revision. They are not current acceptance evidence. Generate fresh reports in an
+output directory or retain them as CI artifacts.
+
 The installed `codex-cli 0.162.1` qualifies the delivered no-key path for
 inspection, canonical resolve/explain/context and the registered shared
 structured context-artifact lifecycle. The real client discovers all nineteen
@@ -62,15 +66,15 @@ replace operator inputs. Disposable PostgreSQL replaces operator storage. Truste
 
 ## Acceptance evidence
 
-Retained [report](evidence/EPIC-04.14-installed-codex/report.json),
-[initialize observation](evidence/EPIC-04.14-installed-codex/mcp-initialize.json),
-[compressed RPC transcript](evidence/EPIC-04.14-installed-codex/rpc-evidence.json.gz)
-and [verified receipt](evidence/EPIC-04.14-installed-codex/verified-evidence.json)
+Retained [report](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/blob/59f6db7e29478e2903cf69d6e5c7e65632876710/docs/evidence/EPIC-04.14-installed-codex/report.json),
+[initialize observation](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/blob/59f6db7e29478e2903cf69d6e5c7e65632876710/docs/evidence/EPIC-04.14-installed-codex/mcp-initialize.json),
+[compressed RPC transcript](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/blob/59f6db7e29478e2903cf69d6e5c7e65632876710/docs/evidence/EPIC-04.14-installed-codex/rpc-evidence.json.gz)
+and [verified receipt](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/blob/59f6db7e29478e2903cf69d6e5c7e65632876710/docs/evidence/EPIC-04.14-installed-codex/verified-evidence.json)
 bind the result to the Git baseline, dirty-candidate flag, source/manifest hashes,
 launcher and running native binary hashes, CG executable hashes, commands,
 protocol, requests/results and artifact hashes. Source, revision and executable
-hashes are checked again after cleanup. Inspect the transcript with
-`gzip -dc docs/evidence/EPIC-04.14-installed-codex/rpc-evidence.json.gz`.
+hashes are checked again after cleanup. Download the historical transcript from the pinned Git revision before inspecting
+it with `gzip -dc rpc-evidence.json.gz`.
 
 | ID | Requirement | Installed-client evidence | Status |
 | --- | --- | --- | --- |

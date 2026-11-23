@@ -1,5 +1,9 @@
 # Provider-independent prompt and invocation IR — #263
 
+Historical evidence and removed review documents are linked to their archived Git
+revision. They are not current acceptance evidence. Generate fresh reports in an
+output directory or retain them as CI artifacts.
+
 `gateway-application::prompt_ir` admits the actual immutable CG-10
 `PlannedContextHandoff` with a negotiated `PreparedModelInvocation` and the exact
 authorized tool definitions. `gateway-domain::prompt_ir` defines version 1.0
@@ -111,7 +115,7 @@ confidence, using existing foundations. Live hosts/adapters are excluded.
 | I03 | #263 stale input rejected | Task reference validation + current admission on admit/render/dispatch | Trusted current-store port; no default authority | Changed store task/context/schema/verification/plan/examples/tool/authority; revocation after rendering; zero dispatch | VERIFIED (synthetic host integration) |
 | I04 | #263 untrusted data stays data | Lossless producer, separate tool definitions, #264 rendering | CG-10 external fragment trust and dedicated example sections | Hostile examples never enter instructions, original input preserved; existing two-renderer adversarial suite | VERIFIED (structural) |
 | I05 | #263 adapter interfaces/diagnostics | `PromptInvocationPort`, admission/render/dispatch services | #264 ports implemented, #269 live transports separate | Transport failures, wrong response identity, version/tool failures, frozen denial fixture | VERIFIED (component) |
-| I06 | #178 >=95% coverage, architecture/docs | Versioned additive Rust modules, CI coverage gate | Existing Rust/Python gates | Per-file measured coverage, architecture regressions, lint/format; retained report | VERIFIED; [evidence](evidence/EPIC-06.03-prompt-ir.json) |
+| I06 | #178 >=95% coverage, architecture/docs | Versioned additive Rust modules, CI coverage gate | Existing Rust/Python gates | Per-file measured coverage, architecture regressions, lint/format; retained report | VERIFIED; [evidence](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/blob/59f6db7e29478e2903cf69d6e5c7e65632876710/docs/evidence/EPIC-06.03-prompt-ir.json) |
 
 Run `cargo test -p gateway-application --test prompt_ir --locked` and the
 EPIC-06.03 entry in `tests/scripts/quality-gates.json`. Fixtures reuse actual canonical

@@ -24,7 +24,7 @@ crates/
 └── gateway-daemon/
 ```
 
-See [the shell entry-point catalog](scripts/shell-entry-points.md) for responsibilities,
+See [the shell entry-point catalog](docs/shell-entry-points.md) for responsibilities,
 arguments, prerequisites and side effects.
 
 ## Installation on Linux
@@ -32,7 +32,7 @@ arguments, prerequisites and side effects.
 With Rust 1.89 or newer and Cargo installed, run the installer from the repository root:
 
 ```bash
-./scripts/install/linux-cli.sh
+./install/linux-cli.sh
 export PATH="$HOME/.cargo/bin:$PATH"
 cg --help
 cg-registry --help
@@ -42,7 +42,7 @@ The script installs `cg` and `cg-registry` from this checkout. By default,
 it uses `CARGO_INSTALL_ROOT`, `CARGO_HOME`, or `$HOME/.cargo` as the install
 root, in that order. The executables are placed in the root's `bin` directory.
 The `PATH` command above applies to the `$HOME/.cargo` default.
-For a custom location, run `./scripts/install/linux-cli.sh --root /absolute/path`
+For a custom location, run `./install/linux-cli.sh --root /absolute/path`
 and add `/absolute/path/bin` to `PATH`. Rerunning the script updates both CLIs
 to the current checkout. The script can also be called from another directory
 by its absolute path.
@@ -53,13 +53,13 @@ Installation and service startup are separate operations. To start PostgreSQL
 with persistent storage, use:
 
 ```bash
-./scripts/operations/postgres/start.sh
+./operations/postgres/start.sh
 ```
 
 The first start creates a private
 `~/.config/cognitive-gateway/postgres.env` with a random password. Compose
 stores database files in a named Docker volume, which survives container
-recreation and `./scripts/operations/postgres/compose.sh down`. The service
+recreation and `./operations/postgres/compose.sh down`. The service
 listens on `127.0.0.1:55432` by default. See
 [`docs/postgres-compose.md`](docs/postgres-compose.md) for configuration,
 Nexus image override, checks and backup instructions.
@@ -125,7 +125,8 @@ and a machine-readable summary under `target/release-evidence/`.
 [Quality gates and the release checklist](docs/declarative-quality-gates.md)
 describe evidence review and focused commands. The `Rust Quality` GitHub
 Actions workflow runs the same command and uploads evidence on success or
-failure. A green gate qualifies the tested revision for release review.
+failure. Markdown-only pushes and pull requests skip this workflow; manual
+`workflow_dispatch` runs remain available. A green gate qualifies the tested revision for release review.
 
 ## Documentation
 
@@ -215,7 +216,7 @@ The [closed-loop application API](docs/closed-loop-execution.md) dispatches
 authorized steps through a replaceable runtime port, reassesses observed
 evidence, and continues or replans within explicit iteration and retry limits.
 
-The optional local model service can be started with `scripts/operations/local-model/service.sh start`;
+The optional local model service can be started with `operations/local-model/service.sh start`;
 see [the operator guide](docs/local-model-runtime.md) for installation, qualification,
 promotion, rollback and the independent Gateway container.
 

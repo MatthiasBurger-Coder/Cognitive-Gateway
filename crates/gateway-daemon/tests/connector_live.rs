@@ -75,6 +75,7 @@ struct Source {
     target: ConnectorTarget,
     current: Arc<Mutex<ConnectorRequest>>,
     consent: Arc<AtomicBool>,
+    deadline: UnixTimestamp,
 }
 impl Source {
     fn snapshot(&self, r: &ConnectorRequest) -> Result<ConnectorPolicySnapshot, ConnectorFailure> {
@@ -134,7 +135,7 @@ impl Source {
             policy_revision: digest(),
             consent_receipt: mutate.then(|| text("exact-live-ref-consent")),
             budget_reservation: text("live-bounded-operation"),
-            deadline: UnixTimestamp::new(now() + 60),
+            deadline: self.deadline,
         })
     }
 }
@@ -348,6 +349,7 @@ fn host(
             target: request.target.clone(),
             current: current.clone(),
             consent: consent.clone(),
+            deadline: UnixTimestamp::new(now() + 60),
         })),
         Box::new(CanonicalConnectorMapping::new(
             DiscoveryMapper::new(request.target.clone(), manifest, document).unwrap(),

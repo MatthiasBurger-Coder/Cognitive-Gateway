@@ -1,5 +1,9 @@
 # Connector resilience — EPIC-07.08 (#231)
 
+Historical evidence and removed review documents are linked to their archived Git
+revision. They are not current acceptance evidence. Generate fresh reports in an
+output directory or retain them as CI artifacts.
+
 The application owns recovery decisions in `connector_resilience`; the daemon
 owns time, cancellation, concurrency and circuit state in `mcp_client`.
 The existing CG-09 admission, normalization and non-cloneable session allocation
@@ -121,6 +125,6 @@ cargo test -p gateway-daemon --lib mcp_client:: --locked
 cargo test -p gateway-daemon --test mcp_client --locked
 ```
 
-The [source-bound qualification report](evidence/EPIC-07.08-resilience.json)
+The [source-bound qualification report](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/blob/59f6db7e29478e2903cf69d6e5c7e65632876710/docs/evidence/EPIC-07.08-resilience.json)
 retains candidate source bindings, measured coverage, subprocess evidence and
 quality-gate results. Issue closure follows the verified pull-request merge.

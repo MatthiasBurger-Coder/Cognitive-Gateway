@@ -1,5 +1,9 @@
 # CG-28 governed learning signals and offline training
 
+Historical evidence and removed review documents are linked to their archived Git
+revision. They are not current acceptance evidence. Generate fresh reports in an
+output directory or retain them as CI artifacts.
+
 Issue: [#219](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/issues/219).
 Contracts: `gateway-domain::offline_learning`. Application boundaries:
 `gateway-application::offline_learning` and `model_releases`.
@@ -89,7 +93,7 @@ There is no training route in the daemon's production inference adapter or the
 CG-27 model service. The concrete `CpuOfflineAdapter` adds train-only feature fitting, bounded Grid/Random search,
 group/chronological CV, validation calibration and separate held-out evaluation. Its
 CPU classifier and isolated container are qualified through the [complete EPIC-03
-acceptance](epic-03-complete-acceptance.md). Training remains explicitly authorized.
+acceptance](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/blob/59f6db7e29478e2903cf69d6e5c7e65632876710/docs/epic-03-complete-acceptance.md). Training remains explicitly authorized.
 
 ## Immutable release, canary and rollback
 

@@ -1,5 +1,9 @@
 # Connector release qualification — EPIC-07.12 #235
 
+Historical evidence and removed review documents are linked to their archived Git
+revision. They are not current acceptance evidence. Generate fresh reports in an
+output directory or retain them as CI artifacts.
+
 The qualification suite retains separate synthetic and authenticated live evidence
 for the complete connector acceptance surface. Rust owns runtime, mapping,
 normalization, CG-09 enforcement, retry decisions and aggregate accounting.
@@ -44,6 +48,34 @@ The complete serial quality subprocess has an eight-hour orchestration timeout
 to accommodate fresh instrumented builds. Individual connector gates retain
 their thirty-minute orchestration limit; application request, session and
 resource deadlines remain enforced by their existing tests.
+
+## Verified release candidate
+
+The release run on 2026-11-22 qualified commit
+`4c8e51ad72219dffc24cd947fb948e92f0337e76` with status
+`QUALIFIED_CONNECTOR_RELEASE`. The candidate was clean. All 39 acceptance rows,
+14 qualification gates and 73 workspace quality gates passed.
+
+| Evidence | Result |
+| --- | --- |
+| Synthetic tests | All 173 Rust cases passed, including the GitHub golden, independent MCP conformance, scope and credential isolation, policy and consent, incompatible protocol/schema rejection and failure injection. |
+| Authenticated GitHub read | Real issue #235 reached scoped evidence and selected context through `cg-github-mcp` and `cg assess`, `cg plan`, `cg resolve`, `cg compile`. Current-policy denial was verified. |
+| Authenticated GitHub effects | Two isolated refs were created, one with acknowledgement and one with a deliberately lost response. Separate authenticated connections observed both effects. Consent denial prevented dispatch, neither mutation was replayed, and the test removed both refs. |
+| Cross-plane contract evidence | Rows E07-32, E07-33 and E07-38 cover the dispatch/result contracts for [#274](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/issues/274) and independent readback for [#276](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/issues/276). The normalized observations are inputs to [#279](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/issues/279). |
+| Quality | The architecture guard and all applicable coverage gates passed, including the existing 95% production thresholds. |
+
+The full run is retained in `target/connector-release-4c8e51a/` in the
+qualification worktree. `report.json` contains the executed test per acceptance
+row and the hashes of 292 result artifacts. The full workspace gate details are
+in `quality/summary.json`.
+
+| File | SHA-256 |
+| --- | --- |
+| `report.json` | `7dadd07d7a1370bb4ae1dea74b97a26384ec1251b62ee920043852dd68420d0b` |
+| `quality/summary.json` | `96715d6cb37fae058122fe90c1cb19791a1abd9b48a306b0e46d13bed4ae3566` |
+
+The evidence applies to the pinned candidate. Qualification of the merged
+revision and GitHub issue closure are separate release steps.
 
 ## Evidence and compatibility
 
@@ -137,8 +169,8 @@ DEVELOPMENT/FULL_PATH. ADR-022 and the existing result/policy/resilience contrac
 remain authoritative. Rollback removes this additive qualification suite, golden,
 live test profiles and quality-manifest entry.
 
-The retained execution record is
-`docs/evidence/EPIC-07.12-connector-qualification.json`; its compressed validation
+The earlier component execution record is
+[`docs/evidence/EPIC-07.12-connector-qualification.json`](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/blob/59f6db7e29478e2903cf69d6e5c7e65632876710/docs/evidence/EPIC-07.12-connector-qualification.json); its compressed validation
 bundle preserves reports and logs. Source bindings describe the candidate before
 adding the evidence record itself. Historical component evidence remains labelled
 with its original scope and cannot authorize full release acceptance.

@@ -18,7 +18,7 @@ For CG-22, `cg patterns --scope <project-scope> --json` reads the local
 PostgreSQL experience and memory stores and rechecks eligibility before
 reporting patterns. Use `--at <unix-seconds>` for a fixed inspection time.
 `cg patterns --report <file-or-json> --json` displays an existing report.
-Both forms are read-only. Start the database with `./scripts/operations/postgres/start.sh`
+Both forms are read-only. Start the database with `./operations/postgres/start.sh`
 and see [the PostgreSQL setup](postgres-compose.md) for credential handling.
 
 ## Runnable walkthrough

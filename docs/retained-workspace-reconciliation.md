@@ -1,8 +1,12 @@
 # Retained connector/session workspace reconciliation (#412)
 
+Historical evidence and removed review documents are linked to their archived Git
+revision. They are not current acceptance evidence. Generate fresh reports in an
+output directory or retain them as CI artifacts.
+
 The complete original integration workspace is retained in Git commit `1b6c98902b5f0108b93c2ee30d07ecc5f8f7291b`.
 All 193 initially outstanding files, including source, tests, historical evidence
-and two generated raw profiles, are preserved. The [manifest](evidence/retained-workspace-reconciliation.json)
+and two generated raw profiles, are preserved. The [manifest](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/blob/59f6db7e29478e2903cf69d6e5c7e65632876710/docs/evidence/retained-workspace-reconciliation.json)
 records each original SHA-256, its actual Git blob, stored hash and line-ending
 restoration metadata. No original payload needs to remain untracked locally.
 

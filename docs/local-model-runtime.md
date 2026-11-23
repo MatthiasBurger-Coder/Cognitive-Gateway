@@ -1,5 +1,9 @@
 # Local Model Runtime and SLM/LxM Boundary
 
+Historical evidence and removed review documents are linked to their archived Git
+revision. They are not current acceptance evidence. Generate fresh reports in an
+output directory or retain them as CI artifacts.
+
 CG-27.01 provides an optional Python model service, an Ollama reference adapter,
 a provider-neutral Rust application port and HTTP adapter, versioned profiles,
 and qualification/promotion/rollback operations. ADR-001 and ADR-017 govern the
@@ -28,12 +32,12 @@ RAM for model context and serving. GPU access is absent from the base deployment
 and CPU inference explicitly requests zero GPU layers.
 
 ```bash
-scripts/operations/local-model/service.sh start
-scripts/operations/local-model/models.sh install /models/qwen3-8b-q4.json
-scripts/operations/local-model/models.sh test qwen3-8b-q4
-scripts/operations/local-model/models.sh promote qwen3-8b-q4
-scripts/operations/local-model/service.sh ready
-scripts/operations/local-model/models.sh inspect
+operations/local-model/service.sh start
+operations/local-model/models.sh install /models/qwen3-8b-q4.json
+operations/local-model/models.sh test qwen3-8b-q4
+operations/local-model/models.sh promote qwen3-8b-q4
+operations/local-model/service.sh ready
+operations/local-model/models.sh inspect
 ```
 
 First download can take longer than the default 180 second request deadline.
@@ -124,10 +128,10 @@ The directory is mounted read-only so adding a model manifest needs no Gateway
 rebuild. Then:
 
 ```bash
-scripts/operations/local-model/models.sh install /models/replacement.json
-scripts/operations/local-model/models.sh test replacement-id
-scripts/operations/local-model/models.sh promote replacement-id
-scripts/operations/local-model/models.sh rollback semantic-interpreter
+operations/local-model/models.sh install /models/replacement.json
+operations/local-model/models.sh test replacement-id
+operations/local-model/models.sh promote replacement-id
+operations/local-model/models.sh rollback semantic-interpreter
 ```
 
 The install and test steps leave the active alias intact and available. Registry
@@ -163,8 +167,8 @@ CPU remains the repository default; for a local NVIDIA installation use:
 
 ```bash
 export CG_MODEL_ACCELERATION=nvidia
-scripts/operations/local-model/service.sh config
-scripts/operations/local-model/service.sh start
+operations/local-model/service.sh config
+operations/local-model/service.sh start
 ```
 
 The NVIDIA override (`compose.model.gpu.yaml`) requests all NVIDIA GPUs with
@@ -182,11 +186,11 @@ Vulkan-capable runtime image because the 0.11.10 reference predates packaged Vul
 support. Examples for supported Linux hosts:
 
 ```bash
-CG_MODEL_ACCELERATION=amd scripts/operations/local-model/service.sh config
-CG_MODEL_ACCELERATION=amd scripts/operations/local-model/service.sh start
+CG_MODEL_ACCELERATION=amd operations/local-model/service.sh config
+CG_MODEL_ACCELERATION=amd operations/local-model/service.sh start
 # Register a new candidate whose runtime_version matches the chosen image.
-CG_MODEL_ACCELERATION=vulkan CG_MODEL_VULKAN_IMAGE=ollama/ollama:0.12.11 scripts/operations/local-model/service.sh config
-CG_MODEL_ACCELERATION=vulkan CG_MODEL_VULKAN_IMAGE=ollama/ollama:0.12.11 scripts/operations/local-model/service.sh start
+CG_MODEL_ACCELERATION=vulkan CG_MODEL_VULKAN_IMAGE=ollama/ollama:0.12.11 operations/local-model/service.sh config
+CG_MODEL_ACCELERATION=vulkan CG_MODEL_VULKAN_IMAGE=ollama/ollama:0.12.11 operations/local-model/service.sh start
 ```
 
 Use the same backend environment for all subsequent operator commands. For
@@ -221,7 +225,7 @@ Neither result claims to benchmark an unreleased generation. An existing registr
 is preserved and rejected by this proof; use a fresh `CG_MODEL_PROJECT_NAME` and
 `CG_MODEL_SERVICE_PORT` for a separate proof deployment.
 
-`runtime_unavailable`: inspect `scripts/operations/local-model/service.sh logs` and container health;
+`runtime_unavailable`: inspect `operations/local-model/service.sh logs` and container health;
 verify endpoint and configured deadline. `model_missing`: check the persistent
 artifact volume. `provenance_changed`: runtime/artifact/template no longer matches
 the qualified profile; restore the pinned runtime/snapshot or register and qualify
@@ -238,7 +242,7 @@ Reference APIs: [Ollama Docker deployment](https://docs.ollama.com/docker),
 
 ## Verified CPU reference evidence
 
-[CG-27.01 evidence](evidence/CG-27.01-cpu-reference.json) records the installed
+[CG-27.01 evidence](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/blob/59f6db7e29478e2903cf69d6e5c7e65632876710/docs/evidence/CG-27.01-cpu-reference.json) records the installed
 Qwen3-8B Q4_K_M profile, exact source/snapshot/template digests, qualification
 suite, hardware, audit events, source hashes and all 29 passing quality gates.
 The real container replay passed promotion, replacement-profile qualification,
@@ -350,8 +354,8 @@ fixture report; real CPU and GPU measurements remain separate hardware runs.
 
 ### Recorded CG-27 evidence
 
-[Fixture report](evidence/CG-27-fixture-benchmark.json) covers all four tasks with
-independent deterministic rules. [CPU model report](evidence/CG-27-cpu-signals.json)
+[Fixture report](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/blob/59f6db7e29478e2903cf69d6e5c7e65632876710/docs/evidence/CG-27-fixture-benchmark.json) covers all four tasks with
+independent deterministic rules. [CPU model report](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/blob/59f6db7e29478e2903cf69d6e5c7e65632876710/docs/evidence/CG-27-cpu-signals.json)
 records the Qwen3-8B Q4_K_M artifact on the named dataset, with pinned profile,
 implementation, prompts and hardware. The CPU model failed ranking tie-break and
 negative matching cases. Those failures remain visible in the report and prevent

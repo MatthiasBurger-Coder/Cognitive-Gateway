@@ -113,7 +113,8 @@ def run(output, execute, release=False, repository=None):
               'worktree_status': capture('git', 'status', '--porcelain'),
               'started_at': datetime.datetime.now(datetime.timezone.utc).isoformat(),
               'gates': {}, 'limitations': list(BLOCKERS.values())}
-    env = dict(os.environ, CARGO_BUILD_JOBS='1', CARGO_TERM_COLOR='never')
+    env = dict(os.environ, CARGO_TERM_COLOR='never')
+    env.setdefault('CARGO_BUILD_JOBS', '1')
     if release:
         if not repository:
             raise ValueError('An explicit isolated live repository is required')

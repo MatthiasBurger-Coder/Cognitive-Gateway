@@ -1,5 +1,9 @@
 # CG-29 distributed cognitive worker fabric
 
+Historical evidence and removed review documents are linked to their archived Git
+revision. They are not current acceptance evidence. Generate fresh reports in an
+output directory or retain them as CI artifacts.
+
 [Issue #220](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/issues/220)
 provides versioned advisory work contracts, scheduler/worker ports, a bounded
 reference coordinator and a local worker adapter. Transport and orchestration
@@ -128,5 +132,5 @@ including fencing and idempotency history across coordinator restart. Separate
 coordinators contend under row locks. `ProcessCognitiveWorker` terminates attempts
 under Linux wall/CPU/address-space/output limits. The container reference adds
 unprivileged execution, no network/credentials/mounts and hard resource bounds.
-See [complete EPIC-03 acceptance](epic-03-complete-acceptance.md) for APIs, tests,
+See [complete EPIC-03 acceptance](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/blob/59f6db7e29478e2903cf69d6e5c7e65632876710/docs/epic-03-complete-acceptance.md) for APIs, tests,
 bounded retention and the qualified deployment scope.

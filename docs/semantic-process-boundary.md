@@ -1,5 +1,9 @@
 # Semantic task / process boundary
 
+Historical evidence and removed review documents are linked to their archived Git
+revision. They are not current acceptance evidence. Generate fresh reports in an
+output directory or retain them as CI artifacts.
+
 Issue [#191](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/issues/191),
 parent #177. This specification implements the boundary in ADR-015 and composes
 the existing [semantic planning handoff](semantic-planning-boundaries.md) with
@@ -122,7 +126,7 @@ moderate confidence, existing foundations included. Rollback removes additive
 tests/fixture/docs. Stop if proof requires changing lifecycle ownership or adding
 runtime invocation. The boundary itself adds no production semantics. The later
 user-authorized gate repairs are reviewed separately in the
-[Three Amigos completion review](epic-05.13-three-amigos-review.md), including
+[Three Amigos completion review](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/blob/59f6db7e29478e2903cf69d6e5c7e65632876710/docs/epic-05.13-three-amigos-review.md), including
 measured coverage for the equivalent Rust changes and native memory helper.
 
 | ID | #191 criterion | Production path / dependency | Verification level | Status |
@@ -138,7 +142,7 @@ gateway-cgsl --test frontend --locked`, `python -m unittest discover -s
 tests/architecture -p "test_*.py"`, and `python tests/scripts/check-dependencies.py`.
 All are included by existing workspace test and architecture quality gates.
 Execution results and limits are retained in
-[EPIC-05.13 evidence](evidence/EPIC-05.13-process-boundary.json).
+[EPIC-05.13 evidence](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/blob/59f6db7e29478e2903cf69d6e5c7e65632876710/docs/evidence/EPIC-05.13-process-boundary.json).
 The bounded criteria above pass. The initially blocking lint, portability and
 test-observation failures have been repaired and revalidated: workspace Rust
 tests, workspace Clippy, architecture guards and contract tests pass. The final

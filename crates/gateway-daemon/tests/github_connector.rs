@@ -94,6 +94,7 @@ impl AcquisitionPort for Collector {
 struct PolicySource {
     denied: Arc<AtomicBool>,
     scope: ContextScopeId,
+    deadline: UnixTimestamp,
 }
 impl PolicySource {
     fn snapshot(&self, r: &ConnectorRequest) -> ConnectorPolicySnapshot {
@@ -141,7 +142,7 @@ impl PolicySource {
             policy_revision: digest(),
             consent_receipt: None,
             budget_reservation: text("read.reservation"),
-            deadline: UnixTimestamp::new(now() + 30),
+            deadline: self.deadline,
         }
     }
 }
@@ -249,6 +250,7 @@ fn configured_host(
     let admission = Arc::new(Cg09ConnectorAdmission::new(PolicySource {
         denied: denied.clone(),
         scope: target.scope.clone(),
+        deadline: UnixTimestamp::new(now() + 30),
     }));
     let mapping = CanonicalConnectorMapping::new(
         DiscoveryMapper::new(target.clone(), manifest.clone(), document).unwrap(),

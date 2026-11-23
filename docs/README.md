@@ -1,10 +1,21 @@
 # Cognitive Gateway Documentation
 
+Historical evidence and removed review documents are linked to their archived Git
+revision. They are not current acceptance evidence. Generate fresh reports in an
+output directory or retain them as CI artifacts.
+
 This repository contains the canonical technical documentation for Cognitive Gateway.
 
 ## Current architecture and implementation status
 
 See [current architecture state](current-architecture-state.md) for the dated implementation-versus-plan matrix. This distinction is normative: an Epic or target architecture does not by itself mean the runtime capability is implemented.
+
+## Installation and operations
+
+Use the [shell entry-point catalog](shell-entry-points.md) for installation,
+PostgreSQL and local-model commands. Generated reports belong in an explicit
+output directory or CI artifacts. Archived Git links preserve historical reports
+without restoring them to the working tree.
 
 ## Architecture
 
@@ -80,9 +91,9 @@ See [`recursive-retrieval.md`](recursive-retrieval.md) for CG-19 bounded rounds,
 validated evidence sufficiency and CG-14 pause integration.
 See [`reasoning-strategy.md`](reasoning-strategy.md) for CG-20C versioned
 reasoning strategies, aggregate budgets and the typed adapter handoff.
-See [`epic-02-evaluation.md`](epic-02-evaluation.md) for CG-20 objective
+See [`epic-02-evaluation.md`](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/blob/59f6db7e29478e2903cf69d6e5c7e65632876710/docs/epic-02-evaluation.md) for CG-20 objective
 evaluation, baseline policy, profiling and curated learning export.
-See [`epic-02-release-qualification.md`](epic-02-release-qualification.md)
+See [`epic-02-release-qualification.md`](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/blob/59f6db7e29478e2903cf69d6e5c7e65632876710/docs/epic-02-release-qualification.md)
 for CG-20D requirement traceability and release readiness.
 See [`knowledge-plane-hardening.md`](knowledge-plane-hardening.md) for CG-20A
 trust boundaries, disclosure limited handoffs, and adversarial verification.
@@ -281,13 +292,13 @@ Run `python3 tests/scripts/quality-gate.py` for the complete CG-13 gate. See [th
 
 - [CG-28 governed learning signals and offline training](offline-learning.md) — evidence admission, reproducible scoped datasets, offline interfaces and model rollout/rollback.
 
-- [v0.3 cognitive runtime release qualification](epic-03-release-qualification.md) — CG-30 integrated acceptance, classification/routing benchmarks, injected failures and clean-candidate evidence admission.
+- [v0.3 cognitive runtime release qualification](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/blob/59f6db7e29478e2903cf69d6e5c7e65632876710/docs/epic-03-release-qualification.md) — CG-30 integrated acceptance, classification/routing benchmarks, injected failures and clean-candidate evidence admission.
 
 - [CG-29 distributed cognitive worker fabric](worker-fabric.md) — immutable snapshots, scoped scheduling, fencing, bounded retries, local adapter and orchestrator boundary.
 
-- [Complete EPIC-03 acceptance](epic-03-complete-acceptance.md) — original criteria plus ML lifecycle, concrete CPU training/inference, PostgreSQL restart/rollback and isolated workers.
+- [Complete EPIC-03 acceptance](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/blob/59f6db7e29478e2903cf69d6e5c7e65632876710/docs/epic-03-complete-acceptance.md) — original criteria plus ML lifecycle, concrete CPU training/inference, PostgreSQL restart/rollback and isolated workers.
 
-- [Full EPIC-04 acceptance](epic-04-acceptance.md) — all 24 parent criteria and fail-closed closure enforcement.
+- [Full EPIC-04 acceptance](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/blob/59f6db7e29478e2903cf69d6e5c7e65632876710/docs/epic-04-acceptance.md) — all 24 parent criteria and fail-closed closure enforcement.
 
 - [SemanticTaskIR v1 and versioning](semantic-task-ir-v1.md) — implemented Rust/wire contract, invariants, pinned references and compatibility; see the implementer guide for delivered compiler components and remaining runtime integration.
 - [Optional interpretation adapters](interpretation-adapters.md) — deterministic-first classifier, embedding and SLM proposals, validation, provenance and fallback.
@@ -304,7 +315,7 @@ Run `python3 tests/scripts/quality-gate.py` for the complete CG-13 gate. See [th
 
 - [Structured output parsing and tool proposals](structured-output-parsing.md) — #265.
 
-- [Evidence and grounding verification](evidence-grounding-verification.md) — #267 source pins, CG-06 support and observed effects.
+- [Evidence and grounding verification](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/blob/59f6db7e29478e2903cf69d6e5c7e65632876710/docs/evidence-grounding-verification.md) — #267 source pins, CG-06 support and observed effects.
 
 - [Bounded invocation retry, cancellation and degradation](invocation-resilience.md) — shared run budgets, fallback admission and usage reconciliation (#268).
 

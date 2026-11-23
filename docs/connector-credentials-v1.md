@@ -1,5 +1,9 @@
 # Connector credential isolation — EPIC-07.06 #229
 
+Historical evidence and removed review documents are linked to their archived Git
+revision. They are not current acceptance evidence. Generate fresh reports in an
+output directory or retain them as CI artifacts.
+
 ## Boundary
 
 `CredentialProfileRef` is an opaque operator identifier in the application port.
@@ -43,5 +47,5 @@ The #229 boundary is component-qualified, including a real synthetic stdio
 subprocess. Live provider deployment and an installed outbound coordinator are
 parent EPIC-07 qualification, not claims made by this child slice.
 
-The retained [qualification record](evidence/EPIC-07.06-credentials.json) binds
+The retained [qualification record](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/blob/59f6db7e29478e2903cf69d6e5c7e65632876710/docs/evidence/EPIC-07.06-credentials.json) binds
 the component evidence and explicit live-provider limitation.

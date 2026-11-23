@@ -1,5 +1,9 @@
 # Model capability, provider and invocation contracts — EPIC-06.01 (#261)
 
+Historical evidence and removed review documents are linked to their archived Git
+revision. They are not current acceptance evidence. Generate fresh reports in an
+output directory or retain them as CI artifacts.
+
 The Rust contracts in `gateway-domain::model_invocation` and preparation service
 in `gateway-application::model_invocation` define the provider-neutral boundary.
 They add no model endpoint, credentials, transport, renderer or runtime launcher.
@@ -132,7 +136,7 @@ Run component tests with
 `cargo test -p gateway-domain -p gateway-application --test model_invocation --locked`.
 Run the measured per-file gate using the EPIC-06.01 entry in
 `tests/scripts/quality-gates.json`. See
-[evidence](evidence/EPIC-06.01-model-contracts.json) for executed checks and source
+[evidence](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/blob/59f6db7e29478e2903cf69d6e5c7e65632876710/docs/evidence/EPIC-06.01-model-contracts.json) for executed checks and source
 bindings. [Production routing (#262)](model-capability-routing.md) is implemented
 as a separate application service. [Prompt/Invocation IR (#263)](prompt-invocation-ir.md)
 now supplies the application admission boundary.
@@ -231,7 +235,7 @@ Issue-level production integration remains dependent on that prerequisite.
 Run `cargo test -p gateway-daemon --test prompt_rendering --locked` and the
 EPIC-06.04 measured gate in `tests/scripts/quality-gates.json`. Qualification scope and
 executed evidence are retained in
-[`EPIC-06.04-prompt-rendering.json`](evidence/EPIC-06.04-prompt-rendering.json).
+[`EPIC-06.04-prompt-rendering.json`](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/blob/59f6db7e29478e2903cf69d6e5c7e65632876710/docs/evidence/EPIC-06.04-prompt-rendering.json).
 Live-provider and installed-host E2E are not claimed by these offline tests.
 
 The [#266 verification boundary](output-verification.md) now binds parsed output

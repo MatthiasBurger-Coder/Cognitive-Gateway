@@ -1,5 +1,9 @@
 # 6. Runtime View
 
+Historical evidence and removed review documents are linked to their archived Git
+revision. They are not current acceptance evidence. Generate fresh reports in an
+output directory or retain them as CI artifacts.
+
 ## 6.1 Representative port-and-adapter request flow
 
 The representative request flow makes the runtime boundary explicit:
@@ -162,7 +166,7 @@ The read-only `cg procedures` command inspects the complete journal without a mo
 Reuse still requires current process, capability and policy authorization;
 [CG-25](../reflex-engine.md) adds exact ACTIVE matching, evidence gates, compiled
 Process/Policy dispatch, budgets and post-execution verification. The complete EPIC-03 reference lifecycle and durable CPU inference integration
-are covered by [complete acceptance](../epic-03-complete-acceptance.md).
+are covered by [complete acceptance](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/blob/59f6db7e29478e2903cf69d6e5c7e65632876710/docs/epic-03-complete-acceptance.md).
 
 The CG-27.01 reference deployment, provider-neutral port and qualification lifecycle
 are implemented; see [the operator guide](../local-model-runtime.md).
@@ -311,7 +315,7 @@ all parsing and verification. No fragment, proposal or replay dispatches a tool.
 
 ### Evidence grounding in output acceptance
 
-After parsing and current admission, output verification requires grounding whenever evidence or all-claims support is mandatory. The trusted host projects all assertions and resolves current scoped records; deterministic checks reject invalid citations, stale/contradictory support, excessive sensitivity and unobserved external-effect claims. Current admission is checked again before acceptance. Verification dispatches no actions. See [grounding](../evidence-grounding-verification.md).
+After parsing and current admission, output verification requires grounding whenever evidence or all-claims support is mandatory. The trusted host projects all assertions and resolves current scoped records; deterministic checks reject invalid citations, stale/contradictory support, excessive sensitivity and unobserved external-effect claims. Current admission is checked again before acceptance. Verification dispatches no actions. See [grounding](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/blob/59f6db7e29478e2903cf69d6e5c7e65632876710/docs/evidence-grounding-verification.md).
 
 ### Retry, cancel and degrade an invocation — EPIC-06.08
 

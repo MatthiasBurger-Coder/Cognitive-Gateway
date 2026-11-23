@@ -3,8 +3,8 @@
 set -euo pipefail
 usage() {
   cat <<'HELP'
-Usage: scripts/operations/local-model/service.sh start|stop|logs|ready
-       scripts/operations/local-model/service.sh config [COMPOSE_CONFIG_OPTIONS...]
+Usage: operations/local-model/service.sh start|stop|logs|ready
+       operations/local-model/service.sh config [COMPOSE_CONFIG_OPTIONS...]
 
 start: build/start the stack and wait up to 360 seconds for healthy services.
 stop: stop the stack, retaining volumes. logs: show the last 100 log lines.

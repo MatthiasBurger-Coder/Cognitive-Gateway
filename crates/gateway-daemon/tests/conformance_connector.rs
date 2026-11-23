@@ -79,6 +79,7 @@ impl AcquisitionPort for Collector {
 struct PolicySource {
     denied: Arc<AtomicBool>,
     scope: ContextScopeId,
+    deadline: UnixTimestamp,
 }
 impl PolicySource {
     fn snapshot(&self, r: &ConnectorRequest) -> ConnectorPolicySnapshot {
@@ -126,7 +127,7 @@ impl PolicySource {
             policy_revision: digest(),
             consent_receipt: None,
             budget_reservation: text("read.reservation"),
-            deadline: UnixTimestamp::new(now() + 30),
+            deadline: self.deadline,
         }
     }
 }
@@ -257,6 +258,7 @@ fn host(
     let admission = Arc::new(Cg09ConnectorAdmission::new(PolicySource {
         denied: denied.clone(),
         scope: target.scope.clone(),
+        deadline: UnixTimestamp::new(now() + 30),
     }));
     let normalizer: Box<dyn ConnectorResultNormalizer> = if github {
         Box::new(
@@ -315,7 +317,7 @@ fn request(target: &ConnectorTarget, revision: ContentDigest, github: bool) -> C
         inventory_revision: revision,
         arguments: if github {
             [
-                (text("path"), TypedValue::String(text("shell-entry-points.md"))),
+                (text("path"), TypedValue::String(text("README.md"))),
                 (text("ref"), TypedValue::String(text("main"))),
             ]
             .into()

@@ -1,5 +1,9 @@
 # Trusted connector admission — #369
 
+Historical evidence and removed review documents are linked to their archived Git
+revision. They are not current acceptance evidence. Generate fresh reports in an
+output directory or retain them as CI artifacts.
+
 `gateway_application::connector_policy::Cg09ConnectorAdmission` adapts outbound
 connector admission to the existing CG-09 `PolicyEngine`. It introduces no
 provider SDK, parallel policy engine or permissive default.
@@ -82,7 +86,7 @@ revocation/failure and repeated audit-free liveness checks. The existing MCP hos
 a dedicated contract regression proves that a legacy
 admission source cannot obtain a current grant through a fallback callback.
 
-The retained [evidence](evidence/EPIC-07.13-connector-admission.json) records the
+The retained [evidence](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/blob/59f6db7e29478e2903cf69d6e5c7e65632876710/docs/evidence/EPIC-07.13-connector-admission.json) records the
 candidate source hashes, commands, measured coverage and independent review.
 The CI connector-admission gate requires at least 95% measured line coverage
 for both `connector_policy.rs` and its `connectors.rs` contract.

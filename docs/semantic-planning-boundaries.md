@@ -1,5 +1,9 @@
 # Semantic task integration with CG-06/07/08
 
+Historical evidence and removed review documents are linked to their archived Git
+revision. They are not current acceptance evidence. Generate fresh reports in an
+output directory or retain them as CI artifacts.
+
 Issue [#190](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/issues/190),
 parent #177. The application module `semantic_planning` implements the typed
 handoff in ADR-015. It imports existing contracts and application facades; no
@@ -111,5 +115,5 @@ invocation owner; no new CLI command or runtime capability is claimed here.
 Run `cargo test -p gateway-application --test semantic_planning --locked` and the
 EPIC-05.12 entry in `tests/scripts/quality-gates.json`. Retained, source-bound results and
 broader repository limitations are in
-[`EPIC-05.12-semantic-planning.json`](evidence/EPIC-05.12-semantic-planning.json).
+[`EPIC-05.12-semantic-planning.json`](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/blob/59f6db7e29478e2903cf69d6e5c7e65632876710/docs/evidence/EPIC-05.12-semantic-planning.json).
 These results qualify this component, not the full parent epic or installed runtime.

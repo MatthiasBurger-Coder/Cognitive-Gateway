@@ -1,5 +1,9 @@
 # Connector policy and consent integration — #230
 
+Historical evidence and removed review documents are linked to their archived Git
+revision. They are not current acceptance evidence. Generate fresh reports in an
+output directory or retain them as CI artifacts.
+
 All connector tool invocations and resource reads enter `ConnectorApplication`
 and the mapped `McpConnectorHost`. `Cg09ConnectorAdmission` calls the existing
 CG-09 `PolicyEngine` before dispatch, and the host repeats current admission
@@ -79,7 +83,7 @@ orchestration and consent continuation remain #274 responsibilities.
 | X1 | Bind capability, arguments, task/step/execution, project, inventory and current consent | `GoalSource.route`, native read association, allocation and exact `ConnectorDispatch` | Native live-source substitutions through the actual mapped run; adapter binding matrix | VERIFIED |
 | X2 | Revalidate immediately before dispatch; stale/replayed consent or changed tools cause zero action | MCP host pre-effect `revalidate` and current-dispatch liveness checks | Actual controlled-peer stale-consent tests; installed discovery barriers for changed consent, policy and tool schema; live-claim revocation/cancellation | VERIFIED |
 
-Read the source-bound [completion evidence](evidence/EPIC-07.07-completion.json)
+Read the source-bound [completion evidence](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/blob/59f6db7e29478e2903cf69d6e5c7e65632876710/docs/evidence/EPIC-07.07-completion.json)
 for the executed commands, results, evidence levels and limits. The existing
 [admission contract](connector-admission-v1.md) remains normative for new sources.
 The added installed denial matrix runs in the existing connector-policy quality

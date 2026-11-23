@@ -1,5 +1,9 @@
 # Three Amigos adaptation review
 
+Historical evidence and removed review documents are linked to their archived Git
+revision. They are not current acceptance evidence. Generate fresh reports in an
+output directory or retain them as CI artifacts.
+
 Date: 2026-10-10. Scope: EPIC-04.16 #297. Reviews below were performed as
 sequential role passes by one agent. They are scenario reviews against inspected
 repository evidence, not independent agents or automated skill-execution tests.
@@ -29,7 +33,7 @@ the skill directory. This review demonstrates concrete decisions on the EPIC-04
 case; it does not establish that every future model invocation will obey the
 skill or that the original skill caused earlier planning decisions.
 
-See [delivery plan](epic-04-gap-plan.md) for historical facts, hypotheses,
+See [delivery plan](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/blob/59f6db7e29478e2903cf69d6e5c7e65632876710/docs/epic-04-gap-plan.md) for historical facts, hypotheses,
 prerequisite effort and issue ordering. Skill instructions prevent recurrence by
 requiring composition-root tracing, actual prerequisite state, precise baseline
 success, evidence labels and report/closure reconciliation before DONE claims.

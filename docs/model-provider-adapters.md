@@ -1,5 +1,9 @@
 # Local and independent model adapters — EPIC-06.09 (#269)
 
+Historical evidence and removed review documents are linked to their archived Git
+revision. They are not current acceptance evidence. Generate fresh reports in an
+output directory or retain them as CI artifacts.
+
 The optional `gateway-daemon::model_adapters` module implements the existing
 `BoundedInvocationPort` for the CG-27 local model service (`/v1/invoke`) and an
 independent Chat Completions provider (`/v1/chat/completions`). Rust domain and
@@ -147,7 +151,7 @@ runtime setup depends on installed models/provider access and is separate.
 | A06 | parent generation/budget/isolation controls | AdapterRenderer / InvocationRun | #263/#264/#268 | wire equality, controls, hostile data, cancellation/output ceilings | VERIFIED |
 | A07 | #269 opt-in live qualification | cg-invoke / qualify-invocation-live.py | registered immutable local candidate | V12: both real HTTP adapters, 20 exact cases and 12 operational probes | VERIFIED (bounded registered role) |
 
-Retained candidate evidence: `docs/evidence/EPIC-06.09-model-adapters.json`.
+Retained candidate evidence: [`docs/evidence/EPIC-06.09-model-adapters.json`](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/blob/59f6db7e29478e2903cf69d6e5c7e65632876710/docs/evidence/EPIC-06.09-model-adapters.json).
 Rollback removes the optional module/route; legacy inference remains separately
 covered. No issue closure, installed-host qualification or parent epic acceptance
 is claimed.
@@ -182,6 +186,6 @@ The final operator-host V12 report is `LIVE_ROLE_PASS`: each adapter passed ten
 fixed extraction cases, six operational probes and independent CPU/RAM, token,
 latency and throughput gates. The adapters share one Docker model/runtime; this
 qualifies the registered role through two transport implementations. The current
-[evidence record](evidence/EPIC-06-host-live.json) supersedes the historical live
+[evidence record](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/blob/59f6db7e29478e2903cf69d6e5c7e65632876710/docs/evidence/EPIC-06-host-live.json) supersedes the historical live
 NOT_RUN status for this bounded host extension. Catalog promotion and EPIC-08
 shared session/effect integration remain separate responsibilities.

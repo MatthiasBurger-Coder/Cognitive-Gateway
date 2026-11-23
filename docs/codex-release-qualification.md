@@ -1,7 +1,11 @@
 # Inbound no-key component qualification — EPIC-04.10 #245
 
+Historical evidence and removed review documents are linked to their archived Git
+revision. They are not current acceptance evidence. Generate fresh reports in an
+output directory or retain them as CI artifacts.
 
-Current full-parent acceptance is governed by [EPIC-04 acceptance](epic-04-acceptance.md).
+
+Current full-parent acceptance is governed by [EPIC-04 acceptance](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/blob/59f6db7e29478e2903cf69d6e5c7e65632876710/docs/epic-04-acceptance.md).
 Shared structured services and installed-client lifecycle proof are delivered;
 older evidence below retains its historical scope. Fresh full reconciliation
 determines the current parent acceptance state.
@@ -60,7 +64,7 @@ All paths below are relative to the checkout root. The fixture identity supplies
 [installed-client run](codex-installed-client-qualification.md) exercises actual
 Codex discovery, inspect/resolve/explain/compile and the supported v2 shared
 sessions. Each report retains its own scope; full parent acceptance requires
-[fresh aggregation of all 24 criteria](epic-04-acceptance.md).
+[fresh aggregation of all 24 criteria](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/blob/59f6db7e29478e2903cf69d6e5c7e65632876710/docs/epic-04-acceptance.md).
 
 | #245 criterion | Objective evidence | Qualification boundary |
 | --- | --- | --- |

@@ -9,9 +9,9 @@ import tempfile
 import unittest
 
 ROOT = Path(__file__).resolve().parents[2]
-INSTALL = 'scripts/install/linux-cli.sh'
-POSTGRES = 'scripts/operations/postgres/'
-MODEL = 'scripts/operations/local-model/'
+INSTALL = 'install/linux-cli.sh'
+POSTGRES = 'operations/postgres/'
+MODEL = 'operations/local-model/'
 
 
 @unittest.skipUnless(os.name == "posix" and shutil.which("bash"), "Requires POSIX Bash")
@@ -64,7 +64,7 @@ sys.exit(int(os.environ.get('CG_SHELL_TEST_EXIT', '0')))
         return [json.loads(line) for line in self.log.read_text().splitlines()] if self.log.exists() else []
 
     def test_all_shell_entrypoints_offer_side_effect_free_help(self):
-        scripts = sorted((*ROOT.glob('scripts/**/*.sh'), *ROOT.glob('tests/scripts/*.sh')))
+        scripts = sorted((*ROOT.glob('install/*.sh'), *ROOT.glob('operations/**/*.sh'), *ROOT.glob('tests/scripts/*.sh')))
         self.assertTrue(scripts)
         for script in scripts:
             with self.subTest(script=script):

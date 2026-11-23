@@ -1,5 +1,9 @@
 # MCP Connector and Plugin Runtime
 
+Historical evidence and removed review documents are linked to their archived Git
+revision. They are not current acceptance evidence. Generate fresh reports in an
+output directory or retain them as CI artifacts.
+
 ## Status and scope
 
 **Normative architecture and compilable port foundation — EPIC-07.01 #224.**
@@ -301,7 +305,7 @@ Review checklist (single-agent architecture review; no external approval implied
 Run `cargo test -p gateway-application --test connectors --locked`,
 `python3 -m unittest discover -s tests/architecture -p 'test_*connect*.py'`,
 `bash tests/scripts/check-architecture.sh`, `cargo fmt --check` and the existing quality
-gates. The evidence record is [EPIC-07.01](evidence/EPIC-07.01-architecture.json).
+gates. The evidence record is [EPIC-07.01](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/blob/59f6db7e29478e2903cf69d6e5c7e65632876710/docs/evidence/EPIC-07.01-architecture.json).
 #225 can build the manifest foundation; #226–#232 implement these boundaries;
 #233/#234 prove GitHub and independent adapters; #235 owns end-to-end/live effects.
 No parent-epic completion or real connector availability is implied by this slice.

@@ -29,16 +29,16 @@ def main():
         report['steps'].append(name)
         print(name, flush=True)
     def model(*args):
-        return json.loads(run('scripts/operations/local-model/models.sh', *args))
+        return json.loads(run('operations/local-model/models.sh', *args))
     try:
-        run('scripts/operations/local-model/service.sh', 'start')
+        run('operations/local-model/service.sh', 'start')
         state = model('inspect')
         if state['profiles']:
             raise RuntimeError('Proof needs an empty registry; choose a new CG_MODEL_PROJECT_NAME and port. Existing state was preserved.')
         record('install', model('install', '/models/qwen3-8b-q4.json'))
         record('cpu-benchmark', model('test', 'qwen3-8b-q4'))
         record('promotion', model('promote', 'qwen3-8b-q4'))
-        record('ready', json.loads(run('scripts/operations/local-model/service.sh', 'ready')))
+        record('ready', json.loads(run('operations/local-model/service.sh', 'ready')))
         suite = json.loads((ROOT / 'models/suites/semantic-proposal-v1.json').read_text())
         request = {'schema_version': '1.0', 'role': 'semantic-interpreter', 'input_contract': suite['input_contract'],
                    'output_contract': suite['output_contract'], 'prompt': suite['cases'][0]['prompt'], 'output_schema': suite['output_schema']}
@@ -62,7 +62,7 @@ def main():
         assert model('inspect')['aliases']['semantic-interpreter'] == 'qwen3-8b-q4'
         # Recreate service containers while preserving artifact and state volumes.
         run(*compose, 'up', '-d', '--force-recreate', '--wait', '--wait-timeout', '360')
-        record('persistent-ready', json.loads(run('scripts/operations/local-model/service.sh', 'ready')))
+        record('persistent-ready', json.loads(run('operations/local-model/service.sh', 'ready')))
         run(*compose, 'stop', 'runtime')
         try:
             endpoint = f"http://127.0.0.1:{os.environ.get('CG_MODEL_SERVICE_PORT', '8091')}"
