@@ -247,18 +247,7 @@ fn inspect(
         .unwrap(),
     )
     .unwrap();
-    let bin = std::env::var_os("CG_QUALIFICATION_BIN_DIR")
-        .map(PathBuf::from)
-        .unwrap_or_else(|| {
-            std::env::current_exe()
-                .unwrap()
-                .parent()
-                .unwrap()
-                .parent()
-                .unwrap()
-                .to_owned()
-        })
-        .join("cg-local");
+    let bin = qualification_bin_dir().join("cg-local");
     let mut cmd = Command::new(bin);
     cmd.env_clear().env("PATH", "/usr/bin:/bin");
     // Retain only the coverage runtime's output locator when instrumented.

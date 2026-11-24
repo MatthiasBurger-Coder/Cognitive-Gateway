@@ -25,17 +25,7 @@ impl Fixture {
         ));
         std::fs::create_dir_all(&root).unwrap();
         let support = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/support");
-        let bins = std::env::var_os("CG_QUALIFICATION_BIN_DIR")
-            .map(PathBuf::from)
-            .unwrap_or_else(|| {
-                std::env::current_exe()
-                    .unwrap()
-                    .parent()
-                    .unwrap()
-                    .parent()
-                    .unwrap()
-                    .to_owned()
-            });
+        let bins = crate::local_sessions::qualification_bin_dir();
         let output=Command::new("python3").arg("-c").arg("import sys,json;from pathlib import Path;sys.path.insert(0,sys.argv[1]);import complete_before_session as f;launch,_,_,_=f.configure(Path(sys.argv[2]));print('WORLD_NATIVE_SETUP='+json.dumps(launch))").arg(support).arg(&root).env("CG_QUALIFICATION_BIN_DIR",bins).output().unwrap();
         assert!(
             output.status.success(),

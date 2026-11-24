@@ -32,6 +32,28 @@ use std::{
     time::{SystemTime, UNIX_EPOCH},
 };
 
+#[cfg(test)]
+fn qualification_bin_dir() -> PathBuf {
+    if let Some(path) = std::env::var_os("CG_QUALIFICATION_BIN_DIR") {
+        return PathBuf::from(path);
+    }
+
+    let test_exe = std::env::current_exe().expect("locate the native test executable");
+    // Cargo may place library tests under the profile's deps directory or
+    // under a package-specific build directory. The CLI is in the profile directory.
+    test_exe
+        .ancestors()
+        .skip(1)
+        .find(|dir| dir.join(format!("cg-local{}", std::env::consts::EXE_SUFFIX)).is_file())
+        .unwrap_or_else(|| {
+            panic!(
+                "cg-local not found above {}; build the gateway-daemon binaries or set CG_QUALIFICATION_BIN_DIR",
+                test_exe.display()
+            )
+        })
+        .to_path_buf()
+}
+
 #[derive(Clone, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(crate) struct SessionAdmission {
