@@ -32,15 +32,20 @@ jobs:
           --health-retries 12
     steps:
       - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
+      # Match the toolchain used for qualified coverage evidence. Upgrade Rust
+      # and cargo-llvm-cov together with a fresh run of the full quality gate.
+      - uses: dtolnay/rust-toolchain@master
         with:
+          toolchain: '1.99.1'
           components: rustfmt, clippy, llvm-tools-preview
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
       - name: Install contract validation and gate regression dependencies
         run: python3 -m pip install -r tests/contracts/requirements.txt coverage==7.15.2
-      - uses: taiki-e/install-action@cargo-llvm-cov
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-llvm-cov@0.9.1
       - name: Configure PostgreSQL integration test
         run: |
           printf 'CG_POSTGRES_PASSWORD=ci-local-only\nCG_POSTGRES_PORT=55432\n' > "$RUNNER_TEMP/postgres.env"

@@ -51,13 +51,7 @@ impl Fixture {
         std::fs::create_dir_all(&root).unwrap();
         let support = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/support");
         let code = "import sys,json;from pathlib import Path;sys.path.insert(0,sys.argv[1]);import observed_goal_session as f;launch,request,intent,root=f.configure(Path(sys.argv[2]),sys.argv[3]=='true');print('BOUNDARY_SETUP='+json.dumps(launch))";
-        let bin = std::env::current_exe()
-            .unwrap()
-            .parent()
-            .unwrap()
-            .parent()
-            .unwrap()
-            .to_owned();
+        let bin = crate::local_sessions::qualification_bin_dir();
         let output = Command::new("python3")
             .arg("-c")
             .arg(code)
