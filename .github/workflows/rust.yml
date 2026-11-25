@@ -14,7 +14,12 @@ permissions:
   contents: read
 
 jobs:
-  quality:
+  quality_shards:
+    name: quality (${{ matrix.shard }})
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [foundation, application, models, connectors]
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -52,9 +57,39 @@ jobs:
           chmod 600 "$RUNNER_TEMP/postgres.env"
           echo "CG_POSTGRES_ENV_FILE=$RUNNER_TEMP/postgres.env" >> "$GITHUB_ENV"
       - name: Declarative v0.1 quality gate
-        run: python3 tests/scripts/quality-gate.py --output target/ci-release-evidence
+        run: python3 tests/scripts/quality-gate.py --shard "${{ matrix.shard }}" --output target/ci-release-evidence
       - name: Retain release evidence (including failures)
         if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: quality-shard-${{ matrix.shard }}
+          overwrite: true
+          path: target/ci-release-evidence
+          if-no-files-found: error
+          retention-days: 30
+
+  quality:
+    needs: quality_shards
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require all four jobs to pass
+        env:
+          RESULT: ${{ needs.quality_shards.result }}
+        run: test "$RESULT" = success
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: quality-shard-*
+          path: target/quality-shards
+      - name: Verify and combine full quality evidence
+        run: >-
+          python3 tests/scripts/quality-gate.py
+          --collect target/quality-shards --output target/ci-release-evidence
+      - name: Retain complete release evidence
         uses: actions/upload-artifact@v4
         with:
           name: declarative-v0.1-${{ github.sha }}-${{ github.run_attempt }}

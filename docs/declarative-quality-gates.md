@@ -23,8 +23,15 @@ access to fetch dependencies; after provisioning, the core tests run locally.
 `--output <new-directory>` chooses the evidence location; existing directories
 are refused. There is no skip or reduced-threshold option. The runner invokes
 the ordered commands in [quality-gates.json](../tests/scripts/quality-gates.json).
-The [Rust Quality workflow](../.github/workflows/rust.yml) executes this same
-entry point on pull requests, main pushes and manual dispatch.
+The [Rust Quality workflow](../.github/workflows/rust.yml) runs the same manifest
+on pull requests, main pushes and manual dispatch. Four jobs run their assigned
+gates in manifest order with separate checkouts, PostgreSQL hosts and coverage
+caches. Gates that read earlier artifacts run in the same job as their producers.
+The final `quality` check requires all four jobs and matches their reports,
+source hashes, commands, logs and artifact hashes to the current checkout. It
+publishes one complete evidence bundle in manifest order. CI keeps the individual
+job bundles for inspecting failures. The default local command runs the whole
+manifest in one process.
 
 The gate runs architecture and gate-failure regression tests, EPIC-04.02 offline
 versioned schema/fixture validation, formatting,
