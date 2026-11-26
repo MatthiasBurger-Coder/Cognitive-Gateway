@@ -127,6 +127,18 @@ absent artifact is fenced and the pure task fails without releasing another
 result. Expired questions are renewed only by explicit recovery when the run's
 absolute deadline still permits it. Expired runs stop with retained usage.
 
+Use `session.inspect` with `{"command_id":"<id>"}` to recover the result of a
+mutation whose response was lost. The command outcome gives the committed
+revision. The accompanying snapshot gives the current revision for a new command.
+
+| Diagnostic | Operator action |
+| --- | --- |
+| `CG_DUPLICATE_COMMAND` | Inspect that command ID under the original owner. Command IDs are unique across that owner's sessions. |
+| `CG_STALE_REVISION` | Inspect the task and confirm the intended operation still applies at its current revision. |
+| `CG_SCOPE_DENIED` | Check the launcher admission and original owner binding, including the stable `--session` value. |
+| `CG_INVALID_SESSION_STATE` | Inspect the state and pending interaction. A completed, failed or cancelled task remains inspectable. To run a separate task, use a new `start` command ID. |
+| `CG_OUTCOME_UNKNOWN` | Inspect before submitting another mutation. Use trusted recovery for a reserved compiler after lease expiry. |
+
 Completed evidence is read through the existing owner-scoped reference URI:
 `cg://workspaces/<w>/projects/<p>/bindings/<b>/references/<id>/<revision>/<digest>`.
 The response uses the v2 evidence resource contract. Artifact bytes themselves

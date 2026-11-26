@@ -235,14 +235,17 @@ mapping, scope, provenance, trust, sensitivity, authorization and retry
 decisions remain Gateway responsibilities. GitHub is a reference connector,
 not a core dependency. See [MCP connector runtime](../mcp-connector-runtime.md).
 
-## 5.7 Codex local adapter (planned EPIC-04)
+## 5.7 Codex local adapter and shared task sessions
 
-The Codex-facing local MCP adapter is a driving adapter into a shared
-application facade. It must not reproduce connector runtime logic and must not
-bring Codex/OpenAI types into authoritative contracts. See
-[Codex local integration](../codex-local-integration.md) and the defined
-[versioned wire contracts](../codex-facing-contracts.md). Server/facade and
-shared session runtime implementation remain planned.
+The local MCP adapter drives the application facade. For enabled session v2
+mappings, `cg-local` and `cg-mcp` use the same `SessionApplicationPort` through
+`SessionCoordinator`. The Rust application owns command admission, lifecycle
+and scoped run identity. CG-14 owns goal assessment and the existing Process and
+Policy services own authorization. `PostgresSessionStore` implements the
+journal port in the daemon. It commits revisions and command outcomes together.
+The v2 adapter supplies the authenticated owner and projects the current
+session. See [ADR-021](../adr/ADR-021-shared-structured-session-ownership.md)
+and the [shared session contract](../shared-session-contract.md).
 
 ## 5.8 Local inference runtime (CG-27.01 reference service)
 
