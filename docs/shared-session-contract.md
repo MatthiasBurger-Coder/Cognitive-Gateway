@@ -1,10 +1,9 @@
-# Shared session contracts and Codex binding — EPIC-04.12
+# Shared task session contracts and Codex binding — EPIC-08.01 and EPIC-04.12
 
-Date: 2026-10-10. Contract decision: **READY_FOR_WORKFLOW** for #272 contract
-implementation. The structured runtime and v2 binding are implemented; their
-qualification is recorded in [shared-session-implementation.md](shared-session-implementation.md).
-ADR-021 records the ownership decision. This remains the normative application
-API specification; runtime acceptance is established by the separate retained evidence.
+ADR-021 records the accepted ownership decision of 2026-10-10. This is the
+normative application API specification. The
+[operator guide](shared-session-implementation.md) covers the shipped structured
+runtime and v2 binding.
 
 Owners: [#272 contracts](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/issues/272),
 [#273 coordinator](https://github.com/MatthiasBurger-Coder/Cognitive-Gateway/issues/273),
@@ -83,8 +82,8 @@ flowchart LR
 
 ## Typed command/query specification
 
-The following Rust-shaped notation specifies types to implement in #272; it is
-not compiled code or permission to expose operations. Opaque IDs are distinct
+The authoritative types live in `gateway_application::sessions`. The signature
+summary below shows the shared structured artifact path. Opaque IDs are distinct
 newtypes with the frozen ASCII token validation. Revision is an integer in
 `0..=9007199254740991`; overflow refuses a transition, never wraps.
 
@@ -103,9 +102,8 @@ enum SessionCommand {
     Cancel { at: Mutation },
 }
 enum InspectTarget { Session(SessionId), Command(CommandId) }
-struct InspectSession { target: InspectTarget }
-// execute(authenticated_owner, command) -> Result<SessionSnapshot, SessionError>
-// inspect(authenticated_owner, query) -> Result<SessionSnapshot, SessionError>
+// SessionApplicationPort::execute(&OwnerBinding, SessionCommand) -> Result<SessionSnapshot, SessionError>
+// SessionApplicationPort::inspect(&OwnerBinding, InspectTarget) -> Result<SessionSnapshot, SessionError>
 ```
 
 `authenticated_owner` is a host-authenticated value, supplied separately from
@@ -117,12 +115,12 @@ is a pinned identity/version/revision/digest loaded from the trusted consent
 store, never a client-created grant. These private validated types must not have
 an unchecked client-deserialization path.
 
-`SessionSnapshot` contains task SessionId, immutable OwnerBinding (internally),
-RunId, Revision, state, pending references, dispatch outcome knowledge, accepted
-command outcome and optional verified final evidence. Public projections disclose
-only admitted metadata. Command inspection returns the session created/changed
-by a committed command, its committed revision/outcome and the currently
-authorized snapshot; an absent command returns unavailable. This
+`SessionCheckpoint` retains the immutable OwnerBinding. Its `SessionSnapshot`
+contains task SessionId, RunId, Revision, state, pending references, dispatch
+outcome knowledge, accepted command outcome and optional verified final evidence.
+Public projections disclose only admitted metadata. Command inspection returns
+the committed command outcome and revision alongside the current authorized
+snapshot. An absent command returns `CG_SESSION_UNAVAILABLE`. This
 also recovers a lost start response without allocating a second task. Inspect
 never resumes work, polls an external effect or changes revision.
 
@@ -177,8 +175,10 @@ a diagnostic, not a synthetic pause. CG-14 decisions remain authoritative; wrapp
 states describe orchestration and outstanding effects, not another process engine.
 Completed requires verified evidence and no pending/uncertain dispatch. Cancelled
 requires no unresolved effect; cancellation does not undo an already completed
-effect. Failed does not conceal an uncertain effect. Terminal snapshots retain
-history but have no actionable pending entries.
+effect. The structured artifact compiler can commit Cancelled immediately when
+the journal advances the fence and invalidates the outstanding compiler's ability
+to release a result. Failed does not conceal an uncertain effect. Terminal
+snapshots retain history but have no actionable pending entries.
 
 Admission order is bounded decode/version/type, current authenticated owner/scope,
 owner-scoped lookup, command replay, revision, state/pending/expiry, canonical
@@ -193,9 +193,9 @@ outcome unknown; v2 publishes fixed sanitized diagnostics before release.
 #275 application logic creates a question only from a supported structured-input
 validator and an actual missing admitted input/source selection. It stores
 PendingId, SessionId/RunId, owner, issued revision, typed answer parser/version,
-question/source basis digest, expiry and consumption state. In the baseline,
-answers can select an admitted source or provide validated non-authority task
-parameters. Facts requiring source authentication still pass observation admission.
+question/source basis digest, expiry and consumption state. The structured
+artifact baseline accepts a single admitted source selection. Facts requiring
+source authentication still pass observation admission.
 The answer cannot change the immutable goal or grant mutation consent. EPIC-05
 clarification plans require that epic's trusted compiler/validator and remain
 unsupported here. Client/model-authored question plans are proposals only.
@@ -267,17 +267,16 @@ nested calls; counters cannot reset on reconnect/replan/restart. Without these
 gates, durable continuation is unsupported and must not be advertised. Storage
 failure/conflict cannot acknowledge acceptance or release an effect.
 
-Normative outbound port responsibilities (implemented under their owners):
-`CurrentAuthorityPort` loads/revalidates admitted scope, authority and revocation;
-`InteractionAuthorityPort` issues/loads typed requests and verified records;
-`ArtifactVerificationPort` loads and verifies admitted canonical artifacts;
+`StructuredSessionHost` registers and prepares admitted goals, checks disclosure
+and authenticates consent issuers. `InteractionAuthorityPort` loads trusted
+consent records and checks their live status. `ArtifactStoragePort` loads
+owner-scoped artifact bytes for the application's `verify_artifact` function.
 `SessionJournalPort` loads a validated session or owner-scoped command outcome,
-atomically creates a session with a unique CommandKey, and conditionally appends
-an event batch against expected revision and fencing token. Append commits state,
-command outcome, budget consumption and any dispatch reservation together.
-A stale revision, stale fence or duplicate key refuses the whole batch. #276 owns
-concrete checkpoint/event serialization and adapter implementation; #272 defines
-these provider-neutral port types. No storage technology enters the core API.
+creates a session with a unique `CommandKey`, and compares revision and fence
+before accepting a `JournalAppend`. The append commits state, command outcome,
+budget consumption and any dispatch reservation together. A stale revision,
+stale fence or duplicate key refuses the whole batch. #276 owns checkpoint
+serialization and the storage adapter. These application ports are provider-neutral.
 
 ## Frozen v1 compatibility and explicit v2 decision
 
@@ -348,6 +347,55 @@ Rollback retains unsupported session operations. Reverting this specification
 changes no runtime/storage state. Contract completion does not close #272/#273/
 #275/#276/#277/#294 or declare EPIC-04 complete.
 
+
+## EPIC-08.01 acceptance trace
+
+One reviewer applied sequential requirements, architecture, automation and
+evidence passes. `cg-local` and `cg-mcp` call `LocalApplication`, which decodes
+the v2 envelope before calling `SessionCoordinator` with `PostgresSessionStore`.
+The coordinator calls the CG-14 `ClosedLoop` for initial assessment and verified
+completion. Process and Policy services retain execution authority. EPIC-03
+procedure, reflex, model and worker decisions retain their existing ownership.
+The contract uses Rust domain types and application ports.
+
+| #272 criterion | Authoritative implementation | Automated verification |
+| --- | --- | --- |
+| TS-01 Positive and invalid transitions | `contracts.rs`, `admission.rs`, `coordinator.rs`, `verification.rs` | `session_contracts::every_mutation_has_one_command_and_the_expected_lifecycle_gate` checks the state/mutation matrix. In `test_sessions.py`, baseline, consent, clarification and cancellation scenarios exercise all six public operations through the shipped hosts, including a refused Continue at a consent pause. |
+| TS-02 Refuse duplicate, stale and cross-scope commands | `SessionAdmission::check`, `JournalAppend::validate_against`, `PostgresSessionStore::{create,append,load,command_outcome}` | Competing start and continue from real CLI processes, owner-wide command reuse across tasks, stale revision and authenticated foreign-owner refusal. The original owner can inspect the unchanged snapshot and reuse a rejected command ID at the correct revision. |
+| TS-03 Preserve terminal results | `SessionState::terminal`, `SessionAdmission::check`, `JournalAppend::validate_against` | Continue and Cancel with fresh command IDs and current revisions fail for completed, failed and cancelled tasks. Subsequent inspection returns the same result. A fresh Start returns distinct task/run IDs at revision 1. |
+| TS-04 Keep permission with the trusted host | `boundary::decode`, typed `ClarificationAnswer` and `ConsentRecordRef`, `InteractionAuthorityPort`, PostgreSQL grant lookup and current policy revalidation | Actual MCP requests bearing an unissued consent reference or an added grant claim fail and keep the pending result unchanged. The trusted issuer can subsequently issue the exact grant. The clarification test still pauses for consent after a valid answer. Rust authority tests check action/revision binding, current policy and withdrawal. Model-originated requests share the untrusted request boundary. |
+
+Fixtures are the registered structured Intent and source alternatives built by
+`tests/codex-local/test_sessions.py`, the canonical input fixtures it reuses and
+the frozen v1 fixtures checked by `tests/contracts`. See the
+[operator guide](shared-session-implementation.md#operator-authority-and-recovery)
+for diagnostic handling and command-outcome inspection. This trace covers the
+#272 contract and its structured runtime binding. Full EPIC-08 acceptance is
+tracked by #271 and #279.
+
+### Qualification — 2026-11-25
+
+Production revision `294919aeccd782361927ca3c1fea123fe81a7c12` with the
+extended executable fixture `tests/codex-local/test_sessions.py`
+(SHA-256 `a405d5bedc3a32d63d1c9079756a419e4ffea68f42c1926422a5c1006b539df7`).
+The run used Rust 1.99.1, cargo-llvm-cov 0.9.1 and disposable PostgreSQL 16.
+
+| Check | Result |
+| --- | --- |
+| Rust `session_contracts` and `session_runtime` | 10 contract and 43 shared application tests passed. |
+| `test_sessions.py` | All 9 scenarios passed against shipped `cg-local` and `cg-mcp` with a synthetic stdio client and PostgreSQL. TS-01 through TS-04 exercised. |
+| Contract and architecture checks | 27 schema/fixture tests passed. The dependency and architecture guards passed. Architecture regressions reported 117 passed and one Windows-only skip. |
+| `qualify-shared-sessions.sh` | Passed with 450 Rust tests, including the executable wrapper and PostgreSQL regressions, followed by the 9 standalone executable scenarios. All 14 gated production files passed the 95% line-coverage threshold. The minimum was 95.76% (361/377 in `local_mcp/mod.rs`). |
+
+Local evidence is under `target/epic08-01-evidence/`. The qualification runner
+retained the test log, coverage counts, transition transcript and verified
+artifact evidence. The files below are in its `shared-sessions/` output directory.
+
+| Evidence file | SHA-256 |
+| --- | --- |
+| `coverage.json` | `db35273181616f75da15a00df472d0a29281ad4a17c0ef7432e78f73bafc6cc3` |
+| `transitions.jsonl` | `6a6207fb40994a550dda88e9d5df4da065145d76ac58eae05cb566b39b3df366` |
+| `verified-evidence.resource.json` | `255c03330270b862584392e13befbdd96f2febcbc796a31e31152dbf222a1187` |
 
 ## Retained contract verification — 2026-10-10
 

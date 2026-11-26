@@ -28,7 +28,8 @@ See [`arc42/`](arc42/) for the living architecture documentation.
 [Shared session contracts and Codex binding](shared-session-contract.md) and
 [ADR-021](adr/ADR-021-shared-structured-session-ownership.md) define the accepted
 structured artifact goal, typed API, trusted interactions, version boundary and
-prerequisite/evidence gates. Contract definition does not implement session services.
+prerequisite and evidence gates. The [operator guide](shared-session-implementation.md)
+describes the shipped Rust service, PostgreSQL journal and CLI/MCP binding.
 
 ## Architecture Decisions
 

@@ -186,12 +186,18 @@ See [canonical host](../codex-canonical-host.md).
 The actual installed Codex client has exercised these paths with neutral admitted
 fixture snapshots and full CLI envelope parity, separately from synthetic
 protocol/component tests. See [installed-client qualification](../codex-installed-client-qualification.md).
-Session service delivery remains pending. [Accepted contract ADR-021](../adr/ADR-021-shared-structured-session-ownership.md)
-specifies one application-owned coordinator, a verified context artifact as the
-explicit goal, exact trusted interactions and a separate v2 session boundary.
-See the [typed specification and prerequisite matrix](../shared-session-contract.md).
-The artifact verifier and #272/#273/#275/#276/#277 services remain delivery work;
-no session lifecycle is claimed by the standalone host or this runtime diagram.
+For the registered structured artifact goal, the v2 `start` command admits the
+owner and persists the initial CG-14 assessment at revision 1. `continue` uses
+the current revision and rechecks Process, Policy and input bindings before
+compiling. `clarify` accepts a selected source from the recorded alternatives.
+`approve` consumes a reference to a grant issued by the trusted operator path.
+`cancel` fences outstanding compiler results. Independent artifact verification
+and CG-14 goal assessment precede verified completion. `inspect` reads by
+session or owner-scoped command ID. Across reconnects, the same authenticated
+owner retains access to the same run and its command outcomes. The application
+refuses mutations of completed, failed and cancelled tasks. See the
+[contract and acceptance evidence](../shared-session-contract.md) and the
+[operator guide](../shared-session-implementation.md).
 
 ## Context planning and CG-10 producer handoff (#285)
 

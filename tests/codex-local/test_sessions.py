@@ -141,6 +141,22 @@ class SharedSessions(unittest.TestCase):
         outcome = self.cli(self.request_v2('inspect', {'command_id': 'compile'}))
         self.assertEqual(outcome['result']['session']['command_outcome']['command'], 'compile')
         self.assertEqual(outcome['result']['session']['state'], 'completed')
+        self.assert_terminal(continued)
+        next_task = self.start('new-task')
+        for field in ('session', 'run'):
+            self.assertNotEqual(next_task['result']['session'][field], continued['result']['session'][field])
+        self.assertEqual(next_task['result']['session']['revision'], 1)
+        duplicate = self.mutate('cancel', next_task, 'compile')
+        self.assertEqual(self.cli(duplicate)['diagnostics'][0]['code'], 'CG_DUPLICATE_COMMAND')
+        self.assertEqual(self.cli(self.inspect(next_task))['result'], next_task['result'])
+        self.assertEqual(self.cli(self.inspect(continued))['result'], continued['result'])
+
+    def assert_terminal(self, terminal):
+        for operation in ('continue', 'cancel'):
+            with self.subTest(terminal=terminal['result']['session']['state'], operation=operation):
+                request = self.mutate(operation, terminal, 'terminal-' + operation)
+                self.assertEqual(self.cli(request)['diagnostics'][0]['code'], 'CG_INVALID_SESSION_STATE')
+        self.assertEqual(self.cli(self.inspect(terminal))['result'], terminal['result'])
 
     def start_response(self, command):
         return self.cli(self.request_v2('start', {'command_id': command, 'intent': {'kind': 'document', 'contract': 'cg.intent', 'contract_version': '1.0', 'document': self.intent}}))
@@ -152,10 +168,21 @@ class SharedSessions(unittest.TestCase):
         self.assertEqual(pending['status'], 'ok', pending)
         self.assertEqual(pending['result']['session']['state'], 'pending_consent')
         self.assertEqual(pending['result']['budget']['actions'], 0)
+        early = self.mutate('continue', pending, 'run')
+        self.assertEqual(self.cli(early)['diagnostics'][0]['code'], 'CG_INVALID_SESSION_STATE')
+        pending_id = pending['result']['session']['pending']['id']
+        proposed = self.mutate('approve', pending, 'approve', pending_id=pending_id,
+                               consent={'contract': 'cg.consent-record', 'contract_version': '2.0',
+                                        'reference': {'id': 'claimed-grant', 'revision': '1',
+                                                      'digest': 'sha256:' + '0' * 64}})
+        client = self.client()
+        self.assertEqual(self.call(client, proposed)['diagnostics'][0]['code'], 'CG_SESSION_UNAVAILABLE')
+        proposed['input']['consent']['granted'] = True
+        self.assertEqual(self.call(client, proposed)['diagnostics'][0]['code'], 'CG_INVALID_INPUT')
+        self.assertEqual(self.cli(self.inspect(pending))['result'], pending['result'])
         issued = self.operator(pending, 'approve')
         self.assertEqual(issued['status'], 'ok', issued)
         reference = issued['result']['reference']
-        pending_id = pending['result']['session']['pending']['id']
         approve = self.mutate('approve', pending, 'approve', pending_id=pending_id,
                               consent={'contract': 'cg.consent-record', 'contract_version': '2.0', 'reference': reference})
         wrong = copy.deepcopy(approve)
@@ -172,7 +199,13 @@ class SharedSessions(unittest.TestCase):
 
     def test_competing_processes_cancel_eof_scope_and_budget(self):
         self.configure()
-        started = self.start()
+        with concurrent.futures.ThreadPoolExecutor(2) as pool:
+            starts = list(pool.map(self.start_response, ('start', 'start')))
+        self.assertCountEqual([response['status'] for response in starts], ['ok', 'error'], starts)
+        started, = [response for response in starts if response['status'] == 'ok']
+        refused, = [response for response in starts if response['status'] == 'error']
+        self.assertEqual(refused['diagnostics'][0]['code'], 'CG_DUPLICATE_COMMAND')
+        self.assertEqual(self.cli(self.request_v2('inspect', {'command_id': 'start'}))['result'], started['result'])
         requests = [self.mutate('continue', started, 'runner-' + str(i)) for i in range(2)]
         with concurrent.futures.ThreadPoolExecutor(2) as pool:
             outcomes = list(pool.map(self.cli, requests))
@@ -187,12 +220,34 @@ class SharedSessions(unittest.TestCase):
         cancelled = self.cli(self.mutate('cancel', second, 'stop'))
         self.assertEqual(cancelled['result']['session']['state'], 'cancelled')
         self.assertEqual(cancelled['result']['budget']['actions'], 0)
+        self.assert_terminal(cancelled)
         foreign = self.inspect(second)
         foreign['scope']['workspace_id'] = 'foreign'
         self.assertEqual(self.cli(foreign)['diagnostics'][0]['code'], 'CG_SCOPE_DENIED')
         self.config['max_actions'] = 0
         self.save()
         self.assertEqual(self.start_response('limited')['diagnostics'][0]['code'], 'CG_LIMIT_EXCEEDED')
+
+    def test_stale_and_foreign_owner_mutations_leave_the_journal_unchanged(self):
+        self.configure()
+        started = self.start()
+        request = self.mutate('cancel', started, 'cancel')
+        stale = copy.deepcopy(request)
+        stale['input']['expected_revision'] += 1
+        self.assertEqual(self.cli(stale)['diagnostics'][0]['code'], 'CG_STALE_REVISION')
+        mapping = self.admission['mappings'][0]
+        original_owner = mapping['session_id']
+        mapping['session_id'] = self.launch[-1] = 'foreign-owner'
+        self.save()
+        try:
+            self.assertEqual(self.cli(request)['diagnostics'][0]['code'], 'CG_SCOPE_DENIED')
+            self.assertEqual(self.cli(self.request_v2('inspect', {'command_id': 'start'}))['diagnostics'][0]['code'],
+                             'CG_SESSION_UNAVAILABLE')
+        finally:
+            mapping['session_id'] = self.launch[-1] = original_owner
+            self.save()
+        self.assertEqual(self.cli(self.inspect(started))['result'], started['result'])
+        self.assertEqual(self.cli(request)['result']['session']['state'], 'cancelled')
 
     def test_denial_withdrawal_current_policy_and_unrelated_goal(self):
         self.configure(consent=True)
@@ -202,7 +257,9 @@ class SharedSessions(unittest.TestCase):
                 self.assertEqual(self.operator(pending, 'approve')['status'], 'ok')
             issued = self.operator(pending, decision)
             self.assertEqual(issued['status'], 'ok', issued)
-            self.assertEqual(self.cli(self.inspect(pending))['result']['session']['state'], 'failed')
+            failed = self.cli(self.inspect(pending))
+            self.assertEqual(failed['result']['session']['state'], 'failed')
+            self.assert_terminal(failed)
         started = self.start('policy')
         self.admission['mappings'][0]['canonical']['policy']['steps']['step-condition.0']['authorizations'] = {}
         self.save()
